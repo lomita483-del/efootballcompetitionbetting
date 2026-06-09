@@ -102,6 +102,8 @@ function AdminPage() {
 
   return (
     <Layout>
+      <SidebarProvider>
+      <AdminSidebar activeTab={activeTab} onSelect={setActiveTab} isAdmin={isAdmin} isMod={isMod} alerts={alerts} />
       <main
         className="relative w-full min-h-[calc(100vh-3.5rem)]"
         style={{ background: "radial-gradient(120% 90% at 50% 0%, oklch(0.22 0.07 158) 0%, oklch(0.16 0.05 158) 40%, oklch(0.10 0.03 158) 100%)" }}
@@ -120,6 +122,7 @@ function AdminPage() {
           >
             <div className="absolute inset-x-0 top-0 h-1 bg-gradient-gold" />
             <div className="relative flex items-center gap-3 flex-wrap">
+              <SidebarTrigger className="text-primary shrink-0" />
               <button
                 type="button"
                 onClick={() => setActiveTab("analytics")}
@@ -199,6 +202,7 @@ function AdminPage() {
           </Tabs>
         </div>
       </main>
+      </SidebarProvider>
     </Layout>
   );
 }
