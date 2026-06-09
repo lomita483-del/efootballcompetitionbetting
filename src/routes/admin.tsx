@@ -1438,6 +1438,121 @@ function TeamStep({ label, team, setTeam, teams }: { label: string; team: any; s
   );
 }
 
+/* ============================ SHOOTER MATCH WIZARD ============================ */
+// Create a 1-v-1 shooter match for marketing. Shooters come from the players
+// seeded on the Clans page (gang/team tag is optional). Each shooter is mapped
+// to a personal team so the SHOOTERS leaderboard credits them individually.
+function ShooterMatchWizard({ onClose }: { onClose: () => void }) {
+  const [shooters, setShooters] = useState<any[]>([]);
+  const [aId, setAId] = useState("");
+  const [bId, setBId] = useState("");
+  const [f, setF] = useState({ oddsA: 2.0, draw: 3.5, oddsB: 2.0, name: "", start_time: "", location: "", featured: true });
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    supabase
+      .from("players")
+      .select("id,name,avatar_url,team_id, team:teams!team_id(name,gang_type)")
+      .order("name")
+      .then(({ data }) => setShooters(data ?? []));
+  }, []);
+
+  const A = shooters.find((s) => s.id === aId);
+  const B = shooters.find((s) => s.id === bId);
+  const gangLabel = (s: any) => (s?.team?.name ? `${s.team.name} (${s.team.gang_type === "G" ? "Gang" : s.team.gang_type === "F" ? "Faction" : "Team"})` : "Free agent");
+
+  async function ensureShooterTeam(s: any): Promise<string | null> {
+    const { data: existing } = await supabase.from("teams").select("id").eq("name", s.name).maybeSingle();
+    let teamId = existing?.id as string | undefined;
+    if (!teamId) {
+      const { data, error } = await supabase.from("teams").insert({ name: s.name, logo_url: s.avatar_url ?? null }).select().single();
+      if (error) { toast.error(error.message); return null; }
+      teamId = data.id;
+    }
+    const { data: pl } = await supabase.from("players").select("id").eq("team_id", teamId).eq("name", s.name).maybeSingle();
+    if (!pl) await supabase.from("players").insert({ team_id: teamId, name: s.name });
+    return teamId!;
+  }
+
+  async function create() {
+    if (!A || !B) { toast.error("Pick two shooters"); return; }
+    if (A.name.trim().toLowerCase() === B.name.trim().toLowerCase()) { toast.error("Pick two different shooters"); return; }
+    setBusy(true);
+    try {
+      const aTeam = await ensureShooterTeam(A); if (!aTeam) return;
+      const bTeam = await ensureShooterTeam(B); if (!bTeam) return;
+      const { data: m, error } = await supabase.from("matches").insert({
+        name: f.name || `${A.name} vs ${B.name}`,
+        home_team_id: aTeam, away_team_id: bTeam,
+        start_time: f.start_time ? new Date(f.start_time).toISOString() : new Date().toISOString(),
+        location: f.location, status: "scheduled", is_featured: f.featured,
+      }).select().single();
+      if (error) { toast.error(error.message); return; }
+      const { data: market } = await supabase.from("markets").insert({ match_id: m.id, name: "Match Winner" }).select().single();
+      if (market) {
+        await supabase.from("odds").insert([
+          { market_id: market.id, label: A.name, value: f.oddsA },
+          { market_id: market.id, label: "Draw", value: f.draw },
+          { market_id: market.id, label: B.name, value: f.oddsB },
+        ]);
+      }
+      await supabase.from("notifications").insert({ user_id: null as any, title: "New shooter match", body: `${A.name} vs ${B.name} — back your shooter.`, link: `/matches/${m.id}` });
+      await logAudit("shooter_match_created", "match", m.id);
+      toast.success("Shooter match created!");
+      onClose();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2"><Trophy className="h-4 w-4 text-primary" />New Shooter Match</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          <p className="text-[11px] text-muted-foreground">Shooters are pulled from the roster you seed on the Clans page. A gang/faction tag is optional — free agents can be matched too. Results post to the Shooters Leaderboard when the match is settled.</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-muted-foreground">Shooter A</label>
+              <Select value={aId} onValueChange={setAId}>
+                <SelectTrigger><SelectValue placeholder="Pick shooter" /></SelectTrigger>
+                <SelectContent>{shooters.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+              </Select>
+              {A && <div className="mt-1 text-[10px] text-muted-foreground">{gangLabel(A)}</div>}
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Shooter B</label>
+              <Select value={bId} onValueChange={setBId}>
+                <SelectTrigger><SelectValue placeholder="Pick shooter" /></SelectTrigger>
+                <SelectContent>{shooters.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+              </Select>
+              {B && <div className="mt-1 text-[10px] text-muted-foreground">{gangLabel(B)}</div>}
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <div><label className="text-xs">A win odds</label><Input type="number" step="0.01" value={f.oddsA} onChange={(e) => setF({ ...f, oddsA: Number(e.target.value) })} /></div>
+            <div><label className="text-xs">Draw odds</label><Input type="number" step="0.01" value={f.draw} onChange={(e) => setF({ ...f, draw: Number(e.target.value) })} /></div>
+            <div><label className="text-xs">B win odds</label><Input type="number" step="0.01" value={f.oddsB} onChange={(e) => setF({ ...f, oddsB: Number(e.target.value) })} /></div>
+          </div>
+          <Input placeholder="Match name (optional)" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
+          <div>
+            <label className="text-xs text-muted-foreground">Countdown / Start time</label>
+            <Input type="datetime-local" value={f.start_time} onChange={(e) => setF({ ...f, start_time: e.target.value })} />
+          </div>
+          <Input placeholder="Location / Venue" value={f.location} onChange={(e) => setF({ ...f, location: e.target.value })} />
+          <label className="flex items-center gap-2 text-sm"><Switch checked={f.featured} onCheckedChange={(v) => setF({ ...f, featured: v })} /> Publish on homepage for marketing</label>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button className="btn-luxury" disabled={busy} onClick={create}>{busy ? "Creating…" : "Create Shooter Match"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /* ============================ EVENTS ============================ */
 function EventsPanel() {
   const [events, setEvents] = useState<any[]>([]);
