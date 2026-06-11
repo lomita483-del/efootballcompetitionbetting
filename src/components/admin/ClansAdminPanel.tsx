@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Shield, Users, UserCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { useConfirm } from "@/components/ConfirmDialog";
 
 type Team = { id: string; name: string; logo_url: string | null; gang_type: "G" | "F" | null };
 type Player = { id: string; team_id: string | null; name: string; position: string | null; avatar_url: string | null; is_substitute: boolean | null };
