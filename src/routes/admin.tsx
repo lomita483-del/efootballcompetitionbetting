@@ -1533,7 +1533,8 @@ function FutureOddAdminCard({ odd, disabled, onOdd, onStatus }: { odd: any; disa
   const progress = Array.isArray(odd.future_progress) ? odd.future_progress : [];
   const completed = progress.filter((p: any) => p && p.round != null).length;
   const currentRound = completed + 1;
-  const terminal = ["lost", "disqualified", "settled", "winner"].includes(status);
+  // "lost" is NOT terminal — the contender stays in the event and advances a round.
+  const terminal = ["disqualified", "settled", "winner"].includes(status);
 
   async function act(next: string) {
     const title =
@@ -1545,6 +1546,8 @@ function FutureOddAdminCard({ odd, disabled, onOdd, onStatus }: { odd: any; disa
         ? `Records Round ${currentRound}${score.trim() ? ` · ${score.trim()}` : ""}${opponent.trim() ? ` (beat ${opponent.trim()})` : ""} and automatically advances them to Round ${currentRound + 1}.`
       : next === "winner"
         ? `Settles them as the tournament champion. Winning tickets update accordingly.`
+        : next === "lost"
+        ? `Records Round ${currentRound}${score.trim() ? ` · ${score.trim()}` : ""}${opponent.trim() ? ` (lost to ${opponent.trim()})` : ""}. They STAY in the event and advance to Round ${currentRound + 1}. The loss shows on bet vouchers but tickets stay open — they only lose if disqualified.`
         : `Records Round ${currentRound}${score.trim() ? ` · ${score.trim()}` : ""}${opponent.trim() ? ` (lost to ${opponent.trim()})` : ""}. They are disqualified and removed from the event, and all open tickets on this pick are settled as lost.`;
     const ok = await confirm({ title, description, confirmText: "Confirm" });
     if (!ok) return;
