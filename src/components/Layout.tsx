@@ -61,7 +61,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
           aria-hidden
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-background/45" />
+        <div className="absolute inset-0 bg-background/25" />
       </div>
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-gradient-to-b from-card/80 to-card/50 border-b border-primary/20 shadow-[0_2px_30px_-12px_rgba(0,0,0,0.6)]">
         <div className="container mx-auto px-4 flex h-16 items-center gap-3 lg:gap-4">
