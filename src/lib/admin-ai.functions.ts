@@ -238,6 +238,101 @@ const TOOLS = [
       parameters: { type: "object", properties: { limit: { type: "number", description: "Default 15, max 50" }, action: { type: "string", description: "Optional action filter substring" } } },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "list_teams",
+      description: "List teams/gangs (id, name). Use this to find team ids before creating a match, or to check if a team already exists before creating one.",
+      parameters: { type: "object", properties: { query: { type: "string", description: "Optional name filter" }, limit: { type: "number", description: "Default 25, max 100" } } },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "create_team",
+      description: "Create a new team/gang. Returns the new team id. Reuse an existing team from list_teams when one already matches.",
+      parameters: { type: "object", properties: { name: { type: "string" }, logo_url: { type: "string" }, gang_type: { type: "string" } }, required: ["name"] },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "list_categories",
+      description: "List match categories (id, name). Use to pick a category_id when creating a match.",
+      parameters: { type: "object", properties: {} },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "list_matches",
+      description: "List matches (id, name, status, start time, scores, featured). Use to find a match_id before updating, settling, or archiving.",
+      parameters: { type: "object", properties: { status: { type: "string", enum: ["scheduled", "live", "ended", "cancelled"] }, query: { type: "string", description: "Optional name filter" }, limit: { type: "number", description: "Default 15, max 50" } } },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "create_match",
+      description: "Create/seed a match between two teams, with a 'Match Winner' market and home/draw/away odds. Look up or create teams first with list_teams/create_team. Returns the new match id.",
+      parameters: {
+        type: "object",
+        properties: {
+          home_team_id: { type: "string" },
+          away_team_id: { type: "string" },
+          name: { type: "string", description: "Optional. Defaults to 'Home vs Away'." },
+          start_time: { type: "string", description: "ISO datetime. Defaults to now." },
+          location: { type: "string" },
+          category_id: { type: "string" },
+          featured: { type: "boolean", description: "Mark as featured, default false" },
+          home_odds: { type: "number", description: "Decimal odds for home win, default 2.0" },
+          draw_odds: { type: "number", description: "Decimal odds for a draw, default 3.0" },
+          away_odds: { type: "number", description: "Decimal odds for away win, default 2.0" },
+        },
+        required: ["home_team_id", "away_team_id"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "set_match_status",
+      description: "Change a match status: scheduled, live, ended, or cancelled.",
+      parameters: { type: "object", properties: { match_id: { type: "string" }, status: { type: "string", enum: ["scheduled", "live", "ended", "cancelled"] } }, required: ["match_id", "status"] },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "set_match_score",
+      description: "Update the live score of a match without ending it.",
+      parameters: { type: "object", properties: { match_id: { type: "string" }, home_score: { type: "number" }, away_score: { type: "number" } }, required: ["match_id", "home_score", "away_score"] },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "settle_match",
+      description: "Finalize a match: set the final score, mark it ended, set the winning team, and close its betting markets.",
+      parameters: { type: "object", properties: { match_id: { type: "string" }, home_score: { type: "number" }, away_score: { type: "number" }, winner: { type: "string", enum: ["home", "away", "draw"], description: "Who won; 'draw' leaves winner empty" } }, required: ["match_id", "home_score", "away_score", "winner"] },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "set_match_featured",
+      description: "Feature or unfeature a match on the homepage.",
+      parameters: { type: "object", properties: { match_id: { type: "string" }, featured: { type: "boolean" } }, required: ["match_id", "featured"] },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "archive_match",
+      description: "Archive a match so it no longer appears in active lists.",
+      parameters: { type: "object", properties: { match_id: { type: "string" } }, required: ["match_id"] },
+    },
+  },
 ] as const;
 
 export const adminAiChat = createServerFn({ method: "POST" })
