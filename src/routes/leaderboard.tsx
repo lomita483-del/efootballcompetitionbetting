@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Trophy } from "lucide-react";
 import { loadStandings, type LbRow } from "@/lib/leaderboard";
 import { supabase } from "@/integrations/supabase/client";
+import leaderboardHeaderAsset from "@/assets/leaderboard-header.png.asset.json";
 
 export const Route = createFileRoute("/leaderboard")({
   head: () => ({
@@ -45,7 +46,7 @@ function Medal({ i }: { i: number }) {
 function Page() {
   const [shooters, setShooters] = useState<LbRow[]>([]);
   const [gangs, setGangs] = useState<LbRow[]>([]);
-  const [headerUrl, setHeaderUrl] = useState<string | null>(null);
+  const [headerUrl, setHeaderUrl] = useState<string | null>(leaderboardHeaderAsset.url);
 
   useEffect(() => {
     const run = async () => {
@@ -70,7 +71,7 @@ function Page() {
     (async () => {
       try {
         const { data, error } = await supabase.from("app_settings").select("leaderboard_header_url").eq("id", 1).maybeSingle();
-        if (active && !error) setHeaderUrl((data as any)?.leaderboard_header_url ?? null);
+        if (active && !error && (data as any)?.leaderboard_header_url) setHeaderUrl((data as any).leaderboard_header_url);
       } catch { /* ignore */ }
     })();
     return () => { active = false; };
