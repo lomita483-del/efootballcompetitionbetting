@@ -89,10 +89,14 @@ export function TournamentBracket({
     <ScaleToFit width={canvasW} height={totalH}>
       <div
         className="relative font-sans"
-        style={{ width: canvasW, height: totalH, background: "radial-gradient(ellipse at top, #11140d, #000 75%)" }}
+        style={{ width: canvasW, height: totalH, background: "radial-gradient(ellipse at 50% 0%, #0a1b12, #050a07 55%, #000 90%)" }}
       >
-        {/* faded watermark logo */}
-        <img src={lslLogo} alt="" className="pointer-events-none absolute inset-0 m-auto opacity-[0.04]" style={{ width: 620 }} />
+        {/* angular tech frame */}
+        <div className="pointer-events-none absolute inset-3 rounded-2xl border border-amber-400/25" style={{ clipPath: "polygon(0 22px, 22px 0, calc(100% - 22px) 0, 100% 22px, 100% calc(100% - 22px), calc(100% - 22px) 100%, 22px 100%, 0 calc(100% - 22px))" }} />
+        <div className="pointer-events-none absolute inset-[14px] rounded-2xl border border-emerald-400/10" />
+        {/* faded watermark logo + tactical glow */}
+        <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(60% 50% at 50% 55%, rgba(16,80,48,0.18), transparent 70%)" }} />
+        <img src={lslLogo} alt="" className="pointer-events-none absolute inset-0 m-auto opacity-[0.05]" style={{ width: 640 }} />
 
         {/* ---------- HEADER ---------- */}
         <div className="absolute left-0 right-0 flex items-center justify-between px-9" style={{ top: 22, height: HEADER_H - 40 }}>
