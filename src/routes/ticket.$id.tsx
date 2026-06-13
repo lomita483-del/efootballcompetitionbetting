@@ -68,7 +68,6 @@ function BetTicket({ bet, viewerId }: { bet: any; viewerId: string }) {
     : bet.status === "cashed_out" ? { label: "CASHED OUT", cls: "border border-amber-400/40 text-amber-300 bg-amber-400/10", Icon: ShieldCheck }
     : { label: "PENDING", cls: "neon-green-border text-emerald-300 bg-emerald-500/10", Icon: ClockIcon };
 
-  const allWon = sels.length > 0 && sels.every((s: any) => s.result === "won");
   function copy(t: string) { navigator.clipboard.writeText(t); toast.success("Copied"); }
 
   async function shareCode() {
@@ -82,7 +81,7 @@ function BetTicket({ bet, viewerId }: { bet: any; viewerId: string }) {
       <PageShell tone="wallet">
       <div className="w-full max-w-xl px-3 py-6 md:ml-0 md:mr-auto">
         <Link to="/dashboard" className="text-muted-foreground text-sm flex items-center gap-1 hover:text-primary mb-3"><ArrowLeft className="h-4 w-4" />My bets</Link>
-        <BetVoucher bet={bet} sels={sels} statusBadge={statusBadge} allWon={allWon} copy={copy} shareCode={shareCode} />
+        <BetVoucher bet={bet} sels={sels} statusBadge={statusBadge} copy={copy} shareCode={shareCode} />
 
         {!isOwner && (
           <Card className="glass mt-4 p-3 text-xs text-muted-foreground">
@@ -96,11 +95,25 @@ function BetTicket({ bet, viewerId }: { bet: any; viewerId: string }) {
 }
 
 /* ====== Premium Glassmorphism Bet Voucher (matches reference) ====== */
-export function BetVoucher({ bet, sels, statusBadge, allWon, copy, shareCode }: {
-  bet: any; sels: any[]; statusBadge: { label: string; cls: string; Icon: any }; allWon: boolean;
+export function BetVoucher({ bet, sels, statusBadge, copy, shareCode }: {
+  bet: any; sels: any[]; statusBadge: { label: string; cls: string; Icon: any };
   copy: (t: string) => void; shareCode: () => void;
 }) {
   const status = bet.status as string;
+  // A selection counts as "winning so far" while a match/tournament is still running.
+  function provWin(s: any): boolean {
+    if (s.result === "won") return true;
+    if (s.result === "lost") return false;
+    const m = s.matches;
+    if (m?.match_kind === "future") return ["qualified", "winner"].includes(s.odds?.future_status);
+    if (!m || (m.status !== "live" && m.status !== "ended")) return false;
+    if (s.markets?.name === "Correct Score") return s.selection_label === `${m.home_score}-${m.away_score}`;
+    const lead = m.home_score > m.away_score ? m.home_team?.name : m.away_score > m.home_score ? m.away_team?.name : "Draw";
+    return s.selection_label === lead;
+  }
+  const allWinning = sels.length > 0 && sels.every(provWin);
+  const isFullWin = sels.length > 0 && sels.every((s: any) => s.result === "won");
+  const cashoutValue = isFullWin ? Number(bet.potential_payout) : Math.floor(Number(bet.potential_payout) * 0.8);
   const isVirtualTicket = sels.some((s: any) => s.matches?.is_virtual);
   const isFutureTicket = sels.some((s: any) => s.matches?.match_kind === "future");
   const statusBarCls =
@@ -315,13 +328,13 @@ export function BetVoucher({ bet, sels, statusBadge, allWon, copy, shareCode }: 
             <span className="text-center">{statusBarText}</span>
           </div>
 
-          {/* CASHOUT (only if open + all selections won) */}
-          {status === "open" && allWon && (
-            <CashoutButton betId={bet.id} amount={Number(bet.potential_payout)} />
+          {/* CASHOUT (open + every selection currently winning) */}
+          {status === "open" && allWinning && (
+            <CashoutButton betId={bet.id} amount={cashoutValue} full={isFullWin} />
           )}
-          {status === "open" && !allWon && (
+          {status === "open" && !allWinning && (
             <div className="text-center text-[11px] text-muted-foreground flex items-center justify-center gap-1">
-              <LockIcon className="h-3 w-3" />Awaiting match settlement. Cash-out unlocks when every selection wins.
+              <LockIcon className="h-3 w-3" />Cash-out unlocks while every selection is winning so far.
             </div>
           )}
           {isVirtualTicket && status === "won" && (
@@ -401,13 +414,15 @@ function FutureTicketProgress({ odd }: { odd: any }) {
   );
 }
 
-function CashoutButton({ betId, amount }: { betId: string; amount: number }) {
+function CashoutButton({ betId, amount, full }: { betId: string; amount: number; full: boolean }) {
   const confirm = useConfirm();
   const [busy, setBusy] = useState(false);
   async function go() {
     const ok = await confirm({
-      title: "Cash out this winning ticket?",
-      description: `All selections won. ${amount.toLocaleString()} tokens will be credited to your wallet immediately.`,
+      title: full ? "Cash out this winning ticket?" : "Cash out early?",
+      description: full
+        ? `All selections won. ${amount.toLocaleString()} tokens will be credited to your wallet immediately.`
+        : `Every selection is winning so far. Lock in ${amount.toLocaleString()} tokens now (a reduced early-cashout value) while the match is still running. Credited to your wallet immediately.`,
       confirmText: "Cash out now",
     });
     if (!ok) return;
