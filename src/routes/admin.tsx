@@ -1509,7 +1509,10 @@ function FuturesAdminPanel() {
     const lm = linkableMatches.find((m) => m.id === matchId);
     const cs = lm ? (side === "away" ? lm.away_score : lm.home_score) : null;
     const os = lm ? (side === "away" ? lm.home_score : lm.away_score) : null;
-    const opp = lm ? (side === "away" ? lm.home_team?.name : lm.away_team?.name) : null;
+    // Prefer the actual shooter/player name; fall back to the gang/team name.
+    const opp = lm ? (side === "away"
+      ? (lm.home_player?.name ?? lm.home_team?.name)
+      : (lm.away_player?.name ?? lm.away_team?.name)) : null;
     const ended = lm && ["ended", "completed", "settled"].includes(lm.status);
     await supabase.from("odds").update({
       future_match_id: matchId,
