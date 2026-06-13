@@ -43,6 +43,7 @@ export function TournamentAdminPanel() {
   const [participants, setParticipants] = useState<TParticipant[]>([]);
   const [matches, setMatches] = useState<TMatch[]>([]);
   const [futureMatches, setFutureMatches] = useState<any[]>([]);
+  const [linkableMatches, setLinkableMatches] = useState<Array<{ id: string; name: string; home_score: number | null; away_score: number | null; status: string }>>([]);
   const [roster, setRoster] = useState<Array<{ id: string; name: string; logo_url: string | null; kind: "player" | "team" }>>([]);
 
   // create form
@@ -58,6 +59,7 @@ export function TournamentAdminPanel() {
   const [resultMatch, setResultMatch] = useState<TMatch | null>(null);
   const [sA, setSA] = useState("");
   const [sB, setSB] = useState("");
+  const [linkId, setLinkId] = useState("");
 
   const sel = useMemo(() => tournaments.find((t) => t.id === selId) ?? null, [tournaments, selId]);
   const partMap = useMemo(() => Object.fromEntries(participants.map((p) => [p.id, p])), [participants]);
