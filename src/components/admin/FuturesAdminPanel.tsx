@@ -21,6 +21,7 @@ function FuturesAdminPanel() {
   const [players, setPlayers] = useState<any[]>([]);
   const [settings, setSettings] = useState({ futures_section_title: "TOURNAMENT FUTURES", futures_min_stake: 1, futures_max_payout: 100000000, futures_max_selections: 1 });
   const [draft, setDraft] = useState({ title: "Gang Champion of the Season", next_title: "Round 1", opens_at: "", closes_at: "", options: "", min_stake: 1, max_payout: 100000000, max_selections: 1 });
+  const [restrictRepeat, setRestrictRepeat] = useState(false);
   const [searchQuery, setSearchQuery] = useState(""); // Search state
 
   // Filter players and teams by search query
@@ -78,6 +79,7 @@ function FuturesAdminPanel() {
     if (!ids.a || !ids.b) { toast.error("Could not prepare futures teams"); return; }
     const { data: m, error } = await supabase.from("matches").insert({
       name: draft.title.trim(), home_team_id: ids.a, away_team_id: ids.b, match_kind: "future", is_featured: true, marketing_enabled: true,
+      restrict_repeat_contender: restrictRepeat,
       location: `Opens ${new Date(draft.opens_at).toLocaleString()} · ${draft.next_title || "Tournament"}`, start_time: new Date(draft.closes_at).toISOString(), lock_time: new Date(draft.opens_at).toISOString(), status: "scheduled",
     } as any).select().single();
     if (error) { toast.error(error.message); return; }
@@ -163,6 +165,10 @@ function FuturesAdminPanel() {
         <Textarea rows={8} value={draft.options} onChange={(e) => setDraft({ ...draft, options: e.target.value })} placeholder={"One option per line:\nGang A | 5.50 | Gang | image-url\nTop Shooter | 8.00 | Shooter | image-url\nBest Clan | 10.00 | Faction / Clan | image-url"} />
         <div className="grid grid-cols-3 gap-2"><Input type="number" min={1} value={draft.min_stake} onChange={(e) => setDraft({ ...draft, min_stake: Number(e.target.value) })} /><Input type="number" min={1} value={draft.max_payout} onChange={(e) => setDraft({ ...draft, max_payout: Number(e.target.value) })} /><Input type="number" min={1} max={3} value={draft.max_selections} onChange={(e) => setDraft({ ...draft, max_selections: Math.min(3, Math.max(1, Number(e.target.value))) })} /></div>
         <Button className="btn-luxury w-full" onClick={createFuture}><Plus className="h-4 w-4 mr-1" />Create Futures Market</Button>
+        <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+          <input type="checkbox" checked={restrictRepeat} onChange={(e) => setRestrictRepeat(e.target.checked)} className="h-4 w-4 accent-primary" />
+          <span>One bet per contender — users may place many tickets in this tournament, but cannot bet the same shooter/gang twice.</span>
+        </label>
       </Card>
 
       <div className="space-y-3">
