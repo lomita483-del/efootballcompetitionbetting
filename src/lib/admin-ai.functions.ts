@@ -338,6 +338,125 @@ export const adminAiChat = createServerFn({ method: "POST" })
         const circulating = (balances ?? []).reduce((a: number, x: any) => a + Number(x.token_balance ?? 0), 0);
         return { user_count: userCount ?? 0, circulating_tokens: circulating, pnl, risk, pending_withdrawals: pendW ?? 0, pending_token_requests: pendT ?? 0 };
       },
+      async list_user_bets({ user_id, limit, status }) {
+        let q = supabase
+          .from("bets")
+          .select("id, stake, status, potential_payout, created_at")
+          .eq("user_id", user_id)
+          .order("created_at", { ascending: false })
+          .limit(Math.min(Math.max(Math.trunc(Number(limit ?? 10)), 1), 50));
+        if (status) q = q.eq("status", String(status));
+        const { data, error } = await q;
+        if (error) throw new Error(error.message);
+        return { count: data?.length ?? 0, bets: data ?? [] };
+      },
+      async void_bet({ bet_id, refund, reason }) {
+        const { error } = await supabase.rpc("admin_void_bet", { _bet_id: bet_id, _refund: !!refund, _reason: reason ?? null });
+        if (error) throw new Error(error.message);
+        return { bet_id, voided: true, refunded: !!refund };
+      },
+      async suspend_bet({ bet_id, reason }) {
+        const { error } = await supabase.rpc("admin_suspend_bet", { _bet_id: bet_id, _reason: reason ?? null });
+        if (error) throw new Error(error.message);
+        return { bet_id, suspended: true };
+      },
+      async unsuspend_bet({ bet_id }) {
+        const { error } = await supabase.rpc("admin_unsuspend_bet", { _bet_id: bet_id });
+        if (error) throw new Error(error.message);
+        return { bet_id, suspended: false };
+      },
+      async delete_bet({ bet_id, refund, reason }) {
+        const { error } = await supabase.rpc("admin_delete_bet", { _bet_id: bet_id, _refund: !!refund, _reason: reason ?? null });
+        if (error) throw new Error(error.message);
+        return { bet_id, deleted: true, refunded: !!refund };
+      },
+      async award_achievement({ user_id, code, title, description, icon }) {
+        const { error } = await supabase.rpc("admin_award_achievement", { _user_id: user_id, _code: code, _title: title, _description: description ?? null, _icon: icon ?? null });
+        if (error) throw new Error(error.message);
+        return { user_id, code, awarded: true };
+      },
+      async notify_user({ user_id, title, body, link }) {
+        const { error } = await supabase.from("notifications").insert({ user_id, title, body, link: link ?? null });
+        if (error) throw new Error(error.message);
+        return { user_id, sent: true };
+      },
+      async list_pending_requests({ kind, limit }) {
+        const k = kind ?? "both";
+        const lim = Math.min(Math.max(Math.trunc(Number(limit ?? 10)), 1), 50);
+        const out: any = {};
+        if (k === "tokens" || k === "both") {
+          const { data, error } = await supabase.from("token_requests").select("id, user_id, amount, note, status, created_at").eq("status", "pending").order("created_at", { ascending: false }).limit(lim);
+          if (error) throw new Error(error.message);
+          out.token_requests = data ?? [];
+        }
+        if (k === "withdrawals" || k === "both") {
+          const { data, error } = await supabase.from("withdrawal_requests").select("id, user_id, ingame_name, gang_name, amount, ticket_ref, status, created_at").eq("status", "pending").order("created_at", { ascending: false }).limit(lim);
+          if (error) throw new Error(error.message);
+          out.withdrawal_requests = data ?? [];
+        }
+        return out;
+      },
+      async review_token_request({ request_id, approve, reason }) {
+        const { data: r, error: e0 } = await supabase.from("token_requests").select("*").eq("id", request_id).maybeSingle();
+        if (e0) throw new Error(e0.message);
+        if (!r) throw new Error("Token request not found");
+        if (r.status !== "pending") throw new Error(`Request already ${r.status}`);
+        if (approve) {
+          const { data: p, error: e1 } = await supabase.from("profiles").select("token_balance").eq("id", r.user_id).maybeSingle();
+          if (e1) throw new Error(e1.message);
+          if (!p) throw new Error("User not found");
+          const newBal = Number(p.token_balance ?? 0) + Number(r.amount);
+          const { error: e2 } = await supabase.from("profiles").update({ token_balance: newBal }).eq("id", r.user_id);
+          if (e2) throw new Error(e2.message);
+          await supabase.from("token_requests").update({ status: "approved", reviewed_at: new Date().toISOString() }).eq("id", request_id);
+          await supabase.from("notifications").insert({ user_id: r.user_id, title: "Tokens credited", body: `${Number(r.amount).toLocaleString()} tokens added to your account.` });
+          await supabase.rpc("admin_log_action", { _action: "token_request_approved", _target_type: "token_request", _target_id: request_id, _metadata: { amount: r.amount, balance_to: newBal, source: "admin_ai" } });
+          return { request_id, approved: true, amount: r.amount, new_balance: newBal };
+        }
+        await supabase.from("token_requests").update({ status: "denied", review_note: reason ?? null, reviewed_at: new Date().toISOString() }).eq("id", request_id);
+        await supabase.from("notifications").insert({ user_id: r.user_id, title: "Token request denied", body: `Reason: ${reason ?? "—"}` });
+        await supabase.rpc("admin_log_action", { _action: "token_request_denied", _target_type: "token_request", _target_id: request_id, _metadata: { reason, source: "admin_ai" } });
+        return { request_id, approved: false };
+      },
+      async review_withdrawal({ request_id, approve, reason }) {
+        const { data: r, error: e0 } = await supabase.from("withdrawal_requests").select("*").eq("id", request_id).maybeSingle();
+        if (e0) throw new Error(e0.message);
+        if (!r) throw new Error("Withdrawal request not found");
+        if (r.status !== "pending") throw new Error(`Request already ${r.status}`);
+        const status = approve ? "approved" : "denied";
+        const { error } = await supabase.from("withdrawal_requests").update({ status, admin_note: reason ?? null, reviewed_by: userId, reviewed_at: new Date().toISOString() }).eq("id", request_id);
+        if (error) throw new Error(error.message);
+        await supabase.from("notifications").insert({ user_id: r.user_id, title: approve ? "Withdrawal approved" : "Withdrawal denied", body: approve ? `Your withdrawal of ${Number(r.amount).toLocaleString()} is approved.` : `Reason: ${reason ?? "—"}` });
+        await supabase.rpc("admin_log_action", { _action: approve ? "withdrawal_approved" : "withdrawal_denied", _target_type: "withdrawal_request", _target_id: request_id, _metadata: { amount: r.amount, reason, source: "admin_ai" } });
+        return { request_id, approved: !!approve };
+      },
+      async match_exposure() {
+        const { data, error } = await supabase.rpc("admin_exposure_per_match");
+        if (error) throw new Error(error.message);
+        return { matches: data ?? [] };
+      },
+      async set_virtual_cycle({ running }) {
+        const { error } = await supabase.rpc("admin_set_virtual_cycle" as any, { _running: !!running });
+        if (error) throw new Error(error.message);
+        return { running: !!running };
+      },
+      async review_virtual_payout({ request_id, approve, reason }) {
+        const { error } = await supabase.rpc("admin_review_virtual_payout" as any, { _id: request_id, _approve: !!approve, _reason: approve ? null : (reason ?? null) });
+        if (error) throw new Error(error.message);
+        return { request_id, approved: !!approve };
+      },
+      async clear_leaderboard() {
+        const { error } = await supabase.rpc("admin_clear_leaderboard");
+        if (error) throw new Error(error.message);
+        return { cleared: true };
+      },
+      async recent_audit_logs({ limit, action }) {
+        let q = supabase.from("audit_logs").select("action, target_type, target_id, metadata, created_at").order("created_at", { ascending: false }).limit(Math.min(Math.max(Math.trunc(Number(limit ?? 15)), 1), 50));
+        if (action) q = q.ilike("action", `%${action}%`);
+        const { data, error } = await q;
+        if (error) throw new Error(error.message);
+        return { count: data?.length ?? 0, logs: data ?? [] };
+      },
     };
 
     const convo: ChatMsg[] = [
