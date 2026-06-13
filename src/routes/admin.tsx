@@ -1423,12 +1423,13 @@ function FuturesAdminPanel() {
   const [futures, setFutures] = useState<any[]>([]);
   const [teams, setTeams] = useState<any[]>([]);
   const [players, setPlayers] = useState<any[]>([]);
+  const [linkableMatches, setLinkableMatches] = useState<any[]>([]);
   const [draft, setDraft] = useState({ title: "Gang Champion of the Season", opens_at: new Date().toISOString().slice(0, 16), closes_at: "", options: "", min_stake: 1, max_payout: 100000000, max_selections: 1, next_title: "Round 1" });
 
   async function load() {
     const [{ data: s }, { data: f }, { data: tm }, { data: pl }] = await Promise.all([
       supabase.from("app_settings").select("futures_section_title,futures_min_stake,futures_max_payout,futures_max_selections").eq("id", 1).maybeSingle(),
-      supabase.from("matches").select("*, markets(id,name,is_open,odds(id,label,value,is_winner,market_id,future_candidate_type,future_emblem_url,future_status,future_next_title,future_next_at,future_progress))").eq("match_kind", "future").eq("is_archived", false).order("start_time", { ascending: false }),
+      supabase.from("matches").select("*, markets(id,name,is_open,odds(id,label,value,is_winner,market_id,future_candidate_type,future_emblem_url,future_status,future_next_title,future_next_at,future_progress,future_match_id,future_match_side,future_live_score,future_live_outcome,future_live_opponent))").eq("match_kind", "future").eq("is_archived", false).order("start_time", { ascending: false }),
       supabase.from("teams").select("id,name,logo_url,gang_type").order("name"),
       supabase.from("players").select("id,name,avatar_url,team_id,teams!team_id(name)").order("name"),
     ]);
@@ -1436,6 +1437,11 @@ function FuturesAdminPanel() {
     setFutures(f ?? []);
     setTeams(tm ?? []);
     setPlayers(pl ?? []);
+    const { data: lm } = await supabase.from("matches")
+      .select("id,name,home_score,away_score,status,home_team:teams!home_team_id(name),away_team:teams!away_team_id(name)")
+      .eq("is_archived", false).eq("is_virtual", false).neq("match_kind", "future")
+      .order("start_time", { ascending: false }).limit(300);
+    setLinkableMatches(lm ?? []);
   }
   useEffect(() => { load(); }, []);
 
