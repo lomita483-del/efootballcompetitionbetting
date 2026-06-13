@@ -68,6 +68,38 @@ function BetTicket({ bet, viewerId }: { bet: any; viewerId: string }) {
     : bet.status === "cashed_out" ? { label: "CASHED OUT", cls: "border border-amber-400/40 text-amber-300 bg-amber-400/10", Icon: ShieldCheck }
     : { label: "PENDING", cls: "neon-green-border text-emerald-300 bg-emerald-500/10", Icon: ClockIcon };
 
+  function copy(t: string) { navigator.clipboard.writeText(t); toast.success("Copied"); }
+
+  async function shareCode() {
+    const url = `${window.location.origin}/?code=${bet.booking_code}`;
+    if (navigator.share) try { await navigator.share({ title: `LSL Booking ${bet.booking_code}`, url }); return; } catch {/*ignore*/}
+    navigator.clipboard.writeText(url); toast.success("Share link copied");
+  }
+
+  return (
+    <Layout>
+      <PageShell tone="wallet">
+      <div className="w-full max-w-xl px-3 py-6 md:ml-0 md:mr-auto">
+        <Link to="/dashboard" className="text-muted-foreground text-sm flex items-center gap-1 hover:text-primary mb-3"><ArrowLeft className="h-4 w-4" />My bets</Link>
+        <BetVoucher bet={bet} sels={sels} statusBadge={statusBadge} copy={copy} shareCode={shareCode} />
+
+        {!isOwner && (
+          <Card className="glass mt-4 p-3 text-xs text-muted-foreground">
+            Viewing a shared booking. Use the booking code on the home page to copy these picks to your own slip.
+          </Card>
+        )}
+      </div>
+      </PageShell>
+    </Layout>
+  );
+}
+
+/* ====== Premium Glassmorphism Bet Voucher (matches reference) ====== */
+export function BetVoucher({ bet, sels, statusBadge, copy, shareCode }: {
+  bet: any; sels: any[]; statusBadge: { label: string; cls: string; Icon: any };
+  copy: (t: string) => void; shareCode: () => void;
+}) {
+  const status = bet.status as string;
   // A selection counts as "winning so far" while a match/tournament is still running.
   function provWin(s: any): boolean {
     if (s.result === "won") return true;
@@ -82,38 +114,6 @@ function BetTicket({ bet, viewerId }: { bet: any; viewerId: string }) {
   const allWinning = sels.length > 0 && sels.every(provWin);
   const isFullWin = sels.length > 0 && sels.every((s: any) => s.result === "won");
   const cashoutValue = isFullWin ? Number(bet.potential_payout) : Math.floor(Number(bet.potential_payout) * 0.8);
-  function copy(t: string) { navigator.clipboard.writeText(t); toast.success("Copied"); }
-
-  async function shareCode() {
-    const url = `${window.location.origin}/?code=${bet.booking_code}`;
-    if (navigator.share) try { await navigator.share({ title: `LSL Booking ${bet.booking_code}`, url }); return; } catch {/*ignore*/}
-    navigator.clipboard.writeText(url); toast.success("Share link copied");
-  }
-
-  return (
-    <Layout>
-      <PageShell tone="wallet">
-      <div className="w-full max-w-xl px-3 py-6 md:ml-0 md:mr-auto">
-        <Link to="/dashboard" className="text-muted-foreground text-sm flex items-center gap-1 hover:text-primary mb-3"><ArrowLeft className="h-4 w-4" />My bets</Link>
-        <BetVoucher bet={bet} sels={sels} statusBadge={statusBadge} allWon={allWon} copy={copy} shareCode={shareCode} />
-
-        {!isOwner && (
-          <Card className="glass mt-4 p-3 text-xs text-muted-foreground">
-            Viewing a shared booking. Use the booking code on the home page to copy these picks to your own slip.
-          </Card>
-        )}
-      </div>
-      </PageShell>
-    </Layout>
-  );
-}
-
-/* ====== Premium Glassmorphism Bet Voucher (matches reference) ====== */
-export function BetVoucher({ bet, sels, statusBadge, allWon, copy, shareCode }: {
-  bet: any; sels: any[]; statusBadge: { label: string; cls: string; Icon: any }; allWon: boolean;
-  copy: (t: string) => void; shareCode: () => void;
-}) {
-  const status = bet.status as string;
   const isVirtualTicket = sels.some((s: any) => s.matches?.is_virtual);
   const isFutureTicket = sels.some((s: any) => s.matches?.match_kind === "future");
   const statusBarCls =
