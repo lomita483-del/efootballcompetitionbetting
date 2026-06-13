@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Crown, Target, Trophy } from "lucide-react";
+import { Crown, Target, Trophy, Users, Crosshair, Swords } from "lucide-react";
 import { ScaleToFit } from "./ScaleToFit";
 import lslLogo from "@/assets/lsl-logo.png";
 
@@ -27,6 +27,14 @@ function roundLabel(playersInRound: number) {
   if (playersInRound <= 8) return { title: "QUARTERFINALS", sub: "8 PLAYERS" };
   if (playersInRound <= 16) return { title: "ROUND OF 16", sub: "16 PLAYERS" };
   return { title: `ROUND OF ${playersInRound}`, sub: `${playersInRound} PLAYERS` };
+}
+
+function roundIcon(playersInRound: number) {
+  if (playersInRound <= 2) return Trophy;
+  if (playersInRound <= 4) return Users;
+  if (playersInRound <= 8) return Crosshair;
+  if (playersInRound <= 16) return Swords;
+  return Users;
 }
 
 export function TournamentBracket({
