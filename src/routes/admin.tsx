@@ -1645,6 +1645,15 @@ function getLinkedOpponentName(match: any, side: "home" | "away") {
   return getMatchSideName(match, side === "away" ? "home" : "away");
 }
 
+function getMatchSideForContender(match: any, label: string): "home" | "away" | null {
+  const contender = label.trim().toLowerCase();
+  const homeNames = [match?.home_player?.name, match?.home_team?.name].map((name) => name?.trim?.().toLowerCase()).filter(Boolean);
+  const awayNames = [match?.away_player?.name, match?.away_team?.name].map((name) => name?.trim?.().toLowerCase()).filter(Boolean);
+  if (homeNames.includes(contender)) return "home";
+  if (awayNames.includes(contender)) return "away";
+  return null;
+}
+
 function getLinkableMatchLabel(match: any) {
   return match?.name || `${getMatchSideName(match, "home")} v ${getMatchSideName(match, "away")}`;
 }
