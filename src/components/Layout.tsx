@@ -51,15 +51,22 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   useVirtualHeartbeat();
   useForceReloadBroadcast();
   const [railOpen, setRailOpen] = useState(false);
-  // Admin-configurable site-wide background (falls back to bundled nebula art).
+  // Admin-configurable site-wide background + branding (fall back to bundled art).
   const [siteBg, setSiteBg] = useState<string | null>(null);
+  const [bgFit, setBgFit] = useState<string>("cover");
+  const [bgPos, setBgPos] = useState<string>("center");
+  const [siteName, setSiteName] = useState<string | null>(null);
   useEffect(() => {
-    supabase.from("app_settings").select("site_bg_url").eq("id", 1).maybeSingle()
-      .then(({ data }) => setSiteBg((data as any)?.site_bg_url ?? null));
+    const apply = (d: any) => {
+      setSiteBg(d?.site_bg_url ?? null);
+      setBgFit(d?.site_bg_fit ?? "cover");
+      setBgPos(d?.site_bg_position ?? "center");
+      setSiteName(d?.site_name ?? null);
+    };
+    supabase.from("app_settings").select("site_bg_url,site_bg_fit,site_bg_position,site_name").eq("id", 1).maybeSingle()
+      .then(({ data }) => apply(data));
     const ch = supabase.channel("site-bg")
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "app_settings" }, (p: any) => {
-        setSiteBg(p.new?.site_bg_url ?? null);
-      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "app_settings" }, (p: any) => apply(p.new))
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
@@ -71,7 +78,8 @@ export const Layout = ({ children }: { children: ReactNode }) => {
           src={siteBg || lslPlatformBg.url}
           alt=""
           aria-hidden
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full"
+          style={{ objectFit: (bgFit as any) || "cover", objectPosition: bgPos || "center" }}
         />
         <div className="absolute inset-0 bg-background/40" />
       </div>
@@ -80,8 +88,14 @@ export const Layout = ({ children }: { children: ReactNode }) => {
           <Link to="/" className="flex items-center gap-2 group shrink-0">
             <GangLogo size={38} className="transition-transform group-hover:scale-105 group-hover:rotate-3 duration-300" />
             <div className="leading-tight">
-              <div className="text-sm font-extrabold tracking-[0.25em] gradient-gold-text">LOMITA</div>
-              <div className="text-[9px] text-muted-foreground tracking-[0.35em]">SHOOTERS LEAGUE</div>
+              {siteName ? (
+                <div className="text-sm font-extrabold tracking-[0.18em] gradient-gold-text uppercase max-w-[160px] truncate">{siteName}</div>
+              ) : (
+                <>
+                  <div className="text-sm font-extrabold tracking-[0.25em] gradient-gold-text">LOMITA</div>
+                  <div className="text-[9px] text-muted-foreground tracking-[0.35em]">SHOOTERS LEAGUE</div>
+                </>
+              )}
             </div>
           </Link>
           <nav className="hidden lg:flex flex-1 items-center justify-center gap-1 flex-nowrap">
@@ -181,7 +195,7 @@ function SiteFooter() {
     <footer className="border-t border-border mt-20 backdrop-blur-xl bg-card/40 lg:pl-0 pl-16">
       <div className="container mx-auto px-4 py-10 grid md:grid-cols-3 gap-6 text-sm">
         <div>
-          <div className="flex items-center gap-2 mb-2"><GangLogo size={28} withGlow={false} /><span className="font-bold tracking-widest gradient-gold-text">LOMITA SHOOTERS LEAGUE</span></div>
+          <div className="flex items-center gap-2 mb-2"><GangLogo size={28} withGlow={false} /><span className="font-bold tracking-widest gradient-gold-text uppercase">{s?.site_name || "LOMITA SHOOTERS LEAGUE"}</span></div>
           <p className="text-muted-foreground text-xs">Virtual token-only platform · No real money gambling.</p>
         </div>
         <div>

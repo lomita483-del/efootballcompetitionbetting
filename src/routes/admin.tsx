@@ -46,6 +46,7 @@ import { ActionConfirmDialog } from "@/components/ActionConfirmDialog";
 import { notifyAction, humanizeAction } from "@/lib/notify-action";
 import { SpotlightsAdminPanel } from "@/components/Spotlight";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { ImageSettingControl } from "@/components/admin/ImageSettingControl";
 import { ClansAdminPanel } from "@/components/admin/ClansAdminPanel";
 import { TopBetsPanel } from "@/components/admin/TopBetsPanel";
 import { TournamentAdminPanel } from "@/components/admin/TournamentAdminPanel";
@@ -67,9 +68,15 @@ export function AdminPage() {
   const [alerts, setAlerts] = useState<Record<string, number>>({});
   // Admin-configurable console header image (falls back to bundled seed art).
   const [heroBg, setHeroBg] = useState<string | null>(null);
+  const [heroFit, setHeroFit] = useState<string>("cover");
+  const [heroPos, setHeroPos] = useState<string>("center right");
   useEffect(() => {
-    supabase.from("app_settings").select("admin_hero_url").eq("id", 1).maybeSingle()
-      .then(({ data }) => setHeroBg((data as any)?.admin_hero_url ?? null));
+    supabase.from("app_settings").select("admin_hero_url,admin_hero_fit,admin_hero_position").eq("id", 1).maybeSingle()
+      .then(({ data }) => {
+        setHeroBg((data as any)?.admin_hero_url ?? null);
+        setHeroFit((data as any)?.admin_hero_fit ?? "cover");
+        setHeroPos((data as any)?.admin_hero_position ?? "center right");
+      });
   }, []);
   // Toggle the frosted-glass blur on the whole console so admins can verify
   // sensitive data alignment/layout against a clean, unblurred surface.
@@ -130,7 +137,7 @@ export function AdminPage() {
 
           <div
             className="admin-hero-frame relative overflow-hidden rounded-2xl p-5 sm:p-7"
-            style={{ backgroundImage: `linear-gradient(90deg, rgba(3,12,10,0.76) 0%, rgba(3,12,10,0.44) 42%, rgba(3,12,10,0.18) 100%), url(${heroBg || adminConsoleSeed})`, backgroundSize: "cover", backgroundPosition: "center right" }}
+            style={{ backgroundImage: `linear-gradient(90deg, rgba(3,12,10,0.76) 0%, rgba(3,12,10,0.44) 42%, rgba(3,12,10,0.18) 100%), url(${heroBg || adminConsoleSeed})`, backgroundSize: `auto, ${heroFit === "contain" ? "contain" : heroFit === "fill" ? "100% 100%" : "cover"}`, backgroundPosition: `center, ${heroPos || "center right"}`, backgroundRepeat: "no-repeat" }}
           >
             <div className="absolute inset-x-0 top-0 h-1 bg-gradient-gold" />
             <div className="relative flex items-center gap-3 flex-wrap">
@@ -3538,28 +3545,45 @@ function SettingsPanel() {
         <FieldLuxe label="Link (optional)"><Input value={s.popup_ad_link ?? ""} onChange={(e) => setS({ ...s, popup_ad_link: e.target.value })} /></FieldLuxe>
       </SettingsSection>
 
-      <SettingsSection icon={ImageIcon} title="Backgrounds & Appearance" subtitle="Upload a site-wide background and an admin console header image.">
-        <FieldLuxe label="Site background (all pages)">
-          <Input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && uploadInto("site_bg_url", e.target.files[0])} />
+      <SettingsSection icon={Sparkles} title="Platform Identity" subtitle="Rename the platform and set the home-page logo.">
+        <FieldLuxe label="Platform name (shown in header, footer & home page)">
+          <Input value={s.site_name ?? ""} onChange={(e) => setS({ ...s, site_name: e.target.value })} placeholder="Lomita Shooters League" />
         </FieldLuxe>
-        <p className="text-[10px] text-muted-foreground">Used as the full-screen backdrop across every page. For best results use a large landscape image (1920×1080 or larger). It is auto-scaled to cover the screen and dimmed for readability — no need to pre-process it.</p>
-        {s.site_bg_url && (
-          <div className="space-y-1">
-            <img src={s.site_bg_url} alt="" className="w-full max-h-40 object-cover rounded border border-border" />
-            <Button variant="ghost" size="sm" className="text-destructive h-7" onClick={() => setS({ ...s, site_bg_url: null })}>Remove site background</Button>
-          </div>
-        )}
-        <div className="h-px bg-border/60 my-1" />
-        <FieldLuxe label="Admin console header image">
-          <Input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && uploadInto("admin_hero_url", e.target.files[0])} />
-        </FieldLuxe>
-        <p className="text-[10px] text-muted-foreground">Shown behind the “Super Admin Console” banner at the top of the admin & moderator pages. A wide image works best.</p>
-        {s.admin_hero_url && (
-          <div className="space-y-1">
-            <img src={s.admin_hero_url} alt="" className="w-full max-h-40 object-cover rounded border border-border" />
-            <Button variant="ghost" size="sm" className="text-destructive h-7" onClick={() => setS({ ...s, admin_hero_url: null })}>Remove header image</Button>
-          </div>
-        )}
+        <ImageSettingControl
+          label="Home page logo"
+          value={s.site_logo_url}
+          onChange={(url) => setS({ ...s, site_logo_url: url })}
+          showFitControls={false}
+          aspect="16 / 9"
+          previewBg="#0b1512"
+          help="Displayed at the very top of the home page hero. Upload directly or paste an image URL. Transparent PNG looks best."
+        />
+        <p className="text-[10px] text-amber-300/80">Remember to press “Save settings” below to apply.</p>
+      </SettingsSection>
+
+      <SettingsSection icon={ImageIcon} title="Backgrounds & Appearance" subtitle="Site-wide background and admin console header image — upload or paste a URL, then crop/fit and preview live.">
+        <ImageSettingControl
+          label="Site background (all pages)"
+          value={s.site_bg_url}
+          onChange={(url) => setS({ ...s, site_bg_url: url })}
+          fit={s.site_bg_fit ?? "cover"}
+          onFitChange={(v) => setS({ ...s, site_bg_fit: v })}
+          position={s.site_bg_position ?? "center"}
+          onPositionChange={(v) => setS({ ...s, site_bg_position: v })}
+          aspect="16 / 9"
+          help="Full-screen backdrop across every page. The preview shows exactly how it will be cropped. A large landscape image (1920×1080+) works best; it is dimmed for readability automatically."
+        />
+        <ImageSettingControl
+          label="Admin console header image"
+          value={s.admin_hero_url}
+          onChange={(url) => setS({ ...s, admin_hero_url: url })}
+          fit={s.admin_hero_fit ?? "cover"}
+          onFitChange={(v) => setS({ ...s, admin_hero_fit: v })}
+          position={s.admin_hero_position ?? "center right"}
+          onPositionChange={(v) => setS({ ...s, admin_hero_position: v })}
+          aspect="21 / 9"
+          help="Shown behind the “Super Admin Console” banner at the top of the admin & moderator pages. A wide image works best."
+        />
         <p className="text-[10px] text-amber-300/80">Remember to press “Save settings” below to apply.</p>
       </SettingsSection>
 
