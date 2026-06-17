@@ -71,6 +71,8 @@ export type Database = {
       app_settings: {
         Row: {
           about_us: string | null
+          admin_hero_fit: string | null
+          admin_hero_position: string | null
           admin_hero_url: string | null
           allow_rebet: boolean
           challenge_reward_multiplier: number
@@ -118,7 +120,11 @@ export type Database = {
           popup_ad_text: string | null
           referral_bonus_referee: number
           referral_bonus_referrer: number
+          site_bg_fit: string | null
+          site_bg_position: string | null
           site_bg_url: string | null
+          site_logo_url: string | null
+          site_name: string | null
           spin_cooldown_hours: number
           spin_enabled: boolean
           spin_max_reward: number
@@ -152,6 +158,8 @@ export type Database = {
         }
         Insert: {
           about_us?: string | null
+          admin_hero_fit?: string | null
+          admin_hero_position?: string | null
           admin_hero_url?: string | null
           allow_rebet?: boolean
           challenge_reward_multiplier?: number
@@ -199,7 +207,11 @@ export type Database = {
           popup_ad_text?: string | null
           referral_bonus_referee?: number
           referral_bonus_referrer?: number
+          site_bg_fit?: string | null
+          site_bg_position?: string | null
           site_bg_url?: string | null
+          site_logo_url?: string | null
+          site_name?: string | null
           spin_cooldown_hours?: number
           spin_enabled?: boolean
           spin_max_reward?: number
@@ -233,6 +245,8 @@ export type Database = {
         }
         Update: {
           about_us?: string | null
+          admin_hero_fit?: string | null
+          admin_hero_position?: string | null
           admin_hero_url?: string | null
           allow_rebet?: boolean
           challenge_reward_multiplier?: number
@@ -280,7 +294,11 @@ export type Database = {
           popup_ad_text?: string | null
           referral_bonus_referee?: number
           referral_bonus_referrer?: number
+          site_bg_fit?: string | null
+          site_bg_position?: string | null
           site_bg_url?: string | null
+          site_logo_url?: string | null
+          site_name?: string | null
           spin_cooldown_hours?: number
           spin_enabled?: boolean
           spin_max_reward?: number
