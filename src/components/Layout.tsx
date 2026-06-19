@@ -237,8 +237,8 @@ function MobLink({ to, icon: Icon, label, badge }: { to: string; icon: any; labe
       title={label}
     >
       <span className="pointer-events-none absolute left-0 inset-y-2 w-[2px] rounded-full bg-gradient-to-b from-transparent via-primary to-transparent opacity-0 group-[.active]:opacity-100 transition-opacity" />
-      <span className="relative grid place-items-center h-11 w-11 rounded-xl transition-all group-[.active]:bg-gradient-to-br group-[.active]:from-primary/25 group-[.active]:to-primary/5 group-[.active]:shadow-[0_0_18px_-4px_rgba(212,175,55,0.55)]">
-        <Icon className="h-[22px] w-[22px] transition-transform group-[.active]:scale-110" />
+      <span className="relative grid place-items-center h-13 w-13 min-h-[52px] min-w-[52px] rounded-xl transition-all group-[.active]:bg-gradient-to-br group-[.active]:from-primary/25 group-[.active]:to-primary/5 group-[.active]:shadow-[0_0_18px_-4px_rgba(212,175,55,0.55)]">
+        <Icon className="h-7 w-7 transition-transform group-[.active]:scale-110" />
         {badge && badge > 0 ? (
           <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-black grid place-items-center ring-2 ring-card animate-pulse">
             {badge > 9 ? "9+" : badge}
