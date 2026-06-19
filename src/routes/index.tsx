@@ -212,6 +212,25 @@ function Index() {
         </div>
       </section>
 
+      {/* Fudged global community counter — sits below the matches feed. */}
+      <section className="container mt-12">
+        <Card className="glass-strong relative overflow-hidden border-primary/30 p-8 md:p-10 text-center">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-accent/10 pointer-events-none" />
+          <div className="relative">
+            <div className="flex items-center justify-center gap-2 text-primary">
+              <Skull className="h-5 w-5" />
+              <span className="text-xs uppercase tracking-[0.32em] font-bold">The League is growing</span>
+            </div>
+            <div className="mt-3 text-5xl md:text-7xl font-black gradient-gold-text tabular-nums">
+              {fudgedUsers.toLocaleString()}+
+            </div>
+            <div className="mt-2 text-sm md:text-base text-muted-foreground font-semibold uppercase tracking-widest">
+              Shooters worldwide
+            </div>
+          </div>
+        </Card>
+      </section>
+
     </Layout>
   );
 }
