@@ -405,15 +405,6 @@ function FeaturedGoldenMatches({ matches }: { matches: MatchRow[] }) {
   );
 }
 
-function FutureEmblemUnused({ label, url }: { label: string; url?: string | null }) {
-  const initials = label.split(/\s+/).filter(Boolean).map((p) => p[0]).slice(0, 2).join("").toUpperCase() || "LS";
-  return (
-    <span className="h-10 w-10 shrink-0 rounded-full border border-primary/35 bg-primary/10 grid place-items-center overflow-hidden text-[11px] font-black text-primary">
-      {url ? <img src={url} alt="" className="h-full w-full object-cover" /> : initials}
-    </span>
-  );
-}
-
 function FutureProgress({ odd }: { odd: any }) {
   const progress = Array.isArray(odd.future_progress) ? odd.future_progress : [];
   const status = odd.future_status ?? "active";
