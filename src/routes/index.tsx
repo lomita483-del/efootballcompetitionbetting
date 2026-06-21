@@ -48,12 +48,9 @@ function Index() {
   const [matches, setMatches] = useState<MatchRow[]>([]);
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [userCount, setUserCount] = useState<number | null>(null);
 
   useEffect(() => {
     Promise.all([fetchMatches(), fetchSettings()]).then(([m, s]) => { setMatches(m); setSettings(s); }).finally(() => setLoading(false));
-    supabase.from("profiles").select("id", { count: "exact", head: true })
-      .then(({ count }) => setUserCount(count ?? 0));
     // Debounce refetches so a burst of realtime row changes (odds/markets
     // updating together) only triggers one network round-trip, not dozens.
     let matchTimer: ReturnType<typeof setTimeout> | undefined;
@@ -92,8 +89,6 @@ function Index() {
   }
   const categoryGroups = Object.entries(byCategory);
   const tagline = settings?.hero_tagline || "Season 4 · Live";
-  // Fudged community size — always reads "500+" at minimum, never an exact figure.
-  const fudgedUsers = (userCount ?? 0) + 500;
 
   return (
     <Layout>
