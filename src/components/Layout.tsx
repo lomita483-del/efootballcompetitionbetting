@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth, ROLE_COLORS, ROLE_LABELS } from "@/contexts/AuthContext";
 import { NotificationBell } from "@/components/NotificationBell";
 import { LevelUpModal } from "@/components/Spotlight";
+import { GlobalWinAnimation } from "@/components/GlobalWinAnimation";
 import { ReactNode, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation } from "@tanstack/react-router";
@@ -163,6 +164,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       </header>
       <main className="relative lg:pl-0 pl-16 overflow-x-hidden">{children}</main>
       <LevelUpModal />
+      <GlobalWinAnimation />
       <nav
         className="lg:hidden fixed left-0 inset-y-0 pt-16 z-40 w-16 overflow-y-auto bg-transparent border-0 shadow-none"
       >
