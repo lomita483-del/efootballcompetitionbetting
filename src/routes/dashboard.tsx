@@ -249,6 +249,66 @@ function PanelCard({ to, onClick, icon: Icon, title, subtitle, comingSoon, gold 
   return <button type="button" onClick={onClick} className="text-left">{inner}</button>;
 }
 
+function TransferDialog({ open, onClose, onDone }: { open: boolean; onClose: () => void; onDone: () => void }) {
+  const [specialId, setSpecialId] = useState("");
+  const [amount, setAmount] = useState(1_000_000);
+  const [recipient, setRecipient] = useState<{ full_name: string; special_id: string } | null>(null);
+  const [checking, setChecking] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function lookup() {
+    const id = specialId.trim();
+    if (!id) return toast.error("Enter a Special ID");
+    setChecking(true);
+    const { data, error } = await (supabase.rpc as any)("resolve_special_id", { _special_id: id });
+    setChecking(false);
+    const row = Array.isArray(data) ? data[0] : data;
+    if (error || !row) { setRecipient(null); return toast.error("No user found with that Special ID"); }
+    setRecipient({ full_name: row.full_name, special_id: row.special_id });
+  }
+
+  async function submit() {
+    if (!recipient) return toast.error("Confirm the recipient first");
+    if (amount <= 0) return toast.error("Enter a valid amount");
+    setSubmitting(true);
+    const { data, error } = await (supabase.rpc as any)("transfer_tokens", { _recipient_special_id: recipient.special_id, _amount: amount });
+    setSubmitting(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Sent ${amount.toLocaleString()} tokens to ${recipient.full_name}`);
+    setSpecialId(""); setRecipient(null); setAmount(1_000_000);
+    onDone();
+    onClose();
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="glass-strong border-primary/30 max-w-md backdrop-blur-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2"><Coins className="h-5 w-5 text-primary" />Transfer Tokens</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs uppercase tracking-widest text-muted-foreground">Recipient Special ID</label>
+            <div className="flex gap-2">
+              <Input value={specialId} onChange={(e) => { setSpecialId(e.target.value.toUpperCase()); setRecipient(null); }} placeholder="e.g. XHA6HD8" />
+              <Button variant="outline" onClick={lookup} disabled={checking}>{checking ? "…" : "Check"}</Button>
+            </div>
+            {recipient && <p className="text-xs text-emerald-300 mt-1">Sending to: <span className="font-bold">{recipient.full_name}</span></p>}
+          </div>
+          <div>
+            <label className="text-xs uppercase tracking-widest text-muted-foreground">Amount</label>
+            <Input type="number" min={1} value={amount} onChange={(e) => setAmount(Number(e.target.value))} />
+          </div>
+          <div className="flex gap-2 pt-2">
+            <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
+            <Button onClick={submit} disabled={submitting || !recipient} className="flex-1 btn-luxury">{submitting ? "Sending…" : "Send Tokens"}</Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function PromoRequestDialog({ open, onClose, userId }: { open: boolean; onClose: () => void; userId: string }) {
   const [amount, setAmount] = useState(1_000_000);
   const [usageLimit, setUsageLimit] = useState(1);
