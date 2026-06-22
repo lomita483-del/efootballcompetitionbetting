@@ -94,15 +94,16 @@ function Index() {
   return (
     <Layout>
       <section className="relative overflow-hidden">
-        <img
-          src={hero}
-          alt=""
-          width={1920}
-          height={1080}
-          fetchPriority="high"
-          decoding="async"
-          className="absolute inset-0 h-full w-full object-cover opacity-40"
-        />
+        {settings?.hero_bg_url && (
+          <img
+            src={settings.hero_bg_url}
+            alt=""
+            fetchPriority="high"
+            decoding="async"
+            className="absolute inset-0 h-full w-full opacity-40"
+            style={{ objectFit: (settings.hero_bg_fit as any) || "cover", objectPosition: settings.hero_bg_position || "center" }}
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/80 to-background" />
         <div className="container relative py-20 md:py-32">
           {settings?.site_logo_url && (
