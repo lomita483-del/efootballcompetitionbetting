@@ -3594,6 +3594,17 @@ function SettingsPanel() {
           help="Full-screen backdrop across every page. The preview shows exactly how it will be cropped. A large landscape image (1920×1080+) works best; it is dimmed for readability automatically."
         />
         <ImageSettingControl
+          label="Home page hero background"
+          value={s.hero_bg_url}
+          onChange={(url) => setS({ ...s, hero_bg_url: url })}
+          fit={s.hero_bg_fit ?? "cover"}
+          onFitChange={(v) => setS({ ...s, hero_bg_fit: v })}
+          position={s.hero_bg_position ?? "center"}
+          onPositionChange={(v) => setS({ ...s, hero_bg_position: v })}
+          aspect="21 / 9"
+          help="Background image behind the hero headline at the very top of the home page. Leave empty for a clean dark hero (no image)."
+        />
+        <ImageSettingControl
           label="Admin console header image"
           value={s.admin_hero_url}
           onChange={(url) => setS({ ...s, admin_hero_url: url })}
