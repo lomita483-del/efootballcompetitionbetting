@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Trophy, X, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import lslLogo from "@/assets/lsl-logo.png";
 
 type WinBet = { id: string; tracking_id: string; potential_payout: number; settled_at: string | null };
 
@@ -61,7 +60,6 @@ export function GlobalWinAnimation() {
           <div className="absolute inset-0 -z-10 rounded-full bg-[radial-gradient(circle,oklch(0.92_0.22_92/0.55),transparent_62%)] blur-2xl animate-pulse" />
           <div className="grid h-40 w-40 place-items-center rounded-full border border-primary/50 bg-gradient-luxury shadow-gold">
             <Trophy className="h-24 w-24 text-[oklch(0.6_0.13_70)]" />
-            <img src={lslLogo} alt="" className="absolute h-14 w-14 object-contain opacity-0" />
           </div>
           <Sparkles className="absolute -left-2 top-3 h-6 w-6 text-amber-200 animate-pulse" />
           <Sparkles className="absolute -right-2 bottom-4 h-5 w-5 text-amber-200 animate-pulse" />
