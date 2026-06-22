@@ -189,16 +189,12 @@ function Index() {
               </div>
             </div>
           )}
-          {!loading && (
+          {!loading && upcoming.length > 0 && (
             <div>
               <SectionHeader icon={Crosshair} title="Upcoming Matches" subtitle="Lock your picks before the round starts." />
-              {upcoming.length === 0 ? (
-                <p className="text-muted-foreground mt-4 text-sm">No upcoming matches scheduled.</p>
-              ) : (
-                <div className="grid md:grid-cols-2 gap-4 mt-4">
-                  {upcoming.slice(0, 6).map((m) => <MatchCardLive key={m.id} match={m} />)}
-                </div>
-              )}
+              <div className="grid md:grid-cols-2 gap-4 mt-4">
+                {upcoming.slice(0, 6).map((m) => <MatchCardLive key={m.id} match={m} />)}
+              </div>
             </div>
           )}
           {categoryGroups.map(([id, g]) => (

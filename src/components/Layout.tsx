@@ -187,7 +187,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
           <MobLink to="/leaderboard" icon={Trophy} label="Top" />
           <MobLink to="/tournament" icon={Swords} label="Bracket" />
           {user && <>
-            <MobLink to="/dashboard" icon={Ticket} label="Bets" />
+            <MobLink to="/dashboard" icon={Ticket} label="ME" />
             <MobLink to="/profile" icon={UserIcon} label="Profile" />
             <MobLink to="/settings" icon={SettingsIcon} label="Settings" />
             <MobLink to="/support" icon={LifeBuoy} label="Help" />
