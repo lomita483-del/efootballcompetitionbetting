@@ -135,7 +135,7 @@ export function BetVoucher({ bet, sels, statusBadge, copy, shareCode }: {
       {/* Outer ambient glow */}
       <div className="absolute -inset-6 rounded-[40px] bg-[radial-gradient(circle_at_30%_20%,oklch(0.85_0.22_152/0.30),transparent_60%),radial-gradient(circle_at_80%_80%,oklch(0.82_0.17_90/0.22),transparent_60%)] blur-3xl pointer-events-none" />
 
-      <div className="relative rounded-[28px] voucher-frame voucher-bg overflow-hidden transition-transform duration-500 hover:[transform:perspective(1600px)_rotateX(0.6deg)_rotateY(-0.6deg)_translateY(-2px)]">
+      <div className="relative rounded-[32px] voucher-frame voucher-bg overflow-hidden transition-transform duration-500 hover:[transform:perspective(1600px)_rotateX(0.6deg)_rotateY(-0.6deg)_translateY(-2px)]">
         {/* LSL logo watermark behind everything */}
         <div
           className="pointer-events-none absolute inset-0 grid place-items-center opacity-[0.08]"
