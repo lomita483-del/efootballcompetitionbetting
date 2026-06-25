@@ -171,6 +171,14 @@ function BetSlipDrawer({ open, onClose }: { open: boolean; onClose: () => void }
         const snapshot = { ...(freshBet ?? placedVirtual), id: betId, _selections: selections, _payout: placedVirtual?.payout ?? payout, _is_virtual: true };
         clear(); refresh();
         setPlaced(snapshot);
+        showBetSuccess({
+          betId,
+          trackingId: placedVirtual?.tracking_id ?? snapshot?.tracking_id,
+          bookingCode: snapshot?.booking_code,
+          stake,
+          potentialWin: Number(placedVirtual?.payout ?? payout),
+          kind: "Virtual matches",
+        });
         return;
       }
       const { data: bet, error: be } = await supabase.from("bets").insert({
@@ -194,6 +202,14 @@ function BetSlipDrawer({ open, onClose }: { open: boolean; onClose: () => void }
       const snapshot = { ...bet, _selections: selections, _payout: payout, _is_virtual: false };
       clear(); refresh();
       setPlaced(snapshot);
+      showBetSuccess({
+        betId: bet.id,
+        trackingId: bet.tracking_id,
+        bookingCode: bet.booking_code,
+        stake,
+        potentialWin: Number(payout),
+        kind: isFutureTicket ? "Tournament futures" : "Real matches",
+      });
     } catch (e: any) {
       toast.error(e.message || "Failed to place bet");
     } finally { setSubmitting(false); }
