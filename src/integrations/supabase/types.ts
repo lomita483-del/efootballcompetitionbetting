@@ -141,6 +141,9 @@ export type Database = {
           spin_enabled: boolean
           spin_max_reward: number
           spin_min_reward: number
+          tasks_bg_fit: string | null
+          tasks_bg_position: string | null
+          tasks_bg_url: string | null
           terms_content: string | null
           updated_at: string
           vapid_public_key: string | null
@@ -240,6 +243,9 @@ export type Database = {
           spin_enabled?: boolean
           spin_max_reward?: number
           spin_min_reward?: number
+          tasks_bg_fit?: string | null
+          tasks_bg_position?: string | null
+          tasks_bg_url?: string | null
           terms_content?: string | null
           updated_at?: string
           vapid_public_key?: string | null
@@ -339,6 +345,9 @@ export type Database = {
           spin_enabled?: boolean
           spin_max_reward?: number
           spin_min_reward?: number
+          tasks_bg_fit?: string | null
+          tasks_bg_position?: string | null
+          tasks_bg_url?: string | null
           terms_content?: string | null
           updated_at?: string
           vapid_public_key?: string | null
@@ -2062,6 +2071,80 @@ export type Database = {
           },
         ]
       }
+      survey_responses: {
+        Row: {
+          answers: Json
+          created_at: string
+          id: string
+          status: string
+          survey_id: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          status?: string
+          survey_id: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          status?: string
+          survey_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_responses_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      surveys: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          questions: Json
+          target_user_ids: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          questions?: Json
+          target_user_ids?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          questions?: Json
+          target_user_ids?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       teams: {
         Row: {
           created_at: string
@@ -2631,32 +2714,50 @@ export type Database = {
       }
       user_tasks: {
         Row: {
+          banner_url: string | null
           completed_at: string | null
           created_at: string
           description: string | null
+          ends_at: string | null
           id: string
+          period: string | null
+          progress: number
+          reward_kind: string
           reward_tokens: number
           status: string
+          target_progress: number
           title: string
           user_id: string
         }
         Insert: {
+          banner_url?: string | null
           completed_at?: string | null
           created_at?: string
           description?: string | null
+          ends_at?: string | null
           id?: string
+          period?: string | null
+          progress?: number
+          reward_kind?: string
           reward_tokens?: number
           status?: string
+          target_progress?: number
           title: string
           user_id: string
         }
         Update: {
+          banner_url?: string | null
           completed_at?: string | null
           created_at?: string
           description?: string | null
+          ends_at?: string | null
           id?: string
+          period?: string | null
+          progress?: number
+          reward_kind?: string
           reward_tokens?: number
           status?: string
+          target_progress?: number
           title?: string
           user_id?: string
         }
@@ -3212,6 +3313,7 @@ export type Database = {
         Args: { _id: string; _note?: string }
         Returns: undefined
       }
+      dismiss_survey: { Args: { _survey_id: string }; Returns: Json }
       draw_lottery: {
         Args: { _draw_id: string; _winning_number?: number }
         Returns: Json
@@ -3318,6 +3420,10 @@ export type Database = {
       }
       settle_pay_winning_bet: { Args: { _bet_id: string }; Returns: Json }
       spin_wheel: { Args: never; Returns: Json }
+      submit_survey: {
+        Args: { _answers: Json; _survey_id: string }
+        Returns: Json
+      }
       transfer_tokens: {
         Args: { _amount: number; _recipient_special_id: string }
         Returns: Json
