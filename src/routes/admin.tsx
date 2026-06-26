@@ -4154,7 +4154,7 @@ function TasksAchievementsPanel() {
   const [users, setUsers] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
   const [achievements, setAchievements] = useState<any[]>([]);
-  const [draft, setDraft] = useState({ user_id: "", title: "", description: "", reward_tokens: 0 });
+  const [draft, setDraft] = useState({ user_id: "", title: "", description: "", reward_tokens: 0, reward_kind: "tokens", target_progress: 1, period: "once", ends_at: "", banner_url: "" });
   const [ach, setAch] = useState({ user_id: "", code: "", title: "", description: "", icon: "🏆" });
   async function load() {
     const [{ data: u }, { data: t }, { data: a }] = await Promise.all([
@@ -4167,8 +4167,22 @@ function TasksAchievementsPanel() {
   useEffect(() => { load(); }, []);
   async function createTask() {
     if (!draft.user_id || !draft.title) { toast.error("Pick a user and enter a task title"); return; }
-    const { error } = await supabase.from("user_tasks").insert({ user_id: draft.user_id, title: draft.title, description: draft.description || null, reward_tokens: draft.reward_tokens || 0 });
-    if (error) toast.error(error.message); else { toast.success("Task assigned"); setDraft({ user_id: "", title: "", description: "", reward_tokens: 0 }); load(); }
+    const rows = draft.user_id === "__all__"
+      ? users.map((u) => u.id)
+      : [draft.user_id];
+    const payload = rows.map((uid) => ({
+      user_id: uid,
+      title: draft.title,
+      description: draft.description || null,
+      reward_tokens: draft.reward_tokens || 0,
+      reward_kind: draft.reward_kind || "tokens",
+      target_progress: Math.max(1, draft.target_progress || 1),
+      period: draft.period || "once",
+      ends_at: draft.ends_at ? new Date(draft.ends_at).toISOString() : null,
+      banner_url: draft.banner_url || null,
+    }));
+    const { error } = await supabase.from("user_tasks").insert(payload);
+    if (error) toast.error(error.message); else { toast.success(`Task assigned to ${rows.length} user(s)`); setDraft({ user_id: "", title: "", description: "", reward_tokens: 0, reward_kind: "tokens", target_progress: 1, period: "once", ends_at: "", banner_url: "" }); load(); }
   }
   async function markDone(task: any) {
     await supabase.from("user_tasks").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", task.id);
@@ -4197,17 +4211,52 @@ function TasksAchievementsPanel() {
   }
   return (
     <div className="space-y-4">
+      <TasksBackgroundControl />
       <Card className="glass-strong p-4 space-y-3">
         <div className="flex items-center gap-2 font-bold"><ClipboardList className="h-4 w-4 text-primary" />User Tasks</div>
         <div className="grid md:grid-cols-4 gap-2">
           <Select value={draft.user_id} onValueChange={(v) => setDraft({ ...draft, user_id: v })}>
             <SelectTrigger><SelectValue placeholder="Assign to user" /></SelectTrigger>
-            <SelectContent>{users.map((u) => <SelectItem key={u.id} value={u.id}>{u.full_name || u.email}</SelectItem>)}</SelectContent>
+            <SelectContent><SelectItem value="__all__">★ All users</SelectItem>{users.map((u) => <SelectItem key={u.id} value={u.id}>{u.full_name || u.email}</SelectItem>)}</SelectContent>
           </Select>
           <Input placeholder="Task title" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
           <Input placeholder="Description" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
           <Input type="number" placeholder="Reward tokens" value={draft.reward_tokens || ""} onChange={(e) => setDraft({ ...draft, reward_tokens: Number(e.target.value) })} />
         </div>
+        <div className="grid md:grid-cols-4 gap-2">
+          <div>
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Reward kind</label>
+            <Select value={draft.reward_kind} onValueChange={(v) => setDraft({ ...draft, reward_kind: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="tokens">Tokens</SelectItem>
+                <SelectItem value="cashback">Cash-back</SelectItem>
+                <SelectItem value="discount">Discount token</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Target progress</label>
+            <Input type="number" min={1} value={draft.target_progress} onChange={(e) => setDraft({ ...draft, target_progress: Number(e.target.value) })} />
+          </div>
+          <div>
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Period</label>
+            <Select value={draft.period} onValueChange={(v) => setDraft({ ...draft, period: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="once">One-off</SelectItem>
+                <SelectItem value="daily">Daily</SelectItem>
+                <SelectItem value="weekly">Weekly</SelectItem>
+                <SelectItem value="monthly">Monthly</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Ends at (countdown)</label>
+            <Input type="datetime-local" value={draft.ends_at} onChange={(e) => setDraft({ ...draft, ends_at: e.target.value })} />
+          </div>
+        </div>
+        <ImageSettingControl label="Task banner image" value={draft.banner_url} onChange={(url) => setDraft({ ...draft, banner_url: url })} />
         <Button className="btn-luxury" onClick={createTask}><Plus className="h-4 w-4 mr-1" />Assign task</Button>
       </Card>
       <div className="grid lg:grid-cols-2 gap-4">
