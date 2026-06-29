@@ -9,6 +9,7 @@ import { LevelUpModal } from "@/components/Spotlight";
 import { GlobalWinAnimation } from "@/components/GlobalWinAnimation";
 import { BetSuccessPopout } from "@/components/BetSuccessPopout";
 import { SurveyPopout } from "@/components/SurveyPopout";
+import { PushPermissionPrompt } from "@/components/PushPermissionPrompt";
 import { ReactNode, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation } from "@tanstack/react-router";
@@ -174,6 +175,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       <GlobalWinAnimation />
       <BetSuccessPopout />
       <SurveyPopout />
+      <PushPermissionPrompt />
       <nav
         className="lg:hidden fixed left-0 inset-y-0 pt-16 z-40 w-16 overflow-y-auto bg-transparent border-0 shadow-none"
       >
