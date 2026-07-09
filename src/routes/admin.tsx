@@ -209,6 +209,9 @@ export function AdminPage() {
             <TabsContent value="tickets" className="mt-4"><TicketsPanel /></TabsContent>
             <TabsContent value="tasks" className="mt-4"><TasksAchievementsPanel /></TabsContent>
             <TabsContent value="surveys" className="mt-4"><SurveysAdminPanel /></TabsContent>
+            <TabsContent value="polls" className="mt-4"><PollsAdminPanel /></TabsContent>
+            <TabsContent value="shop" className="mt-4"><ShopAdminPanel /></TabsContent>
+            <TabsContent value="faq" className="mt-4"><FaqAdminPanel /></TabsContent>
             <TabsContent value="challenges" className="mt-4"><ChallengesAdminPanel /></TabsContent>
             <TabsContent value="seasons" className="mt-4"><SeasonsAdminPanel /></TabsContent>
             <TabsContent value="bettracker" className="mt-4"><BetTrackerPanel /></TabsContent>
