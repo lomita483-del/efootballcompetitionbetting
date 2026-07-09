@@ -121,7 +121,7 @@ function LotteryPage() {
               {pastDraws.slice(0, 6).map((dr) => (
                 <Card key={dr.id} className="p-4 text-center">
                   <div className="text-xs text-muted-foreground mb-1">{dr.title}</div>
-                  <div className="text-4xl font-extrabold gradient-gold-text">{dr.winning_number}</div>
+                  <div className="text-4xl font-extrabold gradient-gold-text">{(Array.isArray(dr.winning_numbers) && dr.winning_numbers.length ? dr.winning_numbers : [dr.winning_number]).filter((n: any) => n !== null && n !== undefined).join(" · ")}</div>
                   <div className="text-[10px] text-muted-foreground mt-1">x{dr.multiplier} payout</div>
                 </Card>
               ))}
