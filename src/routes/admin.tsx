@@ -53,6 +53,7 @@ import { LotteryAdminPanel } from "@/components/admin/LotteryAdminPanel";
 import { GiftsSpinAdminPanel } from "@/components/admin/GiftsSpinAdminPanel";
 import { SurveysAdminPanel } from "@/components/admin/SurveysAdminPanel";
 import { PollsAdminPanel, ShopAdminPanel, FaqAdminPanel } from "@/components/admin/CommunityAdminPanel";
+import { NewsAdminPanel } from "@/components/admin/NewsAdminPanel";
 import { PushBroadcastPanel } from "@/components/admin/PushBroadcastPanel";
 import { HomeBannersAdminPanel } from "@/components/admin/HomeBannersAdminPanel";
 import { ArcadeAdminPanel } from "@/components/admin/ArcadeAdminPanel";
@@ -212,6 +213,7 @@ export function AdminPage() {
             <TabsContent value="polls" className="mt-4"><PollsAdminPanel /></TabsContent>
             <TabsContent value="shop" className="mt-4"><ShopAdminPanel /></TabsContent>
             <TabsContent value="faq" className="mt-4"><FaqAdminPanel /></TabsContent>
+            <TabsContent value="news" className="mt-4"><NewsAdminPanel /></TabsContent>
             <TabsContent value="challenges" className="mt-4"><ChallengesAdminPanel /></TabsContent>
             <TabsContent value="seasons" className="mt-4"><SeasonsAdminPanel /></TabsContent>
             <TabsContent value="bettracker" className="mt-4"><BetTrackerPanel /></TabsContent>
