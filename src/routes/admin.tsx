@@ -1499,6 +1499,19 @@ function ShooterMatchWizard({ onClose }: { onClose: () => void }) {
             <label className="flex items-center gap-2 rounded-lg border border-primary/20 bg-card/60 p-3"><Switch checked={form.featured} onCheckedChange={(v) => setForm({ ...form, featured: v })} />Feature on homepage</label>
             <label className="flex items-center gap-2 rounded-lg border border-accent/20 bg-card/60 p-3"><Switch checked={form.marketing} onCheckedChange={(v) => setForm({ ...form, marketing: v })} />Post for marketing</label>
           </div>
+          {form.featured && (
+            <ImageSettingControl
+              label="Featured match image (optional)"
+              value={form.featured_image_url}
+              onChange={(url) => setForm({ ...form, featured_image_url: url })}
+              fit={form.featured_image_fit}
+              onFitChange={(v) => setForm({ ...form, featured_image_fit: v })}
+              position={form.featured_image_position}
+              onPositionChange={(v) => setForm({ ...form, featured_image_position: v })}
+              aspect="16 / 9"
+              help="Shown as the backdrop of this shooter match in the home page Featured section."
+            />
+          )}
           <div className="grid grid-cols-2 gap-2 text-sm">
             <label className="flex items-center gap-2 rounded-lg border border-primary/20 bg-card/60 p-3"><Switch checked={form.homePresent} onCheckedChange={(v) => setForm({ ...form, homePresent: v })} />Shooter A present (counts on Leaderboard)</label>
             <label className="flex items-center gap-2 rounded-lg border border-primary/20 bg-card/60 p-3"><Switch checked={form.awayPresent} onCheckedChange={(v) => setForm({ ...form, awayPresent: v })} />Shooter B present (counts on Leaderboard)</label>
