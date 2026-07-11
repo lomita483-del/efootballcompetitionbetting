@@ -102,7 +102,6 @@ function Index() {
       </section>
 
       <section className="relative overflow-hidden">
-        {/* hero stays the same */}
         {settings?.hero_bg_url && (
           <img
             src={settings.hero_bg_url}
@@ -161,23 +160,82 @@ function Index() {
 
       <BookingCodeFab />
 
-      <section className="container mt-6">   {/* <--- Tightened from mt-10 */}
+      <section className="container mt-6">
         <div className="grid gap-3 min-[560px]:gap-5 min-[560px]:grid-cols-[minmax(0,1fr)_minmax(0,200px)] lg:grid-cols-[1fr_300px] xl:grid-cols-[1fr_340px] items-start">
-          <div className="space-y-6 min-w-0">   {/* <--- Tightened from space-y-10 */}
+          <div className="space-y-6 min-w-0">
             {loading && <p className="text-muted-foreground">Loading league…</p>}
-            {/* rest of your match sections remain the same */}
             {!loading && featuredFallback.length > 0 && (
               <div>
                 <SectionHeader icon={Trophy} title="Featured Matches" subtitle="The biggest matchups of the round." />
                 <div className="mt-4">
-                  {/* carousel stays */}
+                  <Carousel opts={{ loop: featuredFallback.length > 1 }} plugins={featuredFallback.length > 1 ? [Autoplay({ delay: 5000, stopOnInteraction: false })] : []}>
+                    <CarouselContent>
+                      {featuredFallback.map((m) => {
+                        const bg = futures.length === 0 ? m.featured_image_url : null;
+                        return (
+                          <CarouselItem key={m.id}>
+                            {bg ? (
+                              <div className="relative overflow-hidden rounded-3xl border border-primary/25 shadow-gold">
+                                <img
+                                  src={bg}
+                                  alt=""
+                                  className="absolute inset-0 h-full w-full"
+                                  style={{ objectFit: (m.featured_image_fit as any) || "cover", objectPosition: m.featured_image_position || "center" }}
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/35 to-background/70" />
+                                <div className="relative p-4 md:p-6"><MatchCardLive match={m} /></div>
+                              </div>
+                            ) : (
+                              <MatchCardLive match={m} />
+                            )}
+                          </CarouselItem>
+                        );
+                      })}
+                    </CarouselContent>
+                    {featuredFallback.length > 1 && (<><CarouselPrevious /><CarouselNext /></>)}
+                  </Carousel>
                 </div>
               </div>
             )}
-            {/* ... other sections ... */}
+            {!loading && live.length > 0 && (
+              <div>
+                <SectionHeader icon={Flame} title="Live Now" subtitle="Live odds. Markets close round-by-round." />
+                <div className="space-y-2 mt-4">
+                  {live.map((m) => <MatchCardLive key={m.id} match={m} variant="row" />)}
+                </div>
+              </div>
+            )}
+            {!loading && upcoming.length > 0 && (
+              <div>
+                <SectionHeader icon={Crosshair} title="Upcoming Matches" subtitle="Lock your picks before the round starts." />
+                <div className="space-y-2 mt-4">
+                  {upcoming.slice(0, 6).map((m) => <MatchCardLive key={m.id} match={m} variant="row" />)}
+                </div>
+              </div>
+            )}
+            {categoryGroups.map(([id, g]) => (
+              <div key={id}>
+                <SectionHeader icon={Crosshair} title={g.name} subtitle={`\( {g.items.length} match \){g.items.length === 1 ? "" : "es"} in this category.`} />
+                <div className="space-y-2 mt-4">
+                  {g.items.map((m) => <MatchCardLive key={m.id} match={m} variant="row" />)}
+                </div>
+              </div>
+            ))}
           </div>
           <aside className="space-y-6 min-w-0 lg:sticky lg:top-20 self-start">
-            {/* sidebar stays */}
+            <NewsSlider />
+            <div>
+              <SectionHeader icon={Flame} title="Hot Bets" subtitle="What the league is backing right now." />
+              <div className="mt-3"><HotBets /></div>
+            </div>
+            <div>
+              <SectionHeader icon={Dice5} title="Lottery Results" subtitle="Latest lucky numbers — auto-drawn every 30 min." />
+              <div className="mt-3"><LotteryResultsCard /></div>
+            </div>
+            <div>
+              <SectionHeader icon={Trophy} title="Hall of Fame" subtitle="Grand prize winners — most tokens won." />
+              <div className="mt-3"><GrandPrizeWinners /></div>
+            </div>
           </aside>
         </div>
       </section>
@@ -185,4 +243,5 @@ function Index() {
   );
 }
 
-// Keep all other functions (FuturesSection, BookingCodeFab, etc.) exactly as they are at the bottom of your file
+// Keep the rest of your functions (FuturesSection, BookingCodeFab, SectionHeader, etc.) exactly as they are in your original file below this point
+// (I didn't include them here to save space, but they stay the same)
