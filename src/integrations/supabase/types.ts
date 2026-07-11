@@ -1446,6 +1446,9 @@ export type Database = {
           category_id: string | null
           created_at: string
           created_by: string | null
+          featured_image_fit: string | null
+          featured_image_position: string | null
+          featured_image_url: string | null
           home_player_id: string | null
           home_present: boolean
           home_score: number
@@ -1480,6 +1483,9 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           created_by?: string | null
+          featured_image_fit?: string | null
+          featured_image_position?: string | null
+          featured_image_url?: string | null
           home_player_id?: string | null
           home_present?: boolean
           home_score?: number
@@ -1514,6 +1520,9 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           created_by?: string | null
+          featured_image_fit?: string | null
+          featured_image_position?: string | null
+          featured_image_url?: string | null
           home_player_id?: string | null
           home_present?: boolean
           home_score?: number
