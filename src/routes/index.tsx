@@ -230,15 +230,12 @@ function Index() {
           <aside className="space-y-6 min-w-0 lg:sticky lg:top-20 self-start">
             <NewsSlider />
             <div>
-              <SectionHeader icon={Flame} title="Hot Bets" subtitle="What the league is backing right now." />
               <div className="mt-3"><HotBets /></div>
             </div>
             <div>
-              <SectionHeader icon={Dice5} title="Lottery Results" subtitle="Latest lucky numbers — auto-drawn every 30 min." />
               <div className="mt-3"><LotteryResultsCard /></div>
             </div>
             <div>
-              <SectionHeader icon={Trophy} title="Hall of Fame" subtitle="Grand prize winners — most tokens won." />
               <div className="mt-3"><GrandPrizeWinners /></div>
             </div>
           </aside>
