@@ -115,7 +115,7 @@ function Index() {
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/80 to-background" />
-        <div className="container relative py-20 md:py-32">
+        <div className="container relative py-8 md:py-14">
           {settings?.site_logo_url && (
             <img
               src={settings.site_logo_url}
