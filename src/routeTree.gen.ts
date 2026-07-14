@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WithdrawRouteImport } from './routes/withdraw'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
-import { Route as VirtualRouteImport } from './routes/virtual'
 import { Route as TriviaRouteImport } from './routes/trivia'
 import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as TournamentRouteImport } from './routes/tournament'
@@ -60,11 +59,6 @@ const WithdrawRoute = WithdrawRouteImport.update({
 const WatchlistRoute = WatchlistRouteImport.update({
   id: '/watchlist',
   path: '/watchlist',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VirtualRoute = VirtualRouteImport.update({
-  id: '/virtual',
-  path: '/virtual',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TriviaRoute = TriviaRouteImport.update({
@@ -223,14 +217,14 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const VirtualInstantRoute = VirtualInstantRouteImport.update({
-  id: '/instant',
-  path: '/instant',
-  getParentRoute: () => VirtualRoute,
+  id: '/virtual/instant',
+  path: '/virtual/instant',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const VirtualHistoryRoute = VirtualHistoryRouteImport.update({
-  id: '/history',
-  path: '/history',
-  getParentRoute: () => VirtualRoute,
+  id: '/virtual/history',
+  path: '/virtual/history',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const TicketIdRoute = TicketIdRouteImport.update({
   id: '/ticket/$id',
@@ -297,7 +291,6 @@ export interface FileRoutesByFullPath {
   '/tournament': typeof TournamentRoute
   '/transactions': typeof TransactionsRoute
   '/trivia': typeof TriviaRoute
-  '/virtual': typeof VirtualRouteWithChildren
   '/watchlist': typeof WatchlistRoute
   '/withdraw': typeof WithdrawRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
@@ -341,7 +334,6 @@ export interface FileRoutesByTo {
   '/tournament': typeof TournamentRoute
   '/transactions': typeof TransactionsRoute
   '/trivia': typeof TriviaRoute
-  '/virtual': typeof VirtualRouteWithChildren
   '/watchlist': typeof WatchlistRoute
   '/withdraw': typeof WithdrawRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
@@ -386,7 +378,6 @@ export interface FileRoutesById {
   '/tournament': typeof TournamentRoute
   '/transactions': typeof TransactionsRoute
   '/trivia': typeof TriviaRoute
-  '/virtual': typeof VirtualRouteWithChildren
   '/watchlist': typeof WatchlistRoute
   '/withdraw': typeof WithdrawRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
@@ -432,7 +423,6 @@ export interface FileRouteTypes {
     | '/tournament'
     | '/transactions'
     | '/trivia'
-    | '/virtual'
     | '/watchlist'
     | '/withdraw'
     | '/matches/$matchId'
@@ -476,7 +466,6 @@ export interface FileRouteTypes {
     | '/tournament'
     | '/transactions'
     | '/trivia'
-    | '/virtual'
     | '/watchlist'
     | '/withdraw'
     | '/matches/$matchId'
@@ -520,7 +509,6 @@ export interface FileRouteTypes {
     | '/tournament'
     | '/transactions'
     | '/trivia'
-    | '/virtual'
     | '/watchlist'
     | '/withdraw'
     | '/matches/$matchId'
@@ -565,10 +553,11 @@ export interface RootRouteChildren {
   TournamentRoute: typeof TournamentRoute
   TransactionsRoute: typeof TransactionsRoute
   TriviaRoute: typeof TriviaRoute
-  VirtualRoute: typeof VirtualRouteWithChildren
   WatchlistRoute: typeof WatchlistRoute
   WithdrawRoute: typeof WithdrawRoute
   TicketIdRoute: typeof TicketIdRoute
+  VirtualHistoryRoute: typeof VirtualHistoryRoute
+  VirtualInstantRoute: typeof VirtualInstantRoute
   ApiPublicVirtualTickRoute: typeof ApiPublicVirtualTickRoute
   ApiPublicHooksBroadcastPushRoute: typeof ApiPublicHooksBroadcastPushRoute
   ApiPublicHooksProcessScheduledPushRoute: typeof ApiPublicHooksProcessScheduledPushRoute
@@ -589,13 +578,6 @@ declare module '@tanstack/react-router' {
       path: '/watchlist'
       fullPath: '/watchlist'
       preLoaderRoute: typeof WatchlistRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/virtual': {
-      id: '/virtual'
-      path: '/virtual'
-      fullPath: '/virtual'
-      preLoaderRoute: typeof VirtualRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trivia': {
@@ -817,17 +799,17 @@ declare module '@tanstack/react-router' {
     }
     '/virtual/instant': {
       id: '/virtual/instant'
-      path: '/instant'
+      path: '/virtual/instant'
       fullPath: '/virtual/instant'
       preLoaderRoute: typeof VirtualInstantRouteImport
-      parentRoute: typeof VirtualRoute
+      parentRoute: typeof rootRouteImport
     }
     '/virtual/history': {
       id: '/virtual/history'
-      path: '/history'
+      path: '/virtual/history'
       fullPath: '/virtual/history'
       preLoaderRoute: typeof VirtualHistoryRouteImport
-      parentRoute: typeof VirtualRoute
+      parentRoute: typeof rootRouteImport
     }
     '/ticket/$id': {
       id: '/ticket/$id'
@@ -885,19 +867,6 @@ const MatchesRouteChildren: MatchesRouteChildren = {
 const MatchesRouteWithChildren =
   MatchesRoute._addFileChildren(MatchesRouteChildren)
 
-interface VirtualRouteChildren {
-  VirtualHistoryRoute: typeof VirtualHistoryRoute
-  VirtualInstantRoute: typeof VirtualInstantRoute
-}
-
-const VirtualRouteChildren: VirtualRouteChildren = {
-  VirtualHistoryRoute: VirtualHistoryRoute,
-  VirtualInstantRoute: VirtualInstantRoute,
-}
-
-const VirtualRouteWithChildren =
-  VirtualRoute._addFileChildren(VirtualRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -930,10 +899,11 @@ const rootRouteChildren: RootRouteChildren = {
   TournamentRoute: TournamentRoute,
   TransactionsRoute: TransactionsRoute,
   TriviaRoute: TriviaRoute,
-  VirtualRoute: VirtualRouteWithChildren,
   WatchlistRoute: WatchlistRoute,
   WithdrawRoute: WithdrawRoute,
   TicketIdRoute: TicketIdRoute,
+  VirtualHistoryRoute: VirtualHistoryRoute,
+  VirtualInstantRoute: VirtualInstantRoute,
   ApiPublicVirtualTickRoute: ApiPublicVirtualTickRoute,
   ApiPublicHooksBroadcastPushRoute: ApiPublicHooksBroadcastPushRoute,
   ApiPublicHooksProcessScheduledPushRoute:
