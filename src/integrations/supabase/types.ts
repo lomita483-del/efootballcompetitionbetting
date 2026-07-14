@@ -166,6 +166,7 @@ export type Database = {
           vip_enabled: boolean
           vip_token_multipliers: Json
           virtual_animation_seconds: number
+          virtual_championship_enabled: boolean
           virtual_concurrent_rounds: number
           virtual_cycle_last_tick: string | null
           virtual_cycle_running: boolean
@@ -287,6 +288,7 @@ export type Database = {
           vip_enabled?: boolean
           vip_token_multipliers?: Json
           virtual_animation_seconds?: number
+          virtual_championship_enabled?: boolean
           virtual_concurrent_rounds?: number
           virtual_cycle_last_tick?: string | null
           virtual_cycle_running?: boolean
@@ -408,6 +410,7 @@ export type Database = {
           vip_enabled?: boolean
           vip_token_multipliers?: Json
           virtual_animation_seconds?: number
+          virtual_championship_enabled?: boolean
           virtual_concurrent_rounds?: number
           virtual_cycle_last_tick?: string | null
           virtual_cycle_running?: boolean
@@ -2989,40 +2992,55 @@ export type Database = {
       }
       tournaments: {
         Row: {
+          bracket_size: number
           champion_id: string | null
           created_at: string
           created_by: string | null
+          current_stage: string | null
           event_date: string | null
           futures_match_id: string | null
           id: string
           is_featured: boolean
+          kind: string
           name: string
+          stage_gap_seconds: number
+          starts_at: string | null
           status: string
           tagline: string | null
           updated_at: string
         }
         Insert: {
+          bracket_size?: number
           champion_id?: string | null
           created_at?: string
           created_by?: string | null
+          current_stage?: string | null
           event_date?: string | null
           futures_match_id?: string | null
           id?: string
           is_featured?: boolean
+          kind?: string
           name: string
+          stage_gap_seconds?: number
+          starts_at?: string | null
           status?: string
           tagline?: string | null
           updated_at?: string
         }
         Update: {
+          bracket_size?: number
           champion_id?: string | null
           created_at?: string
           created_by?: string | null
+          current_stage?: string | null
           event_date?: string | null
           futures_match_id?: string | null
           id?: string
           is_featured?: boolean
+          kind?: string
           name?: string
+          stage_gap_seconds?: number
+          starts_at?: string | null
           status?: string
           tagline?: string | null
           updated_at?: string
