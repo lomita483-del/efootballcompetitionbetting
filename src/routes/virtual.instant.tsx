@@ -256,14 +256,17 @@ function ShootoutStage({
   phase,
   animSec,
   recent,
+  sport,
 }: {
   featured: VirtualMatch;
   phase: Phase;
   animSec: number;
   recent: VirtualMatch[];
+  sport: Sport;
 }) {
-  const home = featured.home_team?.name ?? "Gang A";
-  const away = featured.away_team?.name ?? "Gang B";
+  const isFoot = sport === "football";
+  const home = featured.home_team?.name ?? (isFoot ? "Home" : "Gang A");
+  const away = featured.away_team?.name ?? (isFoot ? "Away" : "Gang B");
   const live = phase === "live";
   const { h, a } = useLiveScore(featured, animSec);
 
@@ -290,19 +293,19 @@ function ShootoutStage({
 
       {/* Center arena */}
       {live ? (
-        <LiveMatchTicker match={featured} animSec={animSec} />
+        <LiveMatchTicker match={featured} animSec={animSec} sport={sport} />
       ) : (
         <Card className="virtual-panel virtual-arena grid place-items-center py-10">
           <div className="relative grid place-items-center">
             <div className="h-40 w-40 rounded-full border border-primary/25 grid place-items-center bg-[radial-gradient(circle,rgba(0,0,0,0.6),transparent_70%)]">
               <div className="h-24 w-24 rounded-full border border-primary/40 grid place-items-center animate-pulse">
-                <Crosshair className="h-9 w-9 text-primary" />
+                {isFoot ? <span className="text-3xl">⚽</span> : <Crosshair className="h-9 w-9 text-primary" />}
               </div>
             </div>
           </div>
           <div className="mt-4 text-center">
             <div className="text-[11px] font-black tracking-[0.3em] text-primary">▼ PLACE YOUR BETS ▼</div>
-            <div className="text-xs text-muted-foreground mt-1">Gang vs gang shootout begins at lock</div>
+            <div className="text-xs text-muted-foreground mt-1">{isFoot ? "Kick-off the moment your bet is placed" : "Gang vs gang shootout begins at lock"}</div>
           </div>
         </Card>
       )}
@@ -332,14 +335,15 @@ function ShootoutStage({
 
       {/* Line ups (left) + Opposing line (right) */}
       <div className="grid grid-cols-2 gap-3">
-        <LineUp title="Line ups" team={home} accent="red" />
-        <LineUp title="Opposing line" team={away} accent="sky" align="right" />
+        <LineUp title="Line ups" team={home} accent="red" sport={sport} />
+        <LineUp title="Opposing line" team={away} accent="sky" align="right" sport={sport} />
       </div>
     </div>
   );
 }
 
 const ROLES = ["Ace", "Shot Caller", "Lookout", "Runner", "Enforcer", "Driver"];
+const POSITIONS = ["Striker", "Winger", "Playmaker", "Midfielder", "Defender", "Keeper"];
 const RATINGS = [9, 8, 7, 6, 5, 4];
 
 function LineUp({
@@ -347,20 +351,23 @@ function LineUp({
   team,
   accent,
   align,
+  sport,
 }: {
   title: string;
   team: string;
   accent: "red" | "sky";
   align?: "right";
+  sport: Sport;
 }) {
   const dot = accent === "red" ? "bg-red-500" : "bg-sky-400";
+  const roles = sport === "football" ? POSITIONS : ROLES;
   return (
     <Card className="virtual-panel p-3">
       <div className={`text-[10px] font-black uppercase tracking-[0.25em] text-primary/80 mb-2 ${align === "right" ? "text-right" : ""}`}>
         {title}
       </div>
       <div className="space-y-1.5">
-        {ROLES.map((role, i) => (
+        {roles.map((role, i) => (
           <div
             key={role}
             className={`flex items-center gap-2 text-[11px] ${align === "right" ? "flex-row-reverse text-right" : ""}`}
