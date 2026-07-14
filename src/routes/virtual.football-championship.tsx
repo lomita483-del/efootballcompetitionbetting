@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Trophy, Clock, Radio, Sparkles } from "lucide-react";
 import { BracketBoard } from "@/components/BracketBoard";
 import { ChampionshipBetPanel } from "@/components/ChampionshipBetPanel";
+import { ChampionshipLiveFeed } from "@/components/ChampionshipLiveFeed";
 
 // Football Championship — same engine as virtual.championship but filters
 // tournaments by kind='championship_football'. Auto-restart is honored by
@@ -116,6 +117,7 @@ function FootballChampPage() {
                 <div className="font-display text-2xl font-black">{active.name}</div>
               </div>
               <BracketBoard tournamentId={active.id} currentStage={active.current_stage} />
+              <ChampionshipLiveFeed tournamentId={active.id} sport="football" />
             </Card>
           ) : (
             <Card className="glass p-6 border-primary/30 space-y-4">
@@ -134,6 +136,7 @@ function FootballChampPage() {
                 <p className="text-xs text-muted-foreground mt-1">Current stage: {active.current_stage ?? "R16"}</p>
               </div>
               <BracketBoard tournamentId={active.id} currentStage={active.current_stage} />
+              <ChampionshipLiveFeed tournamentId={active.id} sport="football" />
             </Card>
           )}
 
