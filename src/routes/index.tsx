@@ -34,12 +34,12 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "E-Football Competition Bet — Virtual Token Shooting League" },
       { name: "description", content: "Live matches, gang leaderboards and virtual-token wagering for the E-Football Competition Bet." },
-      { property: "og:title", content: "E-Football Competition Bet" },
-      { property: "og:description", content: "Follow live shooting matches, back your gang with virtual tokens, and climb the seasonal leaderboard." },
+      { property: "og:title", content: "E-Football Competition Bet — Virtual Token Shooting League" },
+      { property: "og:description", content: "Live matches, gang leaderboards and virtual-token wagering for the E-Football Competition Bet." },
       { property: "og:url", content: "https://lslonlinebetting.lovable.app/" },
       { property: "og:image", content: hero },
-      { name: "twitter:title", content: "E-Football Competition Bet" },
-      { name: "twitter:description", content: "Follow live shooting matches, back your gang with virtual tokens, and climb the seasonal leaderboard." },
+      { name: "twitter:title", content: "E-Football Competition Bet — Virtual Token Shooting League" },
+      { name: "twitter:description", content: "Live matches, gang leaderboards and virtual-token wagering for the E-Football Competition Bet." },
     ],
     links: [
       { rel: "canonical", href: "https://lslonlinebetting.lovable.app/" },
