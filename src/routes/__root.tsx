@@ -162,6 +162,17 @@ import { BetSlipFab } from "@/components/BetSlip";
 import { RouteProgress } from "@/components/RouteProgress";
 import { useBranding } from "@/lib/branding";
 import { useEffect } from "react";
+import { trackPageView } from "@/lib/analytics";
+
+function AnalyticsTracker() {
+  const router = useRouter();
+  useEffect(() => {
+    trackPageView();
+    const unsub = router.subscribe("onResolved", () => trackPageView());
+    return () => { unsub(); };
+  }, [router]);
+  return null;
+}
 
 function BrandingSync() {
   const b = useBranding();
@@ -206,6 +217,7 @@ function RootComponent() {
         <BetSlipProvider>
           <ConfirmProvider>
             <BrandingSync />
+            <AnalyticsTracker />
             <MaintenanceGate>
               <Outlet />
             </MaintenanceGate>
