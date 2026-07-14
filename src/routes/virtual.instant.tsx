@@ -57,7 +57,7 @@ const matchSelect = `
   markets(id,name,is_open,odds(id,label,value,is_winner,market_id))
 `;
 
-function VirtualPage() {
+export function VirtualPage({ title = "ECB Virtual Gang League" }: { title?: string } = {}) {
   const [round, setRound] = useState<VirtualMatch[]>([]);
   const [phase, setPhase] = useState<Phase>("idle");
   const [recent, setRecent] = useState<VirtualMatch[]>([]);
