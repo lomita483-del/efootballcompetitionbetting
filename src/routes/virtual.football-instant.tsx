@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Crosshair, Trophy, Loader2 } from "lucide-react";
+import { ArrowLeft, Trophy, Loader2, CircleDot } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { TeamLogo } from "@/components/TeamLogo";
 
@@ -106,7 +106,7 @@ function FootballInstantPage() {
 
           <header className="text-center">
             <h1 className="font-display text-3xl sm:text-4xl font-black gradient-gold-text leading-tight">Instant E-Football</h1>
-            <p className="text-muted-foreground text-sm mt-1">Your private shootout starts the moment you place your bet.</p>
+            <p className="text-muted-foreground text-sm mt-1">Your private penalty shoot-out kicks off the moment you place your bet.</p>
           </header>
 
           {!enabled ? (
@@ -160,10 +160,27 @@ function FootballInstantPage() {
                   </div>
                   <div className="flex items-end">
                     <Button className="btn-luxury w-full" onClick={placeBet} disabled={busy || !user}>
-                      {busy ? <Loader2 className="h-4 w-4 animate-spin mr-1"/> : <Crosshair className="h-4 w-4 mr-1"/>}
-                      Place bet & shoot
+                      {busy ? <Loader2 className="h-4 w-4 animate-spin mr-1"/> : <CircleDot className="h-4 w-4 mr-1"/>}
+                      Place bet & kick off
                     </Button>
                   </div>
+                </div>
+              )}
+
+              {result && kickIdx >= 0 && (
+                <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 space-y-1 text-xs">
+                  <div className="text-[10px] uppercase tracking-widest text-emerald-300 font-black">Live commentary</div>
+                  {(() => {
+                    const lines: string[] = [];
+                    const shown = Math.min(kickIdx + 1, Math.max(result.home_kicks.length, result.away_kicks.length));
+                    for (let i = 0; i < shown; i++) {
+                      const h = result.home_kicks[i];
+                      const a = result.away_kicks[i];
+                      if (h !== undefined) lines.push(`Penalty ${i + 1} · ${pair[0].name}: ${h ? "GOAL! Top corner, keeper had no chance." : "Saved! The keeper flies to his left."}`);
+                      if (a !== undefined) lines.push(`Penalty ${i + 1} · ${pair[1].name}: ${a ? "Buries it — 1-0 on this kick." : "Off the post! Woodwork denies them."}`);
+                    }
+                    return lines.map((l, i) => <div key={i} className="text-muted-foreground">· {l}</div>);
+                  })()}
                 </div>
               )}
 
