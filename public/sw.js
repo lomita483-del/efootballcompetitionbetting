@@ -1,4 +1,6 @@
-/* ECB push service worker */
+/* ECB push service worker v2 */
+const ICON = '/icon-512.png?v=ecb2';
+const BADGE = '/icon-192.png?v=ecb2';
 self.addEventListener('install', (e) => self.skipWaiting());
 self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 
@@ -8,8 +10,8 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'E-Football Competition Bet';
   const options = {
     body: data.body || '',
-    icon: data.icon || '/icon-512.png',
-    badge: '/icon-512.png',
+    icon: data.icon || ICON,
+    badge: BADGE,
     image: data.image || undefined,
     tag: data.tag || data.notification_id || String(Date.now()),
     renotify: true,
