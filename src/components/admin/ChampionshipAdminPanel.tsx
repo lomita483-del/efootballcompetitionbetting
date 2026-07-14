@@ -164,6 +164,31 @@ export function ChampionshipAdminPanel() {
           </div>
           <Switch checked={autoRestart} onCheckedChange={(v) => toggleFlag("virtual_championship_auto_restart", v, setAutoRestart, "Auto-restart")} />
         </div>
+        <div className="mt-3 flex items-center justify-between gap-3 flex-wrap p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5">
+          <div>
+            <div className="font-black text-sm">Instant E-Football (per-user shootouts)</div>
+            <div className="text-xs text-muted-foreground">
+              Opens the /virtual/football-instant arena. Each user's penalty shootout starts privately when they place their bet.
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className={footballInstantEnabled ? "border-emerald-500/40 text-emerald-300 bg-emerald-500/10" : "border-muted/50 text-muted-foreground bg-muted/20"}>
+              {footballInstantEnabled ? "Open" : "Closed"}
+            </Badge>
+            <Switch checked={footballInstantEnabled} onCheckedChange={(v) => toggleFlag("virtual_football_instant_enabled", v, setFootballInstantEnabled, "Instant E-Football")} />
+          </div>
+        </div>
+        <div className="mt-3 flex items-center justify-between gap-3 flex-wrap p-3 rounded-lg border border-primary/20 bg-background/40 text-xs">
+          <div>
+            <div className="font-bold">Football team pool: <span className={footballTeamCount >= 16 ? "text-emerald-300" : "text-destructive"}>{footballTeamCount}</span></div>
+            <div className="text-muted-foreground">Need at least 16 football-tagged teams for the football cup and instant shootouts. Tag teams in Clans admin or use quick-tag.</div>
+          </div>
+          {footballTeamCount < 16 && (
+            <Button size="sm" variant="outline" onClick={autoTagFootballTeams} disabled={genericTeamCount < 16}>
+              Auto-tag 16 teams as football
+            </Button>
+          )}
+        </div>
       </Card>
 
       <Card className="glass p-5 border-primary/20">
