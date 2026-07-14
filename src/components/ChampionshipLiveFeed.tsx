@@ -132,7 +132,7 @@ export function ChampionshipLiveFeed({ tournamentId, sport, currentStage }: { to
             <Circle className="h-2 w-2 fill-destructive text-destructive animate-pulse" /> Live now — {STAGE_LABEL[live[0].round_name] ?? live[0].round_name}
           </div>
           <div className="grid gap-2">
-            {live.map((r) => {
+            {live.slice(0, 1).map((r) => {
               const ev = (r.live_events ?? []).slice(-3).reverse();
               const nameA = nameOf(r.participant_a_id);
               const nameB = nameOf(r.participant_b_id);
@@ -159,6 +159,11 @@ export function ChampionshipLiveFeed({ tournamentId, sport, currentStage }: { to
                 </div>
               );
             })}
+            {live.length > 1 && (
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground text-center">
+                +{live.length - 1} other match{live.length - 1 > 1 ? "es" : ""} playing simultaneously · see bracket below
+              </div>
+            )}
           </div>
         </section>
       )}
