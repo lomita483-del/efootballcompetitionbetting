@@ -43,7 +43,15 @@ export function HomeBannerSlider({ embedded = false, placement = "home" }: { emb
               <Wrapper {...wrapperProps}>
                 <div className="relative h-32 sm:h-40 md:h-48 w-full">
                   {b.image_url && (
-                    <img src={b.image_url} alt={b.title || ""} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <img
+                      src={b.image_url}
+                      alt={b.title || ""}
+                      className="absolute inset-0 h-full w-full transition-transform duration-700 group-hover:scale-105"
+                      style={{
+                        objectFit: (b.image_fit as any) || "cover",
+                        objectPosition: b.image_position || "center",
+                      }}
+                    />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-r from-background/85 via-background/40 to-transparent" />
                   <div className="relative flex h-full items-center justify-between gap-3 p-4 sm:p-6">
