@@ -1332,6 +1332,8 @@ export type Database = {
           created_by: string | null
           cta_label: string
           id: string
+          image_fit: string
+          image_position: string
           image_url: string
           is_active: boolean
           link_url: string
@@ -1346,6 +1348,8 @@ export type Database = {
           created_by?: string | null
           cta_label?: string
           id?: string
+          image_fit?: string
+          image_position?: string
           image_url: string
           is_active?: boolean
           link_url?: string
@@ -1360,6 +1364,8 @@ export type Database = {
           created_by?: string | null
           cta_label?: string
           id?: string
+          image_fit?: string
+          image_position?: string
           image_url?: string
           is_active?: boolean
           link_url?: string
