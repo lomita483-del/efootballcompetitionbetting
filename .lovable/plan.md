@@ -1,36 +1,51 @@
-## Issues to fix
+## 1. Create Account page — add "E" for E-Football, rename Server → Region
 
-### 1) Logos can't be changed
-The admin uploads to the `ads` storage bucket, which requires the moderator/admin role via storage RLS. All screenshots show the account is Super Admin, so upload itself should work. Need concrete failure info to fix without guessing.
+- Add `E` option to the affiliation selector alongside `F` (Faction) and `G` (Gang).
+- When `E` is selected, show a text input to enter the E-Football team name manually (same UX as gang/faction name).
+- Rename the "Server" field to "Region" everywhere on the form and use `region` as the stored value.
+- Store `E`, `G`, or `F` in `gang_type`; the entered name goes into `gang_name` (works for all three).
+- **DB migration:** widen the `profiles.gang_type` check constraint (currently allows `G`/`F` only) to also allow `E`; rename `profiles.server` → `profiles.region` (with a compatibility view if code references `server` elsewhere).
+- Update code that references `profiles.server` (leaderboard, admin panels, ticket, etc.) to use `region`.
 
-Ask: does the upload button spin forever, does a toast error appear (validation? "Only admins…"? bucket error?), or does the image preview appear but Save doesn't persist? Please try uploading a small square PNG and paste the exact toast text.
+## 2. Push blast — show subscribed users' names
 
-### 2) "Canceling statement due to statement timeout" on bulk delete
-`delete_teams_bulk` runs 6 large cascading DELETEs in a single statement with sub-selects across matches → markets → odds → bet_selections. On 55 rows this trips the 60s cap.
+- In the Push Broadcast panel, load the recipient list from `push_subscriptions` and join `profiles` on `user_id` so each row shows in-game name / full name plus device UA, last seen, and endpoint tail.
+- Add a searchable, scrollable "Subscribed devices" section under the send controls (paginated at ~200 rows).
 
-Fix (single migration):
-- Rewrite `delete_teams_bulk` to first collect target match/market IDs into temp arrays, then delete in the correct order using those arrays (no repeated JOINs).
-- Add supporting indexes: `matches(home_team_id)`, `matches(away_team_id)`, `markets(match_id)`, `odds(market_id)`, `bet_selections(match_id)`, `players(team_id)`, `tournament_matches(participant_a_id, participant_b_id)`.
-- Same treatment for `delete_players_bulk`.
+## 3. Instant Virtual — only one match visible
 
-### 3) No voucher for Instant E-Football, Championship, Instant Championship Football
-These modes bypass the standard `bets` table:
-- Instant E-Football writes to `user_virtual_rounds` (via `start_user_virtual_round`) — no `bets` row → no `/ticket/:id` voucher.
-- Championship writes to `championship_bets` (via `place_championship_bet`) — same problem.
+- Investigate: check whether the list is filtered too aggressively (status filter, single-round fetch, missing `is_visible`), whether the seeder generates only one round, or whether the tick isn't spawning additional matches.
+- Fix the query / spawner so the "select a match" screen shows all active instant matches for the current round, not just the first.
 
-Fix:
-- Modify `start_user_virtual_round` to ALSO insert a `bets` row (status auto-settled won/lost, potential_payout=payout, single-selection bet_selection with the picked side). Return the bet id.
-- Modify `place_championship_bet` (and `cancel_championship_bet`) to insert/delete a paired `bets` row with a "future" championship selection so the user gets a real ticket voucher visible in Bet History and admin Bet Tracker.
-- Both bets flagged `is_virtual = true` so they show up under the new admin filter.
+## 4. Championship Virtual — add odds, cashout, voucher settlement
 
-### 4) Admin Bet Tracker — add "Virtual" filter
-- Extend the `filter` select in `BetTrackerPanel` with `virtual` (all is_virtual=true) and `real` options, and change the query to filter by `is_virtual` when those are picked.
+- Add real odds to each championship virtual match:
+  - Compute pre-match odds from participant strength (same style as the standard match markets), stored on the tournament match row.
+  - Recompute live odds each round tick while a match is in progress.
+- Wire betting the same way as regular matches:
+  - Championship bets go through the standard `bets` / `bet_selections` pipeline with the match ID and market/odds locked in at slip time.
+  - Cash-out: allow partial settlement against current live odds while the match is still running (same rule as standard matches).
+  - On championship match finish, settle every open ticket referencing that match as win/loss and update the voucher (ticket) status accordingly.
+- Update the Championship Bet panel UI to show odds per selection, potential payout, and a cashout button on in-play tickets.
 
-## Files touched
-- `supabase/migrations/<new>.sql` — bulk delete rewrite + indexes; RPC updates for virtual+championship writing into `bets`.
-- `src/routes/admin.tsx` — Bet Tracker filter additions.
-- `src/routes/virtual.football-instant.tsx` — after `start_user_virtual_round` returns a bet_id, link to `/ticket/:id` from the result card.
-- `src/components/ChampionshipBetPanel.tsx` — show "View voucher" link after bet placed.
+## 5. Matches page — style the "All matches" heading
 
-## Open question
-Please provide the logo-upload failure symptom (toast text or blank behavior) so #1 can be fixed in the same batch. Everything else I'll ship as described.
+- Replace the plain `"All matches"` text block with the same gold-gradient headline treatment used elsewhere (e.g. gradient title + subtitle line + count badge + subtle divider).
+
+## Technical notes
+
+- Register: constraint change is `ALTER TABLE profiles DROP CONSTRAINT ... ; ADD CONSTRAINT profiles_gang_type_check CHECK (gang_type IN ('G','F','E'))`. `server` → `region` uses `ALTER TABLE ... RENAME COLUMN`.
+- Championship odds: extend `tournament_matches` with `home_odds`, `draw_odds`, `away_odds`, `odds_updated_at`; reuse existing bet-settlement RPC by making it recognize championship-match IDs, or add a parallel settle function keyed on `tournament_match_id`.
+- Cashout: mirror the RPC used for regular in-play cashout, keyed on `bets.match_id` OR `bets.tournament_match_id`.
+- Push panel: single `supabase.from("push_subscriptions").select("*, profile:profiles(full_name, ingame_name)")` — no schema change needed.
+
+## Order of execution
+
+1. DB migration (register schema + championship odds columns).
+2. Register UI + affiliated code paths using `server` → `region`.
+3. Push broadcast panel joins + list.
+4. Instant virtual query fix.
+5. Championship virtual odds computation, betting, cashout, settlement.
+6. Matches page heading.
+
+Confirm and I'll implement in that order.
