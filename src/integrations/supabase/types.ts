@@ -2137,8 +2137,8 @@ export type Database = {
           profile_title: string | null
           referral_code: string | null
           referred_by: string | null
+          region: string | null
           restrict_reason: string | null
-          server: string | null
           showcase_achievement_ids: string[]
           special_id: string | null
           streak_days: number
@@ -2176,8 +2176,8 @@ export type Database = {
           profile_title?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          region?: string | null
           restrict_reason?: string | null
-          server?: string | null
           showcase_achievement_ids?: string[]
           special_id?: string | null
           streak_days?: number
@@ -2215,8 +2215,8 @@ export type Database = {
           profile_title?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          region?: string | null
           restrict_reason?: string | null
-          server?: string | null
           showcase_achievement_ids?: string[]
           special_id?: string | null
           streak_days?: number
@@ -4518,7 +4518,7 @@ export type Database = {
         | "suspended"
         | "refunded"
       chat_room: "general" | "gang" | "moderator"
-      gang_type: "G" | "F"
+      gang_type: "G" | "F" | "E"
       match_status: "scheduled" | "live" | "ended" | "cancelled"
       ticket_status: "open" | "pending" | "resolved" | "closed"
       token_request_status: "pending" | "approved" | "denied"
@@ -4669,7 +4669,7 @@ export const Constants = {
         "refunded",
       ],
       chat_room: ["general", "gang", "moderator"],
-      gang_type: ["G", "F"],
+      gang_type: ["G", "F", "E"],
       match_status: ["scheduled", "live", "ended", "cancelled"],
       ticket_status: ["open", "pending", "resolved", "closed"],
       token_request_status: ["pending", "approved", "denied"],
