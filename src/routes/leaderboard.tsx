@@ -11,9 +11,9 @@ export const Route = createFileRoute("/leaderboard")({
   head: () => ({
     meta: [
       { title: "Leaderboard — E-Football Competition Bet" },
-      { name: "description", content: "See the top shooters and top gangs ranked by total score, season points, wins, and tokens won across the E-Football Competition Bet." },
-      { property: "og:title", content: "ECB Leaderboard — Top Shooters & Gangs" },
-      { property: "og:description", content: "Top shooters and gangs ranked by total score, season points, wins, and tokens won." },
+      { name: "description", content: "See the top shooters and top teams ranked by total score, season points, wins, and tokens won across the E-Football Competition Bet." },
+      { property: "og:title", content: "ECB Leaderboard — Top Shooters & Teams" },
+      { property: "og:description", content: "Top shooters and teams ranked by total score, season points, wins, and tokens won." },
       { property: "og:url", content: "https://lslonlinebetting.lovable.app/leaderboard" },
     ],
     links: [{ rel: "canonical", href: "https://lslonlinebetting.lovable.app/leaderboard" }],
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/leaderboard")({
         "@context": "https://schema.org",
         "@type": "CollectionPage",
         name: "ECB Leaderboard",
-        description: "Top shooters and gangs in the E-Football Competition Bet.",
+        description: "Top shooters and teams in the E-Football Competition Bet.",
         url: "https://lslonlinebetting.lovable.app/leaderboard",
       }),
     }],
@@ -37,7 +37,7 @@ function Medal({ i }: { i: number }) {
   if (i < 3) {
     return (
       <span className="inline-flex items-center gap-1.5">
-        <span className={`inline-grid place-items-center h-8 w-8 rounded-lg bg-gradient-to-b ${tiers[i]} text-black font-black text-sm shadow-[0_0_14px_-2px_rgba(212,175,55,0.6)] border border-white/30`}>
+        <span className={`inline-grid place-items-center h-8 w-8 rounded-lg bg-gradient-to-b ${tiers[i]} text-black font-black text-sm shadow-[0_0_14px_-2px_rgba(212,175,55,0.6)] border border-whi[...]
           {i + 1}
         </span>
         <MedalIcon className={`h-5 w-5 ${medalColors[i]} drop-shadow-[0_0_6px_rgba(212,175,55,0.6)]`} />
@@ -64,7 +64,7 @@ function Page() {
       .on("postgres_changes", { event: "*", schema: "public", table: "leaderboard_overrides" }, run)
       .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, run)
       .on("postgres_changes", { event: "*", schema: "public", table: "app_settings" }, () =>
-        supabase.from("app_settings").select("leaderboard_header_url").eq("id", 1).maybeSingle().then(({ data }) => setHeaderUrl((data as any)?.leaderboard_header_url || leaderboardHeaderAsset.url)),
+        supabase.from("app_settings").select("leaderboard_header_url").eq("id", 1).maybeSingle().then(({ data }) => setHeaderUrl((data as any)?.leaderboard_header_url || leaderboardHeaderAsset.url[...]
       )
       .subscribe();
     return () => { supabase.removeChannel(ch); };
@@ -95,23 +95,23 @@ function Page() {
               <span className="grid place-items-center h-12 w-12 rounded-xl border border-amber-400/40 bg-black/40 shadow-[0_0_20px_-4px_rgba(212,175,55,0.6)]">
                 <Trophy className="h-6 w-6 text-amber-300" />
               </span>
-              <h1 className="text-3xl md:text-4xl font-black tracking-tight gradient-gold-text drop-shadow-[0_2px_8px_rgba(212,175,55,0.3)]">LEADERBOARD</h1>
+              <h1 className="text-3xl md:text-4xl font-black tracking-tight gradient-gold-text drop-shadow-[0_2px_8px_rgba(212,175,55,0.3)]">E-FOOTBALL</h1>
             </div>
           </div>
         )}
 
         <Tabs defaultValue="gangs">
           <TabsList className="bg-black/25 backdrop-blur-[2px] border border-amber-400/40">
-            <TabsTrigger value="gangs">Top Gangs / Factions</TabsTrigger>
+            <TabsTrigger value="gangs">Top Team / Scorer</TabsTrigger>
             <TabsTrigger value="shooters">Top Shooters</TabsTrigger>
           </TabsList>
 
           <TabsContent value="gangs" className="mt-4">
-            <Board rows={gangs} firstCol="Gang / Faction" secondCol="Top Player" pick={(g) => g.top_player || "—"} emptyText="No data yet." />
+            <Board rows={gangs} firstCol="Team / Scorer" secondCol="Top Player" pick={(g) => g.top_player || "—"} emptyText="No data yet." />
           </TabsContent>
 
           <TabsContent value="shooters" className="mt-4">
-            <Board rows={shooters} firstCol="Gang & Faction" secondCol="Player" pick={(p) => p.name} firstPick={(p) => p.gang_faction || "—"} emptyText="No shooters yet." />
+            <Board rows={shooters} firstCol="Team & Scorer" secondCol="Player" pick={(p) => p.name} firstPick={(p) => p.gang_faction || "—"} emptyText="No shooters yet." />
           </TabsContent>
         </Tabs>
       </div>
