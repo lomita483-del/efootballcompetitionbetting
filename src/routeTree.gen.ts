@@ -37,6 +37,7 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as BetHistoryRouteImport } from './routes/bet-history'
 import { Route as ArcadeRouteImport } from './routes/arcade'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AchievementsRouteImport } from './routes/achievements'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -195,6 +196,11 @@ const ArcadeRoute = ArcadeRouteImport.update({
   path: '/arcade',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AchievementsRoute = AchievementsRouteImport.update({
   id: '/achievements',
   path: '/achievements',
@@ -289,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/achievements': typeof AchievementsRoute
+  '/admin': typeof AdminRoute
   '/arcade': typeof ArcadeRoute
   '/bet-history': typeof BetHistoryRoute
   '/chat': typeof ChatRoute
@@ -336,6 +343,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/achievements': typeof AchievementsRoute
+  '/admin': typeof AdminRoute
   '/arcade': typeof ArcadeRoute
   '/bet-history': typeof BetHistoryRoute
   '/chat': typeof ChatRoute
@@ -384,6 +392,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/achievements': typeof AchievementsRoute
+  '/admin': typeof AdminRoute
   '/arcade': typeof ArcadeRoute
   '/bet-history': typeof BetHistoryRoute
   '/chat': typeof ChatRoute
@@ -433,6 +442,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/achievements'
+    | '/admin'
     | '/arcade'
     | '/bet-history'
     | '/chat'
@@ -480,6 +490,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/achievements'
+    | '/admin'
     | '/arcade'
     | '/bet-history'
     | '/chat'
@@ -527,6 +538,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/achievements'
+    | '/admin'
     | '/arcade'
     | '/bet-history'
     | '/chat'
@@ -575,6 +587,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AchievementsRoute: typeof AchievementsRoute
+  AdminRoute: typeof AdminRoute
   ArcadeRoute: typeof ArcadeRoute
   BetHistoryRoute: typeof BetHistoryRoute
   ChatRoute: typeof ChatRoute
@@ -816,6 +829,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArcadeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/achievements': {
       id: '/achievements'
       path: '/achievements'
@@ -953,6 +973,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AchievementsRoute: AchievementsRoute,
+  AdminRoute: AdminRoute,
   ArcadeRoute: ArcadeRoute,
   BetHistoryRoute: BetHistoryRoute,
   ChatRoute: ChatRoute,

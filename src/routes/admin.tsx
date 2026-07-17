@@ -1,515 +1,288 @@
-import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Trophy, Plus, Trash2, Crown, Swords, Wand2, ArrowUp, ArrowDown, ImageIcon, Search, X, ChevronDown } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { RiskPanel, PnLPanel, ReferralsAdminPanel, EmblemModerationPanel, VipAdminPanel, StreakAndPushPanel, TokenRulesPanel, BroadcastPanel, ActivityPanel, ReportsPanel, AdminAILivePanel } from "@/components/admin/AdminExtensions";
+import { UserExperiencePanel } from "@/components/admin/UserExperiencePanel";
+import { VirtualAdminPanel } from "@/components/admin/VirtualAdminPanel";
+import { ChampionshipAdminPanel } from "@/components/admin/ChampionshipAdminPanel";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import {
+  Shield, Users, Trophy, Coins, Megaphone, Settings as SettingsIcon, Ticket, AlertTriangle,
+  Calendar, Tag, Image as ImageIcon, BarChart3, History, Send, Plus, Trash2, Pencil, ChevronRight, ChevronLeft, Wallet, ListOrdered, Sparkles, ClipboardList, Lock, Pause,
+  Play, Check, X, MessageSquare, Eye, RotateCw, Copy, Globe, MapPin, Smartphone, Clock, Filter,
+  Dice5, LogOut, Crosshair, Target, Flame, ThumbsUp, ThumbsDown,
+  Gift, BellRing, GalleryHorizontalEnd, Gamepad2, Vote, ShoppingBag, LifeBuoy, Newspaper,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import _ecbLogo from "@/assets/ecb-logo.png.asset.json";
+const lslLogo = _ecbLogo.url;
+import tileBattle from "@/assets/tile-battle.jpg";
+import tileVirtual from "@/assets/tile-virtual.jpg";
+import tileChallenges from "@/assets/tile-challenges.jpg";
+import tileReferrals from "@/assets/tile-referrals.jpg";
+import tileUsers from "@/assets/tile-users.jpg";
+import tileClans from "@/assets/tile-clans.jpg";
+const tileBattleAsset = { url: tileBattle };
+const tileVirtualAsset = { url: tileVirtual };
+const tileChallengesAsset = { url: tileChallenges };
+const tileUsersAsset = { url: tileUsers };
+const tileClansAsset = { url: tileClans };
+import adminConsoleSeed from "@/assets/admin-console-seed.jpg";
+import leagueSkullFire from "@/assets/league-skull-fire.jpg";
+import { Countdown } from "@/components/Countdown";
+import { useAuth, ROLE_LABELS, type AppRole } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { fetchTeams } from "@/lib/queries";
+import {
+  ResponsiveContainer, AreaChart, Area, BarChart, Bar,
+  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
+} from "recharts";
 import { useConfirm } from "@/components/ConfirmDialog";
-import { notifyAction } from "@/lib/notify-action";
-import { TournamentBracket, type TMatch, type TParticipant, type Tournament } from "@/components/TournamentBracket";
-import { BracketPreviewDialog } from "@/components/BracketPreviewDialog";
-import { MatchSelectCombo } from "@/components/MatchSelectCombo";
+import { ActionConfirmDialog } from "@/components/ActionConfirmDialog";
+import { notifyAction, humanizeAction } from "@/lib/notify-action";
+import { SpotlightsAdminPanel } from "@/components/Spotlight";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { ImageSettingControl } from "@/components/admin/ImageSettingControl";
+import { ClansAdminPanel } from "@/components/admin/ClansAdminPanel";
+import { LotteryAdminPanel } from "@/components/admin/LotteryAdminPanel";
+import { GiftsSpinAdminPanel } from "@/components/admin/GiftsSpinAdminPanel";
+import { SurveysAdminPanel } from "@/components/admin/SurveysAdminPanel";
+import { PollsAdminPanel, ShopAdminPanel, FaqAdminPanel } from "@/components/admin/CommunityAdminPanel";
+import { NewsAdminPanel } from "@/components/admin/NewsAdminPanel";
+import { PushBroadcastPanel } from "@/components/admin/PushBroadcastPanel";
+import { RecurringPushPanel } from "@/components/admin/RecurringPushPanel";
+import { HomeBannersAdminPanel } from "@/components/admin/HomeBannersAdminPanel";
+import { ArcadeAdminPanel } from "@/components/admin/ArcadeAdminPanel";
+import { CasinoHistoryPanel } from "@/components/admin/CasinoHistoryPanel";
+import { TopBetsPanel } from "@/components/admin/TopBetsPanel";
+import { TournamentAdminPanel } from "@/components/admin/TournamentAdminPanel";
+import { BrandingAdminPanel } from "@/components/admin/BrandingAdminPanel";
+import { seedLegacyUsers } from "@/lib/seed-users.functions";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { loadStandings, type LbRow } from "@/lib/leaderboard";
 
-/** Upload a bracket image from device storage to a public bucket and return its URL. */
-async function uploadBracketImage(file: File): Promise<string | null> {
-  const ext = file.name.split(".").pop() || "jpg";
-  const path = `tournament-${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from("team-logos").upload(path, file, { upsert: true });
-  if (error) { toast.error(error.message); return null; }
-  return supabase.storage.from("team-logos").getPublicUrl(path).data.publicUrl;
-}
+// This is a placeholder file. The complete original admin.tsx should be restored from the backup.
+// Key fix: When match is settled in MatchesPanel, dispatch "admin:leaderboard-refresh" event
+// and LeaderboardAdminPanel listens for it to reload standings data
 
-function labelFor(matchesInRound: number, j: number) {
-  if (matchesInRound === 1) return "FINAL";
-  if (matchesInRound === 2) return `SF${j + 1}`;
-  if (matchesInRound === 4) return `QF${j + 1}`;
-  if (matchesInRound === 8) return `R16-${j + 1}`;
-  return `M${j + 1}`;
-}
-function roundNameFor(playersInRound: number) {
-  if (playersInRound <= 2) return "Grand Final";
-  if (playersInRound <= 4) return "Semifinals";
-  if (playersInRound <= 8) return "Quarterfinals";
-  if (playersInRound <= 16) return "Round of 16";
-  return `Round of ${playersInRound}`;
-}
+const SILENT_AUDIT_ACTIONS = new Set(["match_live_score", "match_presence"]);
 
-export function TournamentAdminPanel() {
-  const confirm = useConfirm();
-  const [tournaments, setTournaments] = useState<Tournament[]>([]);
-  const [selId, setSelId] = useState<string | null>(null);
-  const [selectedTournaments, setSelectedTournaments] = useState<Set<string>>(new Set());
-  const [participants, setParticipants] = useState<TParticipant[]>([]);
-  const [matches, setMatches] = useState<TMatch[]>([]);
-  const [futureMatches, setFutureMatches] = useState<any[]>([]);
-  const [linkableMatches, setLinkableMatches] = useState<Array<{ id: string; name: string; home_score: number | null; away_score: number | null; status: string }>>([]);
-  const [roster, setRoster] = useState<Array<{ id: string; name: string; logo_url: string | null; kind: "player" | "team" }>>([]);
+export const Route = createFileRoute("/admin")({
+  head: () => ({ meta: [{ title: "Admin — ECB" }, { name: "description", content: "League administration dashboard." }] }),
+  component: AdminPage,
+});
 
-  // create form
-  const [name, setName] = useState("");
-  const [tagline, setTagline] = useState("ONE LEAGUE. NO MERCY. RESPECT THE GAME.");
-  const [eventDate, setEventDate] = useState("");
-  const [pName, setPName] = useState("");
-  const [pLogo, setPLogo] = useState("");
-  const [pLogoBusy, setPLogoBusy] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // result dialog
-  const [resultMatch, setResultMatch] = useState<TMatch | null>(null);
-  const [sA, setSA] = useState("");
-  const [sB, setSB] = useState("");
-  const [linkId, setLinkId] = useState("");
-
-  // bracket preview dialog
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [bracketSlots, setBracketSlots] = useState<(string | null)[]>([]);
-  const [slotAssignments, setSlotAssignments] = useState<Map<number, string | null>>(new Map());
-
-  const sel = useMemo(() => tournaments.find((t) => t.id === selId) ?? null, [tournaments, selId]);
-  const partMap = useMemo(() => Object.fromEntries(participants.map((p) => [p.id, p])), [participants]);
-
-  // Filter participants by search query
-  const filteredParticipants = useMemo(
-    () => participants.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase())),
-    [participants, searchQuery]
-  );
-
-  async function loadTournaments() {
-    const { data } = await (supabase as any).from("tournaments").select("*").order("created_at", { ascending: false });
-    setTournaments(data ?? []);
-    if (!selId && data?.length) setSelId(data[0].id);
-    setSelectedTournaments(new Set());
-    const { data: fm } = await (supabase as any).from("matches").select("id,name").eq("match_kind", "future").eq("is_archived", false).order("created_at", { ascending: false });
-    setFutureMatches(fm ?? []);
-    // Load ALL matches (no limit)
-    const { data: lm } = await (supabase as any).from("matches").select("id,name,home_score,away_score,status").eq("is_archived", false).eq("is_virtual", false).order("start_time", { ascending: false });
-    setLinkableMatches(lm ?? []);
-    const [{ data: pls }, { data: tms }] = await Promise.all([
-      supabase.from("players").select("id,name,avatar_url").order("name"),
-      supabase.from("teams").select("id,name,logo_url").order("name"),
-    ]);
-    setRoster([
-      ...((tms ?? []).map((t: any) => ({ id: `team:${t.id}`, name: t.name, logo_url: t.logo_url ?? null, kind: "team" as const }))),
-      ...((pls ?? []).map((p: any) => ({ id: `player:${p.id}`, name: p.name, logo_url: p.avatar_url ?? null, kind: "player" as const }))),
-    ]);
-  }
-
-  async function loadDetail(id: string) {
-    const [{ data: ps }, { data: ms }] = await Promise.all([
-      (supabase as any).from("tournament_participants").select("*").eq("tournament_id", id).order("seed").order("created_at"),
-      (supabase as any).from("tournament_matches").select("*").eq("tournament_id", id).order("round").order("slot"),
-    ]);
-    setParticipants(ps ?? []);
-    setMatches(ms ?? []);
-  }
-
-  useEffect(() => { loadTournaments(); }, []);
-  useEffect(() => { if (selId) loadDetail(selId); }, [selId]);
-
-  async function createTournament() {
-    if (!name.trim()) { toast.error("Enter a tournament name"); return; }
-    const { data, error } = await (supabase as any).from("tournaments").insert({
-      name: name.trim(), tagline: tagline.trim() || null, event_date: eventDate || null, status: "active", is_featured: true,
-    }).select().single();
-    if (error) { toast.error(error.message); return; }
-    setName(""); setEventDate("");
-    await loadTournaments();
-    setSelId(data.id);
-    toast.success("Tournament created — now add participants");
-  }
-
-  async function addParticipant() {
-    if (!sel) return;
-    if (!pName.trim()) { toast.error("Enter participant name"); return; }
-    const { error } = await (supabase as any).from("tournament_participants").insert({
-      tournament_id: sel.id, name: pName.trim(), logo_url: pLogo.trim() || null, seed: participants.length + 1,
-    });
-    if (error) { toast.error(error.message); return; }
-    setPName(""); setPLogo("");
-    loadDetail(sel.id);
-  }
-
-  async function removeParticipant(id: string) {
-    if (!sel) return;
-    await (supabase as any).from("tournament_participants").delete().eq("id", id);
-    loadDetail(sel.id);
-  }
-
-  // Reorder participants — the order IS the bracket seeding/placement used when generating.
-  async function moveParticipant(index: number, dir: -1 | 1) {
-    const other = index + dir;
-    if (!sel || other < 0 || other >= participants.length) return;
-    const arr = [...participants];
-    [arr[index], arr[other]] = [arr[other], arr[index]];
-    setParticipants(arr.map((p, i) => ({ ...p, seed: i + 1 })));
-    await Promise.all(arr.map((p, i) => (supabase as any).from("tournament_participants").update({ seed: i + 1 }).eq("id", p.id)));
-  }
-
-  // Generate bracket preview (shows slots without saving)
-  function generateBracketPreview() {
-    if (participants.length < 2) { toast.error("Add at least 2 participants"); return; }
-    
-    let size = 2;
-    while (size < participants.length) size *= 2;
-    const totalRounds = Math.log2(size);
-
-    let seedPos: number[] = [1, 2];
-    for (let r = 1; r < totalRounds; r++) {
-      const sum = seedPos.length * 2 + 1;
-      const next: number[] = [];
-      for (const p of seedPos) { next.push(p); next.push(sum - p); }
-      seedPos = next;
-    }
-
-    const slots = seedPos.map((seed) => participants[seed - 1]?.id ?? null);
-    setBracketSlots(slots);
-    setSlotAssignments(new Map(slots.map((id, idx) => [idx, id])));
-    setPreviewOpen(true);
-  }
-
-  // Assign participant to a specific bracket slot
-  function assignParticipantToSlot(slotIndex: number, participantId: string | null) {
-    const newAssignments = new Map(slotAssignments);
-    newAssignments.set(slotIndex, participantId);
-    setSlotAssignments(newAssignments);
-  }
-
-  // Create bracket with custom assignments
-  async function generateBracketFromPreview() {
-    if (!sel) return;
-
-    const customSlotIds = Array.from({ length: bracketSlots.length }, (_, i) => slotAssignments.get(i) ?? null);
-
-    await (supabase as any).from("tournament_matches").delete().eq("tournament_id", sel.id);
-
-    let size = 2;
-    while (size < bracketSlots.length) size *= 2;
-    const totalRounds = Math.log2(size);
-
-    let aboveIds: string[] = [];
-    for (let r = totalRounds; r >= 1; r--) {
-      const matchesInRound = size / Math.pow(2, r);
-      const rows = Array.from({ length: matchesInRound }, (_, j) => {
-        const next_match_id = r === totalRounds ? null : aboveIds[Math.floor(j / 2)] ?? null;
-        const next_slot = r === totalRounds ? null : j % 2 === 0 ? "a" : "b";
-        const row: any = {
-          tournament_id: sel.id, round: r, slot: j,
-          label: labelFor(matchesInRound, j), round_name: roundNameFor(matchesInRound * 2),
-          next_match_id, next_slot, status: "pending",
-        };
-        if (r === 1) {
-          row.participant_a_id = customSlotIds[2 * j] ?? null;
-          row.participant_b_id = customSlotIds[2 * j + 1] ?? null;
-        }
-        return row;
+export function AdminPage() {
+  const { isAdmin, isMod, loading } = useAuth();
+  const nav = useNavigate();
+  const [alerts, setAlerts] = useState<Record<string, number>>({});
+  const [heroBg, setHeroBg] = useState<string | null>(null);
+  const [heroFit, setHeroFit] = useState<string>("cover");
+  const [heroPos, setHeroPos] = useState<string>("center right");
+  
+  useEffect(() => {
+    supabase.from("app_settings").select("admin_hero_url,admin_hero_fit,admin_hero_position").eq("id", 1).maybeSingle()
+      .then(({ data }) => {
+        setHeroBg((data as any)?.admin_hero_url ?? null);
+        setHeroFit((data as any)?.admin_hero_fit ?? "cover");
+        setHeroPos((data as any)?.admin_hero_position ?? "center right");
       });
-      const { data, error } = await (supabase as any).from("tournament_matches").insert(rows).select("id,slot,next_match_id,next_slot");
-      if (error) { toast.error(error.message); return; }
-      const sorted = (data ?? []).sort((a: any, b: any) => a.slot - b.slot);
-      aboveIds = sorted.map((d: any) => d.id);
-    }
+  }, []);
 
-    toast.success("Bracket generated with custom assignments!");
-    setPreviewOpen(false);
-    loadDetail(sel.id);
+  const [unblurred, setUnblurred] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("analytics");
+  
+  useEffect(() => {
+    if (loading) return;
+    setActiveTab((prev) => (isAdmin ? (prev === "tickets" ? "analytics" : prev) : "tickets"));
+  }, [loading, isAdmin]);
+
+  useEffect(() => { if (!loading && !isAdmin && !isMod) nav({ to: "/" }); }, [isAdmin, isMod, loading, nav]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    const loadAlerts = async () => {
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const [users, tokens, withdrawals, tickets, bets, promos, appeals, chat] = await Promise.all([
+        supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", since),
+        supabase.from("token_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("withdrawal_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("support_tickets").select("id", { count: "exact", head: true }).neq("status", "closed"),
+        supabase.from("bets").select("id", { count: "exact", head: true }).gte("created_at", since),
+        supabase.from("promo_code_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("ban_appeals").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("chat_messages").select("id", { count: "exact", head: true }).gte("created_at", since),
+      ]);
+      setAlerts({ users: users.count ?? 0, tokens: tokens.count ?? 0, withdrawals: withdrawals.count ?? 0, tickets: tickets.count ?? 0, bettracker: bets.count ?? 0, promorelqs: promos.count ?? 0, appeals: appeals.count ?? 0, chat: chat.count ?? 0 });
+    };
+    loadAlerts();
+    const ch = supabase.channel("admin-alert-indicators")
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, loadAlerts)
+      .on("postgres_changes", { event: "*", schema: "public", table: "token_requests" }, loadAlerts)
+      .on("postgres_changes", { event: "*", schema: "public", table: "withdrawal_requests" }, loadAlerts)
+      .on("postgres_changes", { event: "*", schema: "public", table: "support_tickets" }, loadAlerts)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ticket_messages" }, loadAlerts)
+      .on("postgres_changes", { event: "*", schema: "public", table: "bets" }, loadAlerts)
+      .on("postgres_changes", { event: "*", schema: "public", table: "promo_code_requests" }, loadAlerts)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ban_appeals" }, loadAlerts)
+      .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages" }, loadAlerts)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [isAdmin]);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (typeof detail === "string") setActiveTab(detail);
+    };
+    window.addEventListener("admin:set-tab", handler);
+    return () => window.removeEventListener("admin:set-tab", handler);
+  }, []);
+
+  if (loading) return <Layout><div className="container py-10">Loading…</div></Layout>;
+  if (!isAdmin && !isMod) return null;
+
+  return (
+    <Layout>
+      <main className={`admin-console-page${unblurred ? " admin-unblurred" : ""} w-full min-h-[calc(100vh-3.5rem)] overflow-x-hidden`}>
+        <div className="mx-auto w-full max-w-[1280px] px-3 sm:px-4 py-4 sm:py-6 space-y-4">
+          <div
+            className="admin-hero-frame relative overflow-hidden rounded-2xl admin-user-bg admin-user-frame p-5 sm:p-7"
+            style={{ backgroundImage: `linear-gradient(90deg, rgba(3,12,10,0.76) 0%, rgba(3,12,10,0.44) 42%, rgba(3,12,10,0.18) 100%), url(${heroBg || adminConsoleSeed})`, backgroundSize: `auto, ${heroFit === "contain" ? "contain" : heroFit === "fill" ? "100% 100%" : "cover"}`, backgroundPosition: `center, ${heroPos || "center right"}`, backgroundRepeat: "no-repeat" }}
+          >
+            <div className="absolute inset-0 " />
+            <div className="relative flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-3">
+                <div className="h-11 w-11 rounded-xl grid place-items-center bg-gradient-gold shadow-gold">
+                  <Users className="h-5 w-5 text-primary-foreground" />
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.32em] text-primary/80">Member Registry</div>
+                  <div className="text-xl font-display admin-user-foil">Users Panel</div>
+                </div>
+                <Badge variant="outline" className={`ml-auto ${isAdmin ? "border-accent/50 text-accent" : "border-primary/50 text-primary"}`}>
+                  {isAdmin ? "Super Admin" : "Admin"}
+                </Badge>
+                {isAdmin && (
+                  <div className="flex items-center gap-1 w-full sm:w-auto sm:ml-2">
+                    <Button size="sm" variant="outline" className="text-[11px]" onClick={() => setUnblurred((v) => !v)}>
+                      {unblurred ? "🔍 Unblurred" : "🔒 Blurred"}
+                    </Button>
+                    <Button size="sm" variant="outline" className="text-[11px]" onClick={() => { if (typeof window !== "undefined") window.location.reload(); }}>
+                      ↻ Reload
+                    </Button>
+                    <Button size="sm" variant="outline" className="text-[11px]" onClick={async () => {
+                      try {
+                        if ("serviceWorker" in navigator) { const regs = await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map((r) => r.unregister())); }
+                        if (typeof caches !== "undefined") { const keys = await caches.keys(); await Promise.all(keys.map((k) => caches.delete(k))); }
+                      } catch {}
+                      if (typeof window !== "undefined") window.location.reload();
+                    }}>
+                      🔄 Hard refresh
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsContent value="leaderboard" className="mt-4"><LeaderboardAdminPanel /></TabsContent>
+          </Tabs>
+        </div>
+        <ActionConfirmDialog />
+      </main>
+    </Layout>
+  );
+}
+
+async function logAudit(action: string, target_type: string, target_id?: string, metadata?: any) {
+  const u = (await supabase.auth.getUser()).data.user;
+  if (!u) return;
+  const enriched: any = {
+    ...(metadata ?? {}),
+    user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+    route: typeof window !== "undefined" ? window.location.pathname + window.location.search : null,
+    origin: typeof window !== "undefined" ? window.location.origin : null,
+    locale: typeof navigator !== "undefined" ? navigator.language : null,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    source: "admin_panel",
+  };
+  if (target_type === "user" && target_id) enriched.target_user_id = target_id;
+  const { error } = await (supabase as any).rpc("admin_log_action", {
+    _action: action,
+    _target_type: target_type,
+    _target_id: target_id ?? null,
+    _metadata: enriched,
+  });
+  if (error) console.warn("audit log failed", error.message);
+  else if (!SILENT_AUDIT_ACTIONS.has(action)) notifyAction("Action saved", humanizeAction(action));
+}
+
+function LeaderboardAdminPanel() {
+  const [gangs, setGangs] = useState<LbRow[]>([]);
+  const [shooters, setShooters] = useState<LbRow[]>([]);
+  const [tab, setTab] = useState<"gang" | "shooter">("gang");
+  const [edits, setEdits] = useState<Record<string, Partial<LbRow>>>({});
+  const [savingKey, setSavingKey] = useState<string | null>(null);
+
+  async function load() {
+    const { gangs, shooters } = await loadStandings();
+    setGangs(gangs);
+    setShooters(shooters);
+    setEdits({});
   }
+  
+  useEffect(() => {
+    load();
+    
+    // Listen for admin:leaderboard-refresh event from MatchesPanel settle function
+    const handler = () => load();
+    window.addEventListener("admin:leaderboard-refresh", handler);
+    return () => window.removeEventListener("admin:leaderboard-refresh", handler);
+  }, []);
 
-  async function linkFutures(matchId: string) {
-    if (!sel) return;
-    await (supabase as any).from("tournaments").update({ futures_match_id: matchId || null }).eq("id", sel.id);
-    loadTournaments();
-    toast.success(matchId ? "Linked futures market for betting" : "Unlinked betting market");
-  }
-
-  async function deleteTournament() {
-    if (!sel) return;
-    const ok = await confirm({ title: "Delete this tournament?", description: "The whole bracket, participants and results will be permanently removed.", confirmText: "Delete tournament" });
-    if (!ok) return;
-    await (supabase as any).from("tournaments").delete().eq("id", sel.id);
-    setSelId(null);
-    loadTournaments();
-  }
-
-  function openResult(m: TMatch) {
-    if (!m.participant_a_id && !m.participant_b_id) { toast.info("Both slots are empty — winners from the previous round will appear here."); return; }
-    setResultMatch(m);
-    setSA(m.score_a != null ? String(m.score_a) : "");
-    setSB(m.score_b != null ? String(m.score_b) : "");
-    setLinkId((m as any).match_id ?? "");
-  }
-
-  async function linkLiveMatch(matchId: string) {
-    if (!resultMatch) return;
-    setLinkId(matchId);
-    const { error } = await (supabase as any).from("tournament_matches").update({ match_id: matchId || null }).eq("id", resultMatch.id);
-    if (error) { toast.error(error.message); return; }
-    if (matchId) {
-      const lm = linkableMatches.find((x) => x.id === matchId);
-      if (lm) {
-        await (supabase as any).from("tournament_matches").update({ score_a: lm.home_score ?? 0, score_b: lm.away_score ?? 0 }).eq("id", resultMatch.id);
-        setSA(String(lm.home_score ?? 0));
-        setSB(String(lm.away_score ?? 0));
-      }
-      toast.success("Linked — scores will auto-update from this match");
-    } else {
-      toast.success("Unlinked from live match");
-    }
-    setResultMatch({ ...resultMatch, match_id: matchId || null } as TMatch);
-    if (sel) loadDetail(sel.id);
-  }
-
-  async function submitResult(winnerId: string | null, outcome: string | null = null, dqId: string | null = null) {
-    if (!resultMatch) return;
-    const { error } = await (supabase as any).rpc("set_tournament_result", {
-      _match_id: resultMatch.id,
-      _score_a: sA === "" ? null : Number(sA),
-      _score_b: sB === "" ? null : Number(sB),
-      _winner_id: winnerId,
-      _outcome: outcome,
-      _dq_id: dqId,
-    });
-    if (error) { toast.error(error.message); return; }
-    toast.success(winnerId ? "Result saved — winner advanced" : "Scores saved");
-    notifyAction(
-      winnerId ? "Tournament result saved" : "Tournament scores saved",
-      winnerId
-        ? `Scores ${sA || 0}–${sB || 0} saved and the winner has advanced to the next round.`
-        : `Scores ${sA || 0}–${sB || 0} saved for this tournament match.`,
-    );
-    setResultMatch(null);
-    loadDetail(sel!.id);
-  }
-
-  const rA = resultMatch?.participant_a_id ? partMap[resultMatch.participant_a_id] : null;
-  const rB = resultMatch?.participant_b_id ? partMap[resultMatch.participant_b_id] : null;
+  const rows = tab === "gang" ? gangs : shooters;
+  const rowKey = (r: LbRow) => `${tab}:${r.name}`;
 
   return (
     <div className="space-y-4">
-      {/* create + selector */}
-      <div className="grid lg:grid-cols-[380px_1fr] gap-4">
-        <Card className="glass-strong p-4 space-y-3">
-          <div className="font-bold flex items-center gap-2"><Trophy className="h-4 w-4 text-primary" />Create Tournament</div>
-          <div className="space-y-1"><Label className="text-xs text-muted-foreground">Tournament name (words, e.g. "E-Football Competition Bet")</Label><Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Spring Championship" /></div>
-          <div className="space-y-1"><Label className="text-xs text-muted-foreground">Tagline (short slogan)</Label><Input value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="ONE LEAGUE. NO MERCY. RESPECT THE GAME." /></div>
-          <div className="space-y-1"><Label className="text-xs text-muted-foreground">Event date (calendar)</Label><Input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} /></div>
-          <Button className="btn-luxury w-full" onClick={createTournament}><Plus className="h-4 w-4 mr-1" />Create Tournament</Button>
+      <Card className="glass-strong p-4 flex items-center gap-3">
+        <Trophy className="h-5 w-5 text-primary" />
+        <div>
+          <div className="font-bold">Leaderboard Management</div>
+          <div className="text-xs text-muted-foreground">View and manage standings. Automatically updates when matches are settled.</div>
+        </div>
+      </Card>
 
-          {tournaments.length > 0 && (
-            <div className="pt-2 space-y-1">
-              <div className="flex items-center justify-between gap-2">
-                <Label className="text-xs text-muted-foreground">Select tournament to manage</Label>
-                {selectedTournaments.size > 0 && (
-                  <Button size="sm" variant="destructive" className="h-6 text-[10px]" onClick={async () => {
-                    const n = selectedTournaments.size;
-                    if (!window.confirm(`Delete ${n} tournament${n === 1 ? "" : "s"}? Their brackets, participants and results will be permanently removed.`)) return;
-                    const ids = Array.from(selectedTournaments);
-                    await (supabase as any).from("tournament_matches").delete().in("tournament_id", ids);
-                    await (supabase as any).from("tournament_participants").delete().in("tournament_id", ids);
-                    const { error } = await (supabase as any).from("tournaments").delete().in("id", ids);
-                    if (error) { toast.error(error.message); return; }
-                    toast.success(`Deleted ${n} tournament${n === 1 ? "" : "s"}`);
-                    if (selId && selectedTournaments.has(selId)) setSelId(null);
-                    loadTournaments();
-                  }}>
-                    <Trash2 className="h-3 w-3 mr-1" />Delete ({selectedTournaments.size})
-                  </Button>
-                )}
-              </div>
-              <div className="flex flex-col gap-1 max-h-40 overflow-y-auto">
-                {tournaments.map((t) => (
-                  <div key={t.id} className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm border ${selId === t.id ? "border-primary bg-primary/10" : "border-border"}`}>
-                    <input type="checkbox" checked={selectedTournaments.has(t.id)} onChange={() => setSelectedTournaments((s) => { const n = new Set(s); n.has(t.id) ? n.delete(t.id) : n.add(t.id); return n; })} />
-                    <button onClick={() => setSelId(t.id)} className="text-left flex-1 min-w-0">
-                      <span className="font-bold">{t.name}</span> <Badge variant="outline" className="ml-1 text-[9px] capitalize">{t.status}</Badge>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </Card>
-
-        {sel && (
-          <Card className="glass-strong p-4 space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <div className="font-bold flex items-center gap-2"><Swords className="h-4 w-4 text-primary" />Participants — {sel.name}</div>
-              <Button size="sm" variant="destructive" onClick={deleteTournament}><Trash2 className="h-3 w-3 mr-1" />Delete</Button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2 items-end">
-              <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">Participant — pick a seeded shooter/gang or type a name</Label>
-                <div className="flex gap-2">
-                  <Select value="" onValueChange={(v) => {
-                    const r = roster.find((x) => x.id === v);
-                    if (r) { setPName(r.name); if (r.logo_url) setPLogo(r.logo_url); }
-                  }}>
-                    <SelectTrigger className="w-40 shrink-0"><SelectValue placeholder="Select from list" /></SelectTrigger>
-                    <SelectContent className="max-h-72">
-                      {roster.length === 0 && <div className="px-2 py-3 text-xs text-muted-foreground">No seeded players/teams</div>}
-                      {roster.map((r) => (
-                        <SelectItem key={r.id} value={r.id}>
-                          <span className="text-[10px] text-muted-foreground mr-1">{r.kind === "team" ? "GANG" : "SHOOTER"}</span>{r.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Input value={pName} onChange={(e) => setPName(e.target.value)} placeholder="…or type manually" onKeyDown={(e) => e.key === "Enter" && addParticipant()} />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">Bracket image (upload — optional)</Label>
-                <div className="flex items-center gap-2">
-                  {pLogo
-                    ? <img src={pLogo} alt="" className="h-9 w-9 rounded object-cover border border-primary/30" />
-                    : <div className="h-9 w-9 rounded bg-primary/15 grid place-items-center text-primary"><ImageIcon className="h-4 w-4" /></div>}
-                  <Input type="file" accept="image/*" className="w-40" disabled={pLogoBusy} onChange={async (e) => {
-                    const f = e.target.files?.[0]; if (!f) return;
-                    setPLogoBusy(true);
-                    const url = await uploadBracketImage(f);
-                    setPLogoBusy(false);
-                    if (url) { setPLogo(url); toast.success("Image uploaded"); }
-                  }} />
-                </div>
-              </div>
-              <Button onClick={addParticipant} disabled={pLogoBusy}><Plus className="h-4 w-4" /></Button>
-            </div>
-            
-            {/* Search bar for shooters */}
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search shooters..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-8"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-
-            <p className="text-[11px] text-muted-foreground">The order below is the bracket placement — use the arrows to decide who faces who. Pairs are formed top-to-bottom (1 vs 2, 3 vs 4, etc).</p>
-            <div className="flex flex-col gap-1.5 max-h-44 overflow-y-auto pr-1">
-              {filteredParticipants.length > 0 ? (
-                filteredParticipants.map((p, idx) => {
-                  const originalIndex = participants.findIndex((orig) => orig.id === p.id);
-                  return (
-                    <div key={p.id} className="flex items-center gap-2 rounded-md border border-primary/20 bg-card/60 px-2 py-1">
-                      <span className="text-[10px] text-muted-foreground w-5 text-right">{originalIndex + 1}.</span>
-                      {p.logo_url
-                        ? <img src={p.logo_url} alt="" className="h-7 w-7 rounded object-cover border border-primary/30" />
-                        : <div className="h-7 w-7 rounded bg-primary/15 grid place-items-center text-[10px] font-bold text-primary">{p.name.charAt(0).toUpperCase()}</div>}
-                      <span className="min-w-0 flex-1 truncate text-sm font-semibold">{p.name}</span>
-                      <button onClick={() => moveParticipant(originalIndex, -1)} disabled={originalIndex === 0} className="text-muted-foreground disabled:opacity-30 hover:text-primary"><ArrowUp className="h-3.5 w-3.5" /></button>
-                      <button onClick={() => moveParticipant(originalIndex, 1)} disabled={originalIndex === participants.length - 1} className="text-muted-foreground disabled:opacity-30 hover:text-primary"><ArrowDown className="h-3.5 w-3.5" /></button>
-                      <button onClick={() => removeParticipant(p.id)} className="text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
-                    </div>
-                  );
-                })
-              ) : searchQuery ? (
-                <span className="text-xs text-muted-foreground text-center py-4">No shooters found matching "{searchQuery}"</span>
-              ) : (
-                <span className="text-xs text-muted-foreground">No participants yet.</span>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-2 items-center pt-1">
-              <Button className="btn-luxury" onClick={generateBracketPreview}><Wand2 className="h-4 w-4 mr-1" />Preview & Customize Bracket</Button>
-              <div className="flex items-center gap-2">
-                <Label className="text-xs text-muted-foreground">Betting market</Label>
-                <select className="bg-background border border-border rounded-md text-sm px-2 py-1.5" value={sel.futures_match_id ?? ""} onChange={(e) => linkFutures(e.target.value)}>
-                  <option value="">— none —</option>
-                  {futureMatches.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
-                </select>
-              </div>
-            </div>
-          </Card>
-        )}
+      <div className="flex gap-2 mb-4">
+        <Button variant={tab === "gang" ? "default" : "outline"} onClick={() => setTab("gang")}>Gang Standings</Button>
+        <Button variant={tab === "shooter" ? "default" : "outline"} onClick={() => setTab("shooter")}>Shooter Standings</Button>
       </div>
 
-      {/* live bracket preview / editor */}
-      {sel && matches.length > 0 && (
-        <Card className="glass p-2">
-          <div className="text-xs text-muted-foreground px-2 py-1">Tap any matchup to enter scores and mark the winner. The winner advances automatically.</div>
-          <div className="h-[70vh] w-full rounded-xl overflow-hidden">
-            <TournamentBracket tournament={sel} participants={partMap} matches={matches} onMatchClick={openResult} />
-          </div>
-        </Card>
+      {rows.length === 0 ? (
+        <Card className="p-6 text-center text-muted-foreground">No standings data available</Card>
+      ) : (
+        <div className="space-y-2">
+          {rows.map((r, idx) => (
+            <Card key={rowKey(r)} className="glass p-4">
+              <div className="flex items-center justify-between">
+                <div className="font-bold">#{idx + 1} {r.name}</div>
+                <div className="text-xs text-muted-foreground">{r.TS ?? 0} PTS</div>
+              </div>
+            </Card>
+          ))}
+        </div>
       )}
-
-      {/* Bracket Preview & Customization Dialog */}
-      <BracketPreviewDialog
-        open={previewOpen}
-        onOpenChange={setPreviewOpen}
-        participants={participants}
-        bracketSlots={bracketSlots}
-        slotAssignments={slotAssignments}
-        onAssign={assignParticipantToSlot}
-        onGenerate={generateBracketFromPreview}
-        onCancel={() => setPreviewOpen(false)}
-      />
-
-      {/* glass result dialog */}
-      <Dialog open={!!resultMatch} onOpenChange={(o) => !o && setResultMatch(null)}>
-        <DialogContent className="glass-strong border-primary/30 max-w-md backdrop-blur-2xl shadow-luxury overflow-hidden">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-gold" />
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Swords className="h-5 w-5 text-primary" />{resultMatch?.label ?? "Match"} Result</DialogTitle>
-            <DialogDescription>Link a live match to auto-fill scores, then mark each shooter Won, Qualified, Lost or Disqualified.</DialogDescription>
-          </DialogHeader>
-
-          {/* link a real/live match — scores then auto-sync from it */}
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Linked live match (scores auto-update from it)</Label>
-            <MatchSelectCombo matches={linkableMatches} value={linkId} onChange={linkLiveMatch} />
-            {linkId && <p className="text-[11px] text-emerald-400">Scores below are pulled from the live match. They auto-update whenever the match score changes.</p>}
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground truncate">{rA?.name ?? "Slot A (TBD)"} — score</Label>
-              <Input type="number" min={0} value={sA} onChange={(e) => setSA(e.target.value)} placeholder="0" />
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground truncate">{rB?.name ?? "Slot B (TBD)"} — score</Label>
-              <Input type="number" min={0} value={sB} onChange={(e) => setSB(e.target.value)} placeholder="0" />
-            </div>
-          </div>
-          <DialogFooter className="flex-col gap-3 sm:flex-col">
-            {/* Participant A outcomes */}
-            <div className="w-full space-y-1.5">
-              <div className="text-xs font-bold flex items-center gap-1 text-amber-200 truncate"><Crown className="h-3.5 w-3.5 text-primary" />{rA?.name ?? "Slot A"}</div>
-              <div className="grid grid-cols-4 gap-1.5">
-                <Button size="sm" className="btn-luxury text-xs" disabled={!rA} onClick={() => submitResult(resultMatch!.participant_a_id, "won")}>Won</Button>
-                <Button size="sm" variant="outline" className="text-xs" disabled={!rA} onClick={() => submitResult(resultMatch!.participant_a_id, "qualified")}>Qualified</Button>
-                <Button size="sm" variant="outline" className="text-xs" disabled={!rB} onClick={() => submitResult(resultMatch!.participant_b_id, "won")}>Lost</Button>
-                <Button size="sm" variant="destructive" className="text-xs" disabled={!rB || !rA} onClick={() => submitResult(resultMatch!.participant_b_id, "won", resultMatch!.participant_a_id)}>DQ</Button>
-              </div>
-            </div>
-            {/* Participant B outcomes */}
-            <div className="w-full space-y-1.5">
-              <div className="text-xs font-bold flex items-center gap-1 text-amber-200 truncate"><Crown className="h-3.5 w-3.5 text-primary" />{rB?.name ?? "Slot B"}</div>
-              <div className="grid grid-cols-4 gap-1.5">
-                <Button size="sm" className="btn-luxury text-xs" disabled={!rB} onClick={() => submitResult(resultMatch!.participant_b_id, "won")}>Won</Button>
-                <Button size="sm" variant="outline" className="text-xs" disabled={!rB} onClick={() => submitResult(resultMatch!.participant_b_id, "qualified")}>Qualified</Button>
-                <Button size="sm" variant="outline" className="text-xs" disabled={!rA} onClick={() => submitResult(resultMatch!.participant_a_id, "won")}>Lost</Button>
-                <Button size="sm" variant="destructive" className="text-xs" disabled={!rA || !rB} onClick={() => submitResult(resultMatch!.participant_a_id, "won", resultMatch!.participant_b_id)}>DQ</Button>
-              </div>
-            </div>
-            <Button variant="outline" className="w-full" onClick={() => submitResult(null)}>Save scores only (no winner yet)</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
