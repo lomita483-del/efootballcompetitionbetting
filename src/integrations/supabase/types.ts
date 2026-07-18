@@ -1649,6 +1649,7 @@ export type Database = {
           marketing_enabled: boolean
           match_kind: string
           name: string
+          public_id: string | null
           restrict_repeat_contender: boolean
           settled_at: string | null
           settled_by: string | null
@@ -1687,6 +1688,7 @@ export type Database = {
           marketing_enabled?: boolean
           match_kind?: string
           name: string
+          public_id?: string | null
           restrict_repeat_contender?: boolean
           settled_at?: string | null
           settled_by?: string | null
@@ -1725,6 +1727,7 @@ export type Database = {
           marketing_enabled?: boolean
           match_kind?: string
           name?: string
+          public_id?: string | null
           restrict_repeat_contender?: boolean
           settled_at?: string | null
           settled_by?: string | null
@@ -4306,6 +4309,7 @@ export type Database = {
           type: string
         }[]
       }
+      gen_match_public_id: { Args: never; Returns: string }
       gen_special_id: { Args: never; Returns: string }
       get_display_roles: { Args: { _user_id: string }; Returns: string[] }
       has_role: {
