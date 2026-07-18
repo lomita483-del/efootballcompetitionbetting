@@ -1614,6 +1614,7 @@ async function settleFutureBets(matchId: string, winningOddIds: string[], winnin
 }
 
 function ShooterMatchWizard({ onClose }: { onClose: () => void }) {
+  const confirm = useConfirm();
   const [players, setPlayers] = useState<any[]>([]);
   const [teams, setTeams] = useState<any[]>([]);
   const [form, setForm] = useState({ home_player_id: "", away_player_id: "", oddsA: 2, draw: 3.5, oddsB: 2, name: "", start_time: "", location: "", featured: true, featured_image_url: null as string | null, featured_image_fit: "cover", featured_image_position: "center", marketing: true, homePresent: false, awayPresent: false, restrictRepeat: false });
@@ -1633,6 +1634,13 @@ function ShooterMatchWizard({ onClose }: { onClose: () => void }) {
     const homeTeamId = home?.team_id || teams[0]?.id;
     const awayTeamId = away?.team_id || teams.find((t) => t.id !== homeTeamId)?.id || homeTeamId;
     if (!homeTeamId || !awayTeamId) { toast.error("Create at least one team in Clan first, then seed shooters freely with or without team tag."); return; }
+    const startLabel = form.start_time ? new Date(form.start_time).toLocaleString() : "immediately";
+    const ok = await confirm({
+      title: "Post this shooter match?",
+      description: `Shooter A: ${home?.name} (odds ${form.oddsA})\nDraw odds: ${form.draw}\nShooter B: ${away?.name} (odds ${form.oddsB})\nStart: ${startLabel}\nFeatured on homepage: ${form.featured ? "Yes" : "No"}\n\nOnce posted, users can start placing bets immediately.`,
+      confirmText: "Post match", cancelText: "Review again",
+    });
+    if (!ok) return;
     const { data: m, error } = await supabase.from("matches").insert({
       name: form.name || `${home?.name} vs ${away?.name}`,
       home_team_id: homeTeamId,
