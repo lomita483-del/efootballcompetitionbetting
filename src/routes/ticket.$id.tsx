@@ -89,7 +89,7 @@ function TicketPage() {
     const { data, error } = await supabase
       .from("bets")
       .select(
-        "*, bet_selections(*, matches!match_id(id, name, status, start_time, settled_at, home_score, away_score, is_virtual, match_kind, home_team:teams!home_team_id(name,logo_url), away_team:teams!away_team_id(name,logo_url)), markets!market_id(name), odds!odd_id(is_winner,future_status,future_next_title,future_next_at,future_progress,future_emblem_url,future_candidate_type))",
+        "*, bet_selections(*, matches!match_id(id, public_id, name, status, start_time, settled_at, home_score, away_score, is_virtual, match_kind, home_team:teams!home_team_id(name,logo_url), away_team:teams!away_team_id(name,logo_url)), markets!market_id(name), odds!odd_id(is_winner,future_status,future_next_title,future_next_at,future_progress,future_emblem_url,future_candidate_type))",
       )
       .eq("id", id)
       .maybeSingle();
@@ -394,8 +394,10 @@ export function BetVoucher({
               const BadgeIcon = won ? Trophy : lost ? X : ClockIcon;
               const scoreLabel = isFuture ? "PROGRESS" : ended ? "FINAL" : live ? "LIVE" : "SCORE";
               const futureStatus = s.odds?.future_status ?? "active";
-              // Derive a short, stable numeric Game ID from the match uuid (cosmetic, like a bookmaker slip).
-              const gid = m?.id
+              // Prefer the public match code (ECB-XXX###); fall back to a derived numeric Game ID.
+              const gid = m?.public_id
+                ? m.public_id
+                : m?.id
                 ? (parseInt(m.id.replace(/[^0-9a-f]/gi, "").slice(0, 6) || "0", 16) % 90000) + 10000
                 : null;
               const dt = m?.start_time
