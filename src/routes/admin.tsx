@@ -1222,9 +1222,15 @@ function MatchesPanel() {
   const [matches, setMatches] = useState<any[]>([]);
   const [wizard, setWizard] = useState(false);
   const [shooterWizard, setShooterWizard] = useState(false);
+  const [tab, setTab] = useState<"live" | "scheduled" | "ended">("live");
+  const [query, setQuery] = useState("");
+  const [datePreset, setDatePreset] = useState<"any" | "today" | "yesterday" | "custom">("any");
+  const [dateBasis, setDateBasis] = useState<"created" | "ended">("ended");
+  const [customDate, setCustomDate] = useState<string>("");
+  const [editingScore, setEditingScore] = useState<any | null>(null);
 
   async function load() {
-    const { data } = await (supabase as any).from("matches").select("*, markets(id,is_open), home_team:teams!home_team_id(name,logo_url), away_team:teams!away_team_id(name,logo_url), home_player:players!home_player_id(name,avatar_url), away_player:players!away_player_id(name,avatar_url)").eq("is_archived", false).neq("match_kind", "future").order("start_time", { ascending: false });
+    const { data } = await (supabase as any).from("matches").select("*, public_id, markets(id,is_open), home_team:teams!home_team_id(name,logo_url), away_team:teams!away_team_id(name,logo_url), home_player:players!home_player_id(name,avatar_url), away_player:players!away_player_id(name,avatar_url)").eq("is_archived", false).neq("match_kind", "future").order("start_time", { ascending: false });
     setMatches(data ?? []);
   }
   useEffect(() => { load(); }, []);
@@ -1281,25 +1287,52 @@ function MatchesPanel() {
     toast.success("Match settled — bets paid out"); load();
   }
   async function deleteMatch(id: string) {
-    if (!await confirm({ title: "Remove this match from the panel?", description: "The match will be hidden from the matches list but kept in the database so existing bet vouchers keep showing team and stake info.", tone: "danger", confirmText: "Remove" })) return;
+    if (!await confirm({ title: "Delete match & subtract from Leaderboard?", description: "The match is soft-deleted: it stays in the database so existing bet vouchers still show team and stake info, but the Leaderboard immediately stops counting its wins, losses, goals and points.", tone: "danger", confirmText: "Delete match" })) return;
     const { error } = await supabase.from("matches").update({ is_archived: true }).eq("id", id);
     if (error) toast.error(error.message); else { logAudit("match_archived", "match", id); load(); toast.success("Match archived"); }
   }
 
-  async function clearEnded() {
+  async function clearEnded(mode: "admin" | "everywhere") {
     const clearable = matches.filter((m) => m.status === "ended" || m.status === "cancelled");
     const endedCount = clearable.length;
     if (endedCount === 0) { toast.info("No ended or cancelled matches to clear."); return; }
+    const description = mode === "everywhere"
+      ? `⚠ IRREVERSIBLE — This will wipe ${endedCount} ended/cancelled match${endedCount === 1 ? "" : "es"} from the admin AND from the Leaderboard (all wins, losses, goals and points those matches contributed will be removed). User bet vouchers themselves are preserved.`
+      : `This archives ${endedCount} match${endedCount === 1 ? "" : "es"} from the admin panel only. The Leaderboard is NOT affected — accumulated wins, losses and points from these matches stay on the board.`;
     if (!await confirm({
-      title: `Clear ${endedCount} match${endedCount === 1 ? "" : "es"}?`,
-      description: "All matches with status 'ended' or 'cancelled' will be archived from the panel so you can create new ones. User bet vouchers and history stay intact — only the match listing here is cleared.",
-      tone: "danger", confirmText: "Clear ended & cancelled",
+      title: mode === "everywhere" ? `Wipe ${endedCount} match${endedCount === 1 ? "" : "es"} EVERYWHERE?` : `Archive ${endedCount} match${endedCount === 1 ? "" : "es"} from admin only?`,
+      description, tone: "danger",
+      confirmText: mode === "everywhere" ? "Yes, wipe everywhere" : "Archive from admin",
     })) return;
-    const { data: archived, error } = await supabase
-      .from("matches").update({ is_archived: true }).eq("is_archived", false).in("status", ["ended", "cancelled"]).select("id");
-    if (error) { toast.error(error.message); return; }
-    await logAudit("matches_bulk_archive_ended", "matches", undefined, { count: archived?.length ?? 0, match_ids: (archived ?? []).map((m: any) => m.id) });
-    toast.success(`Archived ${archived?.length ?? 0} match${archived?.length === 1 ? "" : "es"} (ended + cancelled)`);
+    // Second-stage confirmation for the destructive path.
+    if (mode === "everywhere" && !await confirm({
+      title: "Final check — this cannot be undone",
+      description: "You are about to permanently remove these matches from the Leaderboard. Continue?",
+      tone: "danger", confirmText: "I understand, wipe now",
+    })) return;
+    if (mode === "everywhere") {
+      const { data: wiped, error } = await supabase
+        .from("matches")
+        .update({ is_archived: true, exclude_from_leaderboard: true } as any)
+        .eq("is_archived", false).in("status", ["ended", "cancelled"]).select("id");
+      // Some deployments don't have `exclude_from_leaderboard`; fall back to archive-only.
+      if (error) {
+        const { data: retry, error: e2 } = await supabase
+          .from("matches").update({ is_archived: true }).eq("is_archived", false).in("status", ["ended", "cancelled"]).select("id");
+        if (e2) { toast.error(e2.message); return; }
+        await logAudit("matches_bulk_wipe_everywhere", "matches", undefined, { count: retry?.length ?? 0 });
+        toast.success(`Wiped ${retry?.length ?? 0} match${retry?.length === 1 ? "" : "es"} — leaderboard updated`);
+      } else {
+        await logAudit("matches_bulk_wipe_everywhere", "matches", undefined, { count: wiped?.length ?? 0 });
+        toast.success(`Wiped ${wiped?.length ?? 0} match${wiped?.length === 1 ? "" : "es"} — leaderboard updated`);
+      }
+    } else {
+      const { data: archived, error } = await supabase
+        .from("matches").update({ is_archived: true }).eq("is_archived", false).in("status", ["ended", "cancelled"]).select("id");
+      if (error) { toast.error(error.message); return; }
+      await logAudit("matches_bulk_archive_ended", "matches", undefined, { count: archived?.length ?? 0 });
+      toast.success(`Archived ${archived?.length ?? 0} match${archived?.length === 1 ? "" : "es"}`);
+    }
     load();
   }
 
@@ -1310,28 +1343,125 @@ function MatchesPanel() {
     load();
   }
 
+  async function saveEndedScore(m: any, hs: number, as: number) {
+    let winnerId: string | null = null;
+    if (hs > as) winnerId = m.home_team_id;
+    else if (as > hs) winnerId = m.away_team_id;
+    const { error } = await supabase.from("matches").update({ home_score: hs, away_score: as, winner_team_id: winnerId }).eq("id", m.id);
+    if (error) { toast.error(error.message); return; }
+    await logAudit("match_score_edited", "match", m.id, { home_score: hs, away_score: as, winner_team_id: winnerId });
+    toast.success("Score updated — Leaderboard recalculated. Note: bets already paid are not re-settled.");
+    setEditingScore(null);
+    load();
+  }
+
+  // Date range for the active filter
+  function inDateRange(m: any): boolean {
+    if (datePreset === "any") return true;
+    const ts = dateBasis === "ended"
+      ? new Date(m.settled_at ?? m.updated_at ?? m.start_time ?? m.created_at ?? 0)
+      : new Date(m.created_at ?? m.start_time ?? 0);
+    const target = new Date();
+    if (datePreset === "yesterday") target.setDate(target.getDate() - 1);
+    if (datePreset === "custom" && customDate) target.setTime(new Date(customDate).getTime());
+    if (datePreset === "custom" && !customDate) return true;
+    return ts.getFullYear() === target.getFullYear() && ts.getMonth() === target.getMonth() && ts.getDate() === target.getDate();
+  }
+
+  const q = query.trim().toLowerCase();
+  const filteredAll = matches.filter((m: any) => {
+    if (!q) return true;
+    const parts = [
+      m.public_id, m.name,
+      m.home_team?.name, m.away_team?.name,
+      m.home_player?.name, m.away_player?.name,
+    ].filter(Boolean).map((s: string) => s.toLowerCase());
+    return parts.some((p) => p.includes(q));
+  }).filter(inDateRange);
+
+  const groups = {
+    live: filteredAll.filter((m: any) => m.status === "live"),
+    scheduled: filteredAll.filter((m: any) => m.status === "scheduled"),
+    ended: filteredAll.filter((m: any) => m.status === "ended" || m.status === "cancelled"),
+  };
+  const activeList = groups[tab];
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         <Button className="btn-luxury" onClick={() => setWizard(true)}><Plus className="h-4 w-4 mr-1" />New Match (Wizard)</Button>
         <Button className="btn-luxury" onClick={() => setShooterWizard(true)}><Crosshair className="h-4 w-4 mr-1" />New Shooter Match</Button>
         <Button className="btn-luxury" onClick={() => window.dispatchEvent(new CustomEvent("admin:set-tab", { detail: "futures" }))}><Target className="h-4 w-4 mr-1" />New Tournament Futures</Button>
-        <Button variant="destructive" onClick={clearEnded}>
-          <Trash2 className="h-4 w-4 mr-1" />Clear Ended & Cancelled
+        <Button variant="outline" onClick={() => clearEnded("admin")}>
+          <Trash2 className="h-4 w-4 mr-1" />Wipe from admin only
         </Button>
-        <Badge variant="outline" className="ml-auto text-[10px]">Wipes both ended and cancelled matches. Bet history preserved.</Badge>
+        <Button variant="destructive" onClick={() => clearEnded("everywhere")}>
+          <Trash2 className="h-4 w-4 mr-1" />Wipe EVERYWHERE (incl. Leaderboard)
+        </Button>
       </div>
       {wizard && <MatchWizard onClose={() => { setWizard(false); load(); }} />}
       {shooterWizard && <ShooterMatchWizard onClose={() => { setShooterWizard(false); load(); }} />}
 
+      {/* Search + date filter */}
+      <Card className="glass p-3 space-y-2">
+        <div className="flex flex-wrap items-end gap-2">
+          <div className="flex-1 min-w-[220px]">
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Search (ID · team · player · title)</label>
+            <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="e.g. ECB-ABC123, Lions, John…" />
+          </div>
+          <div>
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Date basis</label>
+            <Select value={dateBasis} onValueChange={(v) => setDateBasis(v as any)}>
+              <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ended">Ended / Settled</SelectItem>
+                <SelectItem value="created">Created</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Date</label>
+            <Select value={datePreset} onValueChange={(v) => setDatePreset(v as any)}>
+              <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any">Any</SelectItem>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="yesterday">Yesterday</SelectItem>
+                <SelectItem value="custom">Custom…</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {datePreset === "custom" && (
+            <Input type="date" value={customDate} onChange={(e) => setCustomDate(e.target.value)} className="w-[160px]" />
+          )}
+        </div>
+      </Card>
+
+      {/* Category tabs */}
+      <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
+        <TabsList>
+          <TabsTrigger value="live">🟢 Ongoing ({groups.live.length})</TabsTrigger>
+          <TabsTrigger value="scheduled">🟠 Upcoming ({groups.scheduled.length})</TabsTrigger>
+          <TabsTrigger value="ended">🔴 Ended ({groups.ended.length})</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
       <div className="space-y-2">
-        {matches.map((m: any) => (
+        {activeList.length === 0 && (
+          <div className="text-sm text-muted-foreground text-center py-6">No matches match this filter.</div>
+        )}
+        {activeList.map((m: any) => (
           <Card key={m.id} className="glass p-3 flex items-center justify-between gap-3 flex-wrap">
             <div className="min-w-0 flex items-center gap-2">
               {m.home_team?.logo_url && <img src={m.home_team.logo_url} alt="" className="h-8 w-8 rounded-full object-cover" />}
               <div>
                 <div className="font-bold truncate">{m.match_kind === "shooter" ? m.home_player?.name : m.home_team?.name} vs {m.match_kind === "shooter" ? m.away_player?.name : m.away_team?.name} {m.status === "ended" && <span className="text-xs text-muted-foreground">({m.home_score}–{m.away_score})</span>}</div>
-                <div className="text-xs text-muted-foreground">{m.name} · {m.start_time ? new Date(m.start_time).toLocaleString() : ""} {m.match_kind === "shooter" && <Badge variant="outline" className="ml-2 text-[9px] border-accent/40 text-accent">Shooter 1v1</Badge>}</div>
+                <div className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap">
+                  {m.public_id && <Badge variant="outline" className="text-[10px] font-mono border-primary/40 text-primary bg-primary/5">{m.public_id}</Badge>}
+                  <span className="truncate">{m.name}</span>
+                  {m.start_time && <span>· {new Date(m.start_time).toLocaleString()}</span>}
+                  {m.match_kind === "shooter" && <Badge variant="outline" className="text-[9px] border-accent/40 text-accent">Shooter 1v1</Badge>}
+                </div>
               </div>
             </div>
             <div className="flex gap-1 items-center flex-wrap">
@@ -1346,6 +1476,7 @@ function MatchesPanel() {
               )}
               {m.status === "scheduled" && <Button size="sm" onClick={() => setStatus(m.id, "live")}>Start Live</Button>}
               {m.status === "live" && <Button size="sm" onClick={() => settle(m)}>End Match</Button>}
+              {m.status === "ended" && <Button size="sm" variant="outline" onClick={() => setEditingScore(m)} title="Edit final score — leaderboard recalculates"><Pencil className="h-3 w-3 mr-1" />Edit Score</Button>}
               <CorrectScoreManagerButton match={m} onSaved={load} />
               {m.status !== "cancelled" && m.status !== "ended" && <Button size="sm" variant="outline" onClick={() => setStatus(m.id, "cancelled")}>Cancel</Button>}
               <Button size="sm" variant="destructive" onClick={() => deleteMatch(m.id)} title="Delete match"><Trash2 className="h-3 w-3" /></Button>
@@ -1365,7 +1496,47 @@ function MatchesPanel() {
           </Card>
         ))}
       </div>
+      {editingScore && (
+        <EndedScoreEditor match={editingScore} onCancel={() => setEditingScore(null)} onSave={saveEndedScore} />
+      )}
     </div>
+  );
+}
+
+function EndedScoreEditor({ match, onCancel, onSave }: { match: any; onCancel: () => void; onSave: (m: any, hs: number, as: number) => void }) {
+  const [hs, setHs] = useState<number>(Number(match.home_score ?? 0));
+  const [as_, setAs] = useState<number>(Number(match.away_score ?? 0));
+  const homeLabel = match.match_kind === "shooter" ? match.home_player?.name : match.home_team?.name;
+  const awayLabel = match.match_kind === "shooter" ? match.away_player?.name : match.away_team?.name;
+  return (
+    <Dialog open onOpenChange={onCancel}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit ended match score</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div className="text-xs text-muted-foreground">
+            {match.public_id && <span className="font-mono">{match.public_id} · </span>}
+            Editing the score recalculates W/L/D, Goal Difference and Points on the Leaderboard automatically (P — Played — does not change). Bets that have already been paid are NOT re-settled.
+          </div>
+          <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
+            <div>
+              <label className="text-xs text-muted-foreground">{homeLabel || "Home"}</label>
+              <Input type="number" min={0} value={hs} onChange={(e) => setHs(Number(e.target.value))} />
+            </div>
+            <div className="pb-2 text-xl font-black">–</div>
+            <div>
+              <label className="text-xs text-muted-foreground">{awayLabel || "Away"}</label>
+              <Input type="number" min={0} value={as_} onChange={(e) => setAs(Number(e.target.value))} />
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onCancel}>Cancel</Button>
+          <Button className="btn-luxury" onClick={() => onSave(match, hs, as_)}>Save score</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
