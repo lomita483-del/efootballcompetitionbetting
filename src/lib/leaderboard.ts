@@ -37,9 +37,10 @@ export async function loadStandings(): Promise<Standings> {
 
   const { data: matches } = await supabase
     .from("matches")
-    .select("home_team_id,away_team_id,home_player_id,away_player_id,home_score,away_score,winner_team_id,status,is_virtual,match_kind,settled_at,created_at,home_present,away_present")
+    .select("home_team_id,away_team_id,home_player_id,away_player_id,home_score,away_score,winner_team_id,status,is_virtual,match_kind,settled_at,created_at,home_present,away_present,is_archived")
     .eq("status", "ended")
-    .eq("is_virtual", false);
+    .eq("is_virtual", false)
+    .eq("is_archived", false);
   const { data: teams } = await supabase.from("teams").select("id,name");
   const { data: players } = await supabase.from("players").select("id,name,team_id");
   const { data: overrides } = await supabase.from("leaderboard_overrides").select("*");
