@@ -120,7 +120,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
               ) : (
                 <GangLogo size={38} className="transition-transform group-hover:scale-105 group-hover:rotate-3 duration-300" />
               )}
-              <div className="leading-tight">
+              <div className="leading-tight hidden sm:block">
                 {branding.name && branding.name !== "ECB" ? (
                   <>
                     <div className="text-sm font-extrabold tracking-[0.18em] gradient-gold-text uppercase max-w-[160px] truncate">{branding.name}</div>
@@ -358,7 +358,7 @@ function NavLink({ to, icon: Icon, label, badge, danger }: { to: string; icon: a
     <Link
       to={to}
       activeProps={{ className: "active" }}
-      className={`group relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all
+      className={`group relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all whitespace-nowrap
         text-muted-foreground hover:text-foreground hover:bg-primary/5
         [&.active]:text-primary [&.active]:bg-gradient-to-b [&.active]:from-primary/15 [&.active]:to-primary/5
         ${danger ? "hover:text-destructive [&.active]:!text-destructive [&.active]:!from-destructive/15 [&.active]:!to-destructive/5" : ""}`}
