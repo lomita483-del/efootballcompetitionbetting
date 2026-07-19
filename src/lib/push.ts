@@ -66,7 +66,7 @@ async function ensurePushSubscription(): Promise<{ sub: PushSubscription | null;
   return { sub };
 }
 
-async function saveSubscription(userId: string, sub: PushSubscription): Promise<{ ok: boolean; error?: string }> {
+async function saveSubscription(userId: string | null, sub: PushSubscription): Promise<{ ok: boolean; error?: string }> {
   const json: any = sub.toJSON();
   const endpoint = sub.endpoint;
   const p256dh = json?.keys?.p256dh ?? bufToBase64(sub.getKey("p256dh"));
@@ -109,7 +109,7 @@ export async function getPushState(): Promise<PushState> {
 }
 
 /** Silently keeps an already-allowed device stored in the database. */
-export async function syncExistingPushSubscription(userId: string): Promise<{ ok: boolean; error?: string; subscribed?: boolean }> {
+export async function syncExistingPushSubscription(userId: string | null): Promise<{ ok: boolean; error?: string; subscribed?: boolean }> {
   if (!pushSupported()) return { ok: false, error: "Notifications are not supported on this device/browser." };
   if (Notification.permission !== "granted") return { ok: true, subscribed: false };
   const ensured = await ensurePushSubscription();
@@ -124,7 +124,7 @@ export async function syncExistingPushSubscription(userId: string): Promise<{ ok
  * Registers the service worker, requests permission, subscribes to push and
  * stores the subscription token in the database for the given user.
  */
-export async function subscribeToPush(userId: string): Promise<{ ok: boolean; error?: string }> {
+export async function subscribeToPush(userId: string | null): Promise<{ ok: boolean; error?: string }> {
   if (!pushSupported()) return { ok: false, error: "Notifications are not supported on this device/browser." };
 
   const permission = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();

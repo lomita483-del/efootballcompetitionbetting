@@ -71,7 +71,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" },
+      // Fixed 1280-wide design canvas: phones render the desktop layout scaled to fit
+      // (no pinch, no side-scroll). A runtime effect swaps this for `width=device-width`
+      // on real desktops / "Desktop Site" so those get an even wider layout.
+      { name: "viewport", content: "width=1280, viewport-fit=cover" },
       { name: "google-site-verification", content: "VmJKgEfwpQsNav2Nc0ItKNySizECxM7nnKuyxh-A5gM" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
@@ -167,6 +170,48 @@ import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { useBranding } from "@/lib/branding";
 import { useEffect } from "react";
 import { trackPageView } from "@/lib/analytics";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
+
+const PUBLIC_ROUTE_PREFIXES = [
+  "/login", "/register", "/forgot-password", "/reset-password",
+  "/about", "/faq", "/guides", "/api/", "/sitemap.xml",
+];
+
+function AuthGate() {
+  const { session, loading } = useAuth();
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  useEffect(() => {
+    if (loading || session) return;
+    const isPublic = PUBLIC_ROUTE_PREFIXES.some((p) => pathname === p || pathname.startsWith(p));
+    if (!isPublic) navigate({ to: "/login", search: { redirect: pathname } as any, replace: true });
+  }, [session, loading, pathname, navigate]);
+  return null;
+}
+
+function AdaptiveViewport() {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const meta = document.querySelector('meta[name="viewport"]') as HTMLMetaElement | null;
+    if (!meta) return;
+    const canvas = "width=1280, viewport-fit=cover";
+    const wide = "width=device-width, initial-scale=1, viewport-fit=cover";
+    const apply = () => {
+      const w = window.screen?.width ?? window.innerWidth;
+      const target = w >= 1400 ? wide : canvas;
+      if (meta.getAttribute("content") !== target) meta.setAttribute("content", target);
+    };
+    apply();
+    window.addEventListener("resize", apply);
+    window.addEventListener("orientationchange", apply);
+    return () => {
+      window.removeEventListener("resize", apply);
+      window.removeEventListener("orientationchange", apply);
+    };
+  }, []);
+  return null;
+}
 
 function AnalyticsTracker() {
   const router = useRouter();
@@ -218,6 +263,8 @@ function RootComponent() {
           <ConfirmProvider>
             <BrandingSync />
             <AnalyticsTracker />
+            <AuthGate />
+            <AdaptiveViewport />
             <MaintenanceGate>
               <Outlet />
             </MaintenanceGate>

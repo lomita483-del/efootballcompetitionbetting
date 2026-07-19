@@ -2422,7 +2422,7 @@ export type Database = {
           locale: string | null
           p256dh: string
           user_agent: string | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           auth_key: string
@@ -2436,7 +2436,7 @@ export type Database = {
           locale?: string | null
           p256dh: string
           user_agent?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           auth_key?: string
@@ -2450,7 +2450,7 @@ export type Database = {
           locale?: string | null
           p256dh?: string
           user_agent?: string | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }

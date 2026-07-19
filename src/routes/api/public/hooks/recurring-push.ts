@@ -41,12 +41,13 @@ export const Route = createFileRoute('/api/public/hooks/recurring-push')({
             }
 
             // Atomically claim the slot before sending so overlapping cron runs
-            // don't double-send.
+            // don't double-send. `.neq` filters out NULLs, so we must OR in
+            // `is.null` to allow first-time / released rows to be claimed.
             const { data: claimed } = await supabaseAdmin
               .from('recurring_push_settings')
               .update({ last_sent_slot: slot } as any)
               .eq('key', row.key)
-              .neq('last_sent_slot', slot)
+              .or(`last_sent_slot.is.null,last_sent_slot.neq.${slot}`)
               .select('key')
               .maybeSingle()
             if (!claimed) continue

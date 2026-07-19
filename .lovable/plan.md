@@ -1,51 +1,54 @@
-## 1. Create Account page — add "E" for E-Football, rename Server → Region
+# Plan: Desktop-first redesign + 6 targeted fixes
 
-- Add `E` option to the affiliation selector alongside `F` (Faction) and `G` (Gang).
-- When `E` is selected, show a text input to enter the E-Football team name manually (same UX as gang/faction name).
-- Rename the "Server" field to "Region" everywhere on the form and use `region` as the stored value.
-- Store `E`, `G`, or `F` in `gang_type`; the entered name goes into `gang_name` (works for all three).
-- **DB migration:** widen the `profiles.gang_type` check constraint (currently allows `G`/`F` only) to also allow `E`; rename `profiles.server` → `profiles.region` (with a compatibility view if code references `server` elsewhere).
-- Update code that references `profiles.server` (leaderboard, admin panels, ticket, etc.) to use `region`.
+This is a large batch. Confirm the plan (or trim it) before I start; I'll then ship it across a few sequential edits.
 
-## 2. Push blast — show subscribed users' names
+## 1. Responsive redesign — mobile shows the desktop layout, scaled
 
-- In the Push Broadcast panel, load the recipient list from `push_subscriptions` and join `profiles` on `user_id` so each row shows in-game name / full name plus device UA, last seen, and endpoint tail.
-- Add a searchable, scrollable "Subscribed devices" section under the send controls (paginated at ~200 rows).
+Goal: on a phone, every page renders the current desktop composition (same columns, cards, tables, spacing). The user should not need to pinch or side-scroll.
 
-## 3. Instant Virtual — only one match visible
+**How:**
+- Set a viewport meta with `initial-scale` computed from device width vs a fixed design width (1280px). We already have `viewport-fit=cover`; switch the site to a **fixed-width design canvas** approach: wrap `<body>` content in a shell that is `min-width: 1280px` and let the browser scale via `<meta name="viewport" content="width=1280">`. This forces mobile Chrome to render the page at 1280px and fit-to-screen, which is exactly "mobile looks like desktop, no pinch".
+- Add a runtime hook in `__root.tsx` that reads `window.innerWidth` / `window.screen.width` to detect true desktop-site mode (>= ~1400 effective px) and swaps the viewport tag to `width=device-width` so real desktops and "Desktop Site" get the wider expanded layout.
+- Introduce a new Tailwind breakpoint tier used by containers:
+  - default (mobile with viewport=1280): current `md/lg` desktop layout.
+  - `xl:` (≥1400): wider max-width (e.g. `max-w-[1600px]`), extra column on grids, larger gaps.
+- Remove `useIsMobile()` gated hiding on major pages (matches, home, dashboard, sidebar, admin) — anything currently hidden `<md` becomes always-visible. `useIsMobile` stays for genuine touch-only affordances (drawer vs sidebar).
+- Sidebar: on the fixed 1280 canvas it can render as the desktop sidebar by default; keep the hamburger only for the "expanded desktop" tier if the design prefers.
 
-- Investigate: check whether the list is filtered too aggressively (status filter, single-round fetch, missing `is_visible`), whether the seeder generates only one round, or whether the tick isn't spawning additional matches.
-- Fix the query / spawner so the "select a match" screen shows all active instant matches for the current round, not just the first.
+**Risk / caveats I want you to confirm:**
+- `width=1280` viewport means text is physically smaller on phones (readable but small). This is the tradeoff you asked for.
+- Any component that used `100vw`/`100dvh` for full-screen overlays will still fill the viewport correctly.
+- Admin panels tuned with `useIsMobile` drawers will now show desktop tables on phones — that's the intent.
 
-## 4. Championship Virtual — add odds, cashout, voucher settlement
+## 2. Team Wizard → single form
 
-- Add real odds to each championship virtual match:
-  - Compute pre-match odds from participant strength (same style as the standard match markets), stored on the tournament match row.
-  - Recompute live odds each round tick while a match is in progress.
-- Wire betting the same way as regular matches:
-  - Championship bets go through the standard `bets` / `bet_selections` pipeline with the match ID and market/odds locked in at slip time.
-  - Cash-out: allow partial settlement against current live odds while the match is still running (same rule as standard matches).
-  - On championship match finish, settle every open ticket referencing that match as win/loss and update the voucher (ticket) status accordingly.
-- Update the Championship Bet panel UI to show odds per selection, potential payout, and a cashout button on in-play tickets.
+Rewrite `MatchWizard` (5-step) in `src/routes/admin.tsx` as one form matching the ShooterMatchWizard shape: home team, away team, kickoff, odds, featured toggle, image + fit/position, confirmation dialog. Reuse the existing confirmation dialog pattern. Restyle both wizards with the gold/emerald glass tokens (cards, gradient header, section headings) so they no longer look plain.
 
-## 5. Matches page — style the "All matches" heading
+## 3. Login gate — guests can't reach `/`
 
-- Replace the plain `"All matches"` text block with the same gold-gradient headline treatment used elsewhere (e.g. gradient title + subtitle line + count badge + subtle divider).
+- Wrap `Outlet` (or add `beforeLoad` on `__root`) so that if `!session` and route isn't in a public allow-list (`/login`, `/register`, `/forgot-password`, `/reset-password`, `/about`, `/faq`, `/guides/how-it-works`, `/api/*`, `/sitemap.xml`), redirect to `/login`.
+- Login/register: if session exists, redirect to `/`.
+- Keep SEO-critical public pages (about/faq/guides) reachable so crawlers still index — confirm if you want those gated too.
 
-## Technical notes
+## 4. Recurring push not firing
 
-- Register: constraint change is `ALTER TABLE profiles DROP CONSTRAINT ... ; ADD CONSTRAINT profiles_gang_type_check CHECK (gang_type IN ('G','F','E'))`. `server` → `region` uses `ALTER TABLE ... RENAME COLUMN`.
-- Championship odds: extend `tournament_matches` with `home_odds`, `draw_odds`, `away_odds`, `odds_updated_at`; reuse existing bet-settlement RPC by making it recognize championship-match IDs, or add a parallel settle function keyed on `tournament_match_id`.
-- Cashout: mirror the RPC used for regular in-play cashout, keyed on `bets.match_id` OR `bets.tournament_match_id`.
-- Push panel: single `supabase.from("push_subscriptions").select("*, profile:profiles(full_name, ingame_name)")` — no schema change needed.
+- Verify the `pg_cron` job actually calls `/api/public/hooks/recurring-push` (check `cron.job` / `cron.job_run_details`). If missing or failing, reinstall the schedule.
+- Fix the motivational/encouragement selector: currently it may reuse a fixed row instead of rotating; store `last_sent_index` per type in `recurring_push_settings` and advance by 1 each run, wrapping at total count.
+- Log each dispatch to `push_broadcasts` so we can see what actually went out.
 
-## Order of execution
+## 5. Guests subscribe to push
 
-1. DB migration (register schema + championship odds columns).
-2. Register UI + affiliated code paths using `server` → `region`.
-3. Push broadcast panel joins + list.
-4. Instant virtual query fix.
-5. Championship virtual odds computation, betting, cashout, settlement.
-6. Matches page heading.
+- Change `PushPermissionPrompt` + `subscribeToPush` to not require `user_id`. Insert into `push_subscriptions` with `user_id = null` for guests; RLS: add anon INSERT policy scoped to own endpoint. Audience filtering already tolerates null `user_id` for "any / anonymous" audience.
 
-Confirm and I'll implement in that order.
+## 6. Date demarcations on ended matches
+
+- In `src/routes/matches.tsx` (ended tab) and the admin Ended tab, group the list by `ended_at`/`date` day. Insert a sticky separator row (`── July 18, 2026 ──`) between groups. Use `Intl.DateTimeFormat` in project locale, sorted newest first.
+
+## Order of shipping (sequential to reduce blast radius)
+1. Login gate + guest push subscribe (small, safe).
+2. Date demarcations (small, isolated).
+3. Recurring push fix + verification.
+4. Team Wizard single-form + wizard UI polish.
+5. Responsive viewport switch + `useIsMobile` audit — done last because it affects every page.
+
+Reply "go" to ship, or tell me which items to drop / reorder.
