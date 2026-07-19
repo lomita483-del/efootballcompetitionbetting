@@ -14,13 +14,14 @@ export function PushPermissionPrompt() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!user || !pushSupported()) return;
+    if (!pushSupported()) return;
     let alive = true;
     (async () => {
       // If this browser already allowed notifications, keep the DB record alive
-      // silently and do not keep asking after every refresh.
+      // silently and do not keep asking after every refresh. Works for guests too
+      // (user_id is null in that case).
       if (Notification.permission === "granted") {
-        await syncExistingPushSubscription(user.id);
+        await syncExistingPushSubscription(user?.id ?? null);
         if (!alive) return;
         setShow(false);
         return;
@@ -44,9 +45,8 @@ export function PushPermissionPrompt() {
   };
 
   const enable = async () => {
-    if (!user) return;
     setBusy(true);
-    const res = await subscribeToPush(user.id);
+    const res = await subscribeToPush(user?.id ?? null);
     setBusy(false);
     if (res.ok) {
       toast.success("Notifications enabled! You'll get real-time updates.");
