@@ -263,6 +263,8 @@ function RootComponent() {
           <ConfirmProvider>
             <BrandingSync />
             <AnalyticsTracker />
+            <AuthGate />
+            <AdaptiveViewport />
             <MaintenanceGate>
               <Outlet />
             </MaintenanceGate>
