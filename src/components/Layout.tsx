@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { LogOut, User as UserIcon, Shield, MessageSquare, Home, Trophy, Ticket, LifeBuoy, Wallet, Crosshair as MatchIcon, Settings as SettingsIcon, Coins, LayoutDashboard, Dice5, Swords, Clover, ListChecks, Gamepad2, ShoppingBag, ChevronLeft, ChevronRight } from "lucide-react";
+import { LogOut, User as UserIcon, Shield, MessageSquare, Home, Trophy, Ticket, LifeBuoy, Wallet, Crosshair as MatchIcon, Settings as SettingsIcon, Coins, LayoutDashboard, Dice5, Swords, Clover, ListChecks, Gamepad2, ShoppingBag } from "lucide-react";
 import { GangLogo } from "@/components/GangLogo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,7 @@ import { BetSuccessPopout } from "@/components/BetSuccessPopout";
 import { SurveyPopout } from "@/components/SurveyPopout";
 import { PollPopout } from "@/components/PollPopout";
 import { PushPermissionPrompt } from "@/components/PushPermissionPrompt";
-import { ReactNode, useEffect, useState, useRef } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation } from "@tanstack/react-router";
 import lslPlatformBg from "@/assets/ecb-nebula-bg.jpg.asset.json";
@@ -61,10 +61,6 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   useForceReloadBroadcast();
   const [railOpen, setRailOpen] = useState(false);
   const branding = useBranding();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-
   // Admin-configurable site-wide background + branding (fall back to bundled art).
   const [siteBg, setSiteBg] = useState<string | null>(null);
   const [bgFit, setBgFit] = useState<string>("cover");
@@ -73,7 +69,6 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   const [navBg, setNavBg] = useState<string | null>(null);
   const [navBgFit, setNavBgFit] = useState<string>("cover");
   const [navBgPos, setNavBgPos] = useState<string>("center");
-
   useEffect(() => {
     const apply = (d: any) => {
       setSiteBg(d?.site_bg_url ?? null);
@@ -92,38 +87,6 @@ export const Layout = ({ children }: { children: ReactNode }) => {
     return () => { supabase.removeChannel(ch); };
   }, []);
 
-  // Check scroll position for nav buttons
-  const checkScroll = () => {
-    if (scrollContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-    }
-  };
-
-  useEffect(() => {
-    checkScroll();
-    const container = scrollContainerRef.current;
-    if (container) {
-      container.addEventListener('scroll', checkScroll);
-      window.addEventListener('resize', checkScroll);
-      return () => {
-        container.removeEventListener('scroll', checkScroll);
-        window.removeEventListener('resize', checkScroll);
-      };
-    }
-  }, []);
-
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = 200;
-      scrollContainerRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth',
-      });
-    }
-  };
-
   return (
     <div className="relative min-h-screen">
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
@@ -136,8 +99,6 @@ export const Layout = ({ children }: { children: ReactNode }) => {
         />
         <div className="absolute inset-0 bg-background/40" />
       </div>
-
-      {/* Show navbar on all pages except home */}
       {!isHome && (
         <header className="sticky top-0 z-50 backdrop-blur-xl bg-gradient-to-b from-card/80 to-card/50 border-b border-primary/20 shadow-[0_2px_30px_-12px_rgba(0,0,0,0.6)]">
           {navBg && (
@@ -159,7 +120,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
               ) : (
                 <GangLogo size={38} className="transition-transform group-hover:scale-105 group-hover:rotate-3 duration-300" />
               )}
-              <div className="leading-tight hidden sm:block">
+              <div className="leading-tight">
                 {branding.name && branding.name !== "ECB" ? (
                   <>
                     <div className="text-sm font-extrabold tracking-[0.18em] gradient-gold-text uppercase max-w-[160px] truncate">{branding.name}</div>
@@ -175,51 +136,23 @@ export const Layout = ({ children }: { children: ReactNode }) => {
                 )}
               </div>
             </Link>
-
-            {/* Scrollable navigation with scroll buttons */}
-            <div className="flex-1 hidden lg:flex items-center gap-2">
-              {canScrollLeft && (
-                <button
-                  onClick={() => scroll('left')}
-                  className="shrink-0 p-1 rounded-lg hover:bg-primary/10 transition"
-                  aria-label="Scroll left"
-                >
-                  <ChevronLeft className="h-4 w-4 text-muted-foreground" />
-                </button>
-              )}
-              <nav
-                ref={scrollContainerRef}
-                className="flex-1 overflow-x-auto scrollbar-hide flex items-center gap-1"
-                style={{ scrollBehavior: 'smooth' }}
-              >
-                <NavLink to="/matches" icon={MatchIcon} label="Matches" />
-                <NavLink to="/virtual" icon={Dice5} label="Virtual" />
-                <NavLink to="/lottery" icon={Clover} label="Lottery" />
-                <NavLink to="/arcade" icon={Gamepad2} label="Arcade" />
-                <NavLink to="/shop" icon={ShoppingBag} label="Shop" />
-                <NavLink to="/leaderboard" icon={Trophy} label="Leaderboard" />
-                <NavLink to="/tournament" icon={Swords} label="Tournament" />
-                {user && <NavLink to="/dashboard" icon={LayoutDashboard} label="Dashboard" />}
-                {user && <NavLink to="/tasks" icon={ListChecks} label="Tasks" />}
-                {user && <NavLink to="/checkout" icon={Coins} label="Buy" />}
-                {user && <NavLink to="/withdraw" icon={Wallet} label="Withdraw" />}
-                {user && <NavLink to="/support" icon={LifeBuoy} label="Support" />}
-                {user && <NavLink to="/settings" icon={SettingsIcon} label="Settings" />}
-                {isAdmin && <NavLink to="/admin" icon={Shield} label="Admin" danger />}
-                {!isAdmin && isMod && <NavLink to="/mod" icon={Shield} label="Mod" danger />}
-              </nav>
-              {canScrollRight && (
-                <button
-                  onClick={() => scroll('right')}
-                  className="shrink-0 p-1 rounded-lg hover:bg-primary/10 transition"
-                  aria-label="Scroll right"
-                >
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </button>
-              )}
-            </div>
-
-            {/* Pinned user section (always visible) */}
+            <nav className="hidden lg:flex flex-1 items-center justify-center gap-1 flex-nowrap overflow-x-auto scrollbar-hide">
+              <NavLink to="/matches" icon={MatchIcon} label="Matches" />
+              <NavLink to="/virtual" icon={Dice5} label="Virtual" />
+              <NavLink to="/lottery" icon={Clover} label="Lottery" />
+              <NavLink to="/arcade" icon={Gamepad2} label="Arcade" />
+              <NavLink to="/shop" icon={ShoppingBag} label="Shop" />
+              <NavLink to="/leaderboard" icon={Trophy} label="Leaderboard" />
+              <NavLink to="/tournament" icon={Swords} label="Tournament" />
+              {user && <NavLink to="/dashboard" icon={LayoutDashboard} label="Dashboard" />}
+              {user && <NavLink to="/tasks" icon={ListChecks} label="Tasks" />}
+              {user && <NavLink to="/checkout" icon={Coins} label="Buy" />}
+              {user && <NavLink to="/withdraw" icon={Wallet} label="Withdraw" />}
+              {user && <NavLink to="/support" icon={LifeBuoy} label="Support" />}
+              {user && <NavLink to="/settings" icon={SettingsIcon} label="Settings" />}
+              {isAdmin && <NavLink to="/admin" icon={Shield} label="Admin" danger />}
+              {!isAdmin && isMod && <NavLink to="/mod" icon={Shield} label="Mod" danger />}
+            </nav>
             <div className="flex items-center gap-2 shrink-0 ml-auto lg:ml-0">
               {branding.logoCornerUrl && (
                 <img
@@ -236,7 +169,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
               </Link>
               {user && profile ? (
                 <>
-                  <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-primary/30 bg-gradient-to-r from-primary/10 to-accent/5 shadow-[0_0_15px_-5px_rgba(212,175,55,0.3)] whitespace-nowrap">
+                  <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-primary/30 bg-gradient-to-r from-primary/10 to-accent/5 shadow-[0_0_15px_-5px_rgba(212,175,55,0.3)]">
                     <Coins className="h-3.5 w-3.5 text-primary" />
                     <span className="text-sm font-black text-primary leading-none tabular-nums">{profile.token_balance.toLocaleString()}</span>
                   </div>
@@ -266,7 +199,6 @@ export const Layout = ({ children }: { children: ReactNode }) => {
           )}
         </header>
       )}
-
       <main className={`relative lg:pl-0 overflow-x-hidden ${isHome ? "pl-0" : "pl-16"}`}>{children}</main>
       <LevelUpModal />
       <GlobalWinAnimation />
@@ -295,21 +227,21 @@ export const Layout = ({ children }: { children: ReactNode }) => {
           </button>
           <MobLink to="/" icon={Home} label="Home" />
           {railOpen && <>
-            <MobLink to="/matches" icon={MatchIcon} label="Matches" />
-            <MobLink to="/virtual" icon={Dice5} label="Virtual" />
-            <MobLink to="/lottery" icon={Clover} label="Lottery" />
-            <MobLink to="/arcade" icon={Gamepad2} label="Arcade" />
-            <MobLink to="/leaderboard" icon={Trophy} label="Top" />
-            <MobLink to="/tournament" icon={Swords} label="Bracket" />
-            {user && <>
-              <MobLink to="/dashboard" icon={Ticket} label="ME" />
-              <MobLink to="/tasks" icon={ListChecks} label="Tasks" />
-              <MobLink to="/profile" icon={UserIcon} label="Profile" />
-              <MobLink to="/settings" icon={SettingsIcon} label="Settings" />
-              <MobLink to="/support" icon={LifeBuoy} label="Help" />
-            </>}
-            {isAdmin && <MobLink to="/admin" icon={Shield} label="Admin" danger />}
-            {!isAdmin && isMod && <MobLink to="/mod" icon={Shield} label="Mod" danger />}
+          <MobLink to="/matches" icon={MatchIcon} label="Matches" />
+          <MobLink to="/virtual" icon={Dice5} label="Virtual" />
+          <MobLink to="/lottery" icon={Clover} label="Lottery" />
+          <MobLink to="/arcade" icon={Gamepad2} label="Arcade" />
+          <MobLink to="/leaderboard" icon={Trophy} label="Top" />
+          <MobLink to="/tournament" icon={Swords} label="Bracket" />
+          {user && <>
+            <MobLink to="/dashboard" icon={Ticket} label="ME" />
+            <MobLink to="/tasks" icon={ListChecks} label="Tasks" />
+            <MobLink to="/profile" icon={UserIcon} label="Profile" />
+            <MobLink to="/settings" icon={SettingsIcon} label="Settings" />
+            <MobLink to="/support" icon={LifeBuoy} label="Help" />
+          </>}
+          {isAdmin && <MobLink to="/admin" icon={Shield} label="Admin" danger />}
+          {!isAdmin && isMod && <MobLink to="/mod" icon={Shield} label="Mod" danger />}
           </>}
         </div>
       </nav>
@@ -426,7 +358,7 @@ function NavLink({ to, icon: Icon, label, badge, danger }: { to: string; icon: a
     <Link
       to={to}
       activeProps={{ className: "active" }}
-      className={`group relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all whitespace-nowrap
+      className={`group relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all
         text-muted-foreground hover:text-foreground hover:bg-primary/5
         [&.active]:text-primary [&.active]:bg-gradient-to-b [&.active]:from-primary/15 [&.active]:to-primary/5
         ${danger ? "hover:text-destructive [&.active]:!text-destructive [&.active]:!from-destructive/15 [&.active]:!to-destructive/5" : ""}`}
