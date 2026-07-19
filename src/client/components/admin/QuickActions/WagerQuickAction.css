@@ -1,0 +1,32 @@
+/* src/client/components/admin/QuickActions/WagerQuickAction.css */
+.quick-action-wager {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 14px;
+  border-radius:12px;
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: var(--text-color, #fff);
+  cursor: pointer;
+  position: relative;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.quick-action-wager:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.45); }
+.wager-icon { font-size:18px; }
+.wager-label { font-weight:700; letter-spacing:1px; }
+.wager-badge {
+  position:absolute;
+  top:-6px;
+  right:-6px;
+  background: linear-gradient(45deg,#ff6b6b,#ffb86b);
+  color:#111;
+  padding:4px 7px;
+  border-radius:999px;
+  font-weight:700;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
