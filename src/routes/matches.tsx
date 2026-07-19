@@ -5,6 +5,7 @@ import { MatchCardLive } from "@/components/MatchCardLive";
 import { HomeBannerSlider } from "@/components/HomeBannerSlider";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { fetchMatches, type MatchRow } from "@/lib/queries";
+import { Fragment } from "react";
 import { Crosshair } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -88,7 +89,14 @@ function MatchesPage() {
                 <p className="text-muted-foreground text-sm">No matches in this section.</p>
               ) : (
                 <div className="space-y-2 max-w-3xl">
-                  {groups[k].map((m) => <MatchCardLive key={m.id} match={m} variant="row" />)}
+                  {k === "ended"
+                    ? groupByDay(groups.ended).map(([day, list]) => (
+                        <Fragment key={day}>
+                          <DateSeparator label={day} />
+                          {list.map((m) => <MatchCardLive key={m.id} match={m} variant="row" />)}
+                        </Fragment>
+                      ))
+                    : groups[k].map((m) => <MatchCardLive key={m.id} match={m} variant="row" />)}
                 </div>
               )}
             </TabsContent>
@@ -97,4 +105,33 @@ function MatchesPage() {
       </div>
     </Layout>
   );
+}
+
+function DateSeparator({ label }: { label: string }) {
+  return (
+    <div className="sticky top-0 z-10 flex items-center gap-3 py-2 bg-background/85 backdrop-blur">
+      <span className="flex-1 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+      <span className="text-[11px] uppercase tracking-[0.3em] font-black text-primary/90 whitespace-nowrap">{label}</span>
+      <span className="flex-1 h-px bg-gradient-to-l from-transparent via-primary/40 to-transparent" />
+    </div>
+  );
+}
+
+function groupByDay(rows: MatchRow[]): Array<[string, MatchRow[]]> {
+  const fmt = new Intl.DateTimeFormat(undefined, { year: "numeric", month: "long", day: "numeric" });
+  const buckets = new Map<string, { label: string; items: MatchRow[] }>();
+  const sorted = [...rows].sort((a: any, b: any) => {
+    const ta = new Date(a.ended_at || a.settled_at || a.start_time || 0).getTime();
+    const tb = new Date(b.ended_at || b.settled_at || b.start_time || 0).getTime();
+    return tb - ta;
+  });
+  for (const m of sorted) {
+    const raw: any = (m as any).ended_at || (m as any).settled_at || (m as any).start_time;
+    const d = raw ? new Date(raw) : new Date(0);
+    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    const label = raw ? fmt.format(d) : "Undated";
+    if (!buckets.has(key)) buckets.set(key, { label, items: [] });
+    buckets.get(key)!.items.push(m);
+  }
+  return Array.from(buckets.values()).map((b) => [b.label, b.items] as [string, MatchRow[]]);
 }
