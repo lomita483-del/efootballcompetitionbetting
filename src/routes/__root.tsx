@@ -71,7 +71,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" },
+      // Fixed 1280-wide design canvas: phones render the desktop layout scaled to fit
+      // (no pinch, no side-scroll). A runtime effect swaps this for `width=device-width`
+      // on real desktops / "Desktop Site" so those get an even wider layout.
+      { name: "viewport", content: "width=1280, viewport-fit=cover" },
       { name: "google-site-verification", content: "VmJKgEfwpQsNav2Nc0ItKNySizECxM7nnKuyxh-A5gM" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
