@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WithdrawRouteImport } from './routes/withdraw'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
+import { Route as WagersRouteImport } from './routes/wagers'
 import { Route as TriviaRouteImport } from './routes/trivia'
 import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as TournamentRouteImport } from './routes/tournament'
@@ -65,6 +66,11 @@ const WithdrawRoute = WithdrawRouteImport.update({
 const WatchlistRoute = WatchlistRouteImport.update({
   id: '/watchlist',
   path: '/watchlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WagersRoute = WagersRouteImport.update({
+  id: '/wagers',
+  path: '/wagers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TriviaRoute = TriviaRouteImport.update({
@@ -329,6 +335,7 @@ export interface FileRoutesByFullPath {
   '/tournament': typeof TournamentRoute
   '/transactions': typeof TransactionsRoute
   '/trivia': typeof TriviaRoute
+  '/wagers': typeof WagersRoute
   '/watchlist': typeof WatchlistRoute
   '/withdraw': typeof WithdrawRoute
   '/guides/how-it-works': typeof GuidesHowItWorksRoute
@@ -378,6 +385,7 @@ export interface FileRoutesByTo {
   '/tournament': typeof TournamentRoute
   '/transactions': typeof TransactionsRoute
   '/trivia': typeof TriviaRoute
+  '/wagers': typeof WagersRoute
   '/watchlist': typeof WatchlistRoute
   '/withdraw': typeof WithdrawRoute
   '/guides/how-it-works': typeof GuidesHowItWorksRoute
@@ -428,6 +436,7 @@ export interface FileRoutesById {
   '/tournament': typeof TournamentRoute
   '/transactions': typeof TransactionsRoute
   '/trivia': typeof TriviaRoute
+  '/wagers': typeof WagersRoute
   '/watchlist': typeof WatchlistRoute
   '/withdraw': typeof WithdrawRoute
   '/guides/how-it-works': typeof GuidesHowItWorksRoute
@@ -479,6 +488,7 @@ export interface FileRouteTypes {
     | '/tournament'
     | '/transactions'
     | '/trivia'
+    | '/wagers'
     | '/watchlist'
     | '/withdraw'
     | '/guides/how-it-works'
@@ -528,6 +538,7 @@ export interface FileRouteTypes {
     | '/tournament'
     | '/transactions'
     | '/trivia'
+    | '/wagers'
     | '/watchlist'
     | '/withdraw'
     | '/guides/how-it-works'
@@ -577,6 +588,7 @@ export interface FileRouteTypes {
     | '/tournament'
     | '/transactions'
     | '/trivia'
+    | '/wagers'
     | '/watchlist'
     | '/withdraw'
     | '/guides/how-it-works'
@@ -627,6 +639,7 @@ export interface RootRouteChildren {
   TournamentRoute: typeof TournamentRoute
   TransactionsRoute: typeof TransactionsRoute
   TriviaRoute: typeof TriviaRoute
+  WagersRoute: typeof WagersRoute
   WatchlistRoute: typeof WatchlistRoute
   WithdrawRoute: typeof WithdrawRoute
   GuidesHowItWorksRoute: typeof GuidesHowItWorksRoute
@@ -658,6 +671,13 @@ declare module '@tanstack/react-router' {
       path: '/watchlist'
       fullPath: '/watchlist'
       preLoaderRoute: typeof WatchlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wagers': {
+      id: '/wagers'
+      path: '/wagers'
+      fullPath: '/wagers'
+      preLoaderRoute: typeof WagersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trivia': {
@@ -1021,6 +1041,7 @@ const rootRouteChildren: RootRouteChildren = {
   TournamentRoute: TournamentRoute,
   TransactionsRoute: TransactionsRoute,
   TriviaRoute: TriviaRoute,
+  WagersRoute: WagersRoute,
   WatchlistRoute: WatchlistRoute,
   WithdrawRoute: WithdrawRoute,
   GuidesHowItWorksRoute: GuidesHowItWorksRoute,
