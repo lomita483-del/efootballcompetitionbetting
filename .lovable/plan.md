@@ -1,54 +1,111 @@
-# Plan: Desktop-first redesign + 6 targeted fixes
+# Build Plan
 
-This is a large batch. Confirm the plan (or trim it) before I start; I'll then ship it across a few sequential edits.
+Three chunks in one turn. Given the P2P surface, expect this to be a large diff (~25 files). I'll ship it end-to-end; the follow-up turn will be for polish/bug fixes you find while using it.
 
-## 1. Responsive redesign — mobile shows the desktop layout, scaled
+## 1. Top nav fixes
 
-Goal: on a phone, every page renders the current desktop composition (same columns, cards, tables, spacing). The user should not need to pinch or side-scroll.
+- **Pin Balance + Profile + Logout** to the right of the top nav on every page (non-scrollable anchor group).
+- Middle nav links (Matches, Virtual, Lottery, Arcade, Shop, Leaderboard, Tournament, Dashboard, Tasks, etc.) become horizontally scrollable inside the remaining space, sliding under the pinned group with a soft gradient fade so nothing gets clipped off-screen.
+- Remove the top nav row entirely from the **home page** (`/`) on ALL viewports since the home already has its own quick menu / sidebar.
 
-**How:**
-- Set a viewport meta with `initial-scale` computed from device width vs a fixed design width (1280px). We already have `viewport-fit=cover`; switch the site to a **fixed-width design canvas** approach: wrap `<body>` content in a shell that is `min-width: 1280px` and let the browser scale via `<meta name="viewport" content="width=1280">`. This forces mobile Chrome to render the page at 1280px and fit-to-screen, which is exactly "mobile looks like desktop, no pinch".
-- Add a runtime hook in `__root.tsx` that reads `window.innerWidth` / `window.screen.width` to detect true desktop-site mode (>= ~1400 effective px) and swaps the viewport tag to `width=device-width` so real desktops and "Desktop Site" get the wider expanded layout.
-- Introduce a new Tailwind breakpoint tier used by containers:
-  - default (mobile with viewport=1280): current `md/lg` desktop layout.
-  - `xl:` (≥1400): wider max-width (e.g. `max-w-[1600px]`), extra column on grids, larger gaps.
-- Remove `useIsMobile()` gated hiding on major pages (matches, home, dashboard, sidebar, admin) — anything currently hidden `<md` becomes always-visible. `useIsMobile` stays for genuine touch-only affordances (drawer vs sidebar).
-- Sidebar: on the fixed 1280 canvas it can render as the desktop sidebar by default; keep the hamburger only for the "expanded desktop" tier if the design prefers.
+## 2. Admin quick-action buttons
 
-**Risk / caveats I want you to confirm:**
-- `width=1280` viewport means text is physically smaller on phones (readable but small). This is the tradeoff you asked for.
-- Any component that used `100vw`/`100dvh` for full-screen overlays will still fill the viewport correctly.
-- Admin panels tuned with `useIsMobile` drawers will now show desktop tables on phones — that's the intent.
+Bump tile size in the Admin Quick Actions grid (~10-15% larger padding + icon), keep column count on desktop, avoid regressing mobile density.
 
-## 2. Team Wizard → single form
+## 3. P2P Wager System (full spec)
 
-Rewrite `MatchWizard` (5-step) in `src/routes/admin.tsx` as one form matching the ShooterMatchWizard shape: home team, away team, kickoff, odds, featured toggle, image + fit/position, confirmation dialog. Reuse the existing confirmation dialog pattern. Restyle both wizards with the gold/emerald glass tokens (cards, gradient header, section headings) so they no longer look plain.
+### Data model (one migration)
 
-## 3. Login gate — guests can't reach `/`
+```text
+wager_wallets           user_id, balance, locked_balance
+wager_wallet_txns       wallet_id, kind, amount, ref_type, ref_id, admin_id, notes
+wagers                  id, public_id (WGR-XXXXXX), challenger_id, opponent_id,
+                        match_id/event_ref, category, bet_type, stake, total_pot,
+                        platform_fee, agreement, status, expires_at, funded_at,
+                        activated_at, settled_at, winner_id, loser_id, is_draw,
+                        settlement_notes, final_score_home, final_score_away
+wager_rounds            wager_id, round_no, home_score, away_score, winner_id, ended_at
+wager_payments          wager_id, user_id, amount, method, receipt_url, status,
+                        verified_by, verified_at, notes
+wager_live_events       wager_id, ts, kind (score|round|status|commentary|stat),
+                        payload jsonb
+wager_termination_reqs  wager_id, requested_by, reason, opponent_response,
+                        admin_status, admin_id, admin_notes
+wager_disputes          wager_id, opened_by, reason, evidence_urls[], status,
+                        admin_id, resolution_notes, messages jsonb
+wager_notifications     reuses existing notifications table with kind='wager_*'
+wager_audit_log         actor_id, action, prev jsonb, next jsonb, ref_id, reason,
+                        ip, ua
+```
 
-- Wrap `Outlet` (or add `beforeLoad` on `__root`) so that if `!session` and route isn't in a public allow-list (`/login`, `/register`, `/forgot-password`, `/reset-password`, `/about`, `/faq`, `/guides/how-it-works`, `/api/*`, `/sitemap.xml`), redirect to `/login`.
-- Login/register: if session exists, redirect to `/`.
-- Keep SEO-critical public pages (about/faq/guides) reachable so crawlers still index — confirm if you want those gated too.
+Status enum: `pending_approval, awaiting_payment, awaiting_funding, funded, active, live, awaiting_settlement, settled, cancelled, refunded, disputed, terminated`.
 
-## 4. Recurring push not firing
+RLS: challenger/opponent see their own wagers + slips; admin role sees all. Every table has `GRANT` + policies scoped to `auth.uid()` or `has_role`.
 
-- Verify the `pg_cron` job actually calls `/api/public/hooks/recurring-push` (check `cron.job` / `cron.job_run_details`). If missing or failing, reinstall the schedule.
-- Fix the motivational/encouragement selector: currently it may reuse a fixed row instead of rotating; store `last_sent_index` per type in `recurring_push_settings` and advance by 1 each run, wrapping at total count.
-- Log each dispatch to `push_broadcasts` so we can see what actually went out.
+DB functions:
+- `p2p_create_wager`, `p2p_accept_wager`, `p2p_reject_wager`
+- `p2p_verify_payment` (admin) → credits Wager Wallet, transitions status
+- `p2p_settle_wager` (admin) → pays winner from pot, records txn, marks settled
+- `p2p_request_termination`, `p2p_respond_termination`, `p2p_admin_terminate`
+- `p2p_open_dispute`, `p2p_resolve_dispute`
+- Audit trigger writes to `wager_audit_log` on every mutation.
 
-## 5. Guests subscribe to push
+### User-facing routes
 
-- Change `PushPermissionPrompt` + `subscribeToPush` to not require `user_id`. Insert into `push_subscriptions` with `user_id = null` for guests; RLS: add anon INSERT policy scoped to own endpoint. Audience filtering already tolerates null `user_id` for "any / anonymous" audience.
+- `/wagers` — Wager History with tabs (All / Pending / Awaiting Funding / Active / Live / Won / Lost / Draw / Cancelled / Refunded), search + filter.
+- `/wagers/new` — Challenge creator (opponent search, match picker, category, bet type, stake, expiration, agreement).
+- `/wagers/$publicId` — Premium bet slip: QR, countdown, status timeline, funding CTA, terminate/dispute actions.
+- `/wagers/$publicId/live` — Live match UI (scoreboard, round scores, timer, timeline, commentary, live badge), realtime via Supabase channel.
+- Inbox banner on `/notifications` + toast for incoming challenges.
 
-## 6. Date demarcations on ended matches
+### Admin
 
-- In `src/routes/matches.tsx` (ended tab) and the admin Ended tab, group the list by `ended_at`/`date` day. Insert a sticky separator row (`── July 18, 2026 ──`) between groups. Use `Intl.DateTimeFormat` in project locale, sorted newest first.
+New **Wagers** button in Admin Quick Actions → `/admin/wagers` panel (component: `src/components/admin/WagersAdminPanel.tsx`) with:
 
-## Order of shipping (sequential to reduce blast radius)
-1. Login gate + guest push subscribe (small, safe).
-2. Date demarcations (small, isolated).
-3. Recurring push fix + verification.
-4. Team Wizard single-form + wizard UI polish.
-5. Responsive viewport switch + `useIsMobile` audit — done last because it affects every page.
+- Stat header: Total / Pending / Awaiting Payment / Awaiting Funding / Active / Live / Awaiting Settlement / Settled / Cancelled / Refunded / Disputed / Platform Revenue (D/W/M).
+- Tabbed queue mirroring status enum + Search/Filter/Sort by Bet ID, user, match, stake, date, status.
+- Wager detail drawer: full review (payments, wallet balances, evidence, notes, audit log) + action bar:
+  - Approve / Decline / Request changes / Cancel / Reopen / Lock / Unlock / Freeze / Resume
+  - Verify payment / Reject payment / Credit / Deduct / Refund one / Refund both / Partial refund
+  - Assign match / Change match / Edit kickoff / Postpone / Restart / Force start / Force end / Lock match
+  - Live update panel: score, round score, timer, current round, round winner, stat, commentary, timeline, status (realtime broadcast)
+  - Settle: final score, round results, winner/loser/draw/split/void; Approve / Reject / Reverse / Recalc payout + notes
+  - Override: correct final score, correct round, change winner, reverse wallet, re-credit, deduct — requires reason + confirm, writes audit entry
+  - Terminate (admin emergency) with reason enum
+  - Dispute panel: evidence viewer, chat with players, request more evidence, approve/reject, modify settlement, refund, close
+  - Notifications: send payment reminder, wager approved/declined, match cancelled/postponed, settlement complete, refund issued, dispute update, custom announcement.
+- Read-only Audit Log tab with search.
 
-Reply "go" to ship, or tell me which items to drop / reorder.
+### Notifications & realtime
+
+- New `notifications.kind` values covering all 15 wager events.
+- Live match page subscribes to `wager_live_events` and `wagers` row updates via Supabase Realtime (`REPLICA IDENTITY FULL` for both).
+- Recurring push adds "Wager awaiting your action" reminder.
+
+### Security & roles
+
+- Super Admin: full (payment approval, wallet adjust, settlement override, user management).
+- Admin: manage wagers, verify payments, live updates, settle, disputes (no wallet override).
+- Moderator: view + live match data only.
+- All privileged server fns use `requireSupabaseAuth` + `has_role` check before importing `supabaseAdmin`.
+
+### UI/UX
+
+- Glassmorphism cards, gold/emerald accents matching current sportsbook theme.
+- Animated status badges, countdown timers (reuses `Countdown`), trophy celebration on settlement (reuses `GlobalWinAnimation`), QR via `qrcode.react`.
+- Fully responsive under the existing 1280 canvas.
+
+## Technical notes
+
+- Single migration file for all P2P schema + GRANTs + policies + triggers + functions.
+- Client files: `src/lib/wagers.ts` (queries/helpers), `src/lib/wagers.functions.ts` (server fns), `src/components/wager/*` (BetSlip, LiveMatch, ChallengeForm, StatusBadge, ActionBar), route files under `src/routes/wagers.*`, admin panel + wired into `admin.tsx` Quick Actions.
+- Nav pinning done in `src/components/Layout.tsx` with `flex` + `overflow-x-auto` for the scroll region and `sticky right-0` for the pinned group with a `bg-gradient-to-l` mask; home-page suppression via a `hideTopNav` prop or route check.
+- Admin tile size change is a single class swap in the Quick Actions grid.
+
+## What's NOT in this turn
+
+- SMS/email delivery for the new notification kinds beyond the existing push/in-app channels.
+- Custom payment-provider integration (spec says manual admin verification — I'll build that flow, no Stripe/Paddle).
+- Automated fraud detection heuristics (admin can still terminate manually).
+
+Reply "go" to build, or tell me what to cut/add before I start.
