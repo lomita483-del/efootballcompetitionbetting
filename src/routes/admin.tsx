@@ -20,6 +20,7 @@ import {
   Calendar, Tag, Image as ImageIcon, BarChart3, History, Send, Plus, Trash2, Pencil, ChevronRight, ChevronLeft, Wallet, ListOrdered, Sparkles, ClipboardList, Lock, Pause, Play, Check, X, MessageSquare, Eye, RotateCw, Copy, Globe, MapPin, Smartphone, Clock, Filter,
   Dice5, LogOut, Crosshair, Target, Flame, ThumbsUp, ThumbsDown,
   Gift, BellRing, GalleryHorizontalEnd, Gamepad2, Vote, ShoppingBag, LifeBuoy, Newspaper,
+  Swords,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import _ecbLogo from "@/assets/ecb-logo.png.asset.json";
