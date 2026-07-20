@@ -143,6 +143,7 @@ function Index() {
             <Link to="/matches"><Button size="lg" className="btn-luxury">View Matches <ChevronRight className="h-4 w-4 ml-1" /></Button></Link>
             <Link to="/leaderboard"><Button size="lg" variant="outline" className="border-primary/40">Leaderboard</Button></Link>
             <Link to="/checkout"><Button size="lg" variant="outline" className="border-accent/40 text-accent"><Coins className="h-4 w-4 mr-1" />Buy Tokens</Button></Link>
+            <Link to="/wagers"><Button size="lg" variant="outline" className="border-primary/40">P2P Wagers</Button></Link>
           </div>
         </div>
       </section>
