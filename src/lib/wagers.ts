@@ -45,12 +45,12 @@ export async function listMyWagers(uid: string): Promise<Wager[]> {
   return (data as any) ?? [];
 }
 
-export async function findOpponent(query: string): Promise<{ id: string; username: string | null }[]> {
+export async function findOpponent(query: string): Promise<{ id: string; username: string | null; email?: string }[]> {
   const q = query.trim();
   if (!q) return [];
   const { data } = await supabase.from("profiles")
-    .select("id, username")
-    .or(`username.ilike.%${q}%,discord_username.ilike.%${q}%`)
+    .select("id, username, email")
+    .or(`username.ilike.%\( {q}%,discord_username.ilike.% \){q}%,id.ilike.%\( {q}%,email.ilike.% \){q}%`)
     .limit(8);
   return (data as any) ?? [];
 }
