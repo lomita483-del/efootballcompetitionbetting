@@ -1,3 +1,4 @@
+import { ..., ShieldAlert } from "lucide-react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
@@ -199,6 +200,20 @@ function Page() {
   );
 }
 
+{/* Dispute Chat & Evidence Thread */}
+{w.status === "disputed" && (
+  <Card className="glass p-4 mt-4">
+    <div className="flex items-center justify-between mb-3">
+      <div className="text-[10px] uppercase tracking-widest text-fuchsia-400 flex items-center gap-2">
+        <ShieldAlert className="h-4 w-4" /> Dispute Resolution Thread
+      </div>
+      <Badge variant="outline" className="text-fuchsia-300">Both players can message + attach proof</Badge>
+    </div>
+    <div className="text-xs text-muted-foreground border border-fuchsia-500/30 rounded p-4 bg-background/30">
+      Chat & evidence upload coming in next update. Messages will be visible to both players and admin.
+    </div>
+  </Card>
+)}
 function PartyCard({ label, name, avatar, highlight }: any) {
   return (
     <div className={`rounded-lg border p-3 text-center ${highlight ? "border-primary bg-primary/10" : "border-primary/20 bg-background/30"}`}>
