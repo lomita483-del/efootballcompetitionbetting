@@ -237,17 +237,3 @@ function PaymentForm({ wager, onDone }: { wager: Wager; onDone: () => void }) {
     </div>
   );
 }
-
-{/* Dispute Chat & Evidence for Disputed Wagers */}
-{w.status === "disputed" && (
-  <Card className="glass p-4 mt-4">
-    <div className="text-[10px] uppercase tracking-widest text-fuchsia-400 mb-3 flex items-center gap-2">
-      <ShieldAlert className="h-4 w-4" /> Dispute Thread — Both players can chat & attach proof
-    </div>
-    {/* Simple message list + input would go here — expand with Supabase realtime if needed */}
-    <div className="text-xs text-muted-foreground border border-fuchsia-500/20 p-3 rounded">
-      Evidence upload & messages coming soon. Admin will review this thread.
-    </div>
-    {/* Add form for messages/files here */}
-  </Card>
-)}
