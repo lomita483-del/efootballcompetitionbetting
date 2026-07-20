@@ -3641,13 +3641,13 @@ function QuickActionsBar({ onOpen }: { onOpen: (t: string) => void }) {
       <div className="text-[10px] sm:text-xs font-bold tracking-widest text-primary mb-2">QUICK ACTIONS</div>
       <div className="overflow-x-auto pb-2 -mb-2">
         {/* 4 buttons stacked per column; columns flow horizontally and scroll left/right */}
-        <div className="grid grid-rows-4 grid-flow-col auto-cols-[68px] sm:auto-cols-[84px] gap-1.5 w-max">
+        <div className="grid grid-rows-4 grid-flow-col auto-cols-[80px] sm:auto-cols-[96px] gap-2 w-max">
           {actions.map((q, idx) => {
             const c = QA_PALETTE[idx % QA_PALETTE.length];
             return (
-              <button key={q.l} onClick={() => onOpen(q.t)} className={`flex flex-col items-center justify-center gap-1 p-1.5 rounded border active:scale-95 transition ${c.bd}`}>
-                <q.i className={`h-3.5 w-3.5 ${c.ic}`} />
-                <span className="text-[7px] sm:text-[9px] text-foreground text-center leading-tight">{q.l}</span>
+              <button key={q.l} onClick={() => onOpen(q.t)} className={`flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-lg border active:scale-95 transition min-h-[62px] ${c.bd}`}>
+                <q.i className={`h-4 w-4 sm:h-[18px] sm:w-[18px] ${c.ic}`} />
+                <span className="text-[8px] sm:text-[10px] text-foreground text-center leading-tight font-semibold">{q.l}</span>
               </button>
             );
           })}
