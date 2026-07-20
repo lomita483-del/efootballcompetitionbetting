@@ -86,7 +86,7 @@ export async function acceptWager(id: string) {
   if (error) throw error; return data as Wager;
 }
 export async function rejectWager(id: string, reason?: string) {
-  const { data, error } = await supabase.rpc("p2p_reject_wager", { _wager_id: id, _reason: reason ?? null });
+  const { data, error } = await supabase.rpc("p2p_reject_wager", { _wager_id: id, _reason: reason ?? undefined } as any);
   if (error) throw error; return data as Wager;
 }
 export async function requestTermination(id: string, reason: string) {
@@ -124,15 +124,15 @@ export async function adminSettleWager(input: {
   final_home?: number | null; final_away?: number | null; notes?: string;
 }) {
   const { data, error } = await supabase.rpc("p2p_settle_wager", {
-    _wager_id: input.wager_id, _winner_id: input.winner_id,
+    _wager_id: input.wager_id, _winner_id: input.winner_id ?? undefined,
     _is_draw: input.is_draw ?? false,
-    _final_home: input.final_home ?? null, _final_away: input.final_away ?? null,
-    _notes: input.notes ?? null,
-  });
+    _final_home: input.final_home ?? undefined, _final_away: input.final_away ?? undefined,
+    _notes: input.notes ?? undefined,
+  } as any);
   if (error) throw error; return data as Wager;
 }
 export async function adminRefundWager(wager_id: string, reason?: string) {
-  const { data, error } = await supabase.rpc("p2p_refund_wager", { _wager_id: wager_id, _reason: reason ?? null });
+  const { data, error } = await supabase.rpc("p2p_refund_wager", { _wager_id: wager_id, _reason: reason ?? undefined } as any);
   if (error) throw error; return data as Wager;
 }
 export async function adminTerminateWager(wager_id: string, reason: string, refund = true) {
