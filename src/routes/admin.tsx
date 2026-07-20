@@ -254,6 +254,7 @@ export function AdminPage() {
             <TabsContent value="attendance" className="mt-4"><AttendancePanel /></TabsContent>
             <TabsContent value="branding" className="mt-4"><BrandingAdminPanel /></TabsContent>
             <TabsContent value="ux" className="mt-4"><UserExperiencePanel /></TabsContent>
+            <TabsContent value="wagers" className="mt-4"><WagersAdminPanel /></TabsContent>
           </Tabs>
         </div>
         <ActionConfirmDialog />
