@@ -3619,6 +3619,7 @@ const QUICK_ACTIONS: { i: any; l: string; t: string }[] = [
   { i: Wallet, l: "Withdrawals", t: "withdrawals" },
   { i: Trophy, l: "Won Bets", t: "wonbets" },
   { i: X, l: "Lost Bets", t: "lostbets" },
+  { i: Swords, l: "Wagers", t: "wagers" },
 ];
 
 const QA_PALETTE = [
