@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WithdrawRouteImport } from './routes/withdraw'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
+import { Route as WagersRouteImport } from './routes/wagers'
 import { Route as TriviaRouteImport } from './routes/trivia'
 import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as TournamentRouteImport } from './routes/tournament'
@@ -43,6 +44,7 @@ import { Route as AchievementsRouteImport } from './routes/achievements'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VirtualIndexRouteImport } from './routes/virtual.index'
+import { Route as WagersIdRouteImport } from './routes/wagers.$id'
 import { Route as VirtualInstantRouteImport } from './routes/virtual.instant'
 import { Route as VirtualHistoryRouteImport } from './routes/virtual.history'
 import { Route as VirtualFootballInstantRouteImport } from './routes/virtual.football-instant'
@@ -65,6 +67,11 @@ const WithdrawRoute = WithdrawRouteImport.update({
 const WatchlistRoute = WatchlistRouteImport.update({
   id: '/watchlist',
   path: '/watchlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WagersRoute = WagersRouteImport.update({
+  id: '/wagers',
+  path: '/wagers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TriviaRoute = TriviaRouteImport.update({
@@ -227,6 +234,11 @@ const VirtualIndexRoute = VirtualIndexRouteImport.update({
   path: '/virtual/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WagersIdRoute = WagersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => WagersRoute,
+} as any)
 const VirtualInstantRoute = VirtualInstantRouteImport.update({
   id: '/virtual/instant',
   path: '/virtual/instant',
@@ -329,6 +341,7 @@ export interface FileRoutesByFullPath {
   '/tournament': typeof TournamentRoute
   '/transactions': typeof TransactionsRoute
   '/trivia': typeof TriviaRoute
+  '/wagers': typeof WagersRouteWithChildren
   '/watchlist': typeof WatchlistRoute
   '/withdraw': typeof WithdrawRoute
   '/guides/how-it-works': typeof GuidesHowItWorksRoute
@@ -339,6 +352,7 @@ export interface FileRoutesByFullPath {
   '/virtual/football-instant': typeof VirtualFootballInstantRoute
   '/virtual/history': typeof VirtualHistoryRoute
   '/virtual/instant': typeof VirtualInstantRoute
+  '/wagers/$id': typeof WagersIdRoute
   '/virtual/': typeof VirtualIndexRoute
   '/api/public/virtual-tick': typeof ApiPublicVirtualTickRoute
   '/api/public/hooks/broadcast-push': typeof ApiPublicHooksBroadcastPushRoute
@@ -378,6 +392,7 @@ export interface FileRoutesByTo {
   '/tournament': typeof TournamentRoute
   '/transactions': typeof TransactionsRoute
   '/trivia': typeof TriviaRoute
+  '/wagers': typeof WagersRouteWithChildren
   '/watchlist': typeof WatchlistRoute
   '/withdraw': typeof WithdrawRoute
   '/guides/how-it-works': typeof GuidesHowItWorksRoute
@@ -388,6 +403,7 @@ export interface FileRoutesByTo {
   '/virtual/football-instant': typeof VirtualFootballInstantRoute
   '/virtual/history': typeof VirtualHistoryRoute
   '/virtual/instant': typeof VirtualInstantRoute
+  '/wagers/$id': typeof WagersIdRoute
   '/virtual': typeof VirtualIndexRoute
   '/api/public/virtual-tick': typeof ApiPublicVirtualTickRoute
   '/api/public/hooks/broadcast-push': typeof ApiPublicHooksBroadcastPushRoute
@@ -428,6 +444,7 @@ export interface FileRoutesById {
   '/tournament': typeof TournamentRoute
   '/transactions': typeof TransactionsRoute
   '/trivia': typeof TriviaRoute
+  '/wagers': typeof WagersRouteWithChildren
   '/watchlist': typeof WatchlistRoute
   '/withdraw': typeof WithdrawRoute
   '/guides/how-it-works': typeof GuidesHowItWorksRoute
@@ -438,6 +455,7 @@ export interface FileRoutesById {
   '/virtual/football-instant': typeof VirtualFootballInstantRoute
   '/virtual/history': typeof VirtualHistoryRoute
   '/virtual/instant': typeof VirtualInstantRoute
+  '/wagers/$id': typeof WagersIdRoute
   '/virtual/': typeof VirtualIndexRoute
   '/api/public/virtual-tick': typeof ApiPublicVirtualTickRoute
   '/api/public/hooks/broadcast-push': typeof ApiPublicHooksBroadcastPushRoute
@@ -479,6 +497,7 @@ export interface FileRouteTypes {
     | '/tournament'
     | '/transactions'
     | '/trivia'
+    | '/wagers'
     | '/watchlist'
     | '/withdraw'
     | '/guides/how-it-works'
@@ -489,6 +508,7 @@ export interface FileRouteTypes {
     | '/virtual/football-instant'
     | '/virtual/history'
     | '/virtual/instant'
+    | '/wagers/$id'
     | '/virtual/'
     | '/api/public/virtual-tick'
     | '/api/public/hooks/broadcast-push'
@@ -528,6 +548,7 @@ export interface FileRouteTypes {
     | '/tournament'
     | '/transactions'
     | '/trivia'
+    | '/wagers'
     | '/watchlist'
     | '/withdraw'
     | '/guides/how-it-works'
@@ -538,6 +559,7 @@ export interface FileRouteTypes {
     | '/virtual/football-instant'
     | '/virtual/history'
     | '/virtual/instant'
+    | '/wagers/$id'
     | '/virtual'
     | '/api/public/virtual-tick'
     | '/api/public/hooks/broadcast-push'
@@ -577,6 +599,7 @@ export interface FileRouteTypes {
     | '/tournament'
     | '/transactions'
     | '/trivia'
+    | '/wagers'
     | '/watchlist'
     | '/withdraw'
     | '/guides/how-it-works'
@@ -587,6 +610,7 @@ export interface FileRouteTypes {
     | '/virtual/football-instant'
     | '/virtual/history'
     | '/virtual/instant'
+    | '/wagers/$id'
     | '/virtual/'
     | '/api/public/virtual-tick'
     | '/api/public/hooks/broadcast-push'
@@ -627,6 +651,7 @@ export interface RootRouteChildren {
   TournamentRoute: typeof TournamentRoute
   TransactionsRoute: typeof TransactionsRoute
   TriviaRoute: typeof TriviaRoute
+  WagersRoute: typeof WagersRouteWithChildren
   WatchlistRoute: typeof WatchlistRoute
   WithdrawRoute: typeof WithdrawRoute
   GuidesHowItWorksRoute: typeof GuidesHowItWorksRoute
@@ -658,6 +683,13 @@ declare module '@tanstack/react-router' {
       path: '/watchlist'
       fullPath: '/watchlist'
       preLoaderRoute: typeof WatchlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wagers': {
+      id: '/wagers'
+      path: '/wagers'
+      fullPath: '/wagers'
+      preLoaderRoute: typeof WagersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trivia': {
@@ -884,6 +916,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VirtualIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/wagers/$id': {
+      id: '/wagers/$id'
+      path: '/$id'
+      fullPath: '/wagers/$id'
+      preLoaderRoute: typeof WagersIdRouteImport
+      parentRoute: typeof WagersRoute
+    }
     '/virtual/instant': {
       id: '/virtual/instant'
       path: '/virtual/instant'
@@ -989,6 +1028,17 @@ const MatchesRouteChildren: MatchesRouteChildren = {
 const MatchesRouteWithChildren =
   MatchesRoute._addFileChildren(MatchesRouteChildren)
 
+interface WagersRouteChildren {
+  WagersIdRoute: typeof WagersIdRoute
+}
+
+const WagersRouteChildren: WagersRouteChildren = {
+  WagersIdRoute: WagersIdRoute,
+}
+
+const WagersRouteWithChildren =
+  WagersRoute._addFileChildren(WagersRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -1021,6 +1071,7 @@ const rootRouteChildren: RootRouteChildren = {
   TournamentRoute: TournamentRoute,
   TransactionsRoute: TransactionsRoute,
   TriviaRoute: TriviaRoute,
+  WagersRoute: WagersRouteWithChildren,
   WatchlistRoute: WatchlistRoute,
   WithdrawRoute: WithdrawRoute,
   GuidesHowItWorksRoute: GuidesHowItWorksRoute,
@@ -1041,13 +1092,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

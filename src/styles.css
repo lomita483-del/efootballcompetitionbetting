@@ -972,3 +972,7 @@
 .loss-text-rise { animation: loss-text-rise 0.6s ease-out both; }
 .ash-piece    { animation: ash-fall linear forwards; }
 .skull-crack  { stroke-dasharray: 1; stroke-dashoffset: 1; animation: skull-crack-draw 0.9s ease-out 0.6s forwards; }
+
+/* Hide scrollbar for horizontally-scrolling top nav */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

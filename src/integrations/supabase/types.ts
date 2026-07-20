@@ -3819,6 +3819,461 @@ export type Database = {
         }
         Relationships: []
       }
+      wager_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          next: Json | null
+          prev: Json | null
+          reason: string | null
+          wager_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          next?: Json | null
+          prev?: Json | null
+          reason?: string | null
+          wager_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          next?: Json | null
+          prev?: Json | null
+          reason?: string | null
+          wager_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wager_audit_log_wager_id_fkey"
+            columns: ["wager_id"]
+            isOneToOne: false
+            referencedRelation: "wagers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wager_disputes: {
+        Row: {
+          admin_id: string | null
+          created_at: string
+          evidence_urls: string[]
+          id: string
+          messages: Json
+          opened_by: string
+          reason: string
+          resolution_notes: string | null
+          status: string
+          updated_at: string
+          wager_id: string
+        }
+        Insert: {
+          admin_id?: string | null
+          created_at?: string
+          evidence_urls?: string[]
+          id?: string
+          messages?: Json
+          opened_by: string
+          reason: string
+          resolution_notes?: string | null
+          status?: string
+          updated_at?: string
+          wager_id: string
+        }
+        Update: {
+          admin_id?: string | null
+          created_at?: string
+          evidence_urls?: string[]
+          id?: string
+          messages?: Json
+          opened_by?: string
+          reason?: string
+          resolution_notes?: string | null
+          status?: string
+          updated_at?: string
+          wager_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wager_disputes_wager_id_fkey"
+            columns: ["wager_id"]
+            isOneToOne: false
+            referencedRelation: "wagers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wager_live_events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          kind: string
+          payload: Json
+          wager_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind: string
+          payload?: Json
+          wager_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          payload?: Json
+          wager_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wager_live_events_wager_id_fkey"
+            columns: ["wager_id"]
+            isOneToOne: false
+            referencedRelation: "wagers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wager_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          method: string | null
+          notes: string | null
+          receipt_url: string | null
+          reference: string | null
+          status: Database["public"]["Enums"]["wager_payment_status"]
+          user_id: string
+          verified_at: string | null
+          verified_by: string | null
+          wager_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          method?: string | null
+          notes?: string | null
+          receipt_url?: string | null
+          reference?: string | null
+          status?: Database["public"]["Enums"]["wager_payment_status"]
+          user_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+          wager_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          method?: string | null
+          notes?: string | null
+          receipt_url?: string | null
+          reference?: string | null
+          status?: Database["public"]["Enums"]["wager_payment_status"]
+          user_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          wager_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wager_payments_wager_id_fkey"
+            columns: ["wager_id"]
+            isOneToOne: false
+            referencedRelation: "wagers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wager_rounds: {
+        Row: {
+          away_score: number
+          created_at: string
+          ended_at: string | null
+          home_score: number
+          id: string
+          round_no: number
+          wager_id: string
+          winner_id: string | null
+        }
+        Insert: {
+          away_score?: number
+          created_at?: string
+          ended_at?: string | null
+          home_score?: number
+          id?: string
+          round_no: number
+          wager_id: string
+          winner_id?: string | null
+        }
+        Update: {
+          away_score?: number
+          created_at?: string
+          ended_at?: string | null
+          home_score?: number
+          id?: string
+          round_no?: number
+          wager_id?: string
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wager_rounds_wager_id_fkey"
+            columns: ["wager_id"]
+            isOneToOne: false
+            referencedRelation: "wagers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wager_termination_reqs: {
+        Row: {
+          admin_id: string | null
+          admin_notes: string | null
+          admin_status: string
+          created_at: string
+          id: string
+          opponent_response: string | null
+          opponent_response_at: string | null
+          reason: string | null
+          requested_by: string
+          wager_id: string
+        }
+        Insert: {
+          admin_id?: string | null
+          admin_notes?: string | null
+          admin_status?: string
+          created_at?: string
+          id?: string
+          opponent_response?: string | null
+          opponent_response_at?: string | null
+          reason?: string | null
+          requested_by: string
+          wager_id: string
+        }
+        Update: {
+          admin_id?: string | null
+          admin_notes?: string | null
+          admin_status?: string
+          created_at?: string
+          id?: string
+          opponent_response?: string | null
+          opponent_response_at?: string | null
+          reason?: string | null
+          requested_by?: string
+          wager_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wager_termination_reqs_wager_id_fkey"
+            columns: ["wager_id"]
+            isOneToOne: false
+            referencedRelation: "wagers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wager_wallet_txns: {
+        Row: {
+          admin_id: string | null
+          amount: number
+          balance_after: number | null
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["wager_txn_kind"]
+          notes: string | null
+          user_id: string
+          wager_id: string | null
+          wallet_id: string
+        }
+        Insert: {
+          admin_id?: string | null
+          amount: number
+          balance_after?: number | null
+          created_at?: string
+          id?: string
+          kind: Database["public"]["Enums"]["wager_txn_kind"]
+          notes?: string | null
+          user_id: string
+          wager_id?: string | null
+          wallet_id: string
+        }
+        Update: {
+          admin_id?: string | null
+          amount?: number
+          balance_after?: number | null
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["wager_txn_kind"]
+          notes?: string | null
+          user_id?: string
+          wager_id?: string | null
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wager_wallet_txns_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wager_wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wager_wallets: {
+        Row: {
+          balance: number
+          created_at: string
+          id: string
+          locked_balance: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          id?: string
+          locked_balance?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          id?: string
+          locked_balance?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wagers: {
+        Row: {
+          activated_at: string | null
+          admin_notes: string | null
+          agreement: string | null
+          bet_type: string
+          category: string
+          challenger_id: string
+          created_at: string
+          event_label: string | null
+          expires_at: string | null
+          final_score_away: number | null
+          final_score_home: number | null
+          funded_at: string | null
+          id: string
+          is_draw: boolean
+          is_locked: boolean
+          live_at: string | null
+          loser_id: string | null
+          match_id: string | null
+          match_starts_at: string | null
+          opponent_id: string
+          platform_fee_pct: number
+          prize_paid: number | null
+          public_id: string
+          settled_at: string | null
+          settlement_notes: string | null
+          stake: number
+          status: Database["public"]["Enums"]["wager_status"]
+          total_pot: number
+          updated_at: string
+          winner_id: string | null
+        }
+        Insert: {
+          activated_at?: string | null
+          admin_notes?: string | null
+          agreement?: string | null
+          bet_type?: string
+          category?: string
+          challenger_id: string
+          created_at?: string
+          event_label?: string | null
+          expires_at?: string | null
+          final_score_away?: number | null
+          final_score_home?: number | null
+          funded_at?: string | null
+          id?: string
+          is_draw?: boolean
+          is_locked?: boolean
+          live_at?: string | null
+          loser_id?: string | null
+          match_id?: string | null
+          match_starts_at?: string | null
+          opponent_id: string
+          platform_fee_pct?: number
+          prize_paid?: number | null
+          public_id?: string
+          settled_at?: string | null
+          settlement_notes?: string | null
+          stake: number
+          status?: Database["public"]["Enums"]["wager_status"]
+          total_pot?: number
+          updated_at?: string
+          winner_id?: string | null
+        }
+        Update: {
+          activated_at?: string | null
+          admin_notes?: string | null
+          agreement?: string | null
+          bet_type?: string
+          category?: string
+          challenger_id?: string
+          created_at?: string
+          event_label?: string | null
+          expires_at?: string | null
+          final_score_away?: number | null
+          final_score_home?: number | null
+          funded_at?: string | null
+          id?: string
+          is_draw?: boolean
+          is_locked?: boolean
+          live_at?: string | null
+          loser_id?: string | null
+          match_id?: string | null
+          match_starts_at?: string | null
+          opponent_id?: string
+          platform_fee_pct?: number
+          prize_paid?: number | null
+          public_id?: string
+          settled_at?: string | null
+          settlement_notes?: string | null
+          stake?: number
+          status?: Database["public"]["Enums"]["wager_status"]
+          total_pot?: number
+          updated_at?: string
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wagers_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wagers_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "public_real_matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       watchlist: {
         Row: {
           created_at: string
@@ -4297,6 +4752,7 @@ export type Database = {
         Args: { _draw_id: string; _winning_number?: number }
         Returns: Json
       }
+      ensure_wager_wallet: { Args: { _uid: string }; Returns: string }
       fix_pending_virtual_bets: { Args: never; Returns: Json }
       fix_stuck_bets: { Args: never; Returns: number }
       gang_directory: {
@@ -4311,6 +4767,7 @@ export type Database = {
       }
       gen_match_public_id: { Args: never; Returns: string }
       gen_special_id: { Args: never; Returns: string }
+      gen_wager_public_id: { Args: never; Returns: string }
       get_display_roles: { Args: { _user_id: string }; Returns: string[] }
       has_role: {
         Args: {
@@ -4332,6 +4789,280 @@ export type Database = {
       notify_admins: {
         Args: { _body: string; _link: string; _title: string }
         Returns: undefined
+      }
+      p2p_accept_wager: {
+        Args: { _wager_id: string }
+        Returns: {
+          activated_at: string | null
+          admin_notes: string | null
+          agreement: string | null
+          bet_type: string
+          category: string
+          challenger_id: string
+          created_at: string
+          event_label: string | null
+          expires_at: string | null
+          final_score_away: number | null
+          final_score_home: number | null
+          funded_at: string | null
+          id: string
+          is_draw: boolean
+          is_locked: boolean
+          live_at: string | null
+          loser_id: string | null
+          match_id: string | null
+          match_starts_at: string | null
+          opponent_id: string
+          platform_fee_pct: number
+          prize_paid: number | null
+          public_id: string
+          settled_at: string | null
+          settlement_notes: string | null
+          stake: number
+          status: Database["public"]["Enums"]["wager_status"]
+          total_pot: number
+          updated_at: string
+          winner_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wagers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      p2p_admin_terminate: {
+        Args: { _reason: string; _refund?: boolean; _wager_id: string }
+        Returns: {
+          activated_at: string | null
+          admin_notes: string | null
+          agreement: string | null
+          bet_type: string
+          category: string
+          challenger_id: string
+          created_at: string
+          event_label: string | null
+          expires_at: string | null
+          final_score_away: number | null
+          final_score_home: number | null
+          funded_at: string | null
+          id: string
+          is_draw: boolean
+          is_locked: boolean
+          live_at: string | null
+          loser_id: string | null
+          match_id: string | null
+          match_starts_at: string | null
+          opponent_id: string
+          platform_fee_pct: number
+          prize_paid: number | null
+          public_id: string
+          settled_at: string | null
+          settlement_notes: string | null
+          stake: number
+          status: Database["public"]["Enums"]["wager_status"]
+          total_pot: number
+          updated_at: string
+          winner_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wagers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      p2p_refund_wager: {
+        Args: { _reason?: string; _wager_id: string }
+        Returns: {
+          activated_at: string | null
+          admin_notes: string | null
+          agreement: string | null
+          bet_type: string
+          category: string
+          challenger_id: string
+          created_at: string
+          event_label: string | null
+          expires_at: string | null
+          final_score_away: number | null
+          final_score_home: number | null
+          funded_at: string | null
+          id: string
+          is_draw: boolean
+          is_locked: boolean
+          live_at: string | null
+          loser_id: string | null
+          match_id: string | null
+          match_starts_at: string | null
+          opponent_id: string
+          platform_fee_pct: number
+          prize_paid: number | null
+          public_id: string
+          settled_at: string | null
+          settlement_notes: string | null
+          stake: number
+          status: Database["public"]["Enums"]["wager_status"]
+          total_pot: number
+          updated_at: string
+          winner_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wagers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      p2p_reject_wager: {
+        Args: { _reason?: string; _wager_id: string }
+        Returns: {
+          activated_at: string | null
+          admin_notes: string | null
+          agreement: string | null
+          bet_type: string
+          category: string
+          challenger_id: string
+          created_at: string
+          event_label: string | null
+          expires_at: string | null
+          final_score_away: number | null
+          final_score_home: number | null
+          funded_at: string | null
+          id: string
+          is_draw: boolean
+          is_locked: boolean
+          live_at: string | null
+          loser_id: string | null
+          match_id: string | null
+          match_starts_at: string | null
+          opponent_id: string
+          platform_fee_pct: number
+          prize_paid: number | null
+          public_id: string
+          settled_at: string | null
+          settlement_notes: string | null
+          stake: number
+          status: Database["public"]["Enums"]["wager_status"]
+          total_pot: number
+          updated_at: string
+          winner_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wagers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      p2p_request_termination: {
+        Args: { _reason: string; _wager_id: string }
+        Returns: {
+          admin_id: string | null
+          admin_notes: string | null
+          admin_status: string
+          created_at: string
+          id: string
+          opponent_response: string | null
+          opponent_response_at: string | null
+          reason: string | null
+          requested_by: string
+          wager_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wager_termination_reqs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      p2p_settle_wager: {
+        Args: {
+          _final_away?: number
+          _final_home?: number
+          _is_draw?: boolean
+          _notes?: string
+          _wager_id: string
+          _winner_id: string
+        }
+        Returns: {
+          activated_at: string | null
+          admin_notes: string | null
+          agreement: string | null
+          bet_type: string
+          category: string
+          challenger_id: string
+          created_at: string
+          event_label: string | null
+          expires_at: string | null
+          final_score_away: number | null
+          final_score_home: number | null
+          funded_at: string | null
+          id: string
+          is_draw: boolean
+          is_locked: boolean
+          live_at: string | null
+          loser_id: string | null
+          match_id: string | null
+          match_starts_at: string | null
+          opponent_id: string
+          platform_fee_pct: number
+          prize_paid: number | null
+          public_id: string
+          settled_at: string | null
+          settlement_notes: string | null
+          stake: number
+          status: Database["public"]["Enums"]["wager_status"]
+          total_pot: number
+          updated_at: string
+          winner_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wagers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      p2p_verify_payment: {
+        Args: { _payment_id: string }
+        Returns: {
+          activated_at: string | null
+          admin_notes: string | null
+          agreement: string | null
+          bet_type: string
+          category: string
+          challenger_id: string
+          created_at: string
+          event_label: string | null
+          expires_at: string | null
+          final_score_away: number | null
+          final_score_home: number | null
+          funded_at: string | null
+          id: string
+          is_draw: boolean
+          is_locked: boolean
+          live_at: string | null
+          loser_id: string | null
+          match_id: string | null
+          match_starts_at: string | null
+          opponent_id: string
+          platform_fee_pct: number
+          prize_paid: number | null
+          public_id: string
+          settled_at: string | null
+          settlement_notes: string | null
+          stake: number
+          status: Database["public"]["Enums"]["wager_status"]
+          total_pot: number
+          updated_at: string
+          winner_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wagers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       place_championship_bet: {
         Args: {
@@ -4526,6 +5257,29 @@ export type Database = {
       match_status: "scheduled" | "live" | "ended" | "cancelled"
       ticket_status: "open" | "pending" | "resolved" | "closed"
       token_request_status: "pending" | "approved" | "denied"
+      wager_payment_status: "pending" | "verified" | "rejected"
+      wager_status:
+        | "pending_approval"
+        | "awaiting_payment"
+        | "awaiting_funding"
+        | "funded"
+        | "active"
+        | "live"
+        | "awaiting_settlement"
+        | "settled"
+        | "cancelled"
+        | "refunded"
+        | "disputed"
+        | "terminated"
+        | "rejected"
+      wager_txn_kind:
+        | "credit_funding"
+        | "debit_stake_lock"
+        | "credit_payout"
+        | "credit_refund"
+        | "debit_admin_adjust"
+        | "credit_admin_adjust"
+        | "debit_reverse_payout"
       withdrawal_status: "pending" | "approved" | "declined"
     }
     CompositeTypes: {
@@ -4677,6 +5431,31 @@ export const Constants = {
       match_status: ["scheduled", "live", "ended", "cancelled"],
       ticket_status: ["open", "pending", "resolved", "closed"],
       token_request_status: ["pending", "approved", "denied"],
+      wager_payment_status: ["pending", "verified", "rejected"],
+      wager_status: [
+        "pending_approval",
+        "awaiting_payment",
+        "awaiting_funding",
+        "funded",
+        "active",
+        "live",
+        "awaiting_settlement",
+        "settled",
+        "cancelled",
+        "refunded",
+        "disputed",
+        "terminated",
+        "rejected",
+      ],
+      wager_txn_kind: [
+        "credit_funding",
+        "debit_stake_lock",
+        "credit_payout",
+        "credit_refund",
+        "debit_admin_adjust",
+        "credit_admin_adjust",
+        "debit_reverse_payout",
+      ],
       withdrawal_status: ["pending", "approved", "declined"],
     },
   },

@@ -20,6 +20,7 @@ import {
   Calendar, Tag, Image as ImageIcon, BarChart3, History, Send, Plus, Trash2, Pencil, ChevronRight, ChevronLeft, Wallet, ListOrdered, Sparkles, ClipboardList, Lock, Pause, Play, Check, X, MessageSquare, Eye, RotateCw, Copy, Globe, MapPin, Smartphone, Clock, Filter,
   Dice5, LogOut, Crosshair, Target, Flame, ThumbsUp, ThumbsDown,
   Gift, BellRing, GalleryHorizontalEnd, Gamepad2, Vote, ShoppingBag, LifeBuoy, Newspaper,
+  Swords,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import _ecbLogo from "@/assets/ecb-logo.png.asset.json";
@@ -65,6 +66,7 @@ import { CasinoHistoryPanel } from "@/components/admin/CasinoHistoryPanel";
 import { TopBetsPanel } from "@/components/admin/TopBetsPanel";
 import { TournamentAdminPanel } from "@/components/admin/TournamentAdminPanel";
 import { BrandingAdminPanel } from "@/components/admin/BrandingAdminPanel";
+import { WagersAdminPanel } from "@/components/admin/WagersAdminPanel";
 import { seedLegacyUsers } from "@/lib/seed-users.functions";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { loadStandings, type LbRow } from "@/lib/leaderboard";
@@ -253,6 +255,7 @@ export function AdminPage() {
             <TabsContent value="attendance" className="mt-4"><AttendancePanel /></TabsContent>
             <TabsContent value="branding" className="mt-4"><BrandingAdminPanel /></TabsContent>
             <TabsContent value="ux" className="mt-4"><UserExperiencePanel /></TabsContent>
+            <TabsContent value="wagers" className="mt-4"><WagersAdminPanel /></TabsContent>
           </Tabs>
         </div>
         <ActionConfirmDialog />
@@ -3617,6 +3620,7 @@ const QUICK_ACTIONS: { i: any; l: string; t: string }[] = [
   { i: Wallet, l: "Withdrawals", t: "withdrawals" },
   { i: Trophy, l: "Won Bets", t: "wonbets" },
   { i: X, l: "Lost Bets", t: "lostbets" },
+  { i: Swords, l: "Wagers", t: "wagers" },
 ];
 
 const QA_PALETTE = [
@@ -3641,13 +3645,13 @@ function QuickActionsBar({ onOpen }: { onOpen: (t: string) => void }) {
       <div className="text-[10px] sm:text-xs font-bold tracking-widest text-primary mb-2">QUICK ACTIONS</div>
       <div className="overflow-x-auto pb-2 -mb-2">
         {/* 4 buttons stacked per column; columns flow horizontally and scroll left/right */}
-        <div className="grid grid-rows-4 grid-flow-col auto-cols-[68px] sm:auto-cols-[84px] gap-1.5 w-max">
+        <div className="grid grid-rows-4 grid-flow-col auto-cols-[80px] sm:auto-cols-[96px] gap-2 w-max">
           {actions.map((q, idx) => {
             const c = QA_PALETTE[idx % QA_PALETTE.length];
             return (
-              <button key={q.l} onClick={() => onOpen(q.t)} className={`flex flex-col items-center justify-center gap-1 p-1.5 rounded border active:scale-95 transition ${c.bd}`}>
-                <q.i className={`h-3.5 w-3.5 ${c.ic}`} />
-                <span className="text-[7px] sm:text-[9px] text-foreground text-center leading-tight">{q.l}</span>
+              <button key={q.l} onClick={() => onOpen(q.t)} className={`flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-lg border active:scale-95 transition min-h-[62px] ${c.bd}`}>
+                <q.i className={`h-4 w-4 sm:h-[18px] sm:w-[18px] ${c.ic}`} />
+                <span className="text-[8px] sm:text-[10px] text-foreground text-center leading-tight font-semibold">{q.l}</span>
               </button>
             );
           })}
