@@ -195,8 +195,8 @@ export const Layout = ({ children }: { children: ReactNode }) => {
                 </div>
               ) : (
                 <>
-                  <div className="text-sm font-extrabold tracking-[0.25em] gradient-gold-text">LOMITA</div>
-                  <div className="text-[9px] text-muted-foreground tracking-[0.35em]">SHOOTERS LEAGUE</div>
+                  <div className="text-sm font-extrabold tracking-[0.25em] gradient-gold-text">EFOOTBALL</div>
+                  <div className="text-[9px] text-muted-foreground tracking-[0.35em]">COMPETITION BETTING</div>
                 </>
               )}
             </div>
@@ -346,13 +346,13 @@ export const Layout = ({ children }: { children: ReactNode }) => {
               <MobLink to="/tournament" icon={Swords} label="Bracket" />
               {user && (
                 <>
-                  <Moblink to="/wagers" icon={Swords} label="Wagers" />
-                  <MobLink to="/dashboard" icon={Ticket} label="ME" />
-                  <MobLink to="/tasks" icon={ListChecks} label="Tasks" />
-                  <MobLink to="/profile" icon={UserIcon} label="Profile" />
-                  <MobLink to="/settings" icon={SettingsIcon} label="Settings" />
-                  <MobLink to="/support" icon={LifeBuoy} label="Help" />
-                </>
+                 <MobLink to="/wagers" icon={Swords} label="Wagers" />
+                 <MobLink to="/dashboard" icon={Ticket} label="ME" />
+                 <MobLink to="/tasks" icon={ListChecks} label="Tasks" />
+                 <MobLink to="/profile" icon={UserIcon} label="Profile" />
+                 <MobLink to="/settings" icon={SettingsIcon} label="Settings" />
+                 <MobLink to="/support" icon={LifeBuoy} label="Help" />
+               </>
               )}
               {isAdmin && <MobLink to="/admin" icon={Shield} label="Admin" danger />}
               {!isAdmin && isMod && <MobLink to="/mod" icon={Shield} label="Mod" danger />}
