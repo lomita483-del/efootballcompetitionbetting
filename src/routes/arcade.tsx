@@ -81,7 +81,6 @@ function CoinFlip({ s, onDone }: { s: any; onDone: () => void }) {
     setBusy(true); setLast(null);
     const { data, error } = await (supabase.rpc as any)("play_coinflip", { _choice: choice, _stake: stake });
     if (error) { setBusy(false); return toast.error(error.message); }
-    // Let the flip animation play before revealing the result.
     await new Promise((r) => setTimeout(r, 1100));
     setBusy(false);
     setLast(data);
@@ -90,28 +89,58 @@ function CoinFlip({ s, onDone }: { s: any; onDone: () => void }) {
     onDone();
   }
   return (
-    <Card className={`p-6 max-w-md mx-auto border-primary/30 text-center space-y-4 ${last?.payout > 0 ? "animate-win-glow" : ""}`}>
-      <div className="grid place-items-center py-4" style={{ perspective: "800px" }}>
+    <Card className={`relative overflow-hidden p-8 max-w-lg mx-auto border-2 border-amber-400/50 bg-gradient-to-b from-black/40 via-background to-black/60 shadow-[0_0_60px_-15px_rgba(212,175,55,0.5)] text-center space-y-5 ${last?.payout > 0 ? "animate-win-glow" : ""}`}>
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-gold" />
+      <div className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-amber-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-amber-400/10 blur-3xl" />
+      <div className="text-[10px] uppercase tracking-[0.3em] text-amber-300/70 font-bold">Premium Coin Flip</div>
+      <div className="relative grid place-items-center py-6" style={{ perspective: "1000px" }}>
+        <div className="absolute h-56 w-56 rounded-full border border-amber-400/20 shadow-[0_0_50px_-5px_rgba(212,175,55,0.4)]" />
+        <div className="absolute h-48 w-48 rounded-full border border-amber-400/30" />
         <div
           key={busy ? "flip" : last ? last.outcome : "idle"}
-          className={`grid place-items-center h-32 w-32 rounded-full bg-gradient-to-br from-amber-300 to-yellow-600 shadow-[0_10px_40px_-8px_rgba(212,175,55,0.7)] text-6xl ${busy ? "animate-coin-flip" : "animate-coin-idle"}`}
+          className={`relative grid place-items-center h-48 w-48 rounded-full bg-[radial-gradient(circle_at_35%_30%,#fff7d6,transparent_35%),linear-gradient(145deg,#fde68a_0%,#d4af37_35%,#8a6d1f_75%,#4a3a10_100%)] border-[3px] border-amber-200/60 shadow-[0_20px_60px_-10px_rgba(212,175,55,0.8),inset_0_2px_6px_rgba(255,255,255,0.5),inset_0_-6px_14px_rgba(0,0,0,0.4)] text-8xl ${busy ? "animate-coin-flip" : "animate-coin-idle"}`}
         >
-          {busy ? "🪙" : last ? (last.outcome === "heads" ? "👑" : "⚡") : "🪙"}
+          <span className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">{busy ? "🪙" : last ? (last.outcome === "heads" ? "👑" : "⚡") : "🪙"}</span>
         </div>
       </div>
-      <div className="flex gap-2 justify-center">
+      <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto">
         {(["heads", "tails"] as const).map((c) => (
-          <Button key={c} variant={choice === c ? "default" : "outline"} onClick={() => setChoice(c)} disabled={busy} className="capitalize w-28">{c === "heads" ? "👑 Heads" : "⚡ Tails"}</Button>
+          <button
+            key={c}
+            onClick={() => setChoice(c)}
+            disabled={busy}
+            className={`relative flex items-center justify-center gap-2 h-14 rounded-xl border-2 font-black text-sm uppercase tracking-wide transition-all ${choice === c ? "border-amber-300 bg-gradient-to-b from-amber-400/30 to-amber-600/20 text-amber-200 shadow-[0_0_20px_-4px_rgba(212,175,55,0.7)]" : "border-primary/20 bg-black/20 text-muted-foreground hover:border-amber-400/40 hover:text-foreground"}`}
+          >
+            {c === "heads" ? "👑 Heads" : "⚡ Tails"}
+          </button>
         ))}
       </div>
-      <Input type="number" value={stake} min={min} disabled={busy} onChange={(e) => setStake(Number(e.target.value))} />
-      <div className="text-xs text-muted-foreground">Win pays <span className="text-emerald-300 font-bold">{(stake * Number(s.coinflip_payout ?? 1.95)).toLocaleString()}</span> ({Number(s.coinflip_payout ?? 1.95)}x)</div>
-      <Button className="btn-luxury w-full" onClick={play} disabled={busy}>{busy ? "Flipping…" : "Flip Coin"}</Button>
-      {last && !busy && <div className="animate-prize-pop"><Badge variant="outline" className={last.payout > 0 ? "border-emerald-500/50 text-emerald-300 text-sm px-3 py-1" : "border-destructive/50 text-destructive text-sm px-3 py-1"}>{last.payout > 0 ? `🎉 WON ${Number(last.payout).toLocaleString()}` : "😔 LOST"}</Badge></div>}
+      <div className="max-w-xs mx-auto space-y-1">
+        <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Stake</label>
+        <div className="relative">
+          <Coins className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-amber-400" />
+          <Input type="number" value={stake} min={min} disabled={busy} onChange={(e) => setStake(Number(e.target.value))} className="pl-9 h-12 text-base font-bold border-amber-400/30 bg-black/20 focus-visible:ring-amber-400/40" />
+        </div>
+      </div>
+      <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-4 py-2">
+        <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Win pays</span>
+        <span className="text-emerald-300 font-black text-lg">{(stake * Number(s.coinflip_payout ?? 1.95)).toLocaleString()}</span>
+        <span className="text-[10px] text-emerald-400/70 font-bold">({Number(s.coinflip_payout ?? 1.95)}x)</span>
+      </div>
+      <Button className="w-full h-14 text-base font-black tracking-wide bg-gradient-to-b from-amber-300 to-amber-600 hover:from-amber-200 hover:to-amber-500 text-black shadow-[0_10px_30px_-6px_rgba(212,175,55,0.7)] border border-amber-200/50" onClick={play} disabled={busy}>
+        {busy ? "Flipping…" : "Flip Coin"}
+      </Button>
+      {last && !busy && (
+        <div className="animate-prize-pop">
+          <Badge variant="outline" className={last.payout > 0 ? "border-emerald-500/50 text-emerald-300 text-sm px-4 py-1.5" : "border-destructive/50 text-destructive text-sm px-4 py-1.5"}>
+            {last.payout > 0 ? `🎉 WON ${Number(last.payout).toLocaleString()}` : "😔 LOST"}
+          </Badge>
+        </div>
+      )}
     </Card>
   );
 }
-
 function Wheel({ s, onDone }: { s: any; onDone: () => void }) {
   const min = Number(s.wheel_min ?? 100000);
   const [stake, setStake] = useState(min);
