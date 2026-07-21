@@ -275,6 +275,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
           <div className="border-t border-primary/15 bg-background/20">
             <div className="container mx-auto px-4 relative">
               <nav className="flex items-center gap-1 flex-nowrap overflow-x-auto no-scrollbar py-2">
+                <NavLink to="/" icon={Home} label="Home" />
                 <NavLink to="/matches" icon={MatchIcon} label="Matches" />
                 <NavLink to="/virtual" icon={Dice5} label="Virtual" />
                 <NavLink to="/lottery" icon={Clover} label="Lottery" />
