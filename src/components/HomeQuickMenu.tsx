@@ -35,6 +35,7 @@ export function HomeQuickMenu() {
     { to: "/leaderboard", icon: Trophy, label: "Leaderboard" },
     { to: "/tournament", icon: Swords, label: "Tournament" },
     ...(user ? [
+      { to: "/wagers", icon: Swords, label: "P2P Wagers" },
       { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
       { to: "/tasks", icon: ListChecks, label: "Tasks" },
       { to: "/checkout", icon: Coins, label: "Buy Tokens" },
