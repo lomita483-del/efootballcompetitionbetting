@@ -53,15 +53,15 @@ function ArcadePage() {
 
         {user && s && (
           <TabsList className="grid grid-cols-4 max-w-xl mb-6">
-  <TabsTrigger value="coinflip">Coin Flip</TabsTrigger>
-  <TabsTrigger value="wheel">Wheel</TabsTrigger>
-  <TabsTrigger value="scratch">Scratch</TabsTrigger>
-  <TabsTrigger value="roulette">Roulette</TabsTrigger>
-</TabsList>
-<TabsContent value="coinflip"><CoinFlip s={s} onDone={() => { refresh(); }} /></TabsContent>
-<TabsContent value="wheel"><Wheel s={s} onDone={() => { refresh(); }} /></TabsContent>
-<TabsContent value="scratch"><Scratch s={s} onDone={() => { refresh(); }} /></TabsContent>
-<TabsContent value="roulette"><Roulette s={s} onDone={() => { refresh(); }} /></TabsContent>
+           <TabsTrigger value="coinflip">Coin Flip</TabsTrigger>
+             <TabsTrigger value="wheel">Wheel</TabsTrigger>
+             <TabsTrigger value="scratch">Scratch</TabsTrigger>
+             <TabsTrigger value="roulette">Roulette</TabsTrigger>
+          </TabsList>
+           <TabsContent value="coinflip"><CoinFlip s={s} onDone={() => { refresh(); }} /></TabsContent>
+           <TabsContent value="wheel"><Wheel s={s} onDone={() => { refresh(); }} /></TabsContent>
+           <TabsContent value="scratch"><Scratch s={s} onDone={() => { refresh(); }} /></TabsContent>
+          <TabsContent value="roulette"><Roulette s={s} onDone={() => { refresh(); }} /></TabsContent>
           </Tabs>
         )}
       </div>
