@@ -201,32 +201,6 @@ export const Layout = ({ children }: { children: ReactNode }) => {
               )}
             </div>
           </Link>
-          {!isHome && (
-            <nav className="relative flex-1 min-w-0 overflow-x-auto no-scrollbar">
-              <div className="flex items-center gap-1 flex-nowrap px-1">
-                <NavLink to="/matches" icon={MatchIcon} label="Matches" />
-                <NavLink to="/virtual" icon={Dice5} label="Virtual" />
-                <NavLink to="/lottery" icon={Clover} label="Lottery" />
-                <NavLink to="/arcade" icon={Gamepad2} label="Arcade" />
-                <NavLink to="/shop" icon={ShoppingBag} label="Shop" />
-                <NavLink to="/leaderboard" icon={Trophy} label="Leaderboard" />
-                <NavLink to="/tournament" icon={Swords} label="Tournament" />
-                {user && <NavLink to="/wagers" icon={Swords} label="Wagers" />}
-                {user && <NavLink to="/dashboard" icon={LayoutDashboard} label="Dashboard" />}
-                {user && <NavLink to="/tasks" icon={ListChecks} label="Tasks" />}
-                {user && <NavLink to="/checkout" icon={Coins} label="Buy" />}
-                {user && <NavLink to="/withdraw" icon={Wallet} label="Withdraw" />}
-                {user && <NavLink to="/support" icon={LifeBuoy} label="Support" />}
-                {user && <NavLink to="/settings" icon={SettingsIcon} label="Settings" />}
-                {isAdmin && <NavLink to="/admin" icon={Shield} label="Admin" danger />}
-                {!isAdmin && isMod && <NavLink to="/mod" icon={Shield} label="Mod" danger />}
-              </div>
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-card/95 to-transparent"
-              />
-            </nav>
-          )}
           <div className="flex items-center gap-2 shrink-0 ml-auto sticky right-0 bg-gradient-to-l from-card/95 via-card/80 to-transparent pl-3">
             {branding.logoCornerUrl && (
               <img
@@ -297,6 +271,34 @@ export const Layout = ({ children }: { children: ReactNode }) => {
             )}
           </div>
         </div>
+        {!isHome && (
+          <div className="border-t border-primary/15 bg-background/20">
+            <div className="container mx-auto px-4 relative">
+              <nav className="flex items-center gap-1 flex-nowrap overflow-x-auto no-scrollbar py-2">
+                <NavLink to="/matches" icon={MatchIcon} label="Matches" />
+                <NavLink to="/virtual" icon={Dice5} label="Virtual" />
+                <NavLink to="/lottery" icon={Clover} label="Lottery" />
+                <NavLink to="/arcade" icon={Gamepad2} label="Arcade" />
+                <NavLink to="/shop" icon={ShoppingBag} label="Shop" />
+                <NavLink to="/leaderboard" icon={Trophy} label="Leaderboard" />
+                <NavLink to="/tournament" icon={Swords} label="Tournament" />
+                {user && <NavLink to="/wagers" icon={Swords} label="Wagers" />}
+                {user && <NavLink to="/dashboard" icon={LayoutDashboard} label="Dashboard" />}
+                {user && <NavLink to="/tasks" icon={ListChecks} label="Tasks" />}
+                {user && <NavLink to="/checkout" icon={Coins} label="Buy" />}
+                {user && <NavLink to="/withdraw" icon={Wallet} label="Withdraw" />}
+                {user && <NavLink to="/support" icon={LifeBuoy} label="Support" />}
+                {user && <NavLink to="/settings" icon={SettingsIcon} label="Settings" />}
+                {isAdmin && <NavLink to="/admin" icon={Shield} label="Admin" danger />}
+                {!isAdmin && isMod && <NavLink to="/mod" icon={Shield} label="Mod" danger />}
+              </nav>
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-y-0 right-0 top-0 w-10 bg-gradient-to-l from-background/70 to-transparent"
+              />
+            </div>
+          </div>
+        )}
         {user && roles.length > 0 && (
           <div className="container mx-auto px-4 pb-2 flex flex-wrap gap-1">
             {roles.map((r) => (
