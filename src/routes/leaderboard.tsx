@@ -44,7 +44,11 @@ function Medal({ i }: { i: number }) {
       </span>
     );
   }
-  return <span className="text-sm font-bold text-muted-foreground tabular-nums">{i + 1}</span>;
+  return (
+    <span className="inline-grid place-items-center h-8 w-8 rounded-lg bg-gradient-to-b from-[#3a3120] to-[#1a160d] border border-[#7BBA4A]/50 text-[#a8d16a] font-black text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_10px_-3px_rgba(123,186,74,0.5)] tabular-nums">
+      {i + 1}
+    </span>
+  );
 }
 
 function Page() {
@@ -160,7 +164,7 @@ function Board({
                 <Td>
                   <div className="flex items-center gap-2">
                     <Avatar url={r.image_url ?? null} name={firstPick ? firstPick(r) : pick(r)} />
-                    <span className="font-bold text-primary/90">{firstPick ? firstPick(r) : pick(r)}</span>
+                    <span className="text-base font-semibold text-[#7BBA4A] drop-shadow-[0_0_4px_rgba(123,186,74,0.35)]">{firstPick ? firstPick(r) : pick(r)}</span>
                   </div>
                 </Td>
                 <Td><span className={firstPick ? "font-bold" : "text-muted-foreground"}>{secondPick ? secondPick(r) : (firstPick ? pick(r) : (r.top_player || "—"))}</span></Td>
