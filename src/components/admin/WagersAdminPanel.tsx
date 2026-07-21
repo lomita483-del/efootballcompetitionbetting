@@ -7,7 +7,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { CheckCircle2, XCircle, Swords, Coins, Trophy, Ban, RefreshCw, Radio } from "lucide-react";
+import { CheckCircle2, XCircle, Swords, Coins, Trophy, Ban, RefreshCw, Radio, MessageSquare } from "lucide-react";
+import { WagerDisputeThread } from "@/components/WagerDisputeThread";
 import {
   adminVerifyPayment, adminSettleWager, adminRefundWager, adminTerminateWager, adminPostLiveEvent,
   type Wager, type WagerPayment,
@@ -135,6 +136,7 @@ function Stat({ label, value, icon: Icon, tone }: any) {
 
 function WagerAdminRow({ w, profiles, onLive, onChange }: { w: Wager; profiles: any; onLive: () => void; onChange: () => void }) {
   const [settleOpen, setSettleOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const ch = profiles[w.challenger_id]?.username || w.challenger_id.slice(0, 6);
   const op = profiles[w.opponent_id]?.username || w.opponent_id.slice(0, 6);
   return (
@@ -167,8 +169,16 @@ function WagerAdminRow({ w, profiles, onLive, onChange }: { w: Wager; profiles: 
               try { await adminTerminateWager(w.id, r, true); toast.success("Terminated"); onChange(); } catch (e: any) { toast.error(e.message); }
             }}><Ban className="h-3.5 w-3.5 mr-1" />Terminate</Button>
           )}
+          <Button size="sm" variant="outline" onClick={() => setChatOpen((v) => !v)}>
+            <MessageSquare className="h-3.5 w-3.5 mr-1" />Dispute chat
+          </Button>
         </div>
       </div>
+      {chatOpen && (
+        <div className="mt-3">
+          <WagerDisputeThread wagerId={w.id} challengerId={w.challenger_id} opponentId={w.opponent_id} isAdmin />
+        </div>
+      )}
       <SettleDialog wager={w} open={settleOpen} onOpenChange={setSettleOpen} profiles={profiles} onDone={onChange} />
     </div>
   );

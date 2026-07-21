@@ -157,7 +157,12 @@ function Board({
             {rows.map((r, i) => (
               <tr key={r.name} className="border-b border-amber-400/10 hover:bg-amber-400/10 transition-colors">
                 <Td><Medal i={i} /></Td>
-                <Td><span className="font-bold text-primary/90">{firstPick ? firstPick(r) : pick(r)}</span></Td>
+                <Td>
+                  <div className="flex items-center gap-2">
+                    <Avatar url={r.image_url ?? null} name={firstPick ? firstPick(r) : pick(r)} />
+                    <span className="font-bold text-primary/90">{firstPick ? firstPick(r) : pick(r)}</span>
+                  </div>
+                </Td>
                 <Td><span className={firstPick ? "font-bold" : "text-muted-foreground"}>{secondPick ? secondPick(r) : (firstPick ? pick(r) : (r.top_player || "—"))}</span></Td>
                 <Td right><Pill tone="amber">{r.TS}</Pill></Td>
                 <Td right><span className="text-emerald-400 font-bold">{r.W}</span></Td>
@@ -184,3 +189,23 @@ function Pill({ children, tone }: { children: React.ReactNode; tone: "amber" | "
 
 function Th({ children, right }: { children: React.ReactNode; right?: boolean }) { return <th className={`px-4 py-3 ${right ? "text-right" : ""}`}>{children}</th>; }
 function Td({ children, right }: { children: React.ReactNode; right?: boolean }) { return <td className={`px-4 py-3 ${right ? "text-right" : ""}`}>{children}</td>; }
+
+function Avatar({ url, name }: { url: string | null; name: string }) {
+  const initial = (name || "?").trim().charAt(0).toUpperCase();
+  if (url) {
+    return (
+      <img
+        src={url}
+        alt={name}
+        className="h-8 w-8 rounded-full object-cover border border-amber-400/50 shadow-[0_0_8px_-2px_rgba(212,175,55,0.5)] bg-black/30"
+        loading="lazy"
+        onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+      />
+    );
+  }
+  return (
+    <span className="h-8 w-8 grid place-items-center rounded-full border border-amber-400/40 bg-gradient-to-br from-amber-500/30 to-amber-800/30 text-amber-100 text-xs font-black">
+      {initial}
+    </span>
+  );
+}

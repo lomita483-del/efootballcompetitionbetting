@@ -1642,6 +1642,7 @@ export type Database = {
           is_archived: boolean
           is_featured: boolean
           is_virtual: boolean
+          is_void: boolean
           location: string | null
           lock_time: string | null
           locked_at: string | null
@@ -1681,6 +1682,7 @@ export type Database = {
           is_archived?: boolean
           is_featured?: boolean
           is_virtual?: boolean
+          is_void?: boolean
           location?: string | null
           lock_time?: string | null
           locked_at?: string | null
@@ -1720,6 +1722,7 @@ export type Database = {
           is_archived?: boolean
           is_featured?: boolean
           is_virtual?: boolean
+          is_void?: boolean
           location?: string | null
           lock_time?: string | null
           locked_at?: string | null
@@ -3860,6 +3863,54 @@ export type Database = {
           },
         ]
       }
+      wager_dispute_messages: {
+        Row: {
+          attachments: Json
+          body: string | null
+          created_at: string
+          dispute_id: string
+          id: string
+          sender_id: string
+          sender_role: string
+          wager_id: string
+        }
+        Insert: {
+          attachments?: Json
+          body?: string | null
+          created_at?: string
+          dispute_id: string
+          id?: string
+          sender_id: string
+          sender_role?: string
+          wager_id: string
+        }
+        Update: {
+          attachments?: Json
+          body?: string | null
+          created_at?: string
+          dispute_id?: string
+          id?: string
+          sender_id?: string
+          sender_role?: string
+          wager_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wager_dispute_messages_dispute_id_fkey"
+            columns: ["dispute_id"]
+            isOneToOne: false
+            referencedRelation: "wager_disputes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wager_dispute_messages_wager_id_fkey"
+            columns: ["wager_id"]
+            isOneToOne: false
+            referencedRelation: "wagers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wager_disputes: {
         Row: {
           admin_id: string | null
@@ -4676,6 +4727,10 @@ export type Database = {
       admin_set_virtual_cycle: { Args: { _running: boolean }; Returns: Json }
       admin_suspend_bet: {
         Args: { _bet_id: string; _reason?: string }
+        Returns: undefined
+      }
+      admin_toggle_selection_void: {
+        Args: { _bet_id: string; _selection_id: string; _void: boolean }
         Returns: undefined
       }
       admin_unsuspend_bet: { Args: { _bet_id: string }; Returns: undefined }
