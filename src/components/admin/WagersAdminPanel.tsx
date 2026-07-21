@@ -7,7 +7,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { CheckCircle2, XCircle, Swords, Coins, Trophy, Ban, RefreshCw, Radio } from "lucide-react";
+import { CheckCircle2, XCircle, Swords, Coins, Trophy, Ban, RefreshCw, Radio, MessageSquare } from "lucide-react";
+import { WagerDisputeThread } from "@/components/WagerDisputeThread";
 import {
   adminVerifyPayment, adminSettleWager, adminRefundWager, adminTerminateWager, adminPostLiveEvent,
   type Wager, type WagerPayment,
