@@ -87,18 +87,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!user) return;
+    let lastForceLogout: string | null | undefined = (profile as any)?.force_logout_at ?? null;
     const ch = supabase.channel(`me-${user.id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${user.id}` },
         (payload) => {
           const next = payload.new as Profile;
           setProfile((prev) => ({ ...(prev as Profile), ...next }));
-          // Auto kick-out if user just got banned or an admin forces a session reset.
-          const wasKicked = !!next?.force_logout_at && next.force_logout_at !== (profile as any)?.force_logout_at;
+          // Auto kick-out only when force_logout_at is newly set (or strictly newer).
+          const wasKicked =
+            !!next?.force_logout_at &&
+            lastForceLogout != null &&
+            next.force_logout_at !== lastForceLogout;
+          const firstSeenKick =
+            !!next?.force_logout_at && lastForceLogout == null;
+          // Track the latest value for future comparisons.
+          lastForceLogout = next?.force_logout_at ?? lastForceLogout;
           if (next?.is_banned || wasKicked) {
             supabase.auth.signOut().then(() => {
               if (typeof window !== "undefined") window.location.href = next?.is_banned ? "/login?banned=1" : "/login?kicked=1";
             });
           }
+          // firstSeenKick is intentionally ignored — do not sign out on stale force_logout_at values seen for the first time after login.
+          void firstSeenKick;
         })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "token_transactions", filter: `user_id=eq.${user.id}` },
         () => loadUserData(user.id))

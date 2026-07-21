@@ -83,14 +83,20 @@ export async function listMyWagers(uid: string): Promise<Wager[]> {
   return (data as any) ?? [];
 }
 
-export async function findOpponent(query: string): Promise<{ id: string; username: string | null; email?: string }[]> {
+export type OpponentSearchResult = {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  special_id: string | null;
+  avatar_url: string | null;
+  discord_username: string | null;
+};
+
+export async function findOpponent(query: string): Promise<OpponentSearchResult[]> {
   const q = query.trim();
   if (!q) return [];
-  const { data } = await supabase
-    .from("profiles")
-    .select("id, username, email")
-    .or(`username.ilike.%\( {q}%,discord_username.ilike.% \){q}%,id.ilike.%\( {q}%,email.ilike.% \){q}%`)
-    .limit(8);
+  const { data, error } = await supabase.rpc("search_opponents", { _q: q } as any);
+  if (error) return [];
   return (data as any) ?? [];
 }
 

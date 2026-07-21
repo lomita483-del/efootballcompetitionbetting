@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import {
   createChallenge, findOpponent, getMyWagerWallet, listMyWagers,
-  type Wager, type WagerWallet,
+  type Wager, type WagerWallet, type OpponentSearchResult,
 } from "@/lib/wagers";
 
 export const Route = createFileRoute("/wagers")({
@@ -172,8 +172,8 @@ function WagerRow({ w, viewer }: { w: Wager; viewer: string }) {
 function CreateChallengeDialog({ open, onOpenChange, onCreated }: { open: boolean; onOpenChange: (o: boolean) => void; onCreated: () => void }) {
   const { user } = useAuth();
   const [q, setQ] = useState("");
-  const [results, setResults] = useState<{ id: string; username: string | null }[]>([]);
-  const [picked, setPicked] = useState<{ id: string; username: string | null } | null>(null);
+  const [results, setResults] = useState<OpponentSearchResult[]>([]);
+  const [picked, setPicked] = useState<OpponentSearchResult | null>(null);
   const [stake, setStake] = useState(500);
   const [eventLabel, setEventLabel] = useState("");
   const [betType, setBetType] = useState("winner");
@@ -213,23 +213,33 @@ function CreateChallengeDialog({ open, onOpenChange, onCreated }: { open: boolea
             <label className="text-xs uppercase tracking-widest text-muted-foreground">Opponent</label>
             {picked ? (
               <div className="flex items-center justify-between gap-2 mt-1 border border-primary/30 rounded-md px-3 py-2 bg-background/30">
-                <div className="flex items-center gap-2"><User className="h-4 w-4 text-primary" /><span className="font-bold">{picked.username || picked.id.slice(0, 8)}</span></div>
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-primary" />
+                  <div className="flex flex-col">
+                    <span className="font-bold text-sm">{picked.full_name || picked.email || picked.id.slice(0, 8)}</span>
+                    <span className="text-[10px] text-muted-foreground">{picked.email}{picked.special_id ? ` • ${picked.special_id}` : ""}</span>
+                  </div>
+                </div>
                 <Button size="sm" variant="outline" onClick={() => { setPicked(null); setQ(""); }}>Change</Button>
               </div>
             ) : (
               <>
                 <div className="flex items-center gap-2 mt-1">
                   <Search className="h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Search username or Discord…" value={q} onChange={(e) => setQ(e.target.value)} />
+                  <Input placeholder="Search by name, email, Discord, user ID…" value={q} onChange={(e) => setQ(e.target.value)} />
                 </div>
                 {results.length > 0 && (
                   <div className="mt-2 border border-primary/20 rounded-md divide-y divide-primary/10 bg-background/40 max-h-48 overflow-y-auto">
                     {results.map((r) => (
                       <button key={r.id} className="w-full text-left px-3 py-2 hover:bg-primary/10 text-sm" onClick={() => setPicked(r)}>
-                        {r.username || r.id.slice(0, 8)}
+                        <div className="font-semibold">{r.full_name || r.email || r.id.slice(0, 8)}</div>
+                        <div className="text-[10px] text-muted-foreground truncate">{r.email}{r.special_id ? ` • ${r.special_id}` : ""}{r.discord_username ? ` • @${r.discord_username}` : ""}</div>
                       </button>
                     ))}
                   </div>
+                )}
+                {q && !picked && results.length === 0 && (
+                  <div className="mt-2 text-[11px] text-muted-foreground">No players matched. Try their full name, email or user ID.</div>
                 )}
               </>
             )}

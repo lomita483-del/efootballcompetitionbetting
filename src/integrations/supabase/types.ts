@@ -4769,6 +4769,17 @@ export type Database = {
       gen_special_id: { Args: never; Returns: string }
       gen_wager_public_id: { Args: never; Returns: string }
       get_display_roles: { Args: { _user_id: string }; Returns: string[] }
+      get_opponent_profile: {
+        Args: { _id: string }
+        Returns: {
+          avatar_url: string
+          discord_username: string
+          email: string
+          full_name: string
+          id: string
+          special_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -5152,6 +5163,17 @@ export type Database = {
       review_withdrawal_request: {
         Args: { _approve: boolean; _id: string; _note?: string }
         Returns: undefined
+      }
+      search_opponents: {
+        Args: { _q: string }
+        Returns: {
+          avatar_url: string
+          discord_username: string
+          email: string
+          full_name: string
+          id: string
+          special_id: string
+        }[]
       }
       server_now: { Args: never; Returns: string }
       set_tournament_result: {

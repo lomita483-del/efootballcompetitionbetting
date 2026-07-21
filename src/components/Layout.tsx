@@ -168,25 +168,25 @@ export const Layout = ({ children }: { children: ReactNode }) => {
               />
             )}
             <Link to="/shop" title="Rewards Shop" aria-label="Rewards Shop">
-              <Button variant="ghost" size="icon" className="rounded-full border border-transparent hover:border-primary/30">
-                <ShoppingBag className="h-4 w-4 text-primary" />
+              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full border border-primary/40 bg-primary/10 hover:bg-primary/20 shadow-[0_0_12px_-4px_rgba(212,175,55,0.6)]">
+                <ShoppingBag className="h-5 w-5 text-primary" />
               </Button>
             </Link>
             {user && profile ? (
               <>
-                <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-primary/30 bg-gradient-to-r from-primary/10 to-accent/5 shadow-[0_0_15px_-5px_rgba(212,175,55,0.4)]">
-                  <Coins className="h-3.5 w-3.5 text-primary" />
+                <div className="flex items-center gap-1.5 px-3 py-2 rounded-full border border-primary/50 bg-gradient-to-r from-primary/20 to-accent/10 shadow-[0_0_18px_-4px_rgba(212,175,55,0.7)]">
+                  <Coins className="h-4 w-4 text-primary" />
                   <span className="text-sm font-black text-primary leading-none tabular-nums">{profile.token_balance.toLocaleString()}</span>
                 </div>
                 <NotificationBell />
                 <Link to="/profile">
-                  <Button variant="ghost" size="sm" className="gap-2 rounded-full border border-transparent hover:border-primary/30">
-                    <span className="h-6 w-6 rounded-full bg-gradient-to-br from-primary/40 to-accent/30 grid place-items-center"><UserIcon className="h-3.5 w-3.5" /></span>
+                  <Button variant="ghost" size="sm" className="h-10 gap-2 rounded-full border border-primary/40 bg-primary/10 hover:bg-primary/20 shadow-[0_0_12px_-4px_rgba(212,175,55,0.5)]">
+                    <span className="h-7 w-7 rounded-full bg-gradient-to-br from-primary to-accent grid place-items-center text-background"><UserIcon className="h-4 w-4" /></span>
                     <span className="hidden xl:inline text-xs font-semibold max-w-[100px] truncate">{profile.full_name}</span>
                   </Button>
                 </Link>
-                <Button variant="ghost" size="icon" className="rounded-full hover:bg-destructive/10 hover:text-destructive" onClick={async () => { await signOut(); nav({ to: "/" }); }} title="Sign out">
-                  <LogOut className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full border border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/20 shadow-[0_0_12px_-4px_rgba(239,68,68,0.5)]" onClick={async () => { await signOut(); nav({ to: "/" }); }} title="Sign out">
+                  <LogOut className="h-5 w-5" />
                 </Button>
               </>
             ) : (
