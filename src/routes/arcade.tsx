@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Coins, Gamepad2, Sparkles, CircleDollarSign } from "lucide-react";
+import { Coins, Gamepad2, Sparkles, CircleDollarSign, Dices } from "lucide-react";
 
 export const Route = createFileRoute("/arcade")({
   head: () => ({
@@ -29,9 +29,8 @@ function ArcadePage() {
 
   async function load() {
     const { data } = await (supabase as any).from("app_settings")
-      .select("coinflip_enabled,coinflip_min,coinflip_max,coinflip_payout,wheel_enabled,wheel_min,wheel_max,scratch_enabled,scratch_price")
-      .eq("id", 1).maybeSingle();
-    setS(data ?? {});
+  .select("coinflip_enabled,coinflip_min,coinflip_max,coinflip_payout,wheel_enabled,wheel_min,wheel_max,scratch_enabled,scratch_price,roulette_enabled,roulette_min,roulette_max,roulette_number_payout,roulette_color_payout,roulette_green_payout,roulette_parity_payout")
+  .eq("id", 1).maybeSingle();
   }
   useEffect(() => { load(); }, []);
 
@@ -53,15 +52,16 @@ function ArcadePage() {
         {!user && <Card className="p-8 text-center"><p>Please <Link to="/login" className="text-primary underline">sign in</Link> to play.</p></Card>}
 
         {user && s && (
-          <Tabs defaultValue="coinflip">
-            <TabsList className="grid grid-cols-3 max-w-md mb-6">
-              <TabsTrigger value="coinflip">Coin Flip</TabsTrigger>
-              <TabsTrigger value="wheel">Wheel</TabsTrigger>
-              <TabsTrigger value="scratch">Scratch</TabsTrigger>
-            </TabsList>
-            <TabsContent value="coinflip"><CoinFlip s={s} onDone={() => { refresh(); }} /></TabsContent>
-            <TabsContent value="wheel"><Wheel s={s} onDone={() => { refresh(); }} /></TabsContent>
-            <TabsContent value="scratch"><Scratch s={s} onDone={() => { refresh(); }} /></TabsContent>
+          <TabsList className="grid grid-cols-4 max-w-xl mb-6">
+  <TabsTrigger value="coinflip">Coin Flip</TabsTrigger>
+  <TabsTrigger value="wheel">Wheel</TabsTrigger>
+  <TabsTrigger value="scratch">Scratch</TabsTrigger>
+  <TabsTrigger value="roulette">Roulette</TabsTrigger>
+</TabsList>
+<TabsContent value="coinflip"><CoinFlip s={s} onDone={() => { refresh(); }} /></TabsContent>
+<TabsContent value="wheel"><Wheel s={s} onDone={() => { refresh(); }} /></TabsContent>
+<TabsContent value="scratch"><Scratch s={s} onDone={() => { refresh(); }} /></TabsContent>
+<TabsContent value="roulette"><Roulette s={s} onDone={() => { refresh(); }} /></TabsContent>
           </Tabs>
         )}
       </div>
@@ -230,6 +230,160 @@ function Scratch({ s, onDone }: { s: any; onDone: () => void }) {
       </div>
       <div className="text-xs text-muted-foreground">Card price: <span className="text-primary font-bold">{price.toLocaleString()}</span> tokens · prizes up to 10x</div>
       <Button className="btn-luxury w-full" onClick={play} disabled={busy}><CircleDollarSign className="h-4 w-4 mr-1" />{busy ? "Revealing…" : "Buy & Scratch"}</Button>
+    </Card>
+  );
+}
+
+function Roulette({ s, onDone }: { s: any; onDone: () => void }) {
+  const min = Number(s.roulette_min ?? 100000);
+  const [betType, setBetType] = useState<"number" | "color" | "parity">("color");
+  const [betValue, setBetValue] = useState<string>("red");
+  const [stake, setStake] = useState(min);
+  const [busy, setBusy] = useState(false);
+  const [last, setLast] = useState<any>(null);
+  const [angle, setAngle] = useState(0);
+  if (!s.roulette_enabled) return <Card className="p-8 text-center text-muted-foreground">Roulette is currently closed.</Card>;
+
+  const currentMult = betType === "number" ? Number(s.roulette_number_payout ?? 55)
+    : betType === "color" ? (betValue === "green" ? Number(s.roulette_green_payout ?? 55) : Number(s.roulette_color_payout ?? 1.95))
+    : Number(s.roulette_parity_payout ?? 1.95);
+
+  async function play() {
+    setBusy(true); setLast(null);
+    const { data, error } = await (supabase.rpc as any)("play_roulette", { _bet_type: betType, _bet_value: betValue, _stake: stake });
+    if (error) { setBusy(false); return toast.error(error.message); }
+    const num = data.detail?.number ?? 0;
+    setAngle((a) => a + 360 * 6 + (num / 61) * 360);
+    await new Promise((r) => setTimeout(r, 2600));
+    setBusy(false);
+    setLast(data);
+    if (data.payout > 0) toast.success(`${data.outcome}! You won ${Number(data.payout).toLocaleString()} 🎉`);
+    else toast.error(`Landed on ${data.outcome}. No win this time.`);
+    onDone();
+  }
+
+  const numbers = Array.from({ length: 61 }, (_, i) => i);
+  function colorOf(n: number) { return n === 0 ? "green" : n % 2 === 1 ? "red" : "black"; }
+
+  return (
+    <Card className={`relative overflow-hidden p-8 max-w-lg mx-auto border-2 border-amber-400/50 bg-gradient-to-b from-black/40 via-background to-black/60 shadow-[0_0_60px_-15px_rgba(212,175,55,0.5)] text-center space-y-5 ${last?.payout > 0 ? "animate-win-glow" : ""}`}>
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-gold" />
+      <div className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-red-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-amber-400/10 blur-3xl" />
+      <div className="text-[10px] uppercase tracking-[0.3em] text-amber-300/70 font-bold">Royal Roulette</div>
+
+      <div className="relative grid place-items-center py-6">
+        <div className="absolute h-72 w-72 rounded-full border border-amber-400/20 shadow-[0_0_60px_-5px_rgba(212,175,55,0.35)]" />
+        <div className="relative h-64 w-64 rounded-full p-[6px] bg-gradient-to-br from-amber-200 via-amber-500 to-amber-800 shadow-[0_25px_60px_-12px_rgba(212,175,55,0.75)]">
+          <div
+            className="relative h-full w-full rounded-full border-[3px] border-black/40"
+            style={{
+              background: "repeating-conic-gradient(#b91c1c 0deg 5.9deg, #111827 5.9deg 11.8deg)",
+            }}
+          >
+            <div className="absolute inset-0 rounded-full" style={{ background: "conic-gradient(#16a34a 0deg 5.9deg, transparent 5.9deg 360deg)" }} />
+            <div className="absolute inset-6 rounded-full bg-black/70 border border-amber-400/30 grid place-items-center">
+              <span className="h-16 w-16 rounded-full bg-[radial-gradient(circle_at_35%_30%,#fff7d6,transparent_35%),linear-gradient(145deg,#fde68a_0%,#d4af37_40%,#8a6d1f_80%,#4a3a10_100%)] border-2 border-amber-200/70 grid place-items-center text-xl font-black text-black shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_10px_rgba(0,0,0,0.4)]">
+                {last && !busy ? last.detail?.number : "?"}
+              </span>
+            </div>
+            <div
+              className="absolute inset-0"
+              style={{ transition: busy ? "transform 2.6s cubic-bezier(0.12,0.7,0.15,1)" : "none", transform: `rotate(${angle}deg)` }}
+            >
+              <span className="absolute left-1/2 top-1 -translate-x-1/2 h-4 w-4 rounded-full bg-white shadow-[0_0_10px_2px_rgba(255,255,255,0.8)] border border-amber-300" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 max-w-xs mx-auto">
+        {(["color", "number", "parity"] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => { setBetType(t); setBetValue(t === "color" ? "red" : t === "parity" ? "odd" : "0"); }}
+            disabled={busy}
+            className={`h-10 rounded-lg border-2 font-black text-xs uppercase tracking-wide transition-all ${betType === t ? "border-amber-300 bg-gradient-to-b from-amber-400/30 to-amber-600/20 text-amber-200 shadow-[0_0_16px_-4px_rgba(212,175,55,0.7)]" : "border-primary/20 bg-black/20 text-muted-foreground hover:border-amber-400/40"}`}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {betType === "color" && (
+        <div className="grid grid-cols-3 gap-2 max-w-xs mx-auto">
+          {(["red", "black", "green"] as const).map((c) => (
+            <button
+              key={c}
+              onClick={() => setBetValue(c)}
+              disabled={busy}
+              className={`h-12 rounded-lg border-2 font-black text-xs uppercase transition-all ${betValue === c ? "border-amber-300 shadow-[0_0_16px_-4px_rgba(212,175,55,0.7)] scale-105" : "border-white/10 opacity-70 hover:opacity-100"}`}
+              style={{ background: c === "red" ? "linear-gradient(180deg,#dc2626,#7f1d1d)" : c === "black" ? "linear-gradient(180deg,#374151,#0a0a0a)" : "linear-gradient(180deg,#16a34a,#064e3b)" }}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {betType === "parity" && (
+        <div className="grid grid-cols-2 gap-2 max-w-xs mx-auto">
+          {(["odd", "even"] as const).map((p) => (
+            <button
+              key={p}
+              onClick={() => setBetValue(p)}
+              disabled={busy}
+              className={`h-12 rounded-lg border-2 font-black text-xs uppercase transition-all ${betValue === p ? "border-amber-300 bg-gradient-to-b from-amber-400/30 to-amber-600/20 text-amber-200 shadow-[0_0_16px_-4px_rgba(212,175,55,0.7)]" : "border-primary/20 bg-black/20 text-muted-foreground hover:border-amber-400/40"}`}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {betType === "number" && (
+        <div className="max-w-xs mx-auto">
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 px-1">
+            {numbers.map((n) => (
+              <button
+                key={n}
+                onClick={() => setBetValue(String(n))}
+                disabled={busy}
+                className={`shrink-0 h-9 w-9 rounded-md border-2 font-black text-[11px] grid place-items-center transition-all ${betValue === String(n) ? "border-amber-300 scale-110 shadow-[0_0_12px_-2px_rgba(212,175,55,0.8)]" : "border-white/10 opacity-70"}`}
+                style={{ background: colorOf(n) === "red" ? "linear-gradient(180deg,#dc2626,#7f1d1d)" : colorOf(n) === "black" ? "linear-gradient(180deg,#374151,#0a0a0a)" : "linear-gradient(180deg,#16a34a,#064e3b)" }}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="max-w-xs mx-auto space-y-1">
+        <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Stake</label>
+        <div className="relative">
+          <Coins className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-amber-400" />
+          <Input type="number" value={stake} min={min} disabled={busy} onChange={(e) => setStake(Number(e.target.value))} className="pl-9 h-12 text-base font-bold border-amber-400/30 bg-black/20 focus-visible:ring-amber-400/40" />
+        </div>
+      </div>
+
+      <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-4 py-2">
+        <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Win pays</span>
+        <span className="text-emerald-300 font-black text-lg">{Math.floor(stake * currentMult).toLocaleString()}</span>
+        <span className="text-[10px] text-emerald-400/70 font-bold">({currentMult}x)</span>
+      </div>
+
+      <Button className="w-full h-14 text-base font-black tracking-wide bg-gradient-to-b from-amber-300 to-amber-600 hover:from-amber-200 hover:to-amber-500 text-black shadow-[0_10px_30px_-6px_rgba(212,175,55,0.7)] border border-amber-200/50" onClick={play} disabled={busy}>
+        {busy ? "Spinning…" : `Place Bet on ${betType === "color" || betType === "parity" ? betValue.toUpperCase() : `#${betValue}`}`}
+      </Button>
+
+      {last && !busy && (
+        <div className="animate-prize-pop">
+          <Badge variant="outline" className={last.payout > 0 ? "border-emerald-500/50 text-emerald-300 text-sm px-4 py-1.5" : "border-destructive/50 text-destructive text-sm px-4 py-1.5"}>
+            {last.outcome} · {last.payout > 0 ? `🎉 WON ${Number(last.payout).toLocaleString()}` : "NO WIN"}
+          </Badge>
+        </div>
+      )}
     </Card>
   );
 }
