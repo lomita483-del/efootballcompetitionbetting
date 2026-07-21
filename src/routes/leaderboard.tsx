@@ -164,7 +164,7 @@ function Board({
                 <Td>
                   <div className="flex items-center gap-2">
                     <Avatar url={r.image_url ?? null} name={firstPick ? firstPick(r) : pick(r)} />
-                    <span className="text-base font-semibold text-[#7BBA4A] drop-shadow-[0_0_4px_rgba(123,186,74,0.35)]">{firstPick ? firstPick(r) : pick(r)}</span>
+                    <span className="text-base font-bold text-[#9FD65C] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" style={{ textShadow: "0 0 6px rgba(159,214,92,0.5)" }}>{firstPick ? firstPick(r) : pick(r)}</span>
                   </div>
                 </Td>
                 <Td><span className={firstPick ? "font-bold" : "text-muted-foreground"}>{secondPick ? secondPick(r) : (firstPick ? pick(r) : (r.top_player || "—"))}</span></Td>
