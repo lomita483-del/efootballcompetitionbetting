@@ -1,4 +1,3 @@
-import { ..., ShieldAlert } from "lucide-react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
