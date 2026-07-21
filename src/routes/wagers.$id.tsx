@@ -16,6 +16,7 @@ import {
   acceptWager, rejectWager, requestTermination, submitPayment,
   type Wager, type WagerPayment,
 } from "@/lib/wagers";
+import { WagerDisputeThread } from "@/components/WagerDisputeThread";
 
 export const Route = createFileRoute("/wagers/$id")({
   head: ({ params }) => ({ meta: [{ title: `Wager ${params.id.slice(0, 8)} — ECB` }, { name: "robots", content: "noindex" }] }),
@@ -194,6 +195,11 @@ function Page() {
               )}
           </Card>
         )}
+
+        {/* Dispute thread */}
+        <div className="mt-4">
+          <WagerDisputeThread wagerId={w.id} challengerId={w.challenger_id} opponentId={w.opponent_id} />
+        </div>
       </div>
     </Layout>
   );
