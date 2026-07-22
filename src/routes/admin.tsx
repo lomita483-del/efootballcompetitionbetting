@@ -4407,6 +4407,12 @@ function BetTrackerPanel() {
       toast.success(ok.checked ? "Ticket voided & refunded" : "Ticket voided"); load();
     }
   }
+async function toggleSelectionVoid(b: any, s: any) {
+    const nextVoid = s.result !== "void";
+    const { error } = await (supabase as any).rpc("admin_toggle_selection_void", { _bet_id: b.id, _selection_id: s.id, _void: nextVoid });
+    if (error) toast.error(error.message);
+    else { await logAudit("selection_void_toggle", "bet_selection", s.id, { bet_id: b.id, void: nextVoid, match: s.matches?.name }); toast.success(nextVoid ? "Match marked void on this ticket" : "Void removed from this ticket"); load(); }
+  }
 
   const filtered = bets.filter((b) => {
     if (!q) return true;
@@ -4485,8 +4491,21 @@ function BetTrackerPanel() {
                 </div>
                 <div className="mt-3 grid gap-1.5">
                   {(b.bet_selections ?? []).map((s: any) => (
-                    <div key={s.id} className="rounded-lg border border-border/70 bg-background/30 px-2 py-1.5 text-[11px] text-muted-foreground">
-                      <span className="font-semibold text-foreground">{s.matches?.name ?? "Match"}</span> · {s.selection_label} <span className="font-mono text-primary">@{Number(s.locked_odds).toFixed(2)}</span>
+                    <div key={s.id} className="flex items-center justify-between gap-2 rounded-lg border border-border/70 bg-background/30 px-2 py-1.5 text-[11px] text-muted-foreground">
+                      <span className="min-w-0 truncate">
+                        <span className="font-semibold text-foreground">{s.matches?.name ?? "Match"}</span> · {s.selection_label} <span className="font-mono text-primary">@{Number(s.locked_odds).toFixed(2)}</span>
+                      </span>
+                      <span className="flex items-center gap-1.5 shrink-0">
+                        <Badge variant="outline" className={
+                          s.result === "won" ? "border-emerald-500/50 text-emerald-300 text-[9px]" :
+                          s.result === "lost" ? "border-destructive/50 text-destructive text-[9px]" :
+                          s.result === "void" ? "border-amber-500/50 text-amber-300 text-[9px]" :
+                          "border-muted-foreground/40 text-muted-foreground text-[9px]"
+                        }>{s.result ?? "pending"}</Badge>
+                        <Button size="sm" variant="outline" className="h-6 px-2 text-[10px]" onClick={() => toggleSelectionVoid(b, s)}>
+                          {s.result === "void" ? "Unvoid" : "Void"}
+                        </Button>
+                      </span>
                     </div>
                   ))}
                 </div>
