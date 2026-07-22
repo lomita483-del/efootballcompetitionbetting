@@ -1488,8 +1488,8 @@ function MatchesPanel() {
                 className={m.is_void ? "bg-fuchsia-600 hover:bg-fuchsia-500 text-white" : "border-fuchsia-500/40 text-fuchsia-300 hover:bg-fuchsia-500/10"}
                 onClick={async () => {
                   const nextVoid = !m.is_void;
-                  const reason = nextVoid ? (prompt("Reason for voiding this match? (shown in audit log)") ?? "") : null;
-                  const { error } = await supabase.rpc("admin_toggle_match_void", { _match_id: m.id, _void: nextVoid, _reason: reason });
+                  const reason = nextVoid ? (prompt("Reason for voiding this match? (shown in audit log)") ?? "") : undefined;
+                  const { error } = await supabase.rpc("admin_toggle_match_void", { _match_id: m.id, _void: nextVoid, _reason: reason } as any);
                   if (error) { toast.error(error.message); return; }
                   toast.success(nextVoid ? "Match voided — all tickets treat this leg as odds 0.00" : "Match un-voided");
                   load();
