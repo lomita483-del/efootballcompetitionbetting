@@ -1443,9 +1443,9 @@ function MatchesPanel() {
       {/* Category tabs */}
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
         <TabsList>
-          <TabsTrigger value="live">🟢 Ongoing ({groups.live.length})</TabsTrigger>
-          <TabsTrigger value="scheduled">🟠 Upcoming ({groups.scheduled.length})</TabsTrigger>
-          <TabsTrigger value="ended">🔴 Ended ({groups.ended.length})</TabsTrigger>
+          <TabsTrigger value="live">🟢 ONGOING ({groups.live.length})</TabsTrigger>
+          <TabsTrigger value="scheduled">🟠 UPCOMING ({groups.scheduled.length})</TabsTrigger>
+          <TabsTrigger value="ended">🔴 ENDED ({groups.ended.length})</TabsTrigger>
         </TabsList>
       </Tabs>
 
