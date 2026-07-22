@@ -209,7 +209,7 @@ export function BetVoucher({
   // Resolve a single selection's outcome even before the backend settles the whole bet,
   // so an ended match never lingers on "PENDING".
   const betFinalized = ["won", "lost", "cashed_out", "void", "refunded"].includes(status);
-  function selResult(s: any): "won" | "lost" | "pending"void" {
+  function selResult(s: any): "won" | "lost" | "pending" | "void" {
     if (s.result === "void") return "void";
     if (s.result === "won") return "won";
     if (s.result === "lost") return "lost";
