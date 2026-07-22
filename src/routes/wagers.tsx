@@ -48,8 +48,6 @@ const STATUS_TONE: Record<string, string> = {
 
 function Page() {
   const { user } = useAuth();
-  const matches = useMatches();
-  const onDetailRoute = matches.some((m) => m.routeId === "/wagers/$id");
   const [wallet, setWallet] = useState<WagerWallet | null>(null);
   const [wagers, setWagers] = useState<Wager[]>([]);
   const [openCreate, setOpenCreate] = useState(false);
@@ -79,7 +77,6 @@ function Page() {
   }, [wagers, tab]);
 
   if (!user) return <Layout><div className="container py-10 text-center">Sign in to view wagers.</div></Layout>;
-  if (onDetailRoute) return <Outlet />;
 
   return (
     <Layout>
