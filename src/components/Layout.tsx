@@ -337,7 +337,7 @@ function SiteFooter({ isHome = false }: { isHome?: boolean }) {
       .then(({ data }) => setS(data));
   }, []);
   return (
-    <footer className={`border-t border-border mt-20 backdrop-blur-xl bg-card/40 lg:pl-0 ${isHome ? "pl-0" : "pl-16"}`}>
+    <footer className="border-t border-border mt-20 backdrop-blur-xl bg-card/40">
       <div className="container mx-auto px-4 py-10 grid md:grid-cols-3 gap-6 text-sm">
         <div>
           <div className="flex items-center gap-2 mb-2">
