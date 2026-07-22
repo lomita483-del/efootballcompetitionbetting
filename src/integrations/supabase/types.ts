@@ -4750,10 +4750,19 @@ export type Database = {
         Args: { _bet_id: string; _reason?: string }
         Returns: undefined
       }
-      admin_toggle_selection_void: {
-        Args: { _bet_id: string; _selection_id: string; _void: boolean }
+      admin_toggle_match_void: {
+        Args: { _match_id: string; _reason?: string; _void: boolean }
         Returns: undefined
       }
+      admin_toggle_selection_void:
+        | {
+            Args: { _bet_id: string; _selection_id: string; _void: boolean }
+            Returns: undefined
+          }
+        | {
+            Args: { _selection_id: string; _void: boolean }
+            Returns: undefined
+          }
       admin_unsuspend_bet: { Args: { _bet_id: string }; Returns: undefined }
       admin_upsert_leaderboard_override: {
         Args: {
