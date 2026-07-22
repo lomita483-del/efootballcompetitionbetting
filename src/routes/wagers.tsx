@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import {
   createChallenge, findOpponent, getMyWagerWallet, listMyWagers,
+  acceptWager, rejectWager,
   type Wager, type WagerWallet, type OpponentSearchResult,
 } from "@/lib/wagers";
 
@@ -107,6 +108,20 @@ function Page() {
               <TabsTrigger value="active">Active</TabsTrigger>
               <TabsTrigger value="history">History</TabsTrigger>
             </TabsList>
+            {(() => {
+              const incoming = wagers.filter((w) => w.opponent_id === user.id && w.status === "pending_approval");
+              if (incoming.length === 0) return null;
+              return (
+                <div className="mt-4 rounded-xl border-2 border-amber-400/50 bg-amber-500/10 p-3 space-y-2">
+                  <div className="text-[10px] uppercase tracking-widest text-amber-200 font-black flex items-center gap-1">
+                    <Swords className="h-3.5 w-3.5" /> Incoming challenges ({incoming.length})
+                  </div>
+                  {incoming.map((w) => (
+                    <IncomingChallengeRow key={w.id} w={w} onDone={refresh} />
+                  ))}
+                </div>
+              );
+            })()}
             <TabsContent value={tab} className="mt-4 space-y-2">
               {filtered.length === 0 && (
                 <div className="text-center py-10 text-muted-foreground text-sm">
@@ -122,6 +137,43 @@ function Page() {
       </div>
       <CreateChallengeDialog open={openCreate} onOpenChange={setOpenCreate} onCreated={refresh} />
     </Layout>
+  );
+}
+
+function IncomingChallengeRow({ w, onDone }: { w: Wager; onDone: () => void }) {
+  const [busy, setBusy] = useState(false);
+  async function accept() {
+    setBusy(true);
+    try { await acceptWager(w.id); toast.success("Challenge accepted — fund your stake next."); onDone(); }
+    catch (e: any) { toast.error(e.message); }
+    finally { setBusy(false); }
+  }
+  async function decline() {
+    const reason = prompt("Reason (optional)") ?? "";
+    setBusy(true);
+    try { await rejectWager(w.id, reason); toast.success("Challenge declined"); onDone(); }
+    catch (e: any) { toast.error(e.message); }
+    finally { setBusy(false); }
+  }
+  return (
+    <div className="flex items-center gap-3 rounded-lg border border-amber-400/40 bg-background/40 p-2.5 flex-wrap">
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-sm">{w.public_id}</span>
+          <Badge variant="outline" className="text-[9px] uppercase bg-amber-500/20 text-amber-200 border-amber-500/40">Awaiting your reply</Badge>
+        </div>
+        <div className="text-xs text-muted-foreground truncate mt-0.5">
+          {w.event_label || w.bet_type} • Stake <span className="text-primary font-bold">{w.stake.toLocaleString()}</span> tokens
+        </div>
+      </div>
+      <div className="flex items-center gap-1.5 shrink-0">
+        <Button size="sm" className="btn-luxury" disabled={busy} onClick={accept}>Accept</Button>
+        <Button size="sm" variant="outline" disabled={busy} onClick={decline}>Decline</Button>
+        <Link to="/wagers/$id" params={{ id: w.id }}>
+          <Button size="sm" variant="ghost">View</Button>
+        </Link>
+      </div>
+    </div>
   );
 }
 
