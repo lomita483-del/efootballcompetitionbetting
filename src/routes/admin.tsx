@@ -1482,6 +1482,22 @@ function MatchesPanel() {
               {m.status === "ended" && <Button size="sm" variant="outline" onClick={() => setEditingScore(m)} title="Edit final score — leaderboard recalculates"><Pencil className="h-3 w-3 mr-1" />Edit Score</Button>}
               <CorrectScoreManagerButton match={m} onSaved={load} />
               {m.status !== "cancelled" && m.status !== "ended" && <Button size="sm" variant="outline" onClick={() => setStatus(m.id, "cancelled")}>Cancel</Button>}
+              <Button
+                size="sm"
+                variant={m.is_void ? "default" : "outline"}
+                className={m.is_void ? "bg-fuchsia-600 hover:bg-fuchsia-500 text-white" : "border-fuchsia-500/40 text-fuchsia-300 hover:bg-fuchsia-500/10"}
+                onClick={async () => {
+                  const nextVoid = !m.is_void;
+                  const reason = nextVoid ? (prompt("Reason for voiding this match? (shown in audit log)") ?? "") : null;
+                  const { error } = await supabase.rpc("admin_toggle_match_void", { _match_id: m.id, _void: nextVoid, _reason: reason });
+                  if (error) { toast.error(error.message); return; }
+                  toast.success(nextVoid ? "Match voided — all tickets treat this leg as odds 0.00" : "Match un-voided");
+                  load();
+                }}
+                title={m.is_void ? "Un-void this match" : "Void this match (tickets keep their other legs; this leg drops to 0.00)"}
+              >
+                {m.is_void ? "Voided" : "Void"}
+              </Button>
               <Button size="sm" variant="destructive" onClick={() => deleteMatch(m.id)} title="Delete match"><Trash2 className="h-3 w-3" /></Button>
             </div>
             <div className="w-full flex flex-wrap items-center gap-2 border-t border-border/40 pt-2 mt-1">
