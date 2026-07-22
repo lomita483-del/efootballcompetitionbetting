@@ -189,6 +189,13 @@ export type Database = {
           popup_ad_text: string | null
           referral_bonus_referee: number
           referral_bonus_referrer: number
+          roulette_color_payout: number | null
+          roulette_enabled: boolean | null
+          roulette_green_payout: number | null
+          roulette_max: number | null
+          roulette_min: number | null
+          roulette_number_payout: number | null
+          roulette_parity_payout: number | null
           scratch_enabled: boolean | null
           scratch_price: number | null
           shop_enabled: boolean | null
@@ -326,6 +333,13 @@ export type Database = {
           popup_ad_text?: string | null
           referral_bonus_referee?: number
           referral_bonus_referrer?: number
+          roulette_color_payout?: number | null
+          roulette_enabled?: boolean | null
+          roulette_green_payout?: number | null
+          roulette_max?: number | null
+          roulette_min?: number | null
+          roulette_number_payout?: number | null
+          roulette_parity_payout?: number | null
           scratch_enabled?: boolean | null
           scratch_price?: number | null
           shop_enabled?: boolean | null
@@ -463,6 +477,13 @@ export type Database = {
           popup_ad_text?: string | null
           referral_bonus_referee?: number
           referral_bonus_referrer?: number
+          roulette_color_payout?: number | null
+          roulette_enabled?: boolean | null
+          roulette_green_payout?: number | null
+          roulette_max?: number | null
+          roulette_min?: number | null
+          roulette_number_payout?: number | null
+          roulette_parity_payout?: number | null
           scratch_enabled?: boolean | null
           scratch_price?: number | null
           shop_enabled?: boolean | null
@@ -5164,6 +5185,10 @@ export type Database = {
       }
       play_coinflip: {
         Args: { _choice: string; _stake: number }
+        Returns: Json
+      }
+      play_roulette: {
+        Args: { _bet_type: string; _bet_value: string; _stake: number }
         Returns: Json
       }
       play_scratch: { Args: never; Returns: Json }
