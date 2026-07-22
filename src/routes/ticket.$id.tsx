@@ -190,6 +190,7 @@ export function BetVoucher({
   const status = bet.status as string;
   // A selection only counts as a win once its match has ENDED (no cash-out while live).
   function endedWin(s: any): boolean {
+    if (s.result === "void") return true;
     if (s.result === "won") return true;
     if (s.result === "lost") return false;
     const m = s.matches;
@@ -208,7 +209,8 @@ export function BetVoucher({
   // Resolve a single selection's outcome even before the backend settles the whole bet,
   // so an ended match never lingers on "PENDING".
   const betFinalized = ["won", "lost", "cashed_out", "void", "refunded"].includes(status);
-  function selResult(s: any): "won" | "lost" | "pending" {
+  function selResult(s: any): "won" | "lost" | "pending"void" {
+    if (s.result === "void") return "void";
     if (s.result === "won") return "won";
     if (s.result === "lost") return "lost";
     const m = s.matches;
@@ -389,9 +391,10 @@ export function BetVoucher({
               const r = selResult(s);
               const won = r === "won";
               const lost = r === "lost";
-              const badgeCls = won ? "badge-won" : lost ? "badge-lost" : "badge-pending";
-              const badgeLabel = won ? "WON" : lost ? "LOST" : live ? "LIVE" : "PENDING";
-              const BadgeIcon = won ? Trophy : lost ? X : ClockIcon;
+              const isVoid = r === "void";
+              const badgeCls = won ? "badge-won" : lost ? "badge-lost" : isVoid ? "border border-amber-400/40 text-amber-300 bg-amber-400/10" : "badge-pending";
+              const badgeLabel = won ? "WON" : lost ? "LOST" : isVoid ? "VOID" : live ? "LIVE" : "PENDING";
+              const BadgeIcon = won ? Trophy : lost ? X : isVoid ? ShieldAlert : ClockIcon;
               const scoreLabel = isFuture ? "PROGRESS" : ended ? "FINAL" : live ? "LIVE" : "SCORE";
               const futureStatus = s.odds?.future_status ?? "active";
               // Prefer the public match code (ECB-XXX###); fall back to a derived numeric Game ID.
