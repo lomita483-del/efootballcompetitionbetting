@@ -310,7 +310,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
           </div>
         )}
       </header>
-      <main className={`relative lg:pl-0 overflow-x-hidden ${isHome ? "pl-0" : "pl-16"}`}>{children}</main>
+      <main className="relative overflow-x-hidden">{children}</main>
       <LevelUpModal />
       <GlobalWinAnimation />
       <GlobalLossAnimation />
@@ -318,52 +318,6 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       <SurveyPopout />
       <PollPopout />
       <PushPermissionPrompt />
-      <nav
-        className={`${isHome ? "hidden" : "lg:hidden"} fixed left-0 inset-y-0 pt-16 z-40 w-16 overflow-y-auto border-r border-primary/25 shadow-[6px_0_28px_-14px_rgba(212,175,55,0.55)] bg-[linear-gradient(180deg,rgba(11,10,20,0.92)_0%,rgba(20,14,32,0.88)_50%,rgba(11,10,20,0.94)_100%)] backdrop-blur-xl before:pointer-events-none before:absolute before:inset-y-0 before:right-0 before:w-px before:bg-gradient-to-b before:from-transparent before:via-primary/60 before:to-transparent after:pointer-events-none after:absolute after:inset-0 after:bg-[radial-gradient(120%_60%_at_0%_0%,rgba(212,175,55,0.14),transparent_55%),radial-gradient(120%_60%_at_0%_100%,rgba(120,80,220,0.14),transparent_55%)]`}
-      >
-        <div className="relative z-10 flex flex-col items-stretch gap-3 py-4 px-1.5">
-          <button
-            type="button"
-            onClick={() => setRailOpen((v) => !v)}
-            aria-expanded={railOpen}
-            aria-label={railOpen ? "Collapse menu" : "Expand menu"}
-            className="group relative flex flex-col items-center justify-center gap-1 px-0 py-1 rounded-xl text-[10px] font-semibold tracking-wide text-primary transition-all hover:text-foreground active:scale-95"
-            title="Menu"
-          >
-            <span className="relative grid place-items-center h-[52px] w-[52px] rounded-xl border border-primary/40 bg-gradient-to-br from-primary/35 via-primary/15 to-transparent shadow-[0_0_22px_-4px_rgba(212,175,55,0.7),inset_0_1px_0_rgba(255,255,255,0.15)]">
-              <span className="pointer-events-none absolute inset-0 rounded-xl bg-[radial-gradient(60%_60%_at_50%_0%,rgba(255,255,255,0.25),transparent_70%)]" />
-              <SettingsIcon
-                className={`relative h-7 w-7 drop-shadow-[0_0_6px_rgba(212,175,55,0.7)] transition-transform ${railOpen ? "rotate-180" : ""}`}
-              />
-            </span>
-            <span className="leading-none text-[9px]">{railOpen ? "Less" : "More"}</span>
-          </button>
-          <MobLink to="/" icon={Home} label="Home" />
-          {railOpen && (
-            <>
-              <MobLink to="/matches" icon={MatchIcon} label="Matches" />
-              <MobLink to="/virtual" icon={Dice5} label="Virtual" />
-              <MobLink to="/lottery" icon={Clover} label="Lottery" />
-              <MobLink to="/arcade" icon={Gamepad2} label="Arcade" />
-              <MobLink to="/leaderboard" icon={Trophy} label="Top" />
-              <MobLink to="/tournament" icon={Swords} label="Bracket" />
-              {user && (
-                <>
-                 <MobLink to="/wagers" icon={Swords} label="Wagers" />
-                 <MobLink to="/dashboard" icon={Ticket} label="ME" />
-                 <MobLink to="/tasks" icon={ListChecks} label="Tasks" />
-                 <MobLink to="/profile" icon={UserIcon} label="Profile" />
-                 <MobLink to="/settings" icon={SettingsIcon} label="Settings" />
-                 <MobLink to="/support" icon={LifeBuoy} label="Help" />
-               </>
-              )}
-              {isAdmin && <MobLink to="/admin" icon={Shield} label="Admin" danger />}
-              {!isAdmin && isMod && <MobLink to="/mod" icon={Shield} label="Mod" danger />}
-            </>
-          )}
-        </div>
-      </nav>
-      <div className="lg:hidden h-0" />
       <SiteFooter isHome={isHome} />
     </div>
   );
