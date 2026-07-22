@@ -31,6 +31,7 @@ function ArcadePage() {
     const { data } = await (supabase as any).from("app_settings")
   .select("coinflip_enabled,coinflip_min,coinflip_max,coinflip_payout,wheel_enabled,wheel_min,wheel_max,scratch_enabled,scratch_price,roulette_enabled,roulette_min,roulette_max,roulette_number_payout,roulette_color_payout,roulette_green_payout,roulette_parity_payout")
   .eq("id", 1).maybeSingle();
+    setS(data);
   }
   useEffect(() => { load(); }, []);
 
@@ -52,6 +53,7 @@ function ArcadePage() {
         {!user && <Card className="p-8 text-center"><p>Please <Link to="/login" className="text-primary underline">sign in</Link> to play.</p></Card>}
 
         {user && s && (
+          <Tabs defaultValue="coinflip">
           <TabsList className="grid grid-cols-4 max-w-xl mb-6">
            <TabsTrigger value="coinflip">Coin Flip</TabsTrigger>
              <TabsTrigger value="wheel">Wheel</TabsTrigger>
