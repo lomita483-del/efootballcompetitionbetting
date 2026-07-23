@@ -151,31 +151,40 @@ export function MatchCardLive({ match, variant = "card" }: { match: MatchRow; va
     const oddsList = market?.odds.slice(0, 3) ?? [];
     const labels = shortLabels(oddsList.length);
     return (
-     <Card className="glass bg-background/20 backdrop-blur-[2px] px-3 py-1 pl-4 hover:border-primary/60 hover:-translate-y-0.5 transition-all relative overflow-hidden">
-        <span className={`absolute left-0 top-0 h-full w-1 ${match.status === "live" ? "bg-destructive" : match.status === "ended" ? "bg-muted-foreground/40" : "bg-emerald-500/70"}`} />
+      <Card className="glass bg-background/20 backdrop-blur-[2px] px-3 py-1 pl-4 hover:border-primary/60 hover:-translate-y-0.5 transition-all relative overflow-hidden">
+        <span className={`absolute left-0 top-0 h-full w-1 ${match.match_kind === "future" ? "bg-amber-400/70" : match.status === "live" ? "bg-destructive" : match.status === "ended" ? "bg-muted-foreground/40" : "bg-emerald-500/70"}`} />
         <div className="flex items-stretch gap-2 sm:gap-3">
           <Link to="/matches/$matchId" params={{ matchId: match.id }} className="min-w-0 flex-1 flex flex-col justify-center">
             <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-wider text-muted-foreground">
+              {match.match_kind === "future" && <span className="text-amber-300 font-bold">FUTURES</span>}
               {match.status === "live" && <span className="text-destructive font-bold">● LIVE</span>}
               <span className="truncate">{match.name}</span>
             </div>
-            <div className="mt-0.5 space-y-0">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <TeamLogo name={homeName} url={match.match_kind === "shooter" ? match.home_player?.avatar_url : match.home_team?.logo_url} size={18} rounded="full" />
-                <span className="font-bold text-xs truncate">{homeName}</span>
-                {match.status !== "scheduled" && <span className="ml-auto text-xs font-mono text-muted-foreground">{match.home_score}</span>}
+            {match.match_kind === "future" ? (
+              <div className="mt-0.5 text-[9px] text-muted-foreground leading-tight">
+                {match.status === "scheduled" ? <>Closes in <Countdown target={match.start_time} /></> : <span>{match.status.toUpperCase()}</span>}
               </div>
-              <div className="flex items-center gap-1.5 min-w-0">
-                <TeamLogo name={awayName} url={match.match_kind === "shooter" ? match.away_player?.avatar_url : match.away_team?.logo_url} size={18} rounded="full" />
-                <span className="font-bold text-xs truncate">{awayName}</span>
-                {match.status !== "scheduled" && <span className="ml-auto text-xs font-mono text-muted-foreground">{match.away_score}</span>}
-              </div>
-            </div>
-            <div className="mt-0.5 text-[9px] text-muted-foreground leading-tight">
-              {match.status === "scheduled" && <>Starts in <Countdown target={match.start_time} /></>}
-              {match.status === "live" && <span className="text-destructive font-bold">In progress</span>}
-              {match.status === "ended" && <span>Final</span>}
-            </div>
+            ) : (
+              <>
+                <div className="mt-0.5 space-y-0">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <TeamLogo name={homeName} url={match.match_kind === "shooter" ? match.home_player?.avatar_url : match.home_team?.logo_url} size={18} rounded="full" />
+                    <span className="font-bold text-xs truncate">{homeName}</span>
+                    {match.status !== "scheduled" && <span className="ml-auto text-xs font-mono text-muted-foreground">{match.home_score}</span>}
+                  </div>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <TeamLogo name={awayName} url={match.match_kind === "shooter" ? match.away_player?.avatar_url : match.away_team?.logo_url} size={18} rounded="full" />
+                    <span className="font-bold text-xs truncate">{awayName}</span>
+                    {match.status !== "scheduled" && <span className="ml-auto text-xs font-mono text-muted-foreground">{match.away_score}</span>}
+                  </div>
+                </div>
+                <div className="mt-0.5 text-[9px] text-muted-foreground leading-tight">
+                  {match.status === "scheduled" && <>Starts in <Countdown target={match.start_time} /></>}
+                  {match.status === "live" && <span className="text-destructive font-bold">In progress</span>}
+                  {match.status === "ended" && <span>Final</span>}
+                </div>
+              </>
+            )}
           </Link>
           <div className="flex items-stretch gap-1 shrink-0">
             {oddsList.length === 0 && <span className="self-center text-[10px] text-muted-foreground px-2">No odds</span>}
