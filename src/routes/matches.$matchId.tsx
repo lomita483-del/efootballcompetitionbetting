@@ -55,7 +55,7 @@ function Page() {
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [matchId]);
-
+Card
   if (loading) return <Layout><div className="container py-10">Loading…</div></Layout>;
   if (!m) return <Layout><div className="container py-10">Match not found. <Link to="/matches" className="text-primary underline">Back</Link></div></Layout>;
 
@@ -67,23 +67,38 @@ function Page() {
     <Layout>
       <div className="container py-10 max-w-5xl">
         <Link to="/matches" className="text-muted-foreground text-sm flex items-center gap-1 hover:text-primary"><ArrowLeft className="h-4 w-4" />All matches</Link>
-        <Card className="glass-strong p-6 mt-3">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{m.name}</span>
-            <span className="flex items-center gap-3">
-              {m.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{m.location}</span>}
+        {m.match_kind === "future" ? (
+          <Card className="glass-strong p-6 mt-3 relative overflow-hidden border-amber-400/40">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-gold" />
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <Badge variant="outline" className="border-amber-400/50 text-amber-300 bg-amber-400/10">Futures / Outright Market</Badge>
               {m.is_featured && <Badge variant="outline" className="border-primary/40 text-primary">Featured</Badge>}
-            </span>
-          </div>
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6 mt-6">
-            <Side name={home} logo={m.home_team?.logo_url} score={m.home_score} status={m.status} />
-            <div className="text-center">
-              <div className="text-[10px] tracking-widest text-muted-foreground">{m.status.toUpperCase()}</div>
-              {m.status === "scheduled" ? <Countdown target={m.start_time} /> : <div className="text-xl font-bold gradient-gold-text">{m.home_score} — {m.away_score}</div>}
             </div>
-            <Side name={away} logo={m.away_team?.logo_url} score={m.away_score} status={m.status} align="right" />
-          </div>
-        </Card>
+            <h1 className="text-2xl font-black tracking-wide gradient-gold-text mt-3">{m.name}</h1>
+            <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+              <span>{m.status === "scheduled" ? "Betting closes" : m.status === "ended" ? "Settled" : "Status"}: <span className="font-semibold text-foreground">{m.status === "scheduled" ? new Date(m.start_time).toLocaleString() : m.status.toUpperCase()}</span></span>
+              {m.status === "scheduled" && <Countdown target={m.start_time} />}
+            </div>
+          </Card>
+        ) : (
+          <Card className="glass-strong p-6 mt-3">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>{m.name}</span>
+              <span className="flex items-center gap-3">
+                {m.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{m.location}</span>}
+                {m.is_featured && <Badge variant="outline" className="border-primary/40 text-primary">Featured</Badge>}
+              </span>
+            </div>
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6 mt-6">
+              <Side name={home} logo={m.home_team?.logo_url} score={m.home_score} status={m.status} />
+              <div className="text-center">
+                <div className="text-[10px] tracking-widest text-muted-foreground">{m.status.toUpperCase()}</div>
+                {m.status === "scheduled" ? <Countdown target={m.start_time} /> : <div className="text-xl font-bold gradient-gold-text">{m.home_score} — {m.away_score}</div>}
+              </div>
+              <Side name={away} logo={m.away_team?.logo_url} score={m.away_score} status={m.status} align="right" />
+            </div>
+          </Card>
+        )}
 
         <h2 className="text-xl font-bold mt-8 mb-3 flex items-center gap-2"><Trophy className="h-5 w-5 text-primary" />Markets</h2>
         {m.markets.length === 0 && <p className="text-muted-foreground text-sm">No markets yet.</p>}
@@ -106,13 +121,37 @@ function Page() {
                 {isCS ? (
                   <CorrectScoreGrid market={mk} matchLocked={!mk.is_open || m.status !== "scheduled"} matchId={m.id} matchName={`${home} vs ${away}`} selectedOdd={selectedOdd} add={add} remove={remove} homeName={home} awayName={away} />
                 ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-3">
+                  <div className={m.match_kind === "future" ? "grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3" : "grid grid-cols-2 sm:grid-cols-3 gap-2 mt-3"}>
                     {mk.odds.map((o) => {
                       const sel = selectedOdd === o.id;
                       const locked = !mk.is_open || m.status !== "scheduled";
+                      const matchName = m.match_kind === "future" ? m.name : `${home} vs ${away}`;
+                      if (m.match_kind === "future") {
+                        return (
+                          <button
+                            key={o.id}
+                            disabled={locked}
+                            onClick={() => sel ? remove(o.id) : add({ match_id: m.id, match_name: matchName, market_id: mk.id, market_name: mk.name, odd_id: o.id, selection_label: o.label, odds: Number(o.value) })}
+                            className={`flex items-center gap-3 rounded-xl border p-3 text-left transition ${sel ? "border-primary bg-primary/15 shadow-gold" : "border-border bg-background/40 hover:border-primary/50"} ${locked ? "opacity-50 cursor-not-allowed" : ""}`}
+                          >
+                            {o.future_emblem_url
+                              ? <img src={o.future_emblem_url} alt="" className="h-9 w-9 rounded-full object-cover border border-amber-400/40 shrink-0" />
+                              : <span className="h-9 w-9 rounded-full bg-amber-400/15 border border-amber-400/30 grid place-items-center text-sm font-bold text-amber-300 shrink-0">{o.label.charAt(0).toUpperCase()}</span>}
+                            <div className="min-w-0 flex-1">
+                              <div className="font-bold truncate">{o.label}</div>
+                              {o.future_candidate_type && <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{o.future_candidate_type}</div>}
+                            </div>
+                            <div className="text-right shrink-0">
+                              <div className="font-mono font-black text-primary">{Number(o.value).toFixed(2)}</div>
+                              {o.future_status === "winner" && <Badge className="mt-1 bg-accent text-accent-foreground text-[9px]">WINNER</Badge>}
+                              {o.future_status === "disqualified" && <Badge variant="outline" className="mt-1 border-destructive/50 text-destructive text-[9px]">OUT</Badge>}
+                            </div>
+                          </button>
+                        );
+                      }
                       return (
                         <Button key={o.id} variant={sel ? "default" : "outline"} disabled={locked}
-                          onClick={() => sel ? remove(o.id) : add({ match_id: m.id, match_name: `${home} vs ${away}`, market_id: mk.id, market_name: mk.name, odd_id: o.id, selection_label: o.label, odds: Number(o.value) })}>
+                          onClick={() => sel ? remove(o.id) : add({ match_id: m.id, match_name: matchName, market_id: mk.id, market_name: mk.name, odd_id: o.id, selection_label: o.label, odds: Number(o.value) })}>
                           <span className="text-xs">{o.label}</span>
                           <span className="ml-2 font-mono">{Number(o.value).toFixed(2)}</span>
                           {o.is_winner && <Badge className="ml-2 bg-accent text-accent-foreground">W</Badge>}
