@@ -16,6 +16,7 @@ import {
   acceptWager, rejectWager, requestTermination, submitPayment,
   type Wager, type WagerPayment,
 } from "@/lib/wagers";
+import { RivalryStats } from "@/components/RivalryStats";
 import { WagerDisputeThread } from "@/components/WagerDisputeThread";
 
 export const Route = createFileRoute("/wagers/$id")({
@@ -222,6 +223,14 @@ function Page() {
           </Card>
         )}
 
+        {/* Rivalry stats */}
+        <RivalryStats
+          userAId={w.challenger_id}
+          userBId={w.opponent_id}
+          nameA={challenger?.full_name || w.challenger_id.slice(0, 8)}
+          nameB={opponent?.full_name || w.opponent_id.slice(0, 8)}
+        />
+        
         {/* Dispute thread */}
         <div className="mt-4">
           <WagerDisputeThread wagerId={w.id} challengerId={w.challenger_id} opponentId={w.opponent_id} />
