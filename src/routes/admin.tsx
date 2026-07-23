@@ -2095,7 +2095,6 @@ function FutureTinyEmblem({ label, url }: { label: string; url?: string | null }
 
 function MatchWizard({ onClose }: { onClose: () => void }) {
   const confirm = useConfirm();
-  const [step, setStep] = useState(1);
   const [teams, setTeams] = useState<any[]>([]);
   const [cats, setCats] = useState<any[]>([]);
   const [teamA, setTeamA] = useState({ id: "", name: "", logoFile: null as File | null, mainPlayers: "", subPlayers: "" });
@@ -2189,17 +2188,20 @@ function MatchWizard({ onClose }: { onClose: () => void }) {
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Match Wizard — Step {step} of 5</DialogTitle>
+          <DialogTitle>Create Team Match</DialogTitle>
         </DialogHeader>
 
-        {step === 1 && <TeamStep label="Team A" team={teamA} setTeam={setTeamA} teams={teams} />}
-        {step === 2 && <TeamStep label="Team B" team={teamB} setTeam={setTeamB} teams={teams} />}
-        {step === 3 && (
-          <div className="space-y-3">
+        <div className="space-y-5">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card className="glass p-4"><TeamStep label="Team A" team={teamA} setTeam={setTeamA} teams={teams} /></Card>
+            <Card className="glass p-4"><TeamStep label="Team B" team={teamB} setTeam={setTeamB} teams={teams} /></Card>
+          </div>
+
+          <Card className="glass p-4 space-y-3">
             <div className="text-sm font-bold">Match Details & Odds</div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid md:grid-cols-3 gap-3">
               <div>
                 <label className="text-xs text-muted-foreground">Home / Away</label>
                 <Select value={details.homeIs} onValueChange={(v) => setDetails({ ...details, homeIs: v as any })}>
@@ -2221,10 +2223,9 @@ function MatchWizard({ onClose }: { onClose: () => void }) {
               <div><label className="text-xs">Draw odds</label><Input type="number" step="0.01" value={details.draw} onChange={(e) => setDetails({ ...details, draw: Number(e.target.value) })} /></div>
               <div><label className="text-xs">Team B win odds</label><Input type="number" step="0.01" value={details.oddsB} onChange={(e) => setDetails({ ...details, oddsB: Number(e.target.value) })} /></div>
             </div>
-          </div>
-        )}
-        {step === 4 && (
-          <div className="space-y-3">
+          </Card>
+
+          <Card className="glass p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div className="text-sm font-bold flex items-center gap-2"><Trophy className="h-4 w-4 text-primary" />Correct Score Market</div>
               <label className="flex items-center gap-2 text-xs"><Switch checked={csEnabled} onCheckedChange={setCsEnabled} /> Enable</label>
@@ -2260,17 +2261,18 @@ function MatchWizard({ onClose }: { onClose: () => void }) {
                 </div>
               </>
             )}
-          </div>
-        )}
-        {step === 5 && (
-          <div className="space-y-3">
+          </Card>
+
+          <Card className="glass p-4 space-y-3">
             <div className="text-sm font-bold">Final Settings</div>
-            <Input placeholder="Match name (e.g. Round 14 · Night Hunt)" value={details.name} onChange={(e) => setDetails({ ...details, name: e.target.value })} />
-            <div>
-              <label className="text-xs text-muted-foreground">Countdown / Start time</label>
-              <Input type="datetime-local" value={details.start_time} onChange={(e) => setDetails({ ...details, start_time: e.target.value })} />
+            <div className="grid md:grid-cols-3 gap-3">
+              <Input placeholder="Match name (e.g. Round 14 · Night Hunt)" value={details.name} onChange={(e) => setDetails({ ...details, name: e.target.value })} />
+              <div>
+                <label className="text-xs text-muted-foreground">Countdown / Start time</label>
+                <Input type="datetime-local" value={details.start_time} onChange={(e) => setDetails({ ...details, start_time: e.target.value })} />
+              </div>
+              <Input placeholder="Location / Venue" value={details.location} onChange={(e) => setDetails({ ...details, location: e.target.value })} />
             </div>
-            <Input placeholder="Location / Venue" value={details.location} onChange={(e) => setDetails({ ...details, location: e.target.value })} />
             <label className="flex items-center gap-2 text-sm"><Switch checked={details.featured} onCheckedChange={(v) => setDetails({ ...details, featured: v })} /> Publish on homepage as Featured</label>
             {details.featured && (
               <ImageSettingControl
@@ -2290,16 +2292,12 @@ function MatchWizard({ onClose }: { onClose: () => void }) {
               <label className="flex items-center gap-2 rounded-lg border border-primary/20 bg-card/60 p-3 text-sm"><Switch checked={details.awayPresent} onCheckedChange={(v) => setDetails({ ...details, awayPresent: v })} /> Away team present (counts on Leaderboard)</label>
             </div>
             <label className="flex items-center gap-2 rounded-lg border border-accent/20 bg-card/60 p-3 text-sm"><Switch checked={details.restrictRepeat} onCheckedChange={(v) => setDetails({ ...details, restrictRepeat: v })} /> Restrict repeat bets — one bet per contender on this match</label>
-          </div>
-        )}
+          </Card>
+        </div>
 
-        <DialogFooter className="flex justify-between">
-          <Button variant="outline" disabled={step === 1} onClick={() => setStep(step - 1)}><ChevronLeft className="h-4 w-4" />Back</Button>
-          {step < 5 ? (
-            <Button onClick={() => setStep(step + 1)}>Next<ChevronRight className="h-4 w-4" /></Button>
-          ) : (
-            <Button className="btn-luxury" onClick={finalCreate}>Create Match</Button>
-          )}
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button className="btn-luxury" onClick={finalCreate}>Review & Create Match</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

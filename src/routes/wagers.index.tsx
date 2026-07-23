@@ -20,7 +20,7 @@ import {
   type Wager, type WagerWallet, type OpponentSearchResult,
 } from "@/lib/wagers";
 
-export const Route = createFileRoute("/wagers")({
+export const Route = createFileRoute("/wagers/")({
   head: () => ({
     meta: [
       { title: "P2P Wagers — ECB" },

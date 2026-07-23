@@ -21,6 +21,7 @@ export function WagersAdminPanel() {
   const [profiles, setProfiles] = useState<Record<string, any>>({});
   const [q, setQ] = useState("");
   const [live, setLive] = useState<Wager | null>(null);
+  const [busyPaymentId, setBusyPaymentId] = useState<string | null>(null);
 
   async function load() {
     const { data: w } = await supabase.from("wagers").select("*").order("created_at", { ascending: false }).limit(200);
@@ -87,8 +88,13 @@ export function WagersAdminPanel() {
                     <div className="text-xs text-muted-foreground truncate">{p.amount.toLocaleString()} tokens • {p.method || "—"} • {p.reference || "—"}</div>
                   </div>
                   {p.receipt_url && <a href={p.receipt_url} target="_blank" rel="noopener" className="text-xs text-primary underline">Receipt</a>}
-                  <Button size="sm" className="btn-luxury" onClick={async () => { try { await adminVerifyPayment(p.id); toast.success("Verified"); } catch (e: any) { toast.error(e.message); } }}>
-                    <CheckCircle2 className="h-3.5 w-3.5 mr-1" />Verify
+                  <Button size="sm" className="btn-luxury" disabled={busyPaymentId === p.id} onClick={async () => {
+                    setBusyPaymentId(p.id);
+                    try { await adminVerifyPayment(p.id); toast.success("Verified — wager funding updated"); await load(); }
+                    catch (e: any) { toast.error(e.message); }
+                    finally { setBusyPaymentId(null); }
+                  }}>
+                    <CheckCircle2 className="h-3.5 w-3.5 mr-1" />{busyPaymentId === p.id ? "Verifying…" : "Verify"}
                   </Button>
                 </div>
               );
@@ -113,7 +119,7 @@ export function WagersAdminPanel() {
             <TabsContent key={k} value={k} className="mt-4 space-y-2">
               {groups[k].length === 0 && <div className="text-center text-muted-foreground text-sm py-6">None</div>}
               {groups[k].map((w) => (
-                <WagerAdminRow key={w.id} w={w} profiles={profiles} onLive={() => setLive(w)} onChange={load} />
+                <WagerAdminRow key={w.id} w={w} payments={payments.filter((p) => p.wager_id === w.id)} profiles={profiles} onLive={() => setLive(w)} onChange={load} />
               ))}
             </TabsContent>
           ))}
@@ -134,7 +140,7 @@ function Stat({ label, value, icon: Icon, tone }: any) {
   );
 }
 
-function WagerAdminRow({ w, profiles, onLive, onChange }: { w: Wager; profiles: any; onLive: () => void; onChange: () => void }) {
+function WagerAdminRow({ w, payments, profiles, onLive, onChange }: { w: Wager; payments: WagerPayment[]; profiles: any; onLive: () => void; onChange: () => void }) {
   const [settleOpen, setSettleOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const ch = profiles[w.challenger_id]?.username || w.challenger_id.slice(0, 6);
@@ -174,6 +180,21 @@ function WagerAdminRow({ w, profiles, onLive, onChange }: { w: Wager; profiles: 
           </Button>
         </div>
       </div>
+      {(["awaiting_payment", "awaiting_funding"] as string[]).includes(w.status) && (
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          {[w.challenger_id, w.opponent_id].map((userId) => {
+            const payment = payments.find((p) => p.user_id === userId);
+            return (
+              <div key={userId} className="rounded-md border border-primary/15 bg-background/40 px-3 py-2 text-xs">
+                <div className="font-bold">{profiles[userId]?.username || userId.slice(0, 6)}</div>
+                <div className={payment?.status === "verified" ? "text-emerald-300" : payment?.status === "pending" ? "text-amber-300" : "text-muted-foreground"}>
+                  {payment?.status === "verified" ? "Stake verified" : payment?.status === "pending" ? "Proof awaiting verification" : "Payment proof not submitted"}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
       {chatOpen && (
         <div className="mt-3">
           <WagerDisputeThread wagerId={w.id} challengerId={w.challenger_id} opponentId={w.opponent_id} isAdmin />
