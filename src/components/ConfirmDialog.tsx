@@ -36,7 +36,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
     <Ctx.Provider value={confirm}>
       {children}
       <Dialog open={!!opts} onOpenChange={(o) => !o && close(false)}>
-        <DialogContent className="relative border-amber-400/30 max-w-md overflow-hidden bg-gradient-to-b from-black/70 via-background/95 to-black/80 backdrop-blur-2xl shadow-[0_25px_80px_-15px_rgba(0,0,0,0.8),0_0_60px_-20px_rgba(212,175,55,0.35)] rounded-2xl">
+        <DialogContent className="border-amber-400/30 max-w-md overflow-hidden bg-gradient-to-b from-black/70 via-background/95 to-black/80 backdrop-blur-2xl shadow-[0_25px_80px_-15px_rgba(0,0,0,0.8),0_0_60px_-20px_rgba(212,175,55,0.35)] rounded-2xl">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
           <div className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-amber-400/10 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-amber-400/5 blur-3xl" />
