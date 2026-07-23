@@ -28,6 +28,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { LevelUpModal } from "@/components/Spotlight";
 import { GlobalWinAnimation } from "@/components/GlobalWinAnimation";
 import { GlobalLossAnimation } from "@/components/GlobalLossAnimation";
+import { WagerMilestone } from "@/components/WagerMilestone";
 import { BetSuccessPopout } from "@/components/BetSuccessPopout";
 import { SurveyPopout } from "@/components/SurveyPopout";
 import { PollPopout } from "@/components/PollPopout";
@@ -314,6 +315,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       <LevelUpModal />
       <GlobalWinAnimation />
       <GlobalLossAnimation />
+      <WagerMilestone />
       <BetSuccessPopout />
       <SurveyPopout />
       <PollPopout />
