@@ -365,25 +365,39 @@ function FeaturedGoldenMatches({ matches, bgImage, bgFit, bgPos }: { matches: Ma
           <div key={m.id} className="relative rounded-2xl border border-amber-300/40 bg-black/25 overflow-hidden shadow-[0_8px_30px_-12px_rgba(0,0,0,0.7)]">
             <div className="flex items-center justify-between gap-2 px-3 pt-2.5 text-[10px] uppercase tracking-widest">
               <span className="inline-flex items-center gap-1.5 font-black text-amber-200">
-                {live ? (
+                {m.match_kind === "future" ? "Futures" : live ? (
                   <><span className="relative flex h-1.5 w-1.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" /><span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-500" /></span> Live</>
                 ) : "Upcoming"}
               </span>
               <span className="font-mono text-amber-50/70">
-                {live ? "Round in play" : <>Starts in <Countdown target={m.start_time} /></>}
+                {m.match_kind === "future" ? <>Closes in <Countdown target={m.start_time} /></> : live ? "Round in play" : <>Starts in <Countdown target={m.start_time} /></>}
               </span>
             </div>
             <Link to="/matches/$matchId" params={{ matchId: m.id }} className="flex items-center gap-3 px-3 py-2 hover:bg-amber-400/5 transition">
-              <TeamLogo name={m.home_team?.name} url={m.home_team?.logo_url} size={30} rounded="full" />
-              <div className="min-w-0 flex-1">
-                <div className="font-extrabold text-sm text-amber-50 leading-tight truncate uppercase">
-                  {m.home_team?.name ?? m.name}
-                  {m.away_team && <span className="text-amber-100/50 font-normal lowercase"> vs </span>}
-                  {m.away_team?.name}
-                </div>
-                <div className="text-[10px] text-amber-100/60 truncate">{market?.name ?? "Match winner"}</div>
-              </div>
-              {m.away_team && <TeamLogo name={m.away_team?.name} url={m.away_team?.logo_url} size={30} rounded="full" />}
+              {m.match_kind === "future" ? (
+                <>
+                  <span className="h-[30px] w-[30px] shrink-0 rounded-full border border-amber-300/50 bg-amber-400/15 grid place-items-center text-amber-200"><Trophy className="h-4 w-4" /></span>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-extrabold text-sm text-amber-50 leading-tight truncate uppercase">
+                      <span className="text-amber-300 mr-1.5">FUTURES</span>{m.name}
+                    </div>
+                    <div className="text-[10px] text-amber-100/60 truncate">{market?.name ?? "Outright market"}</div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <TeamLogo name={m.home_team?.name} url={m.home_team?.logo_url} size={30} rounded="full" />
+                  <div className="min-w-0 flex-1">
+                    <div className="font-extrabold text-sm text-amber-50 leading-tight truncate uppercase">
+                      {m.home_team?.name ?? m.name}
+                      {m.away_team && <span className="text-amber-100/50 font-normal lowercase"> vs </span>}
+                      {m.away_team?.name}
+                    </div>
+                    <div className="text-[10px] text-amber-100/60 truncate">{market?.name ?? "Match winner"}</div>
+                  </div>
+                  {m.away_team && <TeamLogo name={m.away_team?.name} url={m.away_team?.logo_url} size={30} rounded="full" />}
+                </>
+              )}
             </Link>
             {odds.length > 0 && (
               <div className="grid gap-2 px-3 pb-3" style={{ gridTemplateColumns: `repeat(${Math.min(odds.length, 3)}, minmax(0,1fr))` }}>
