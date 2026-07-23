@@ -4754,15 +4754,10 @@ export type Database = {
         Args: { _match_id: string; _reason?: string; _void: boolean }
         Returns: undefined
       }
-      admin_toggle_selection_void:
-        | {
-            Args: { _bet_id: string; _selection_id: string; _void: boolean }
-            Returns: undefined
-          }
-        | {
-            Args: { _selection_id: string; _void: boolean }
-            Returns: undefined
-          }
+      admin_toggle_selection_void: {
+        Args: { _bet_id: string; _selection_id: string; _void: boolean }
+        Returns: undefined
+      }
       admin_unsuspend_bet: { Args: { _bet_id: string }; Returns: undefined }
       admin_upsert_leaderboard_override: {
         Args: {
@@ -5221,6 +5216,10 @@ export type Database = {
         }[]
       }
       recalc_vip_tier: { Args: { _user_id: string }; Returns: string }
+      recalculate_open_bet_totals: {
+        Args: { _bet_id: string }
+        Returns: undefined
+      }
       redeem_promo_code: { Args: { _code: string }; Returns: Json }
       redeem_referral_code: { Args: { _code: string }; Returns: Json }
       redeem_shop_item: { Args: { _item_id: string }; Returns: Json }

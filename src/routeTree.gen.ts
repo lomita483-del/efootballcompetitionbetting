@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WithdrawRouteImport } from './routes/withdraw'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
-import { Route as WagersRouteImport } from './routes/wagers'
 import { Route as TriviaRouteImport } from './routes/trivia'
 import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as TournamentRouteImport } from './routes/tournament'
@@ -43,6 +42,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AchievementsRouteImport } from './routes/achievements'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WagersIndexRouteImport } from './routes/wagers.index'
 import { Route as VirtualIndexRouteImport } from './routes/virtual.index'
 import { Route as WagersIdRouteImport } from './routes/wagers.$id'
 import { Route as VirtualInstantRouteImport } from './routes/virtual.instant'
@@ -67,11 +67,6 @@ const WithdrawRoute = WithdrawRouteImport.update({
 const WatchlistRoute = WatchlistRouteImport.update({
   id: '/watchlist',
   path: '/watchlist',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const WagersRoute = WagersRouteImport.update({
-  id: '/wagers',
-  path: '/wagers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TriviaRoute = TriviaRouteImport.update({
@@ -229,15 +224,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WagersIndexRoute = WagersIndexRouteImport.update({
+  id: '/wagers/',
+  path: '/wagers/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VirtualIndexRoute = VirtualIndexRouteImport.update({
   id: '/virtual/',
   path: '/virtual/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WagersIdRoute = WagersIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => WagersRoute,
+  id: '/wagers/$id',
+  path: '/wagers/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const VirtualInstantRoute = VirtualInstantRouteImport.update({
   id: '/virtual/instant',
@@ -341,7 +341,6 @@ export interface FileRoutesByFullPath {
   '/tournament': typeof TournamentRoute
   '/transactions': typeof TransactionsRoute
   '/trivia': typeof TriviaRoute
-  '/wagers': typeof WagersRouteWithChildren
   '/watchlist': typeof WatchlistRoute
   '/withdraw': typeof WithdrawRoute
   '/guides/how-it-works': typeof GuidesHowItWorksRoute
@@ -354,6 +353,7 @@ export interface FileRoutesByFullPath {
   '/virtual/instant': typeof VirtualInstantRoute
   '/wagers/$id': typeof WagersIdRoute
   '/virtual/': typeof VirtualIndexRoute
+  '/wagers/': typeof WagersIndexRoute
   '/api/public/virtual-tick': typeof ApiPublicVirtualTickRoute
   '/api/public/hooks/broadcast-push': typeof ApiPublicHooksBroadcastPushRoute
   '/api/public/hooks/process-scheduled-push': typeof ApiPublicHooksProcessScheduledPushRoute
@@ -392,7 +392,6 @@ export interface FileRoutesByTo {
   '/tournament': typeof TournamentRoute
   '/transactions': typeof TransactionsRoute
   '/trivia': typeof TriviaRoute
-  '/wagers': typeof WagersRouteWithChildren
   '/watchlist': typeof WatchlistRoute
   '/withdraw': typeof WithdrawRoute
   '/guides/how-it-works': typeof GuidesHowItWorksRoute
@@ -405,6 +404,7 @@ export interface FileRoutesByTo {
   '/virtual/instant': typeof VirtualInstantRoute
   '/wagers/$id': typeof WagersIdRoute
   '/virtual': typeof VirtualIndexRoute
+  '/wagers': typeof WagersIndexRoute
   '/api/public/virtual-tick': typeof ApiPublicVirtualTickRoute
   '/api/public/hooks/broadcast-push': typeof ApiPublicHooksBroadcastPushRoute
   '/api/public/hooks/process-scheduled-push': typeof ApiPublicHooksProcessScheduledPushRoute
@@ -444,7 +444,6 @@ export interface FileRoutesById {
   '/tournament': typeof TournamentRoute
   '/transactions': typeof TransactionsRoute
   '/trivia': typeof TriviaRoute
-  '/wagers': typeof WagersRouteWithChildren
   '/watchlist': typeof WatchlistRoute
   '/withdraw': typeof WithdrawRoute
   '/guides/how-it-works': typeof GuidesHowItWorksRoute
@@ -457,6 +456,7 @@ export interface FileRoutesById {
   '/virtual/instant': typeof VirtualInstantRoute
   '/wagers/$id': typeof WagersIdRoute
   '/virtual/': typeof VirtualIndexRoute
+  '/wagers/': typeof WagersIndexRoute
   '/api/public/virtual-tick': typeof ApiPublicVirtualTickRoute
   '/api/public/hooks/broadcast-push': typeof ApiPublicHooksBroadcastPushRoute
   '/api/public/hooks/process-scheduled-push': typeof ApiPublicHooksProcessScheduledPushRoute
@@ -497,7 +497,6 @@ export interface FileRouteTypes {
     | '/tournament'
     | '/transactions'
     | '/trivia'
-    | '/wagers'
     | '/watchlist'
     | '/withdraw'
     | '/guides/how-it-works'
@@ -510,6 +509,7 @@ export interface FileRouteTypes {
     | '/virtual/instant'
     | '/wagers/$id'
     | '/virtual/'
+    | '/wagers/'
     | '/api/public/virtual-tick'
     | '/api/public/hooks/broadcast-push'
     | '/api/public/hooks/process-scheduled-push'
@@ -548,7 +548,6 @@ export interface FileRouteTypes {
     | '/tournament'
     | '/transactions'
     | '/trivia'
-    | '/wagers'
     | '/watchlist'
     | '/withdraw'
     | '/guides/how-it-works'
@@ -561,6 +560,7 @@ export interface FileRouteTypes {
     | '/virtual/instant'
     | '/wagers/$id'
     | '/virtual'
+    | '/wagers'
     | '/api/public/virtual-tick'
     | '/api/public/hooks/broadcast-push'
     | '/api/public/hooks/process-scheduled-push'
@@ -599,7 +599,6 @@ export interface FileRouteTypes {
     | '/tournament'
     | '/transactions'
     | '/trivia'
-    | '/wagers'
     | '/watchlist'
     | '/withdraw'
     | '/guides/how-it-works'
@@ -612,6 +611,7 @@ export interface FileRouteTypes {
     | '/virtual/instant'
     | '/wagers/$id'
     | '/virtual/'
+    | '/wagers/'
     | '/api/public/virtual-tick'
     | '/api/public/hooks/broadcast-push'
     | '/api/public/hooks/process-scheduled-push'
@@ -651,7 +651,6 @@ export interface RootRouteChildren {
   TournamentRoute: typeof TournamentRoute
   TransactionsRoute: typeof TransactionsRoute
   TriviaRoute: typeof TriviaRoute
-  WagersRoute: typeof WagersRouteWithChildren
   WatchlistRoute: typeof WatchlistRoute
   WithdrawRoute: typeof WithdrawRoute
   GuidesHowItWorksRoute: typeof GuidesHowItWorksRoute
@@ -661,7 +660,9 @@ export interface RootRouteChildren {
   VirtualFootballInstantRoute: typeof VirtualFootballInstantRoute
   VirtualHistoryRoute: typeof VirtualHistoryRoute
   VirtualInstantRoute: typeof VirtualInstantRoute
+  WagersIdRoute: typeof WagersIdRoute
   VirtualIndexRoute: typeof VirtualIndexRoute
+  WagersIndexRoute: typeof WagersIndexRoute
   ApiPublicVirtualTickRoute: typeof ApiPublicVirtualTickRoute
   ApiPublicHooksBroadcastPushRoute: typeof ApiPublicHooksBroadcastPushRoute
   ApiPublicHooksProcessScheduledPushRoute: typeof ApiPublicHooksProcessScheduledPushRoute
@@ -683,13 +684,6 @@ declare module '@tanstack/react-router' {
       path: '/watchlist'
       fullPath: '/watchlist'
       preLoaderRoute: typeof WatchlistRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/wagers': {
-      id: '/wagers'
-      path: '/wagers'
-      fullPath: '/wagers'
-      preLoaderRoute: typeof WagersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trivia': {
@@ -909,6 +903,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/wagers/': {
+      id: '/wagers/'
+      path: '/wagers'
+      fullPath: '/wagers/'
+      preLoaderRoute: typeof WagersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/virtual/': {
       id: '/virtual/'
       path: '/virtual'
@@ -918,10 +919,10 @@ declare module '@tanstack/react-router' {
     }
     '/wagers/$id': {
       id: '/wagers/$id'
-      path: '/$id'
+      path: '/wagers/$id'
       fullPath: '/wagers/$id'
       preLoaderRoute: typeof WagersIdRouteImport
-      parentRoute: typeof WagersRoute
+      parentRoute: typeof rootRouteImport
     }
     '/virtual/instant': {
       id: '/virtual/instant'
@@ -1028,17 +1029,6 @@ const MatchesRouteChildren: MatchesRouteChildren = {
 const MatchesRouteWithChildren =
   MatchesRoute._addFileChildren(MatchesRouteChildren)
 
-interface WagersRouteChildren {
-  WagersIdRoute: typeof WagersIdRoute
-}
-
-const WagersRouteChildren: WagersRouteChildren = {
-  WagersIdRoute: WagersIdRoute,
-}
-
-const WagersRouteWithChildren =
-  WagersRoute._addFileChildren(WagersRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -1071,7 +1061,6 @@ const rootRouteChildren: RootRouteChildren = {
   TournamentRoute: TournamentRoute,
   TransactionsRoute: TransactionsRoute,
   TriviaRoute: TriviaRoute,
-  WagersRoute: WagersRouteWithChildren,
   WatchlistRoute: WatchlistRoute,
   WithdrawRoute: WithdrawRoute,
   GuidesHowItWorksRoute: GuidesHowItWorksRoute,
@@ -1081,7 +1070,9 @@ const rootRouteChildren: RootRouteChildren = {
   VirtualFootballInstantRoute: VirtualFootballInstantRoute,
   VirtualHistoryRoute: VirtualHistoryRoute,
   VirtualInstantRoute: VirtualInstantRoute,
+  WagersIdRoute: WagersIdRoute,
   VirtualIndexRoute: VirtualIndexRoute,
+  WagersIndexRoute: WagersIndexRoute,
   ApiPublicVirtualTickRoute: ApiPublicVirtualTickRoute,
   ApiPublicHooksBroadcastPushRoute: ApiPublicHooksBroadcastPushRoute,
   ApiPublicHooksProcessScheduledPushRoute:

@@ -191,9 +191,9 @@ export function BetVoucher({
   // A selection only counts as a win once its match has ENDED (no cash-out while live).
   function endedWin(s: any): boolean {
     if (s.result === "void") return true;
-    if (s.result === "won") return true;
-    if (s.result === "lost") return false;
     const m = s.matches;
+    if (s.result === "won") return m?.match_kind === "future" || m?.status === "ended";
+    if (s.result === "lost") return false;
     if (m?.match_kind === "future") return s.odds?.future_status === "winner";
     if (!m || m.status !== "ended") return false;
     if (s.markets?.name === "Correct Score") {
@@ -211,9 +211,10 @@ export function BetVoucher({
   const betFinalized = ["won", "lost", "cashed_out", "void", "refunded"].includes(status);
   function selResult(s: any): "won" | "lost" | "pending" | "void" {
     if (s.result === "void") return "void";
+    const m = s.matches;
+    if (m?.match_kind !== "future" && m?.status !== "ended") return "pending";
     if (s.result === "won") return "won";
     if (s.result === "lost") return "lost";
-    const m = s.matches;
     if (m?.match_kind === "future") {
       if (s.odds?.future_status === "winner") return "won";
       if (["disqualified", "eliminated", "settled_lost"].includes(s.odds?.future_status)) return "lost";
@@ -244,7 +245,12 @@ export function BetVoucher({
   // leg has already resolved, reflect the real result instead of showing PENDING.
   const resolved = sels.map(selResult);
   const anyLost = resolved.includes("lost");
-  const allResolvedWon = sels.length > 0 && resolved.every((r) => r === "won");
+  const allResolvedWon = sels.length > 0 && resolved.every((r) => r === "won" || r === "void");
+  const effectiveOdds = sels.reduce(
+    (total, selection) => total * (selResult(selection) === "void" ? 1 : Number(selection.locked_odds || 1)),
+    1,
+  );
+  const effectivePayout = Math.max(Number(bet.stake || 0), Math.round(Number(bet.stake || 0) * effectiveOdds));
   const effectiveStatus =
     status === "won" ||
     status === "lost" ||
@@ -490,7 +496,7 @@ export function BetVoucher({
                     <span className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Pick</span>
                     <span className="text-sm font-bold text-foreground truncate">
                       {s.selection_label}
-                      <span className="gold-foil font-mono font-black">@{Number(s.locked_odds).toFixed(2)}</span>
+                      <span className="gold-foil font-mono font-black">@{isVoid ? "0.00" : Number(s.locked_odds).toFixed(2)}</span>
                     </span>
                     <span className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Market</span>
                     <span className="text-xs font-semibold text-foreground/90 truncate">
@@ -532,7 +538,7 @@ export function BetVoucher({
                 </div>
               </div>
               <div className="font-display font-black text-lg sm:text-2xl neon-green">
-                {Number(bet.total_odds).toFixed(2)}
+                {effectiveOdds.toFixed(2)}
               </div>
             </div>
             <div className="voucher-row p-3 text-center">
@@ -544,7 +550,7 @@ export function BetVoucher({
               </div>
               <div className="font-display font-black text-lg sm:text-2xl gold-foil">
                 {Number(
-                  status === "cashed_out" ? (bet.cashout_amount ?? bet.potential_payout) : bet.potential_payout,
+                  status === "cashed_out" ? (bet.cashout_amount ?? effectivePayout) : effectivePayout,
                 ).toLocaleString()}
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
@@ -19,7 +19,17 @@ import {
 import { WagerDisputeThread } from "@/components/WagerDisputeThread";
 
 export const Route = createFileRoute("/wagers/$id")({
-  head: ({ params }) => ({ meta: [{ title: `Wager ${params.id.slice(0, 8)} — ECB` }, { name: "robots", content: "noindex" }] }),
+  head: ({ params }) => ({
+    meta: [
+      { title: `Wager ${params.id.slice(0, 8)} — ECB` },
+      { name: "description", content: "Review, fund and manage your private ECB player-to-player wager." },
+      { property: "og:title", content: `Wager ${params.id.slice(0, 8)} — ECB` },
+      { property: "og:description", content: "Review, fund and manage your private ECB player-to-player wager." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: Page,
 });
 
@@ -35,16 +45,26 @@ const STATUS_TONE: Record<string, string> = {
 };
 
 function Page() {
-  const { id } = useParams({ from: "/wagers/$id" });
+  const { id } = Route.useParams();
   const { user } = useAuth();
   const [w, setW] = useState<Wager | null>(null);
   const [payments, setPayments] = useState<WagerPayment[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<Record<string, any>>({});
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   async function load() {
-    const { data } = await supabase.from("wagers").select("*").eq("id", id).maybeSingle();
+    if (!user) { setLoading(false); return; }
+    setLoadError(null);
+    const { data, error } = await supabase.from("wagers").select("*").eq("id", id).maybeSingle();
+    if (error) {
+      setLoadError(error.message);
+      setW(null);
+      setLoading(false);
+      return;
+    }
     setW(data as any);
     const { data: p } = await supabase.from("wager_payments").select("*").eq("wager_id", id).order("created_at", { ascending: false });
     setPayments((p as any) ?? []);
@@ -55,9 +75,10 @@ function Page() {
       const map: any = {}; (profs ?? []).forEach((r: any) => map[r.id] = r);
       setProfiles(map);
     }
+    setLoading(false);
   }
 
-  useEffect(() => { load(); }, [id]);
+  useEffect(() => { setLoading(true); load(); }, [id, user?.id]);
   useEffect(() => {
     const ch = supabase.channel(`wager-${id}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "wagers", filter: `id=eq.${id}` }, load)
@@ -68,7 +89,9 @@ function Page() {
   }, [id]);
 
   if (!user) return <Layout><div className="container py-10 text-center">Sign in required.</div></Layout>;
-  if (!w) return <Layout><div className="container py-10 text-center text-muted-foreground">Loading wager…</div></Layout>;
+  if (loading) return <Layout><div className="container py-10 text-center text-muted-foreground">Loading wager…</div></Layout>;
+  if (loadError) return <Layout><div className="container py-10 text-center"><div className="font-bold">Unable to load this wager.</div><div className="mt-1 text-sm text-muted-foreground">{loadError}</div><Button className="mt-4" variant="outline" onClick={() => { setLoading(true); load(); }}>Try again</Button></div></Layout>;
+  if (!w) return <Layout><div className="container py-10 text-center"><div className="font-bold">Wager not found.</div><Link to="/wagers" className="mt-3 inline-flex text-sm text-primary hover:underline">Return to wagers</Link></div></Layout>;
 
   const isChallenger = w.challenger_id === user.id;
   const isParty = isChallenger || w.opponent_id === user.id;
@@ -80,6 +103,7 @@ function Page() {
 
   const challenger = profiles[w.challenger_id];
   const opponent = profiles[w.opponent_id];
+  const myPaymentState = myPayment?.status;
 
   async function doAccept() { setBusy(true); try { await acceptWager(w!.id); toast.success("Accepted"); } catch (e: any) { toast.error(e.message); } finally { setBusy(false); } }
   async function doReject() {
@@ -171,6 +195,8 @@ function Page() {
                     <Badge variant="outline" className="text-[9px] uppercase">{p.status}</Badge>
                   </div>
                 ))}
+                 {isParty && myPaymentState === "pending" && <div className="pt-2 text-amber-300">Your proof is awaiting admin verification.</div>}
+                 {isParty && myPaymentState === "verified" && !bothFunded && <div className="pt-2 text-emerald-300">Your stake is verified. Waiting for the other player.</div>}
               </div>
             )}
           </Card>
@@ -209,7 +235,7 @@ function PartyCard({ label, name, avatar, highlight }: any) {
   return (
     <div className={`rounded-lg border p-3 text-center ${highlight ? "border-primary bg-primary/10" : "border-primary/20 bg-background/30"}`}>
       <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
-      {avatar ? <img src={avatar} className="h-12 w-12 rounded-full object-cover mx-auto mt-2" alt="" />
+      {avatar ? <img src={avatar} className="h-12 w-12 rounded-full object-cover mx-auto mt-2" alt={`${name} avatar`} />
         : <div className="h-12 w-12 rounded-full grid place-items-center mx-auto mt-2 bg-primary/10 text-primary font-bold">{(name || "?").slice(0, 2).toUpperCase()}</div>}
       <div className="font-bold text-sm truncate mt-1">{name}</div>
     </div>
@@ -222,6 +248,10 @@ function PaymentForm({ wager, onDone }: { wager: Wager; onDone: () => void }) {
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   async function submit() {
+    if (!method.trim() && !reference.trim() && !file) {
+      toast.error("Add a payment method, transaction reference or receipt image");
+      return;
+    }
     setBusy(true);
     try {
       await submitPayment({ wager_id: wager.id, amount: wager.stake, method, reference, file });
