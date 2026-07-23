@@ -1,3 +1,4 @@
+import { LevelBadge } from "@/components/LevelBadge";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,6 +61,9 @@ function ProfilePage() {
     <Layout>
       <div className="container mx-auto px-4 py-10 max-w-2xl">
         <h1 className="text-3xl font-bold text-primary mb-6">Your Profile</h1>
+        <Card className="p-5 mb-6">
+          <LevelBadge xp={(profile as any).xp ?? 0} />
+        </Card>
         <Card className="p-5 mb-6 border-primary/30 bg-gradient-to-r from-primary/10 to-accent/5">
           <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Your Special ID</div>
           <div className="mt-1 flex items-center gap-3 flex-wrap">
