@@ -1488,7 +1488,26 @@ function MatchesPanel() {
                 className={m.is_void ? "bg-fuchsia-600 hover:bg-fuchsia-500 text-white" : "border-fuchsia-500/40 text-fuchsia-300 hover:bg-fuchsia-500/10"}
                 onClick={async () => {
                   const nextVoid = !m.is_void;
-                  const reason = nextVoid ? (prompt("Reason for voiding this match? (shown in audit log)") ?? "") : undefined;
+                  let reason: string | undefined;
+                  if (nextVoid) {
+                    const ok = await confirm({
+                      title: "Confirm Match Void",
+                      description: "This action will mark this match as VOID across every bet voucher that contains it. The affected tickets will remain active and payouts will be recalculated automatically.",
+                      confirmText: "Confirm Void",
+                      tone: "danger",
+                      inputLabel: "Reason (shown in audit log)",
+                      inputPlaceholder: "e.g. Match cancelled, server desync, disputed result…",
+                    });
+                    if (!ok || typeof ok !== "object") return;
+                    reason = ok.value || undefined;
+                  } else {
+                    const ok = await confirm({
+                      title: "Remove Void Status?",
+                      description: "This match will return to normal settlement across every voucher that contains it.",
+                      confirmText: "Remove Void",
+                    });
+                    if (!ok) return;
+                  }
                   const { error } = await supabase.rpc("admin_toggle_match_void", { _match_id: m.id, _void: nextVoid, _reason: reason } as any);
                   if (error) { toast.error(error.message); return; }
                   toast.success(nextVoid ? "Match voided — all tickets treat this leg as odds 0.00" : "Match un-voided");
