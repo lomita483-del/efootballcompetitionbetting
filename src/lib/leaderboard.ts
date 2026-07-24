@@ -12,9 +12,10 @@ export type LbRow = {
   P: number;
   PTS: number;
   GD: number; // Goal Difference
-  manual_rank?: number | null;
+manual_rank?: number | null;
   override_id?: string | null;
   is_override?: boolean;
+  rank_delta?: number; // positive = moved up since last snapshot, negative = moved down, undefined = no prior data yet
 };
 
 export type Standings = { gangs: LbRow[]; shooters: LbRow[]; scorers: LbRow[] };
@@ -180,9 +181,44 @@ export async function loadStandings(): Promise<Standings> {
     });
   });
 
-return {
-    gangs: Array.from(gangAgg.values()).sort(sortRows),
-    shooters: Array.from(playerAgg.values()).sort(sortRows),
-    scorers: Array.from(scorerAgg.values()).sort((a, b) => b.TS - a.TS || b.P - a.P),
-  };
+const gangsSorted = Array.from(gangAgg.values()).sort(sortRows);
+  const shootersSorted = Array.from(playerAgg.values()).sort(sortRows);
+  const scorersSorted = Array.from(scorerAgg.values()).sort((a, b) => b.TS - a.TS || b.P - a.P);
+
+  await Promise.all([
+    applyRankDeltas("gangs", gangsSorted),
+    applyRankDeltas("shooters", shootersSorted),
+    applyRankDeltas("scorers", scorersSorted),
+  ]);
+
+  return { gangs: gangsSorted, shooters: shootersSorted, scorers: scorersSorted };
+}
+
+async function applyRankDeltas(board: "gangs" | "shooters" | "scorers", rows: LbRow[]) {
+  if (rows.length === 0) return;
+  const names = rows.map((r) => r.name);
+
+  const { data: prevRows } = await supabase
+    .from("leaderboard_rank_snapshots")
+    .select("name, rank")
+    .eq("board", board)
+    .in("name", names);
+
+  const prevRankByName = new Map<string, number>();
+  (prevRows ?? []).forEach((r: any) => prevRankByName.set(r.name, r.rank));
+
+  rows.forEach((r, i) => {
+    const currentRank = i + 1;
+    const prevRank = prevRankByName.get(r.name);
+    r.rank_delta = prevRank != null ? prevRank - currentRank : undefined;
+  });
+
+  const upserts = rows.map((r, i) => ({
+    board,
+    name: r.name,
+    rank: i + 1,
+    updated_at: new Date().toISOString(),
+  }));
+
+  await supabase.from("leaderboard_rank_snapshots").upsert(upserts, { onConflict: "board,name" });
 }
