@@ -128,9 +128,31 @@ function Page() {
                   No wagers here yet. Challenge a friend to get started.
                 </div>
               )}
-              {filtered.map((w) => (
-                <WagerRow key={w.id} w={w} viewer={user.id} />
-              ))}
+              {(() => {
+                const fmt = (d: string) => {
+                  const day = new Date(d); day.setHours(0, 0, 0, 0);
+                  const today = new Date(); today.setHours(0, 0, 0, 0);
+                  const diff = Math.round((today.getTime() - day.getTime()) / 86400000);
+                  if (diff === 0) return "Today";
+                  if (diff === 1) return "Yesterday";
+                  return day.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: day.getFullYear() !== today.getFullYear() ? "numeric" : undefined });
+                };
+                const groups: Record<string, Wager[]> = {};
+                const order: string[] = [];
+                for (const w of filtered) {
+                  const key = fmt(w.created_at);
+                  if (!groups[key]) { groups[key] = []; order.push(key); }
+                  groups[key].push(w);
+                }
+                return order.map((k) => (
+                  <div key={k} className="space-y-2">
+                    <div className="sticky top-0 z-10 -mx-1 px-3 py-1.5 rounded-md bg-background/80 backdrop-blur border border-primary/20 text-[10px] uppercase tracking-widest text-primary font-black">
+                      {k} <span className="text-muted-foreground font-normal ml-1">· {groups[k].length}</span>
+                    </div>
+                    {groups[k].map((w) => <WagerRow key={w.id} w={w} viewer={user.id} />)}
+                  </div>
+                ));
+              })()}
             </TabsContent>
           </Tabs>
         </Card>
