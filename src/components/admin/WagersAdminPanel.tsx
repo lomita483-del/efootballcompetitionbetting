@@ -31,8 +31,8 @@ export function WagersAdminPanel() {
     const ids = new Set<string>();
     (w ?? []).forEach((r: any) => { ids.add(r.challenger_id); ids.add(r.opponent_id); });
     if (ids.size) {
-      const { data: profs } = await supabase.from("profiles").select("id, username, avatar_url").in("id", Array.from(ids));
-      const m: any = {}; (profs ?? []).forEach((r: any) => m[r.id] = r); setProfiles(m);
+      const { data: profs } = await supabase.from("profiles").select("id, full_name, ingame_name, special_id, avatar_url").in("id", Array.from(ids));
+      const m: any = {}; (profs ?? []).forEach((r: any) => m[r.id] = { ...r, display: r.ingame_name || r.full_name || r.special_id || null }); setProfiles(m);
     }
   }
   useEffect(() => { load(); }, []);
@@ -48,8 +48,8 @@ export function WagersAdminPanel() {
     if (!q.trim()) return list;
     const s = q.toLowerCase();
     return list.filter((w) => w.public_id.toLowerCase().includes(s)
-      || (profiles[w.challenger_id]?.username || "").toLowerCase().includes(s)
-      || (profiles[w.opponent_id]?.username || "").toLowerCase().includes(s));
+      || (profiles[w.challenger_id]?.display || "").toLowerCase().includes(s)
+      || (profiles[w.opponent_id]?.display || "").toLowerCase().includes(s));
   };
   const groups = useMemo(() => ({
     pending: filter(wagers.filter((w) => ["pending_approval","awaiting_payment","awaiting_funding"].includes(w.status))),
@@ -84,7 +84,7 @@ export function WagersAdminPanel() {
               return (
                 <div key={p.id} className="flex items-center gap-3 border border-primary/20 bg-background/30 rounded-md p-2">
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-bold">{w?.public_id} • {profiles[p.user_id]?.username || p.user_id.slice(0, 6)}</div>
+                    <div className="text-sm font-bold">{w?.public_id} • {profiles[p.user_id]?.display || p.user_id.slice(0, 6)}</div>
                     <div className="text-xs text-muted-foreground truncate">{p.amount.toLocaleString()} tokens • {p.method || "—"} • {p.reference || "—"}</div>
                   </div>
                   {p.receipt_url && <a href={p.receipt_url} target="_blank" rel="noopener" className="text-xs text-primary underline">Receipt</a>}
@@ -143,8 +143,8 @@ function Stat({ label, value, icon: Icon, tone }: any) {
 function WagerAdminRow({ w, payments, profiles, onLive, onChange }: { w: Wager; payments: WagerPayment[]; profiles: any; onLive: () => void; onChange: () => void }) {
   const [settleOpen, setSettleOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
-  const ch = profiles[w.challenger_id]?.username || w.challenger_id.slice(0, 6);
-  const op = profiles[w.opponent_id]?.username || w.opponent_id.slice(0, 6);
+  const ch = profiles[w.challenger_id]?.display || w.challenger_id.slice(0, 6);
+  const op = profiles[w.opponent_id]?.display || w.opponent_id.slice(0, 6);
   return (
     <div className="border border-primary/20 rounded-lg bg-background/30 p-3">
       <div className="flex items-center gap-3 flex-wrap">
@@ -186,7 +186,7 @@ function WagerAdminRow({ w, payments, profiles, onLive, onChange }: { w: Wager; 
             const payment = payments.find((p) => p.user_id === userId);
             return (
               <div key={userId} className="rounded-md border border-primary/15 bg-background/40 px-3 py-2 text-xs">
-                <div className="font-bold">{profiles[userId]?.username || userId.slice(0, 6)}</div>
+                <div className="font-bold">{profiles[userId]?.display || userId.slice(0, 6)}</div>
                 <div className={payment?.status === "verified" ? "text-emerald-300" : payment?.status === "pending" ? "text-amber-300" : "text-muted-foreground"}>
                   {payment?.status === "verified" ? "Stake verified" : payment?.status === "pending" ? "Proof awaiting verification" : "Payment proof not submitted"}
                 </div>
@@ -233,7 +233,7 @@ function SettleDialog({ wager, open, onOpenChange, profiles, onDone }: any) {
             {(["ch","draw","op"] as const).map((k) => (
               <button key={k} onClick={() => setChoice(k)}
                 className={`p-2 rounded-md border text-sm font-bold ${choice === k ? "border-primary bg-primary/10 text-primary" : "border-primary/20"}`}>
-                {k === "ch" ? (profiles[wager.challenger_id]?.username || "Challenger") : k === "op" ? (profiles[wager.opponent_id]?.username || "Opponent") : "Draw"}
+                {k === "ch" ? (profiles[wager.challenger_id]?.display || "Challenger") : k === "op" ? (profiles[wager.opponent_id]?.display || "Opponent") : "Draw"}
               </button>
             ))}
           </div>
