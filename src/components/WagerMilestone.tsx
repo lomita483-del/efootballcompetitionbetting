@@ -11,6 +11,7 @@ export function WagerMilestone() {
 
   useEffect(() => {
     if (!user) return;
+    const uid = user.id;
 
     async function checkMilestones(wagerId: string, prizePaid: number) {
       const seenKey = `lsl-milestone-${wagerId}`;
@@ -19,14 +20,14 @@ export function WagerMilestone() {
       const { data } = await supabase
         .from("wagers")
         .select("id, winner_id, prize_paid, settled_at")
-        .or(`challenger_id.eq.${user.id},opponent_id.eq.${user.id}`)
+        .or(`challenger_id.eq.${uid},opponent_id.eq.${uid}`)
         .eq("status", "settled")
         .order("settled_at", { ascending: true });
 
       if (!data) return;
       localStorage.setItem(seenKey, "1");
 
-      const wins = data.filter((w: any) => w.winner_id === user.id);
+      const wins = data.filter((w: any) => w.winner_id === uid);
       const totalWins = wins.length;
       const isFirstWin = totalWins === 1;
       const priorBest = Math.max(0, ...wins.filter((w: any) => w.id !== wagerId).map((w: any) => w.prize_paid || 0));
@@ -34,7 +35,7 @@ export function WagerMilestone() {
 
       let streak = 0;
       for (let i = data.length - 1; i >= 0; i--) {
-        if (data[i].winner_id === user.id) streak++;
+        if (data[i].winner_id === uid) streak++;
         else break;
       }
       const isStreakMilestone = streak > 0 && streak % 5 === 0;
