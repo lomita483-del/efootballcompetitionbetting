@@ -53,14 +53,16 @@ function Medal({ i }: { i: number }) {
 
 function Page() {
   const [shooters, setShooters] = useState<LbRow[]>([]);
+  const [scorers, setScorers] = useState<LbRow[]>([]);
   const [gangs, setGangs] = useState<LbRow[]>([]);
   const [headerUrl, setHeaderUrl] = useState<string | null>(leaderboardHeaderAsset.url);
 
   useEffect(() => {
     const run = async () => {
-      const { gangs, shooters } = await loadStandings();
+    const { gangs, shooters, scorers } = await loadStandings();
       setGangs(gangs);
       setShooters(shooters);
+      setScorers(scorers);
     };
     run();
     const ch = supabase
@@ -120,6 +122,7 @@ function Page() {
           <TabsList className="bg-black/25 backdrop-blur-[2px] border border-amber-400/40">
             <TabsTrigger value="gangs">Top Team / Scorer</TabsTrigger>
             <TabsTrigger value="shooters">Top Shooters</TabsTrigger>
+            <TabsTrigger value="scorers">Top Scorer</TabsTrigger>
           </TabsList>
 
           <TabsContent value="gangs" className="mt-4">
@@ -128,6 +131,10 @@ function Page() {
 
           <TabsContent value="shooters" className="mt-4">
             <Board rows={shooters} firstCol="Team & Scorer" secondCol="Player" pick={(p) => p.name} firstPick={(p) => p.gang_faction || "—"} emptyText="No shooters yet." />
+          </TabsContent>
+
+          <TabsContent value="scorers" className="mt-4">
+            <ScorerBoard rows={scorers} />
           </TabsContent>
         </Tabs>
       </div>
@@ -175,6 +182,38 @@ function Board({
                 <Td right><span className={r.GD >= 0 ? "text-emerald-400 font-bold" : "text-destructive font-bold"}>{r.GD >= 0 ? "+" : ""}{r.GD}</span></Td>
                 <Td right><span className="text-muted-foreground">{r.P}</span></Td>
                 <Td right><Pill tone="emerald">{r.PTS}</Pill></Td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function ScorerBoard({ rows }: { rows: LbRow[] }) {
+  return (
+    <div className="relative rounded-2xl overflow-hidden bg-black/15 backdrop-blur-[2px] border-2 border-amber-400/55 shadow-[0_0_40px_-12px_rgba(212,175,55,0.5)]">
+      <div className="relative overflow-x-auto">
+        <table className="w-full text-sm min-w-[420px]">
+          <thead>
+            <tr className="text-left text-[11px] uppercase tracking-widest text-amber-200/80 border-b border-amber-400/30 bg-black/20">
+              <Th>Rank</Th><Th>Name</Th><Th right>Matches Played</Th><Th right>Total Goals</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 && <tr><td colSpan={4} className="p-6 text-center text-muted-foreground">No goals logged yet.</td></tr>}
+            {rows.map((r, i) => (
+              <tr key={r.name} className="border-b border-amber-400/10 hover:bg-amber-400/10 transition-colors">
+                <Td><Medal i={i} /></Td>
+                <Td>
+                  <div className="flex items-center gap-2">
+                    <Avatar url={r.image_url ?? null} name={r.name} />
+                    <span className="text-base font-bold text-[#9FD65C] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" style={{ textShadow: "0 0 6px rgba(159,214,92,0.5)" }}>{r.name}</span>
+                  </div>
+                </Td>
+                <Td right><span className="text-muted-foreground">{r.P}</span></Td>
+                <Td right><Pill tone="emerald">{r.TS}</Pill></Td>
               </tr>
             ))}
           </tbody>
