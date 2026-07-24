@@ -1,3 +1,4 @@
+import { Trophy, Medal as MedalIcon, ArrowUp, ArrowDown } from "lucide-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
@@ -43,6 +44,12 @@ function Medal({ i }: { i: number }) {
         <MedalIcon className={`h-5 w-5 ${medalColors[i]} drop-shadow-[0_0_6px_rgba(212,175,55,0.6)]`} />
       </span>
     );
+  }
+
+  function RankArrow({ delta }: { delta?: number }) {
+  if (!delta) return <span className="inline-block w-3.5" aria-hidden />;
+  if (delta > 0) return <ArrowUp className="h-3.5 w-3.5 text-emerald-400 shrink-0" />;
+  return <ArrowDown className="h-3.5 w-3.5 text-destructive shrink-0" />;
   }
   return (
     <span className="inline-grid place-items-center h-8 w-8 rounded-lg bg-gradient-to-b from-[#3a3120] to-[#1a160d] border border-[#7BBA4A]/50 text-[#a8d16a] font-black text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_10px_-3px_rgba(123,186,74,0.5)] tabular-nums">
@@ -172,6 +179,7 @@ function Board({
                   <div className="flex items-center gap-2">
                     <Avatar url={r.image_url ?? null} name={firstPick ? firstPick(r) : pick(r)} />
                     <span className="text-base font-bold text-[#9FD65C] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" style={{ textShadow: "0 0 6px rgba(159,214,92,0.5)" }}>{firstPick ? firstPick(r) : pick(r)}</span>
+                    <RankArrow delta={r.rank_delta} />
                   </div>
                 </Td>
                 <Td><span className={firstPick ? "font-bold" : "text-muted-foreground"}>{secondPick ? secondPick(r) : (firstPick ? pick(r) : (r.top_player || "—"))}</span></Td>
@@ -210,6 +218,7 @@ function ScorerBoard({ rows }: { rows: LbRow[] }) {
                   <div className="flex items-center gap-2">
                     <Avatar url={r.image_url ?? null} name={r.name} />
                     <span className="text-base font-bold text-[#9FD65C] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" style={{ textShadow: "0 0 6px rgba(159,214,92,0.5)" }}>{r.name}</span>
+                    <RankArrow delta={r.rank_delta} />
                   </div>
                 </Td>
                 <Td right><span className="text-muted-foreground">{r.P}</span></Td>
