@@ -3605,6 +3605,7 @@ const QUICK_ACTIONS: { i: any; l: string; t: string }[] = [
   { i: Users, l: "Users", t: "users" },
   { i: Shield, l: "Banned", t: "bannedusers" },
   { i: Sparkles, l: "Admin AI", t: "adminai" },
+  { i: AlertTriangle, l: "Suspicious Activity", t: "flags" },
   { i: AlertTriangle, l: "Appeals", t: "appeals" },
   { i: History, l: "Audit", t: "audit" },
   { i: ClipboardList, l: "Bet Tracker", t: "bettracker" },
