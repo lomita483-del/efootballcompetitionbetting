@@ -173,3 +173,30 @@ export function SuspiciousActivityPanel() {
             </SelectContent>
           </Select>
           <div className="flex gap-1">
+            <Input type="number" title="Threshold (>=)" value={newRule.value} onChange={(e) => setNewRule({ ...newRule, value: Number(e.target.value) })} />
+            <Input type="number" title="Window (minutes)" value={newRule.window_minutes} onChange={(e) => setNewRule({ ...newRule, window_minutes: Number(e.target.value) })} />
+          </div>
+        </div>
+        <Button size="sm" className="btn-luxury" onClick={addCustomRule}>Add rule</Button>
+      </Card>
+    </div>
+  );
+}
+
+function RuleRow({ rule, onToggle, onSave, onDelete }: { rule: any; onToggle: (v: boolean) => void; onSave: (value: number, window_minutes: number) => void; onDelete?: () => void }) {
+  const [value, setValue] = useState<number>(Number(rule.value));
+  const [win, setWin] = useState<number>(Number(rule.window_minutes ?? 1440));
+  return (
+    <div className="flex items-center gap-2 flex-wrap rounded-lg border border-border bg-background/40 p-2">
+      <Switch checked={rule.enabled} onCheckedChange={onToggle} />
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-semibold truncate">{rule.name}</div>
+        <div className="text-[10px] text-muted-foreground">{CATEGORY_LABEL[rule.category] ?? rule.category} · {rule.metric}{rule.is_builtin ? " · built-in" : ""}</div>
+      </div>
+      <Input type="number" className="h-8 w-20" value={value} onChange={(e) => setValue(Number(e.target.value))} />
+      <Input type="number" className="h-8 w-24" value={win} onChange={(e) => setWin(Number(e.target.value))} title="Window (minutes)" />
+      <Button size="sm" variant="outline" onClick={() => onSave(value, win)}>Save</Button>
+      {onDelete && <Button size="sm" variant="destructive" onClick={onDelete}>Delete</Button>}
+    </div>
+  );
+}
