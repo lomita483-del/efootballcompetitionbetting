@@ -115,8 +115,10 @@ export async function loadStandings(): Promise<Standings> {
       const tid = side === "home" ? m.home_team_id : m.away_team_id;
       const tname = teamMap.get(tid) || "Team";
       const opponentScore = side === "home" ? awayScore : homeScore;
-      const won = m.winner_team_id === tid;
-      const draw = m.winner_team_id == null;
+      const draw = teamScore === opponentScore;
+      const won = !draw && (m.winner_team_id
+        ? m.winner_team_id === tid
+        : teamScore > opponentScore);
       const gd = teamScore - opponentScore;
       if (countForGangs) {
         const cur = gangAgg.get(tname) ?? { name: tname, top_player: (teamPlayers.get(tid) ?? [])[0], image_url: teamLogo.get(tid) ?? null, TS: 0, W: 0, L: 0, D: 0, PTS: 0, P: 0, GD: 0 };
