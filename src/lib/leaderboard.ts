@@ -185,3 +185,4 @@ return {
     shooters: Array.from(playerAgg.values()).sort(sortRows),
     scorers: Array.from(scorerAgg.values()).sort((a, b) => b.TS - a.TS || b.P - a.P),
   };
+}
