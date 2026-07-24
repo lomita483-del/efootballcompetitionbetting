@@ -197,8 +197,8 @@ export function AdminPage() {
             </div>
           </div>
 
+            <Tabs value={activeTab} onValueChange={setActiveTab}> 
             <TabsContent value="flags" className="mt-4"><SuspiciousActivityPanel /></TabsContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsContent value="users" className="mt-4"><UsersPanel /></TabsContent>
             <TabsContent value="bannedusers" className="mt-4"><BannedUsersPanel /></TabsContent>
             <TabsContent value="virtual" className="mt-4"><VirtualAdminPanel /></TabsContent>
