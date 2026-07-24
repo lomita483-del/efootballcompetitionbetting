@@ -17,7 +17,7 @@ export type LbRow = {
   is_override?: boolean;
 };
 
-export type Standings = { gangs: LbRow[]; shooters: LbRow[] };
+export type Standings = { gangs: LbRow[]; shooters: LbRow[]; scorers: LbRow[] };
 
 export function sortRows(a: LbRow, b: LbRow) {
   if (a.manual_rank != null && b.manual_rank != null) return a.manual_rank - b.manual_rank;
@@ -61,6 +61,7 @@ export async function loadStandings(): Promise<Standings> {
 
   const gangAgg = new Map<string, LbRow>();
   const playerAgg = new Map<string, LbRow>();
+  const scorerAgg = new Map<string, LbRow>();
   (players ?? []).forEach((p) => {
     if (!p.name) return;
     const tname = p.team_id ? (teamMap.get(p.team_id) || "") : "";
@@ -130,6 +131,18 @@ export async function loadStandings(): Promise<Standings> {
         else { cur.L += 1; }
         gangAgg.set(tname, cur);
       }
+      if (countForGangs) {
+        const pid = side === "home" ? m.home_player_id : m.away_player_id;
+        if (pid) {
+          const pl = playerMap.get(pid);
+          if (pl?.name) {
+            const sc = scorerAgg.get(pl.name) ?? { name: pl.name, image_url: pl.avatar_url ?? null, TS: 0, W: 0, L: 0, D: 0, PTS: 0, P: 0, GD: 0 };
+            sc.P += 1;
+            sc.TS += teamScore; // goals this player scored in this match
+            scorerAgg.set(pl.name, sc);
+          }
+        }
+      }
       if (countForShooters) {
         (teamPlayers.get(tid) ?? []).forEach((pname) => {
           const pc = playerAgg.get(pname) ?? { name: pname, gang_faction: tname, image_url: playerAvatarByName.get(pname) ?? null, TS: 0, W: 0, L: 0, D: 0, PTS: 0, P: 0, GD: 0 };
@@ -167,8 +180,8 @@ export async function loadStandings(): Promise<Standings> {
     });
   });
 
-  return {
+return {
     gangs: Array.from(gangAgg.values()).sort(sortRows),
     shooters: Array.from(playerAgg.values()).sort(sortRows),
+    scorers: Array.from(scorerAgg.values()).sort((a, b) => b.TS - a.TS || b.P - a.P),
   };
-}
