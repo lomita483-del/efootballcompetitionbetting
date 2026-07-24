@@ -39,6 +39,7 @@ const NAV: AdminNavItem[] = [
   { group: "Overview", key: "audit",       label: "Audit",                icon: History,         admin: true },
   { group: "Overview", key: "risk",        label: "Risk",                 icon: AlertTriangle,   admin: true },
   { group: "Overview", key: "adminai",     label: "Admin AI",             icon: Sparkles,        admin: true },
+  { group: "Overview", key: "flags", label: "Suspicious Activity", icon: AlertTriangle, admin: true },
 
   // Users & Community
   { group: "Users & Community", key: "users",       label: "Users",                icon: Users,           modOk: true, alertKey: "users" },
