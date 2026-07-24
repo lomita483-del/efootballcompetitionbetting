@@ -72,7 +72,7 @@ function Page() {
     const { data: ev } = await supabase.from("wager_live_events").select("*").eq("wager_id", id).order("created_at", { ascending: false }).limit(50);
     setEvents((ev as any) ?? []);
     if (data) {
-      const { data: profs } = await supabase.from("profiles").select("id, full_name, ingame_name, avatar_url").in("id", [data.challenger_id, data.opponent_id]);
+      const { data: profs } = await supabase.from("profiles").select("id, full_name, ingame_name, avatar_url, special_id").in("id", [data.challenger_id, data.opponent_id]);
       const map: any = {}; (profs ?? []).forEach((r: any) => map[r.id] = r);
       setProfiles(map);
     }
@@ -104,6 +104,11 @@ function Page() {
 
   const challenger = profiles[w.challenger_id];
   const opponent = profiles[w.opponent_id];
+  const nameOf = (p: any, fallback: string) => p?.ingame_name || p?.full_name || p?.special_id || fallback;
+  const chName = nameOf(challenger, w.challenger_id.slice(0, 6));
+  const opName = nameOf(opponent, w.opponent_id.slice(0, 6));
+  const latestScore = events.find((e) => e.kind === "score_update")?.payload as { home?: number; away?: number } | undefined;
+  const commentary = events.filter((e) => e.kind === "commentary");
   const myPaymentState = myPayment?.status;
 
   async function doAccept() { setBusy(true); try { await acceptWager(w!.id); toast.success("Accepted"); } catch (e: any) { toast.error(e.message); } finally { setBusy(false); } }
@@ -136,13 +141,13 @@ function Page() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5 items-center">
-              <PartyCard label="Challenger" name={challenger?.username || w.challenger_id.slice(0, 8)} avatar={challenger?.avatar_url} highlight={w.winner_id === w.challenger_id} />
+              <PartyCard label="Challenger" name={chName} avatar={challenger?.avatar_url} highlight={w.winner_id === w.challenger_id} />
               <div className="text-center">
                 <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Stake each</div>
                 <div className="text-3xl font-black gradient-gold-text flex items-center justify-center gap-1"><Coins className="h-5 w-5" />{w.stake.toLocaleString()}</div>
                 <div className="text-xs text-muted-foreground mt-1">Pot {(w.stake * 2).toLocaleString()}</div>
               </div>
-              <PartyCard label="Opponent" name={opponent?.username || w.opponent_id.slice(0, 8)} avatar={opponent?.avatar_url} highlight={w.winner_id === w.opponent_id} />
+              <PartyCard label="Opponent" name={opName} avatar={opponent?.avatar_url} highlight={w.winner_id === w.opponent_id} />
             </div>
 
             {w.event_label && (
@@ -161,7 +166,7 @@ function Page() {
               <div className="mt-4 rounded-md border border-primary/40 bg-primary/10 p-3 text-center">
                 {w.is_draw
                   ? <div className="font-bold text-primary">Draw — stake split</div>
-                  : <div className="font-black text-primary flex items-center justify-center gap-1"><Trophy className="h-4 w-4" />Winner: {(w.winner_id === w.challenger_id ? challenger : opponent)?.username || "—"} • +{w.prize_paid?.toLocaleString()} tokens</div>}
+                  : <div className="font-black text-primary flex items-center justify-center gap-1"><Trophy className="h-4 w-4" />Winner: {w.winner_id === w.challenger_id ? chName : opName} • +{w.prize_paid?.toLocaleString()} tokens</div>}
               </div>
             )}
           </div>
@@ -192,7 +197,7 @@ function Page() {
                 {payments.length === 0 && <div className="text-muted-foreground">No payments yet.</div>}
                 {payments.map((p) => (
                   <div key={p.id} className="flex items-center justify-between border-b border-primary/10 py-1.5">
-                    <span className="truncate">{(profiles[p.user_id]?.username) || p.user_id.slice(0, 6)} • {p.amount.toLocaleString()}</span>
+                    <span className="truncate">{nameOf(profiles[p.user_id], p.user_id.slice(0, 6))} • {p.amount.toLocaleString()}</span>
                     <Badge variant="outline" className="text-[9px] uppercase">{p.status}</Badge>
                   </div>
                 ))}
@@ -205,21 +210,45 @@ function Page() {
 
         {/* Live feed */}
         {(w.status === "live" || w.status === "awaiting_settlement" || events.length > 0) && (
-          <Card className="glass p-4 mt-4">
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Live match feed</div>
-            {events.length === 0
-              ? <div className="text-xs text-muted-foreground">Admin will post live updates here.</div>
-              : (
-                <ul className="space-y-1.5 text-xs">
-                  {events.map((e) => (
-                    <li key={e.id} className="border-l-2 border-primary pl-2">
-                      <div className="font-bold">{e.kind}</div>
-                      <div className="text-muted-foreground">{JSON.stringify(e.payload)}</div>
-                      <div className="text-[10px] text-muted-foreground">{new Date(e.created_at).toLocaleTimeString()}</div>
-                    </li>
-                  ))}
-                </ul>
+          <Card className="glass-strong border-primary/30 mt-4 overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-2 bg-gradient-to-r from-primary/20 to-transparent border-b border-primary/20">
+              <div className="text-[10px] uppercase tracking-widest text-primary font-black flex items-center gap-1">
+                <span className={`h-2 w-2 rounded-full ${w.status === "live" ? "bg-red-500 animate-pulse" : "bg-muted"}`} />
+                Live match feed
+              </div>
+              <span className="text-[10px] text-muted-foreground">{events.length} update{events.length === 1 ? "" : "s"}</span>
+            </div>
+            <div className="p-4">
+              <div className="rounded-xl border border-primary/30 bg-background/40 p-4 flex items-center justify-around">
+                <div className="text-center flex-1 min-w-0">
+                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground truncate">{chName}</div>
+                  <div className="text-4xl font-black gradient-gold-text mt-1">{latestScore?.home ?? "–"}</div>
+                </div>
+                <div className="px-3 text-2xl font-black text-muted-foreground">vs</div>
+                <div className="text-center flex-1 min-w-0">
+                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground truncate">{opName}</div>
+                  <div className="text-4xl font-black gradient-gold-text mt-1">{latestScore?.away ?? "–"}</div>
+                </div>
+              </div>
+
+              {commentary.length > 0 && (
+                <div className="mt-4">
+                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Commentary</div>
+                  <ul className="space-y-2">
+                    {commentary.map((e) => (
+                      <li key={e.id} className="rounded-lg border border-primary/15 bg-background/30 px-3 py-2">
+                        <div className="text-sm">{e.payload?.text ?? ""}</div>
+                        <div className="text-[10px] text-muted-foreground mt-1">{new Date(e.created_at).toLocaleTimeString()}</div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
+
+              {events.length === 0 && (
+                <div className="text-xs text-muted-foreground text-center mt-3">Admin will post live updates here.</div>
+              )}
+            </div>
           </Card>
         )}
 
@@ -227,8 +256,8 @@ function Page() {
         <RivalryStats
           userAId={w.challenger_id}
           userBId={w.opponent_id}
-          nameA={challenger?.full_name || w.challenger_id.slice(0, 8)}
-          nameB={opponent?.full_name || w.opponent_id.slice(0, 8)}
+          nameA={chName}
+          nameB={opName}
         />
         
         {/* Dispute thread */}
