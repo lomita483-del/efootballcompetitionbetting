@@ -135,7 +135,7 @@ const handleDownload = async () => {
   if (!captureRef.current || downloading) return;
   setDownloading(true);
   try {
-    const { default: html2canvas } = await import("html2canvas");
+    const { default: html2canvas } = await import("html2canvas-pro");
     const canvas = await html2canvas(captureRef.current, {
       backgroundColor: "#07090b",
       useCORS: true,
