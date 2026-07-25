@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
 import { loadStandings, type LbRow } from "@/lib/leaderboard";
 import { supabase } from "@/integrations/supabase/client";
 import leaderboardHeaderAsset from "@/assets/leaderboard-header.png.asset.json";
@@ -111,30 +112,36 @@ function Page() {
     return () => { active = false; };
   }, []);
 
-  const handleDownload = async () => {
-    if (!captureRef.current || downloading) return;
-    setDownloading(true);
-    try {
-      const { default: html2canvas } = await import("html2canvas");
-      const canvas = await html2canvas(captureRef.current, {
-        backgroundColor: "#07090b",
-        useCORS: true,
-        scale: 2,
-        logging: false,
-      });
-      const dataUrl = canvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      link.href = dataUrl;
-      link.download = "e-football-leaderboard.png";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (err) {
-      console.error("Failed to generate leaderboard image", err);
-    } finally {
-      setDownloading(false);
-    }
-  };
+const handleDownload = async () => {
+  if (!captureRef.current || downloading) return;
+  setDownloading(true);
+  try {
+    const { default: html2canvas } = await import("html2canvas");
+    const canvas = await html2canvas(captureRef.current, {
+      backgroundColor: "#07090b",
+      useCORS: true,
+      scale: 2,
+      logging: false,
+    });
+    const blob: Blob | null = await new Promise((resolve) =>
+      canvas.toBlob((b) => resolve(b), "image/png")
+    );
+    if (!blob) throw new Error("Canvas export returned empty blob");
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "e-football-leaderboard.png";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("Failed to generate leaderboard image", err);
+    toast.error("Couldn't generate the image — one of the avatar/logo images may be blocking export.");
+  } finally {
+    setDownloading(false);
+  }
+};
 
   return (
     <Layout>
