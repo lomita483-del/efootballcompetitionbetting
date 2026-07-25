@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
@@ -35,20 +35,6 @@ type VirtualSettings = {
 
 type CycleState = { running: boolean; animSec: number; durSec: number; perRound: number; maxScore: number };
 type Phase = "idle" | "pre" | "live";
-
-export const Route = createFileRoute("/virtual/instant")({
-  head: () => ({
-    meta: [
-      { title: "Virtual Gang League — Instant Shootouts | ECB" },
-      {
-        name: "description",
-        content:
-          "Gang vs gang instant shootout rounds. Watch the live shootout feed, line-ups, and previous scores — auto-played every round.",
-      },
-    ],
-  }),
-  component: VirtualPage,
-});
 
 const matchSelect = `
   id,name,status,start_time,location,is_featured,home_score,away_score,is_virtual,lock_time,locked_at,virtual_round_batch_id,
