@@ -109,6 +109,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     scripts: [
       {
+        children: `(function(){try{var t=localStorage.getItem('ecb-theme');if(t!=='light'&&t!=='dark')t='dark';var r=document.documentElement;r.classList.toggle('light',t==='light');r.classList.toggle('dark',t==='dark');r.style.colorScheme=t;}catch(e){}})();`,
+      },
+      {
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
