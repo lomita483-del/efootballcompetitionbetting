@@ -3536,23 +3536,303 @@ function AnalyticsPanel() {
             </button>
           ))}
         </PanelBlock>
+function AnalyticsPanel() {
+  const nav = useNavigate();
+  const [stats, setStats] = useState<any>(null);
+  const [series, setSeries] = useState<any[]>([]);
+  const [counts, setCounts] = useState<any>({});
+  const [activity, setActivity] = useState<any[]>([]);
+  const [liveMatches, setLiveMatches] = useState<any[]>([]);
+  const [broadcasts, setBroadcasts] = useState<any[]>([]);
+  const [event, setEvent] = useState<any>(null);
+  const [highlights, setHighlights] = useState<any[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const [u, b, t, r, m, tr, wr, pr, ap, ti, br, ev] = await Promise.all([
+        supabase.from("profiles").select("created_at, token_balance, is_banned"),
+        supabase.from("bets").select("status, stake, potential_payout, created_at"),
+        supabase.from("token_transactions").select("amount, kind, created_at"),
+        supabase.from("token_requests").select("status, amount"),
+        supabase.from("matches").select("id,name,status,created_at,home_team:teams!home_team_id(name,logo_url),away_team:teams!away_team_id(name,logo_url)").eq("is_virtual", false).in("status", ["live", "scheduled"]).limit(5),
+        supabase.from("token_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("withdrawal_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("promo_code_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("ban_appeals").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("support_tickets").select("id", { count: "exact", head: true }).neq("status", "closed"),
+        supabase.from("broadcasts").select("*").order("created_at", { ascending: false }).limit(3),
+        supabase.from("events").select("*").eq("is_active", true).gt("ends_at", new Date().toISOString()).order("ends_at", { ascending: true }).limit(1).maybeSingle(),
+      ]);
+      const users = u.data ?? [];
+      const bets = b.data ?? [];
+      const txs = t.data ?? [];
+      const reqs = r.data ?? [];
+      const totalStaked = bets.reduce((a, x: any) => a + (x.stake ?? 0), 0);
+      const totalPaid = bets.filter((x: any) => x.status === "won").reduce((a, x: any) => a + (x.potential_payout ?? 0), 0);
+      setStats({
+        totalUsers: users.length,
+        bannedUsers: users.filter((x: any) => x.is_banned).length,
+        circulating: users.reduce((a, x: any) => a + (x.token_balance ?? 0), 0),
+        totalBets: bets.length,
+        wonBets: bets.filter((x: any) => x.status === "won").length,
+        lostBets: bets.filter((x: any) => x.status === "lost").length,
+        openBets: bets.filter((x: any) => x.status === "open").length,
+        totalStaked, totalPaid, houseEdge: totalStaked - totalPaid,
+        approvedRequests: reqs.filter((x: any) => x.status === "approved").reduce((a, x: any) => a + (x.amount ?? 0), 0),
+        debits: txs.filter((x: any) => x.amount < 0).reduce((a, x: any) => a + Math.abs(x.amount), 0),
+        credits: txs.filter((x: any) => x.amount > 0).reduce((a, x: any) => a + x.amount, 0),
+      });
+      setCounts({
+        gangWars: m.data?.length ?? 0,
+        pendingTokens: tr.count ?? 0,
+        pendingWithdrawals: wr.count ?? 0,
+        pendingPromos: pr.count ?? 0,
+        pendingAppeals: ap.count ?? 0,
+        openTickets: ti.count ?? 0,
+        bookedTickets: bets.length,
+        pendingTotal: (tr.count ?? 0) + (wr.count ?? 0) + (pr.count ?? 0),
+      });
+      setLiveMatches(m.data ?? []);
+      setBroadcasts(br.data ?? []);
+      setEvent(ev.data ?? null);
+
+      const days: Record<string, { day: string; bets: number; staked: number; users: number }> = {};
+      const today = new Date(); today.setHours(0,0,0,0);
+      for (let i = 13; i >= 0; i--) {
+        const d = new Date(today); d.setDate(d.getDate() - i);
+        const key = d.toISOString().slice(5, 10);
+        days[d.toISOString().slice(0,10)] = { day: key, bets: 0, staked: 0, users: 0 };
+      }
+      bets.forEach((x: any) => {
+        const k = (x.created_at ?? "").slice(0, 10);
+        if (days[k]) { days[k].bets += 1; days[k].staked += Number(x.stake ?? 0); }
+      });
+      users.forEach((x: any) => {
+        const k = (x.created_at ?? "").slice(0, 10);
+        if (days[k]) days[k].users += 1;
+      });
+      setSeries(Object.values(days));
+
+      const { data: aud } = await supabase.from("audit_logs").select("action,target_type,created_at,metadata").order("created_at", { ascending: false }).limit(6);
+      setActivity(aud ?? []);
+      const { data: hl } = await supabase.from("highlights").select("id,title,media_url,media_type,created_at,likes,dislikes").eq("is_active", true).order("created_at", { ascending: false }).limit(4);
+      setHighlights(hl ?? []);
+    })();
+  }, []);
+
+  if (!stats) return <div className="text-sm text-muted-foreground">Loading analytics…</div>;
+
+  const fmt = (n: number) => n.toLocaleString();
+  const short = (n: number) => {
+    const a = Math.abs(n);
+    if (a >= 1e9) return (n / 1e9).toFixed(2) + "B";
+    if (a >= 1e6) return (n / 1e6).toFixed(2) + "M";
+    if (a >= 1e3) return (n / 1e3).toFixed(1) + "K";
+    return String(n);
+  };
+
+  const goTab = (t: string) => setActiveTabFromAnalytics(nav, t);
+  const row1 = [
+    { icon: Users, value: stats.totalUsers, title: "USERS", sub: "TOTAL USERS", tone: "gold", onClick: () => goTab("users") },
+    { icon: Trophy, value: counts.gangWars ?? 0, title: "GANG WARS", sub: "LIVE & UPCOMING", tone: "gold", onClick: () => goTab("matches") },
+    { icon: AlertTriangle, value: counts.pendingTotal ?? 0, title: "PENDING REQUESTS", sub: "AWAITING ACTION", tone: "amber", onClick: () => goTab("tokens") },
+    { icon: Coins, value: short(stats.circulating), title: "TOTAL VOLUME", sub: "IN CIRCULATION", tone: "gold-lg" },
+    { icon: Calendar, value: counts.openTickets ?? 0, title: "OPEN REPORTS", sub: "REPORTED ITEMS", tone: "gold", onClick: () => goTab("tickets") },
+  ];
+  const row2 = [
+    { icon: Ticket, value: counts.bookedTickets ?? 0, title: "TICKETS BOOKED", sub: "TOTAL BOOKED", onClick: () => goTab("bettracker") },
+    { icon: Coins, value: counts.pendingTokens ?? 0, title: "TOKEN REQUESTS", sub: "REQUESTED TOKENS", onClick: () => goTab("tokens") },
+    { icon: Wallet, value: counts.pendingWithdrawals ?? 0, title: "WITHDRAWALS", sub: "PENDING PAYOUTS", onClick: () => goTab("withdrawals") },
+    { icon: Tag, value: counts.pendingPromos ?? 0, title: "PENDING REQUESTS", sub: "PENDING PROOFS", onClick: () => goTab("promoreqs") },
+    { icon: AlertTriangle, value: counts.pendingAppeals ?? 0, title: "BAN APPEALS", sub: "PENDING APPEALS", onClick: () => goTab("appeals") },
+  ];
+  const row4 = [
+    { icon: Users, value: stats.totalUsers, title: "TOTAL USERS", onClick: () => goTab("users") },
+    { icon: Shield, value: stats.bannedUsers, title: "BANNED USERS", onClick: () => goTab("bannedusers") },
+    { icon: Coins, value: short(stats.circulating), title: "TOKENS CIRCULATING", onClick: () => goTab("pnl") },
+    { icon: Ticket, value: stats.totalBets, title: "TOTAL BETS", onClick: () => goTab("bettracker") },
+    { icon: Trophy, value: stats.wonBets, title: "WON BETS", onClick: () => goTab("wonbets") },
+  ];
+  const row5 = [
+    { icon: X, value: stats.lostBets, title: "LOST BETS", onClick: () => goTab("lostbets") },
+    { icon: Eye, value: stats.openBets, title: "OPEN BETS", onClick: () => goTab("bettracker") },
+    { icon: Coins, value: short(stats.totalStaked), title: "TOTAL STAKED", onClick: () => goTab("pnl") },
+    { icon: Wallet, value: short(stats.totalPaid), title: "TOTAL PAID OUT", onClick: () => goTab("pnl") },
+    { icon: BarChart3, value: short(stats.houseEdge), title: "NET (HOUSE)", onClick: () => goTab("pnl") },
+  ];
+  const row6 = [
+    { icon: Check, value: short(stats.approvedRequests), title: "TOKENS APPROVED", onClick: () => goTab("tokens") },
+    { icon: Coins, value: short(stats.credits), title: "TOKEN CREDITS", onClick: () => goTab("tokenmovement") },
+    { icon: Coins, value: short(stats.debits), title: "TOKEN DEBITS", onClick: () => goTab("tokenmovement") },
+  ];
+
+  const ts = (ts: string) => {
+    const diff = (Date.now() - +new Date(ts)) / 1000;
+    if (diff < 60) return `${Math.floor(diff)}s ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+    return `${Math.floor(diff / 86400)} days ago`;
+  };
+
+  return (
+    <div className="space-y-3">
+      {/* ROW 1 — 5 metric squares */}
+      <div className="grid grid-cols-5 gap-2 sm:gap-3">
+        {row1.map((x) => <MetricSquare key={x.title} {...x} />)}
       </div>
 
-      {/* ROW 8 — Broadcast Center | Quick Actions | Top Bets */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
-        <PanelBlock title="BROADCAST CENTER" compact count={broadcasts.length} hideWhenEmpty onView={() => setActiveTabFromAnalytics(nav, "broadcast")}>
-          {broadcasts.length === 0 && <div className="text-[10px] text-muted-foreground">No broadcasts</div>}
-          {broadcasts.map((b) => (
-            <button key={b.id} onClick={() => setActiveTabFromAnalytics(nav, "broadcast")} className="w-full text-left text-[9px] sm:text-xs py-1 border-b border-primary/10 last:border-0 hover:bg-primary/5 rounded px-1 transition">
-              <div className="flex items-center gap-1"><Megaphone className="h-2.5 w-2.5 text-primary shrink-0" /><div className="truncate text-foreground font-semibold">{b.title || "Broadcast"}</div></div>
-              {b.body && <div className="text-[8px] sm:text-[10px] text-muted-foreground truncate pl-3.5">{b.body}</div>}
-              <div className="text-[7px] sm:text-[9px] text-muted-foreground pl-3.5">{ts(b.created_at)}</div>
-            </button>
-          ))}
-        </PanelBlock>
-        <MiniLeaderboardPanel onOpen={() => setActiveTabFromAnalytics(nav, "leaderboard")} />
-        <TopBetsPanel limit={3} />
+      {/* ROW 2 — 5 metric squares */}
+      <div className="grid grid-cols-5 gap-2 sm:gap-3">
+        {row2.map((x) => <MetricSquare key={x.title} {...x} />)}
       </div>
+
+      {/* ROW 3 — 2 charts side-by-side */}
+      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+        <Card className="glass p-2 sm:p-4 border-primary/20 bg-card/60">
+          <div className="text-[9px] sm:text-xs font-bold tracking-widest text-primary mb-1">VOLUME OVER TIME <span className="text-muted-foreground font-normal">(LAST 14 DAYS)</span></div>
+          <ResponsiveContainer width="100%" height={160}>
+            <AreaChart data={series} margin={{ top: 5, right: 4, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="gStake" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(45 96% 56%)" stopOpacity={0.5} />
+                  <stop offset="100%" stopColor="hsl(45 96% 56%)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(45 30% 20%)" />
+              <XAxis dataKey="day" stroke="hsl(45 50% 60%)" fontSize={8} />
+              <YAxis stroke="hsl(45 50% 60%)" fontSize={8} tickFormatter={short} />
+              <RTooltip contentStyle={{ background: "hsl(45 20% 8%)", border: "1px solid hsl(45 60% 40%)", borderRadius: 8, fontSize: 11 }} />
+              <Area type="monotone" dataKey="staked" stroke="hsl(45 96% 56%)" fill="url(#gStake)" strokeWidth={2} dot={{ r: 2, fill: "hsl(45 96% 56%)" }} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </Card>
+        <Card className="glass p-2 sm:p-4 border-primary/20 bg-card/60">
+          <div className="text-[9px] sm:text-xs font-bold tracking-widest text-primary mb-1">NEW USERS PER DAY</div>
+          <ResponsiveContainer width="100%" height={160}>
+            <BarChart data={series} margin={{ top: 5, right: 4, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(45 30% 20%)" />
+              <XAxis dataKey="day" stroke="hsl(45 50% 60%)" fontSize={8} />
+              <YAxis stroke="hsl(45 50% 60%)" fontSize={8} />
+              <RTooltip contentStyle={{ background: "hsl(45 20% 8%)", border: "1px solid hsl(45 60% 40%)", borderRadius: 8, fontSize: 11 }} />
+              <Bar dataKey="users" fill="hsl(45 96% 56%)" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+      </div>
+
+      {/* ROW 4 — 5 metric squares */}
+      <div className="grid grid-cols-5 gap-2 sm:gap-3">
+        {row4.map((x) => <MetricSquare key={x.title} {...x} compact />)}
+      </div>
+
+      {/* ROW 5 — 5 metric squares */}
+      <div className="grid grid-cols-5 gap-2 sm:gap-3">
+        {row5.map((x) => <MetricSquare key={x.title} {...x} compact />)}
+      </div>
+
+      {/* ROW 6 — 3 wider squares + image cell */}
+      <div className="grid grid-cols-4 gap-2 sm:gap-3">
+        {row6.map((x) => <MetricSquare key={x.title} {...x} compact />)}
+        <Card className="overflow-hidden border-primary/20 bg-card/60 relative min-h-[80px] group">
+          <img src={leagueSkullFire} alt="League" loading="lazy" width={512} height={512}
+               className="absolute inset-0 h-full w-full object-cover scale-110 animate-pulse-glow group-hover:scale-125 transition-transform duration-[3000ms]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          <div className="absolute inset-x-0 bottom-1 text-center text-[10px] uppercase tracking-widest text-white font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">League</div>
+        </Card>
+      </div>
+
+      {/* ROW 7 — Recent Activity + Broadcast Center | Live Gang Wars + big logo + Leaderboard | Top 3 Bettors + icon tiles */}
+      <div className="grid grid-cols-3 gap-3">
+        {/* LEFT: Recent Activity, then Broadcast Center */}
+        <div className="space-y-3">
+          <PanelBlock title="RECENT ACTIVITY" accent="sky" count={activity.length} hideWhenEmpty onView={() => setActiveTabFromAnalytics(nav, "activity")}>
+            {activity.length === 0 && <div className="text-[10px] text-muted-foreground">No activity yet</div>}
+            {activity.slice(0, 5).map((a, i) => (
+              <button key={i} onClick={() => setActiveTabFromAnalytics(nav, "audit")} className="w-full text-left flex items-start gap-1.5 text-[9px] sm:text-xs py-1 border-b border-border/40 last:border-0 hover:bg-sky-500/10 rounded transition">
+                <Sparkles className="h-3 w-3 text-sky-400 shrink-0 mt-0.5" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-foreground truncate">{a.action?.replace(/_/g, " ")}</div>
+                  <div className="text-muted-foreground text-[8px] sm:text-[10px]">{ts(a.created_at)}</div>
+                </div>
+              </button>
+            ))}
+          </PanelBlock>
+          <PanelBlock title="BROADCAST CENTER" compact count={broadcasts.length} hideWhenEmpty onView={() => setActiveTabFromAnalytics(nav, "broadcast")}>
+            {broadcasts.length === 0 && <div className="text-[10px] text-muted-foreground">No broadcasts</div>}
+            {broadcasts.map((b) => (
+              <button key={b.id} onClick={() => setActiveTabFromAnalytics(nav, "broadcast")} className="w-full text-left text-[9px] sm:text-xs py-1 border-b border-primary/10 last:border-0 hover:bg-primary/5 rounded px-1 transition">
+                <div className="flex items-center gap-1"><Megaphone className="h-2.5 w-2.5 text-primary shrink-0" /><div className="truncate text-foreground font-semibold">{b.title || "Broadcast"}</div></div>
+                {b.body && <div className="text-[8px] sm:text-[10px] text-muted-foreground truncate pl-3.5">{b.body}</div>}
+                <div className="text-[7px] sm:text-[9px] text-muted-foreground pl-3.5">{ts(b.created_at)}</div>
+              </button>
+            ))}
+          </PanelBlock>
+        </div>
+
+        {/* MIDDLE: Live Gang Wars, big league logo, Leaderboard mini widget */}
+        <div className="space-y-3">
+          <PanelBlock title="LIVE GANG WARS" accent="rose" compact count={liveMatches.length} hideWhenEmpty onView={() => nav({ to: "/matches" })}>
+            {liveMatches.length === 0 && <div className="text-[10px] text-muted-foreground">No live wars</div>}
+            {liveMatches.slice(0, 2).map((m: any) => {
+              const home = m.home_team; const away = m.away_team;
+              const initial = (n?: string) => (n ? n.charAt(0).toUpperCase() : "?");
+              return (
+                <button key={m.id} onClick={() => nav({ to: "/matches/$matchId", params: { matchId: m.id } })} className="w-full flex items-center gap-1.5 text-[9px] sm:text-xs py-1 border-b border-border/40 last:border-0 hover:bg-rose-500/10 rounded px-1 transition">
+                  {home?.logo_url ? <img src={home.logo_url} alt="" className="h-5 w-5 rounded-full object-cover border border-rose-500/40" /> : <div className="h-5 w-5 rounded-full bg-rose-500/20 grid place-items-center text-[8px] font-bold text-rose-300 border border-rose-500/40">{initial(home?.name)}</div>}
+                  <div className="flex-1 min-w-0 text-center text-foreground font-semibold truncate">{home?.name ?? "Home"} <span className="text-muted-foreground">vs</span> {away?.name ?? "Away"}</div>
+                  {away?.logo_url ? <img src={away.logo_url} alt="" className="h-5 w-5 rounded-full object-cover border border-rose-500/40" /> : <div className="h-5 w-5 rounded-full bg-rose-500/20 grid place-items-center text-[8px] font-bold text-rose-300 border border-rose-500/40">{initial(away?.name)}</div>}
+                </button>
+              );
+            })}
+          </PanelBlock>
+          <Card className="relative overflow-hidden border-primary/20 bg-card/60 min-h-[140px]">
+            <img src={leagueSkullFire} alt="Competition Betting ECB" loading="lazy" width={512} height={512} className="absolute inset-0 h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/40" />
+          </Card>
+          <MiniLeaderboardPanel onOpen={() => setActiveTabFromAnalytics(nav, "leaderboard")} />
+        </div>
+
+        {/* RIGHT: Top 3 Bettors, then two small icon tiles */}
+        <div className="space-y-3">
+          <TopBetsPanel limit={3} />
+          <div className="grid grid-cols-2 gap-3">
+            <Card className="overflow-hidden border-primary/20 bg-card/60 relative aspect-square">
+              <img src={tileClansAsset.url} alt="Gangs" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            </Card>
+            <Card className="overflow-hidden border-primary/20 bg-card/60 relative aspect-square">
+              <img src={leagueSkullFire} alt="League" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Event countdown — kept, tucked under the 3-column row */}
+      {event && (
+        <PanelBlock title="EVENT COUNTDOWN" compact count={1} onView={() => setActiveTabFromAnalytics(nav, "events")}>
+          <button onClick={() => setActiveTabFromAnalytics(nav, "events")} className="relative w-full min-h-24 text-left rounded-lg p-2 transition space-y-1 overflow-hidden border border-primary/20 bg-card/50">
+            {event.banner_url ? <img src={event.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-70" /> : <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20" />}
+            <div className="absolute inset-0 bg-gradient-to-r from-background/85 via-background/45 to-background/70" />
+            <div className="relative text-[9px] sm:text-xs font-bold text-primary truncate drop-shadow">{event.title}</div>
+            <div className="relative text-[10px] sm:text-sm font-mono text-amber-300 drop-shadow"><Countdown target={event.ends_at} /></div>
+            {event.description && <div className="relative text-[9px] text-muted-foreground line-clamp-1">{event.description}</div>}
+          </button>
+        </PanelBlock>
+      )}
+
+      {/* Highlights hub — kept, full width below */}
+      <PanelBlock title="HIGHLIGHTS HUB" accent="violet" count={highlights.length} hideWhenEmpty onView={() => setActiveTabFromAnalytics(nav, "content")}>
+        {highlights.length === 0 && <div className="text-[10px] text-muted-foreground">No highlights yet</div>}
+        {highlights.slice(0, 4).map((h) => (
+          <button key={h.id} onClick={() => setActiveTabFromAnalytics(nav, "content")} className="w-full flex items-center gap-1.5 text-[9px] sm:text-xs py-1 border-b border-border/40 last:border-0 hover:bg-violet-500/10 rounded px-1 transition">
+            {h.media_type === "video" ? <Play className="h-3 w-3 text-violet-400 shrink-0" /> : <ImageIcon className="h-3 w-3 text-violet-400 shrink-0" />}
+            <div className="min-w-0 flex-1 truncate text-left">{h.title}</div>
+            <span className="flex items-center gap-0.5 text-emerald-300 shrink-0"><ThumbsUp className="h-3 w-3" />{h.likes ?? 0}</span>
+            <span className="flex items-center gap-0.5 text-destructive shrink-0"><ThumbsDown className="h-3 w-3" />{h.dislikes ?? 0}</span>
+          </button>
+        ))}
+      </PanelBlock>
 
       {/* ROW 9 — 5 module tiles */}
       <div className="grid grid-cols-6 gap-3">
