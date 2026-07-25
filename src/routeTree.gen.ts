@@ -50,6 +50,7 @@ import { Route as VirtualChampionshipRouteImport } from './routes/virtual.champi
 import { Route as VirtualFootballChampionshipRouteImport } from './routes/virtual.football-championship'
 import { Route as VirtualFootballInstantRouteImport } from './routes/virtual.football-instant'
 import { Route as VirtualHistoryRouteImport } from './routes/virtual.history'
+import { Route as VirtualInstantRouteImport } from './routes/virtual.instant'
 import { Route as WagersIndexRouteImport } from './routes/wagers.index'
 import { Route as WagersIdRouteImport } from './routes/wagers.$id'
 import { Route as ApiPublicVirtualTickRouteImport } from './routes/api/public/virtual-tick'
@@ -264,6 +265,11 @@ const VirtualHistoryRoute = VirtualHistoryRouteImport.update({
   path: '/virtual/history',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VirtualInstantRoute = VirtualInstantRouteImport.update({
+  id: '/virtual/instant',
+  path: '/virtual/instant',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WagersIndexRoute = WagersIndexRouteImport.update({
   id: '/wagers/',
   path: '/wagers/',
@@ -344,6 +350,7 @@ export interface FileRoutesByFullPath {
   '/virtual/football-championship': typeof VirtualFootballChampionshipRoute
   '/virtual/football-instant': typeof VirtualFootballInstantRoute
   '/virtual/history': typeof VirtualHistoryRoute
+  '/virtual/instant': typeof VirtualInstantRoute
   '/wagers/$id': typeof WagersIdRoute
   '/virtual/': typeof VirtualIndexRoute
   '/wagers/': typeof WagersIndexRoute
@@ -394,6 +401,7 @@ export interface FileRoutesByTo {
   '/virtual/football-championship': typeof VirtualFootballChampionshipRoute
   '/virtual/football-instant': typeof VirtualFootballInstantRoute
   '/virtual/history': typeof VirtualHistoryRoute
+  '/virtual/instant': typeof VirtualInstantRoute
   '/wagers/$id': typeof WagersIdRoute
   '/virtual': typeof VirtualIndexRoute
   '/wagers': typeof WagersIndexRoute
@@ -445,6 +453,7 @@ export interface FileRoutesById {
   '/virtual/football-championship': typeof VirtualFootballChampionshipRoute
   '/virtual/football-instant': typeof VirtualFootballInstantRoute
   '/virtual/history': typeof VirtualHistoryRoute
+  '/virtual/instant': typeof VirtualInstantRoute
   '/wagers/$id': typeof WagersIdRoute
   '/virtual/': typeof VirtualIndexRoute
   '/wagers/': typeof WagersIndexRoute
@@ -497,6 +506,7 @@ export interface FileRouteTypes {
     | '/virtual/football-championship'
     | '/virtual/football-instant'
     | '/virtual/history'
+    | '/virtual/instant'
     | '/wagers/$id'
     | '/virtual/'
     | '/wagers/'
@@ -547,6 +557,7 @@ export interface FileRouteTypes {
     | '/virtual/football-championship'
     | '/virtual/football-instant'
     | '/virtual/history'
+    | '/virtual/instant'
     | '/wagers/$id'
     | '/virtual'
     | '/wagers'
@@ -597,6 +608,7 @@ export interface FileRouteTypes {
     | '/virtual/football-championship'
     | '/virtual/football-instant'
     | '/virtual/history'
+    | '/virtual/instant'
     | '/wagers/$id'
     | '/virtual/'
     | '/wagers/'
@@ -647,6 +659,7 @@ export interface RootRouteChildren {
   VirtualFootballChampionshipRoute: typeof VirtualFootballChampionshipRoute
   VirtualFootballInstantRoute: typeof VirtualFootballInstantRoute
   VirtualHistoryRoute: typeof VirtualHistoryRoute
+  VirtualInstantRoute: typeof VirtualInstantRoute
   WagersIdRoute: typeof WagersIdRoute
   VirtualIndexRoute: typeof VirtualIndexRoute
   WagersIndexRoute: typeof WagersIndexRoute
@@ -946,6 +959,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VirtualHistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/virtual/instant': {
+      id: '/virtual/instant'
+      path: '/virtual/instant'
+      fullPath: '/virtual/instant'
+      preLoaderRoute: typeof VirtualInstantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/wagers/': {
       id: '/wagers/'
       path: '/wagers'
@@ -1049,6 +1069,7 @@ const rootRouteChildren: RootRouteChildren = {
   VirtualFootballChampionshipRoute: VirtualFootballChampionshipRoute,
   VirtualFootballInstantRoute: VirtualFootballInstantRoute,
   VirtualHistoryRoute: VirtualHistoryRoute,
+  VirtualInstantRoute: VirtualInstantRoute,
   WagersIdRoute: WagersIdRoute,
   VirtualIndexRoute: VirtualIndexRoute,
   WagersIndexRoute: WagersIndexRoute,
@@ -1062,3 +1083,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
