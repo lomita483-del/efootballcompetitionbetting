@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Layout } from "@/components/Layout";
+import { ThemeToggleInline } from "@/components/ThemeToggle";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -176,6 +177,7 @@ export function AdminPage() {
               </Badge>
               {isAdmin && (
                 <div className="flex items-center gap-1 w-full sm:w-auto sm:ml-2">
+                  <ThemeToggleInline />
                   <Button size="sm" variant="outline" className="text-[11px]" onClick={() => setUnblurred((v) => !v)} title="Toggle frosted-glass blur to verify alignment & layout">
                     {unblurred ? "🔍 Unblurred" : "✨ Blurred"}
                   </Button>
