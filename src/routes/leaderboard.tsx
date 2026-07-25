@@ -1,4 +1,4 @@
-import { Trophy, Medal as MedalIcon, ArrowUp, ArrowDown, Star } from "lucide-react";
+import { Trophy, Medal as MedalIcon, ArrowUp, ArrowDown, Users, Target, Goal } from "lucide-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
@@ -32,24 +32,20 @@ export const Route = createFileRoute("/leaderboard")({
 });
 
 function Medal({ i }: { i: number }) {
-  const tiers = [
-    "from-amber-300 via-yellow-500 to-yellow-700 border-amber-200 text-black shadow-[0_0_18px_-2px_rgba(255,200,60,0.75)]",
-    "from-slate-100 via-slate-300 to-slate-500 border-slate-100 text-black shadow-[0_0_16px_-3px_rgba(220,220,230,0.6)]",
-    "from-amber-500 via-orange-600 to-orange-800 border-amber-400 text-black shadow-[0_0_16px_-3px_rgba(230,130,40,0.7)]",
-  ];
-  const ribbonColors = ["text-yellow-300", "text-slate-100", "text-amber-500"];
+  const tiers = ["from-amber-300 to-yellow-600", "from-slate-200 to-slate-400", "from-amber-600 to-orange-800"];
+  const medalColors = ["text-yellow-300", "text-slate-200", "text-amber-600"];
   if (i < 3) {
     return (
       <span className="inline-flex items-center gap-1.5">
-        <span className={`inline-grid place-items-center h-10 w-10 rounded-xl bg-gradient-to-b ${tiers[i]} font-black text-lg border-2 tabular-nums`}>
+        <span className={`inline-grid place-items-center h-8 w-8 rounded-full bg-gradient-to-b ${tiers[i]} text-black font-black text-sm shadow-[0_0_14px_-2px_rgba(212,175,55,0.6)] border border-white/30`}>
           {i + 1}
         </span>
-        <MedalIcon className={`h-5 w-5 ${ribbonColors[i]} drop-shadow-[0_0_6px_rgba(212,175,55,0.7)]`} />
+        <MedalIcon className={`h-5 w-5 ${medalColors[i]} drop-shadow-[0_0_6px_rgba(212,175,55,0.6)]`} />
       </span>
     );
   }
   return (
-    <span className="inline-grid place-items-center h-10 w-10 rounded-xl bg-black/40 border-2 border-emerald-500/60 text-emerald-300 font-black text-lg shadow-[inset_0_0_10px_rgba(16,185,129,0.15)] tabular-nums">
+    <span className="inline-grid place-items-center h-8 w-8 rounded-full bg-gradient-to-b from-[#1c2a1c] to-[#10160f] border border-emerald-400/40 text-emerald-300 font-black text-sm tabular-nums">
       {i + 1}
     </span>
   );
@@ -69,10 +65,10 @@ function Page() {
 
   useEffect(() => {
     const run = async () => {
-    const { gangs, shooters, scorers } = await loadStandings();
-      setGangs(gangs);
-      setShooters(shooters);
-      setScorers(scorers);
+      const standings: any = await loadStandings();
+      setGangs(standings.gangs ?? []);
+      setShooters(standings.shooters ?? []);
+      setScorers(standings.scorers ?? []);
     };
     run();
     const ch = supabase
@@ -129,14 +125,14 @@ function Page() {
         )}
 
         <Tabs defaultValue="gangs">
-          <TabsList className="bg-black/25 backdrop-blur-[2px] border border-amber-400/40">
-            <TabsTrigger value="gangs">Top Team / Scorer</TabsTrigger>
-            <TabsTrigger value="shooters">Top Shooters</TabsTrigger>
-            <TabsTrigger value="scorers">Top Scorer</TabsTrigger>
+          <TabsList className="bg-black/25 backdrop-blur-[2px] border border-amber-400/40 gap-1 p-1">
+            <TabsTrigger value="gangs" className="gap-1.5 data-[state=active]:bg-emerald-500/90 data-[state=active]:text-black font-bold"><Users className="h-3.5 w-3.5" />Top Team / Scorer</TabsTrigger>
+            <TabsTrigger value="shooters" className="gap-1.5 data-[state=active]:bg-emerald-500/90 data-[state=active]:text-black font-bold"><Target className="h-3.5 w-3.5" />Top Shooters</TabsTrigger>
+            <TabsTrigger value="scorers" className="gap-1.5 data-[state=active]:bg-emerald-500/90 data-[state=active]:text-black font-bold"><Goal className="h-3.5 w-3.5" />Top Scorer</TabsTrigger>
           </TabsList>
 
           <TabsContent value="gangs" className="mt-4">
-            <Board rows={gangs} firstCol="Team / Scorer" secondCol="Top Player" pick={(g) => g.name} secondPick={(g) => g.top_player || "—"} emptyText="No data yet." />
+            <Board rows={gangs} firstCol="Team / Scorer" secondCol="Top Player" pick={(g) => g.name} secondPick={(g) => g.top_player || "—"} emptyText="No data yet." showMvp otherDivider />
           </TabsContent>
 
           <TabsContent value="shooters" className="mt-4">
@@ -147,13 +143,23 @@ function Page() {
             <ScorerBoard rows={scorers} />
           </TabsContent>
         </Tabs>
+
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 mt-4 px-2 text-[10px] text-muted-foreground">
+          <span><b className="text-amber-200">TS</b> Total Score</span>
+          <span><b className="text-emerald-400">W</b> Wins</span>
+          <span><b className="text-destructive">L</b> Losses</span>
+          <span><b className="text-amber-400">D</b> Draws</span>
+          <span><b className="text-foreground">GD</b> Goal Difference</span>
+          <span><b className="text-foreground">P</b> Played</span>
+          <span><b className="text-emerald-300">PTS</b> Points</span>
+        </div>
       </div>
     </Layout>
   );
 }
 
 function Board({
-  rows, firstCol, secondCol, pick, firstPick, secondPick, emptyText,
+  rows, firstCol, secondCol, pick, firstPick, secondPick, emptyText, showMvp, otherDivider,
 }: {
   rows: LbRow[];
   firstCol: string;
@@ -162,144 +168,60 @@ function Board({
   firstPick?: (r: LbRow) => string;
   secondPick?: (r: LbRow) => string;
   emptyText: string;
+  showMvp?: boolean;
+  otherDivider?: boolean;
 }) {
-  const top = rows.slice(0, 10);
-  const rest = rows.slice(10);
   return (
-    <div className="relative rounded-2xl p-3 sm:p-4 bg-gradient-to-b from-black/40 via-black/20 to-black/40 border-2 border-emerald-500/60 shadow-[0_0_40px_-12px_rgba(16,185,129,0.45),inset_0_0_40px_-20px_rgba(16,185,129,0.3)]">
-      <div className="overflow-x-auto">
-        <div className="min-w-[720px]">
-          {/* header */}
-          <div className="grid grid-cols-[64px_1.4fr_1fr_56px_44px_44px_44px_56px_44px_60px] items-center gap-2 px-3 py-2 text-[11px] uppercase tracking-widest text-amber-300/90 font-bold">
-            <div>Rank</div>
-            <div>{firstCol}</div>
-            <div>{secondCol}</div>
-            <div className="text-center">TS</div>
-            <div className="text-center">W</div>
-            <div className="text-center">L</div>
-            <div className="text-center">D</div>
-            <div className="text-center">GD</div>
-            <div className="text-center">P</div>
-            <div className="text-center">PTS</div>
-          </div>
-
-          {rows.length === 0 && (
-            <div className="p-8 text-center text-muted-foreground">{emptyText}</div>
-          )}
-
-          <div className="flex flex-col gap-2">
-            {top.map((r, i) => (
-              <LbRowCard key={r.name} r={r} i={i} firstPick={firstPick} pick={pick} secondPick={secondPick} />
+    <div className="relative rounded-2xl overflow-hidden bg-black/15 backdrop-blur-[2px] border-2 border-amber-400/55 shadow-[0_0_40px_-12px_rgba(212,175,55,0.5)]">
+      <div className="relative overflow-x-auto">
+        <table className="w-full text-sm min-w-[640px]">
+          <thead>
+            <tr className="text-left text-[11px] uppercase tracking-widest text-amber-200/80 border-b border-amber-400/30 bg-black/20">
+              <Th>Rank</Th><Th>{firstCol}</Th><Th>{secondCol}</Th>
+              <Th right>TS</Th><Th right>W</Th><Th right>L</Th><Th right>D</Th><Th right>GD</Th><Th right>P</Th><Th right>PTS</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 && <tr><td colSpan={10} className="p-6 text-center text-muted-foreground">{emptyText}</td></tr>}
+            {rows.map((r, i) => (
+              <>
+                {otherDivider && i === 10 && (
+                  <tr key="divider" aria-hidden>
+                    <td colSpan={10} className="py-2">
+                      <div className="flex items-center justify-center gap-3 text-[10px] uppercase tracking-[0.3em] text-amber-300/70 font-bold">
+                        <span className="h-px w-10 bg-amber-400/30" />✦ Other Teams ✦<span className="h-px w-10 bg-amber-400/30" />
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                <tr key={r.name} className="border-b border-amber-400/10 hover:bg-amber-400/10 transition-colors">
+                  <Td><Medal i={i} /></Td>
+                  <Td>
+                    <div className="flex items-center gap-2">
+                      <Avatar url={r.image_url ?? null} name={firstPick ? firstPick(r) : pick(r)} />
+                      <span className="text-base font-bold text-[#9FD65C] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" style={{ textShadow: "0 0 6px rgba(159,214,92,0.5)" }}>{firstPick ? firstPick(r) : pick(r)}</span>
+                      <RankArrow delta={r.rank_delta} />
+                    </div>
+                  </Td>
+                  <Td>
+                    <span className={firstPick ? "font-bold" : "text-muted-foreground"}>{secondPick ? secondPick(r) : (firstPick ? pick(r) : (r.top_player || "—"))}</span>
+                    {showMvp && i === 0 && <span className="ml-2 inline-block align-middle rounded-full border border-amber-300/60 bg-amber-400/15 text-amber-200 text-[9px] font-black px-1.5 py-0.5">★MVP</span>}
+                  </Td>
+                  <Td right><Pill tone="neutral">{r.TS}</Pill></Td>
+                  <Td right><span className="text-emerald-400 font-bold">{r.W}</span></Td>
+                  <Td right><span className="text-destructive font-bold">{r.L}</span></Td>
+                  <Td right><span className="text-amber-400 font-bold">{r.D}</span></Td>
+                  <Td right><span className={r.GD >= 0 ? "text-emerald-400 font-bold" : "text-destructive font-bold"}>{r.GD >= 0 ? "+" : ""}{r.GD}</span></Td>
+                  <Td right><span className="text-muted-foreground">{r.P}</span></Td>
+                  <Td right><Pill tone="emerald">{r.PTS}</Pill></Td>
+                </tr>
+              </>
             ))}
-          </div>
-
-          {rest.length > 0 && (
-            <div className="my-3 flex items-center justify-center gap-3 text-amber-300/90">
-              <span className="h-px w-16 bg-gradient-to-r from-transparent to-amber-400/60" />
-              <span className="text-amber-300">✦</span>
-              <span className="text-[11px] uppercase tracking-[0.25em] font-bold">Other Teams</span>
-              <span className="text-amber-300">✦</span>
-              <span className="h-px w-16 bg-gradient-to-l from-transparent to-amber-400/60" />
-            </div>
-          )}
-
-          <div className="flex flex-col gap-2">
-            {rest.map((r, idx) => (
-              <LbRowCard key={r.name} r={r} i={idx + 10} firstPick={firstPick} pick={pick} secondPick={secondPick} />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* legend */}
-      <div className="mt-4 rounded-xl border border-amber-400/40 bg-black/40 px-3 py-2 overflow-x-auto">
-        <div className="flex items-center gap-4 text-[11px] whitespace-nowrap">
-          <LegendItem k="TS" label="Total Score" color="text-amber-300" />
-          <LegendItem k="W" label="Wins" color="text-emerald-400" />
-          <LegendItem k="L" label="Losses" color="text-red-400" />
-          <LegendItem k="D" label="Draws" color="text-amber-300" />
-          <LegendItem k="GD" label="Goal Difference" color="text-emerald-400" />
-          <LegendItem k="P" label="Played" color="text-emerald-400" />
-          <LegendItem k="PTS" label="Points" color="text-emerald-400" />
-        </div>
+          </tbody>
+        </table>
       </div>
     </div>
   );
-}
-
-function LegendItem({ k, label, color }: { k: string; label: string; color: string }) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <span className={`font-black ${color}`}>{k}</span>
-      <span className="text-muted-foreground">{label}</span>
-    </div>
-  );
-}
-
-function LbRowCard({
-  r, i, firstPick, pick, secondPick,
-}: {
-  r: LbRow;
-  i: number;
-  firstPick?: (r: LbRow) => string;
-  pick: (r: LbRow) => string;
-  secondPick?: (r: LbRow) => string;
-}) {
-  const isFirst = i === 0;
-  const isSecond = i === 1;
-  const isThird = i === 2;
-  const rowBorder = isFirst
-    ? "border-amber-300/90 shadow-[0_0_24px_-4px_rgba(255,200,60,0.55),inset_0_0_24px_-10px_rgba(255,200,60,0.4)] bg-gradient-to-r from-amber-500/15 via-amber-400/10 to-amber-500/15"
-    : isSecond
-    ? "border-slate-200/70 shadow-[0_0_18px_-6px_rgba(220,220,230,0.5)] bg-gradient-to-r from-slate-400/10 via-slate-300/5 to-slate-400/10"
-    : isThird
-    ? "border-orange-500/70 shadow-[0_0_18px_-6px_rgba(230,130,40,0.55)] bg-gradient-to-r from-orange-600/15 via-amber-700/10 to-orange-600/15"
-    : "border-emerald-500/40 bg-black/40 hover:border-emerald-400/70";
-  const nameLabel = firstPick ? firstPick(r) : pick(r);
-  const secondary = secondPick ? secondPick(r) : (firstPick ? pick(r) : (r.top_player || "—"));
-  return (
-    <div className={`grid grid-cols-[64px_1.4fr_1fr_56px_44px_44px_44px_56px_44px_60px] items-center gap-2 rounded-xl border-2 px-3 py-2 transition-colors ${rowBorder}`}>
-      <div><Medal i={i} /></div>
-      <div className="flex items-center gap-2 min-w-0">
-        <Avatar url={r.image_url ?? null} name={nameLabel} />
-        <span className="truncate text-base font-black uppercase tracking-wide text-[#9FD65C]" style={{ textShadow: "0 0 8px rgba(159,214,92,0.55)" }}>{nameLabel}</span>
-        <RankArrow delta={r.rank_delta} />
-      </div>
-      <div className="flex items-center gap-1.5 min-w-0">
-        <span className="truncate text-muted-foreground">{secondary}</span>
-        {isFirst && (
-          <span className="inline-flex items-center gap-0.5 shrink-0 rounded-md border border-amber-300/70 bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-black text-amber-200">
-            <Star className="h-3 w-3 fill-amber-300 text-amber-300" />MVP
-          </span>
-        )}
-      </div>
-      <StatBox>{r.TS}</StatBox>
-      <StatText className="text-emerald-400">{r.W}</StatText>
-      <StatText className="text-red-400">{r.L}</StatText>
-      <StatText className="text-amber-300">{r.D}</StatText>
-      <StatText className={r.GD >= 0 ? "text-emerald-400" : "text-red-400"}>{`${r.GD >= 0 ? "+" : ""}${r.GD}`}</StatText>
-      <StatText className="text-emerald-400">{r.P}</StatText>
-      <PtsBox>{r.PTS}</PtsBox>
-    </div>
-  );
-}
-
-function StatBox({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="mx-auto inline-grid place-items-center min-w-[48px] h-9 rounded-lg border border-amber-400/60 bg-black/60 px-2 font-black tabular-nums text-amber-100 shadow-[inset_0_0_10px_rgba(212,175,55,0.15)]">
-      {children}
-    </div>
-  );
-}
-function PtsBox({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="mx-auto inline-grid place-items-center min-w-[52px] h-9 rounded-lg border-2 border-emerald-400/70 bg-emerald-500/10 px-2 font-black tabular-nums text-emerald-300 shadow-[inset_0_0_10px_rgba(16,185,129,0.2)]">
-      {children}
-    </div>
-  );
-}
-function StatText({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <div className={`text-center font-black tabular-nums ${className}`}>{children}</div>;
 }
 
 function ScorerBoard({ rows }: { rows: LbRow[] }) {
@@ -335,10 +257,12 @@ function ScorerBoard({ rows }: { rows: LbRow[] }) {
   );
 }
 
-function Pill({ children, tone }: { children: React.ReactNode; tone: "amber" | "emerald" }) {
+function Pill({ children, tone }: { children: React.ReactNode; tone: "amber" | "emerald" | "neutral" }) {
   const cls = tone === "amber"
     ? "border-amber-400/40 text-amber-200 bg-amber-400/10"
-    : "border-emerald-400/40 text-emerald-300 bg-emerald-400/10";
+    : tone === "emerald"
+    ? "border-emerald-400/40 text-emerald-300 bg-emerald-400/10"
+    : "border-white/15 text-foreground bg-black/30";
   return <span className={`inline-grid place-items-center min-w-[40px] rounded-md border px-2 py-1 font-black tabular-nums ${cls}`}>{children}</span>;
 }
 
