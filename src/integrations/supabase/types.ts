@@ -14,6 +14,62 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_flags: {
+        Row: {
+          category: string
+          created_at: string
+          details: Json
+          id: string
+          related_id: string | null
+          related_type: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          rule_key: string
+          rule_label: string
+          severity: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          details?: Json
+          id?: string
+          related_id?: string | null
+          related_type?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          rule_key: string
+          rule_label: string
+          severity?: string
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          related_id?: string | null
+          related_type?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          rule_key?: string
+          rule_label?: string
+          severity?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_flags_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       advertisements: {
         Row: {
           created_at: string
@@ -1239,6 +1295,54 @@ export type Database = {
         }
         Relationships: []
       }
+      flag_rules: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          enabled: boolean
+          id: string
+          is_builtin: boolean
+          metric: string
+          name: string
+          operator: string
+          rule_key: string
+          updated_at: string
+          value: number
+          window_minutes: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          id?: string
+          is_builtin?: boolean
+          metric: string
+          name: string
+          operator?: string
+          rule_key: string
+          updated_at?: string
+          value: number
+          window_minutes?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          id?: string
+          is_builtin?: boolean
+          metric?: string
+          name?: string
+          operator?: string
+          rule_key?: string
+          updated_at?: string
+          value?: number
+          window_minutes?: number | null
+        }
+        Relationships: []
+      }
       friends: {
         Row: {
           created_at: string
@@ -1544,6 +1648,27 @@ export type Database = {
           total_score?: number
           updated_at?: string
           wins?: number
+        }
+        Relationships: []
+      }
+      leaderboard_rank_snapshots: {
+        Row: {
+          board: string
+          name: string
+          rank: number
+          updated_at: string
+        }
+        Insert: {
+          board: string
+          name: string
+          rank: number
+          updated_at?: string
+        }
+        Update: {
+          board?: string
+          name?: string
+          rank?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -4913,7 +5038,7 @@ export type Database = {
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_mod_or_admin: { Args: { _user_id: string }; Returns: boolean }
       notify_admins: {
-        Args: { _body: string; _link: string; _title: string }
+        Args: { _body: string; _link?: string; _title: string }
         Returns: undefined
       }
       p2p_accept_wager: {
@@ -5287,6 +5412,7 @@ export type Database = {
         Args: { _approve: boolean; _id: string; _note?: string }
         Returns: undefined
       }
+      run_suspicious_activity_scan: { Args: never; Returns: undefined }
       search_opponents: {
         Args: { _q: string }
         Returns: {

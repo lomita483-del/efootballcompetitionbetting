@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
-import { VirtualFootballPage } from "./virtual.instant";
+import { VirtualFootballPage } from "@/components/VirtualPageShared";
 
 export const Route = createFileRoute("/virtual/football-instant")({
   head: () => ({
