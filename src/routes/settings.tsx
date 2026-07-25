@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
-import { Settings as SettingsIcon, UserCog, Bell, ChevronRight } from "lucide-react";
+import { Settings as SettingsIcon, UserCog, Bell, ChevronRight, Palette } from "lucide-react";
 import { PushNotifSettings } from "@/components/UserHubSections";
 import { useAuth } from "@/contexts/AuthContext";
+import { ThemeToggleCard } from "@/components/ThemeToggle";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -36,6 +37,13 @@ function SettingsPage() {
             <p className="text-xs text-muted-foreground">Manage your account preferences</p>
           </div>
         </div>
+
+        <section>
+          <h2 className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-3 flex items-center gap-2">
+            <Palette className="h-3 w-3" /> Appearance
+          </h2>
+          <ThemeToggleCard />
+        </section>
 
         <section>
           <h2 className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-3 flex items-center gap-2">

@@ -176,6 +176,7 @@ export function AdminPage() {
               </Badge>
               {isAdmin && (
                 <div className="flex items-center gap-1 w-full sm:w-auto sm:ml-2">
+                  <ThemeToggleInline />
                   <Button size="sm" variant="outline" className="text-[11px]" onClick={() => setUnblurred((v) => !v)} title="Toggle frosted-glass blur to verify alignment & layout">
                     {unblurred ? "🔍 Unblurred" : "✨ Blurred"}
                   </Button>
