@@ -198,7 +198,7 @@ const handleDownload = async () => {
           </button>
         </div>
 
-        <div ref={captureRef} className="rounded-2xl bg-[#07090b] p-2 sm:p-3">
+        <div ref={captureRef} className="rounded-2xl bg-[#07090b]/70 backdrop-blur-sm p-2 sm:p-3">
           {headerUrl ? (
             <div className="relative mb-4 rounded-2xl overflow-hidden border-2 border-amber-400/60 shadow-[0_0_40px_-10px_rgba(212,175,55,0.55)]">
               <img
@@ -221,7 +221,7 @@ const handleDownload = async () => {
           )}
 
           <Tabs defaultValue="gangs">
-            <TabsList className="h-auto bg-black/50 backdrop-blur-[2px] border border-amber-400/40 p-1 gap-1">
+            <TabsList className="h-auto bg-black/25 backdrop-blur-[2px] border border-amber-400/40 p-1 gap-1">
               <TabsTrigger
                 value="gangs"
                 className="gap-1.5 rounded-lg border border-amber-400/25 px-2.5 py-1 data-[state=active]:border-amber-300/90 data-[state=active]:bg-amber-400/15 data-[state=active]:shadow-[0_0_16px_-4px_rgba(212,175,55,0.6)] data-[state=active]:text-amber-100"
@@ -277,7 +277,7 @@ function Board({
   const top = rows.slice(0, 10);
   const rest = rows.slice(10);
   return (
-    <div className="relative rounded-2xl p-2 sm:p-3 bg-gradient-to-b from-black/40 via-black/20 to-black/40 border-2 border-emerald-500/60 shadow-[0_0_40px_-12px_rgba(16,185,129,0.45),inset_0_0_40px_-20px_rgba(16,185,129,0.3)]">
+    <div className="relative rounded-2xl p-2 sm:p-3 bg-gradient-to-b from-black/20 via-black/10 to-black/20 border-2 border-emerald-500/60 shadow-[0_0_40px_-12px_rgba(16,185,129,0.45),inset_0_0_40px_-20px_rgba(16,185,129,0.3)]">
       <div className="overflow-x-auto">
         <div className="min-w-[680px]">
           {/* header */}
@@ -323,7 +323,7 @@ function Board({
       </div>
 
       {/* legend */}
-      <div className="mt-3 rounded-xl border border-amber-400/40 bg-black/40 px-2.5 py-1.5 overflow-x-auto">
+      <div className="mt-3 rounded-xl border border-amber-400/40 bg-black/20 px-2.5 py-1.5 overflow-x-auto">
         <div className="flex items-center gap-3 text-[10px] whitespace-nowrap">
           <LegendItem k="TS" label="Total Score" color="text-amber-300" />
           <LegendItem k="W" label="Wins" color="text-emerald-400" />
@@ -360,12 +360,12 @@ function LbRowCard({
   const isSecond = i === 1;
   const isThird = i === 2;
   const rowBorder = isFirst
-    ? "border-amber-300/90 shadow-[0_0_24px_-4px_rgba(255,200,60,0.55),inset_0_0_24px_-10px_rgba(255,200,60,0.4)] bg-black/70 bg-gradient-to-r from-amber-500/20 via-amber-400/15 to-amber-500/20"
+    ? "border-amber-300/90 shadow-[0_0_24px_-4px_rgba(255,200,60,0.55),inset_0_0_24px_-10px_rgba(255,200,60,0.4)] bg-black/30 bg-gradient-to-r from-amber-500/20 via-amber-400/15 to-amber-500/20"
     : isSecond
-    ? "border-slate-200/70 shadow-[0_0_18px_-6px_rgba(220,220,230,0.5)] bg-black/70 bg-gradient-to-r from-slate-400/15 via-slate-300/10 to-slate-400/15"
+    ? "border-slate-200/70 shadow-[0_0_18px_-6px_rgba(220,220,230,0.5)] bg-black/30 bg-gradient-to-r from-slate-400/15 via-slate-300/10 to-slate-400/15"
     : isThird
-    ? "border-orange-500/70 shadow-[0_0_18px_-6px_rgba(230,130,40,0.55)] bg-black/70 bg-gradient-to-r from-orange-600/20 via-amber-700/15 to-orange-600/20"
-    : "border-emerald-500/50 bg-black/70 hover:border-emerald-400/70 hover:bg-black/80";
+    ? "border-orange-500/70 shadow-[0_0_18px_-6px_rgba(230,130,40,0.55)] bg-black/30 bg-gradient-to-r from-orange-600/20 via-amber-700/15 to-orange-600/20"
+    : "border-emerald-500/50 bg-black/35 hover:border-emerald-400/70 hover:bg-black/45";
   const nameLabel = firstPick ? firstPick(r) : pick(r);
   const secondary = secondPick ? secondPick(r) : (firstPick ? pick(r) : (r.top_player || "—"));
   return (
@@ -397,7 +397,7 @@ function LbRowCard({
 
 function StatBox({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto inline-grid place-items-center min-w-[40px] h-7 rounded-md border border-amber-400/60 bg-black/60 px-1.5 font-black text-xs tabular-nums text-amber-100 shadow-[inset_0_0_10px_rgba(212,175,55,0.15)]">
+    <div className="mx-auto inline-grid place-items-center min-w-[40px] h-7 rounded-md border border-amber-400/60 bg-black/30 px-1.5 font-black text-xs tabular-nums text-amber-100 shadow-[inset_0_0_10px_rgba(212,175,55,0.15)]">
       {children}
     </div>
   );
@@ -417,7 +417,7 @@ function ScorerBoard({ rows }: { rows: LbRow[] }) {
   const top = rows.slice(0, 10);
   const rest = rows.slice(10);
   return (
-    <div className="relative rounded-2xl p-2 sm:p-3 bg-gradient-to-b from-black/40 via-black/20 to-black/40 border-2 border-emerald-500/60 shadow-[0_0_40px_-12px_rgba(16,185,129,0.45),inset_0_0_40px_-20px_rgba(16,185,129,0.3)]">
+    <div className="relative rounded-2xl p-2 sm:p-3 bg-gradient-to-b from-black/20 via-black/10 to-black/20 border-2 border-emerald-500/60 shadow-[0_0_40px_-12px_rgba(16,185,129,0.45),inset_0_0_40px_-20px_rgba(16,185,129,0.3)]">
       <div className="overflow-x-auto">
         <div className="min-w-[520px]">
           {/* header */}
@@ -464,12 +464,12 @@ function ScorerRowCard({ r, i }: { r: LbRow; i: number }) {
   const isSecond = i === 1;
   const isThird = i === 2;
   const rowBorder = isFirst
-    ? "border-amber-300/90 shadow-[0_0_24px_-4px_rgba(255,200,60,0.55),inset_0_0_24px_-10px_rgba(255,200,60,0.4)] bg-black/70 bg-gradient-to-r from-amber-500/20 via-amber-400/15 to-amber-500/20"
+    ? "border-amber-300/90 shadow-[0_0_24px_-4px_rgba(255,200,60,0.55),inset_0_0_24px_-10px_rgba(255,200,60,0.4)] bg-black/30 bg-gradient-to-r from-amber-500/20 via-amber-400/15 to-amber-500/20"
     : isSecond
-    ? "border-slate-200/70 shadow-[0_0_18px_-6px_rgba(220,220,230,0.5)] bg-black/70 bg-gradient-to-r from-slate-400/15 via-slate-300/10 to-slate-400/15"
+    ? "border-slate-200/70 shadow-[0_0_18px_-6px_rgba(220,220,230,0.5)] bg-black/30 bg-gradient-to-r from-slate-400/15 via-slate-300/10 to-slate-400/15"
     : isThird
-    ? "border-orange-500/70 shadow-[0_0_18px_-6px_rgba(230,130,40,0.55)] bg-black/70 bg-gradient-to-r from-orange-600/20 via-amber-700/15 to-orange-600/20"
-    : "border-emerald-500/50 bg-black/70 hover:border-emerald-400/70 hover:bg-black/80";
+    ? "border-orange-500/70 shadow-[0_0_18px_-6px_rgba(230,130,40,0.55)] bg-black/30 bg-gradient-to-r from-orange-600/20 via-amber-700/15 to-orange-600/20"
+    : "border-emerald-500/50 bg-black/35 hover:border-emerald-400/70 hover:bg-black/45";
   return (
     <div className={`grid grid-cols-[52px_1fr_130px_110px] items-center gap-1.5 rounded-xl border-2 px-2.5 py-2 transition-colors ${rowBorder}`}>
       <div><Medal i={i} /></div>
