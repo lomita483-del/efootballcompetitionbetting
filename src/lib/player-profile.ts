@@ -37,11 +37,38 @@ export type PlayerProfile = {
  * real, ended, non-virtual, non-archived matches (same pool the leaderboard uses).
  */
 export async function loadPlayerProfile(name: string): Promise<PlayerProfile | null> {
-  const { data: player } = await supabase
+  // Leaderboard rows show UPPERCASED team/player labels, while `players.name`
+  // is stored in mixed case — match case-insensitively.
+  const { data: playerRows } = await supabase
     .from("players")
     .select("id, name, avatar_url, team_id, user_id")
-    .eq("name", name)
-    .maybeSingle();
+    .ilike("name", name)
+    .limit(1);
+  let player: any = playerRows?.[0] ?? null;
+
+  // Fall back to a team label (Top Team rows use the team name, which has no
+  // matching player row) — build the profile around the team instead.
+  if (!player) {
+    const { data: teamRows } = await supabase
+      .from("teams")
+      .select("id, name")
+      .ilike("name", name)
+      .limit(1);
+    const team = teamRows?.[0] as any;
+    if (!team) return null;
+    const { data: roster } = await supabase
+      .from("players")
+      .select("id, name, avatar_url, team_id, user_id")
+      .eq("team_id", team.id)
+      .limit(1);
+    player = roster?.[0] ?? {
+      id: "00000000-0000-0000-0000-000000000000",
+      name: team.name,
+      avatar_url: null,
+      team_id: team.id,
+      user_id: null,
+    };
+  }
 
   if (!player) return null;
 
