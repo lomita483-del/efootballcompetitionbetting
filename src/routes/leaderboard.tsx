@@ -587,10 +587,7 @@ function PlayerProfileDialog({
 
   return (
     <Dialog open={!!name} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent
-        showCloseButton={false}
-        className="max-w-md max-h-[88vh] overflow-y-auto border-2 border-amber-400/70 bg-[#080604] p-0 shadow-[0_0_60px_-10px_rgba(212,175,55,0.6)]"
-      >
+      <DialogContent className="max-w-md max-h-[88vh] overflow-y-auto border-2 border-amber-400/70 bg-[#080604] p-0 shadow-[0_0_60px_-10px_rgba(212,175,55,0.6)] [&>button]:hidden">
         <div className="relative rounded-lg border border-amber-400/30 bg-gradient-to-b from-[#100c06] via-black to-[#0b0805] p-3 space-y-3">
           <button
             type="button"
