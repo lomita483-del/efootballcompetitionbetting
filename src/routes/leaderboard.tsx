@@ -284,7 +284,7 @@ function Board({
   firstPick?: (r: LbRow) => string;
   secondPick?: (r: LbRow) => string;
   emptyText: string;
-  onOpen: (name: string) => void;
+  onOpen: (name: string, image: string | null) => void;
 }) {
   const top = rows.slice(0, 10);
   const rest = rows.slice(10);
@@ -367,7 +367,7 @@ function LbRowCard({
   firstPick?: (r: LbRow) => string;
   pick: (r: LbRow) => string;
   secondPick?: (r: LbRow) => string;
-  onOpen: (name: string) => void;
+  onOpen: (name: string, image: string | null) => void;
 }) {
   const isFirst = i === 0;
   const isSecond = i === 1;
@@ -388,7 +388,7 @@ function LbRowCard({
         <Avatar url={r.image_url ?? null} name={nameLabel} />
         <button
           type="button"
-          onClick={() => onOpen(nameLabel)}
+          onClick={() => onOpen(nameLabel, r.image_url ?? null)}
           className="truncate text-sm font-black uppercase tracking-wide text-[#9FD65C] hover:underline hover:text-[#c2f08a] transition-colors text-left"
           style={{ textShadow: "0 0 8px rgba(159,214,92,0.55)" }}
         >
@@ -433,7 +433,7 @@ function StatText({ children, className = "" }: { children: React.ReactNode; cla
   return <div className={`text-center font-black text-xs tabular-nums ${className}`}>{children}</div>;
 }
 
-function ScorerBoard({ rows, onOpen }: { rows: LbRow[]; onOpen: (name: string) => void }) {
+function ScorerBoard({ rows, onOpen }: { rows: LbRow[]; onOpen: (name: string, image: string | null) => void }) {
   const top = rows.slice(0, 10);
   const rest = rows.slice(10);
   return (
@@ -479,7 +479,7 @@ function ScorerBoard({ rows, onOpen }: { rows: LbRow[]; onOpen: (name: string) =
   );
 }
 
-function ScorerRowCard({ r, i, onOpen }: { r: LbRow; i: number; onOpen: (name: string) => void }) {
+function ScorerRowCard({ r, i, onOpen }: { r: LbRow; i: number; onOpen: (name: string, image: string | null) => void }) {
   const isFirst = i === 0;
   const isSecond = i === 1;
   const isThird = i === 2;
@@ -497,7 +497,7 @@ function ScorerRowCard({ r, i, onOpen }: { r: LbRow; i: number; onOpen: (name: s
         <Avatar url={r.image_url ?? null} name={r.name} />
         <button
           type="button"
-          onClick={() => onOpen(r.name)}
+          onClick={() => onOpen(r.name, r.image_url ?? null)}
           className="truncate text-sm font-black uppercase tracking-wide text-[#9FD65C] hover:underline hover:text-[#c2f08a] transition-colors text-left"
           style={{ textShadow: "0 0 8px rgba(159,214,92,0.55)" }}
         >
