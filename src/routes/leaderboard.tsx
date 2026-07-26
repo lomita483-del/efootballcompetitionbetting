@@ -89,7 +89,7 @@ function Page() {
   const [gangs, setGangs] = useState<LbRow[]>([]);
   const [headerUrl, setHeaderUrl] = useState<string | null>(leaderboardHeaderAsset.url);
   const [downloading, setDownloading] = useState(false);
-  const [openName, setOpenName] = useState<string | null>(null);
+  const [selected, setSelected] = useState<{ name: string; source: "gangs" | "shooters" | "scorers"; image: string | null } | null>(null);
   const captureRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
