@@ -511,25 +511,54 @@ function ScorerRowCard({ r, i, onOpen }: { r: LbRow; i: number; onOpen: (name: s
   );
 }
 
-function StatBox({ label, value, tone }: { label: string; value: string | number; tone?: "emerald" | "destructive" | "amber" | "default" }) {
-  const cls = tone === "emerald" ? "text-emerald-400" : tone === "destructive" ? "text-destructive" : tone === "amber" ? "text-amber-400" : "text-foreground";
+function StatBox({ label, value, tone, icon }: { label: string; value: string | number; tone?: "emerald" | "destructive" | "amber" | "default"; icon?: React.ReactNode }) {
+  const cls = tone === "emerald" ? "text-emerald-400" : tone === "destructive" ? "text-red-400" : tone === "amber" ? "text-amber-300" : "text-amber-50";
   return (
-    <div className="rounded-lg border border-amber-400/20 bg-black/20 px-3 py-2 text-center">
-      <div className={`text-lg font-black tabular-nums ${cls}`}>{value}</div>
-      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
+    <div className="rounded-xl border border-amber-400/45 bg-gradient-to-b from-black/70 to-amber-950/25 px-2 py-2 text-center shadow-[inset_0_1px_0_rgba(255,215,120,0.18)]">
+      {icon && <div className="mb-0.5 grid place-items-center text-amber-300/90">{icon}</div>}
+      <div className={`text-xl font-black tabular-nums ${cls}`}>{value}</div>
+      <div className="text-[9px] uppercase tracking-[0.12em] text-amber-200/70 font-bold">{label}</div>
+    </div>
+  );
+}
+
+/** Ornate gold rank plaque with laurel flourishes, as in the design reference. */
+function RankPlaque({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="relative overflow-hidden rounded-xl border-2 border-amber-400/70 bg-gradient-to-b from-amber-900/40 via-black/70 to-black/80 px-2 py-2.5 text-center shadow-[0_0_18px_-6px_rgba(212,175,55,0.7),inset_0_0_18px_-10px_rgba(255,215,120,0.6)]">
+      <div className="text-xl font-black tabular-nums text-amber-200 drop-shadow-[0_0_8px_rgba(212,175,55,0.8)]">{value}</div>
+      <div className="text-[8.5px] uppercase tracking-[0.18em] font-black text-amber-100/85 leading-tight">{label}</div>
+      <div className="mt-1 flex items-center justify-center gap-0.5 text-amber-300/90">
+        <Star className="h-2 w-2 fill-amber-300 text-amber-300" />
+        <Star className="h-2.5 w-2.5 fill-amber-300 text-amber-300" />
+        <Star className="h-2 w-2 fill-amber-300 text-amber-300" />
+      </div>
+      <span className="pointer-events-none absolute inset-y-2 left-1 w-3 rounded-full bg-gradient-to-r from-amber-400/25 to-transparent" />
+      <span className="pointer-events-none absolute inset-y-2 right-1 w-3 rounded-full bg-gradient-to-l from-amber-400/25 to-transparent" />
+    </div>
+  );
+}
+
+function SectionFrame({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl border-2 border-amber-400/55 bg-black/50 p-2.5 shadow-[inset_0_0_24px_-14px_rgba(255,215,120,0.7)]">
+      <div className="mb-2 text-[10px] uppercase tracking-[0.2em] font-black text-amber-200">{title}</div>
+      {children}
     </div>
   );
 }
 
 function PlayerProfileDialog({
-  name, onClose, gangs, shooters, scorers,
+  selection, onClose, gangs, shooters, scorers,
 }: {
-  name: string | null;
+  selection: { name: string; source: "gangs" | "shooters" | "scorers"; image: string | null } | null;
   onClose: () => void;
   gangs: LbRow[];
   shooters: LbRow[];
   scorers: LbRow[];
 }) {
+  const name = selection?.name ?? null;
+  const source = selection?.source ?? "gangs";
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -541,132 +570,178 @@ function PlayerProfileDialog({
     return () => { active = false; };
   }, [name]);
 
-  if (!name) return null;
+  if (!name || !selection) return null;
 
-  const teamRank = profile?.teamName ? gangs.findIndex((g) => g.name === profile.teamName) : -1;
-  const shooterRank = profile ? shooters.findIndex((s) => s.name === profile.name) : -1;
-  const scorerRank = profile ? scorers.findIndex((s) => s.name === profile.name) : -1;
+  const teamRank = source === "gangs"
+    ? gangs.findIndex((g) => g.name.toLowerCase() === name.toLowerCase())
+    : profile?.teamName ? gangs.findIndex((g) => g.name.toLowerCase() === profile.teamName!.toLowerCase()) : -1;
+  const shooterRank = profile ? shooters.findIndex((s) => s.name.toLowerCase() === profile.name.toLowerCase()) : -1;
+  const scorerRank = profile ? scorers.findIndex((s) => s.name.toLowerCase() === profile.name.toLowerCase()) : -1;
+
+  const showTeam = source === "gangs" || source === "scorers";
+  const showShooter = source === "shooters" || source === "scorers";
+  const history = (profile?.matchHistory ?? []).filter((m) =>
+    source === "gangs" ? m.kind === "team" : source === "shooters" ? m.kind === "shooter" : true
+  );
+  const avatarUrl = selection.image ?? profile?.avatarUrl ?? null;
 
   return (
     <Dialog open={!!name} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            <Avatar url={profile?.avatarUrl ?? null} name={name} large />
-            <span>{name}</span>
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent
+        showCloseButton={false}
+        className="max-w-md max-h-[88vh] overflow-y-auto border-2 border-amber-400/70 bg-[#080604] p-0 shadow-[0_0_60px_-10px_rgba(212,175,55,0.6)]"
+      >
+        <div className="relative rounded-lg border border-amber-400/30 bg-gradient-to-b from-[#100c06] via-black to-[#0b0805] p-3 space-y-3">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close profile"
+            className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full border-2 border-amber-400/80 bg-black/70 text-amber-200 hover:bg-amber-400/20"
+          >
+            <X className="h-4 w-4" />
+          </button>
 
-        {loading && <div className="py-8 text-center text-sm text-muted-foreground">Loading profile…</div>}
+          <DialogHeader className="space-y-0">
+            <DialogTitle className="sr-only">{name} profile</DialogTitle>
+          </DialogHeader>
 
-        {!loading && !profile && (
-          <div className="py-8 text-center text-sm text-muted-foreground">No profile data found for this name.</div>
-        )}
-
-        {!loading && profile && (
-          <div className="space-y-4">
-            {/* Linked website account */}
-            <div className="flex items-center gap-2 rounded-lg border border-amber-400/20 bg-black/20 px-3 py-2 text-sm">
-              {profile.linkedUsername ? (
+          {/* Crest / hero */}
+          <div className="relative overflow-hidden rounded-2xl border-2 border-amber-400/60 bg-gradient-to-b from-amber-900/25 via-black to-black px-4 pb-4 pt-7 text-center shadow-[inset_0_0_50px_-22px_rgba(255,200,80,0.8)]">
+            <Crown className="absolute left-1/2 top-1.5 h-6 w-6 -translate-x-1/2 fill-amber-300 text-amber-300 drop-shadow-[0_0_10px_rgba(212,175,55,0.9)]" />
+            <div className="mx-auto mt-2 grid h-28 w-28 place-items-center rounded-full border-[3px] border-amber-400/90 bg-gradient-to-b from-amber-950/60 to-black shadow-[0_0_30px_-6px_rgba(212,175,55,0.85),inset_0_0_24px_-8px_rgba(255,215,120,0.7)] overflow-hidden">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt={name} className="h-full w-full object-cover" loading="lazy" />
+              ) : (
+                <span className="font-display text-4xl font-black text-amber-200 drop-shadow-[0_0_10px_rgba(212,175,55,0.8)]">
+                  {name.trim().charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <div className="mt-3 font-display text-xl font-black uppercase tracking-[0.12em] text-amber-100 drop-shadow-[0_0_10px_rgba(212,175,55,0.5)]">
+              {name}
+            </div>
+            <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-amber-400/50 bg-black/70 px-3 py-1 text-[11px]">
+              {profile?.linkedUsername ? (
                 <>
-                  <Link2 className="h-4 w-4 text-emerald-400" />
-                  <span className="text-muted-foreground">Linked account:</span>
+                  <Link2 className="h-3.5 w-3.5 text-emerald-400" />
                   <span className="font-bold text-emerald-300">{profile.linkedUsername}</span>
                 </>
               ) : (
                 <>
-                  <Link2Off className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Not linked to a website account</span>
+                  <Link2Off className="h-3.5 w-3.5 text-amber-200/70" />
+                  <span className="text-amber-100/80">Not linked to a website account</span>
                 </>
               )}
             </div>
+          </div>
 
-            {/* Current positions */}
-            <div className="grid grid-cols-3 gap-2">
-              <StatBox label="Team Rank" value={teamRank >= 0 ? `#${teamRank + 1}` : "—"} />
-              <StatBox label="Shooter Rank" value={shooterRank >= 0 ? `#${shooterRank + 1}` : "—"} />
-              <StatBox label="Scorer Rank" value={scorerRank >= 0 ? `#${scorerRank + 1}` : "—"} />
-            </div>
+          {loading && <div className="py-8 text-center text-sm text-amber-200/70">Loading profile…</div>}
+          {!loading && !profile && (
+            <div className="py-8 text-center text-sm text-amber-200/70">No profile data found for this name.</div>
+          )}
 
-            {/* Team stats */}
-            {profile.teamName && (
-              <div>
-                <div className="text-xs uppercase tracking-wide text-amber-300/80 font-bold mb-1.5">Team — {profile.teamName}</div>
-                <div className="grid grid-cols-4 gap-2">
-                  <StatBox label="Played" value={profile.team.played} />
-                  <StatBox label="Won" value={profile.team.wins} tone="emerald" />
-                  <StatBox label="Lost" value={profile.team.losses} tone="destructive" />
-                  <StatBox label="Drawn" value={profile.team.draws} tone="amber" />
-                  <StatBox label="Points" value={profile.team.points} />
-                  <StatBox label="Goals" value={profile.team.goals} />
-                  <StatBox label="Present" value={profile.team.present} tone="emerald" />
-                  <StatBox label="Absent" value={profile.team.absent} tone="destructive" />
-                </div>
+          {!loading && profile && (
+            <>
+              {/* Rank plaques — scoped to the board the profile was opened from */}
+              <div className={`grid gap-2 ${source === "scorers" ? "grid-cols-3" : "grid-cols-1"}`}>
+                {(source === "gangs" || source === "scorers") && (
+                  <RankPlaque value={teamRank >= 0 ? `#${teamRank + 1}` : "—"} label="Team Rank" />
+                )}
+                {(source === "shooters" || source === "scorers") && (
+                  <RankPlaque value={shooterRank >= 0 ? `#${shooterRank + 1}` : "—"} label="Shooter Rank" />
+                )}
+                {source === "scorers" && (
+                  <RankPlaque value={scorerRank >= 0 ? `#${scorerRank + 1}` : "—"} label="Scorer Rank" />
+                )}
               </div>
-            )}
 
-            {/* Shooter stats */}
-            {profile.shooter.played + profile.shooter.absent > 0 && (
-              <div>
-                <div className="text-xs uppercase tracking-wide text-amber-300/80 font-bold mb-1.5">Shooter Duels</div>
-                <div className="grid grid-cols-4 gap-2">
-                  <StatBox label="Played" value={profile.shooter.played} />
-                  <StatBox label="Won" value={profile.shooter.wins} tone="emerald" />
-                  <StatBox label="Lost" value={profile.shooter.losses} tone="destructive" />
-                  <StatBox label="Drawn" value={profile.shooter.draws} tone="amber" />
-                  <StatBox label="Points" value={profile.shooter.points} />
-                  <StatBox label="Kills" value={profile.shooter.kills} />
-                  <StatBox label="Present" value={profile.shooter.present} tone="emerald" />
-                  <StatBox label="Absent" value={profile.shooter.absent} tone="destructive" />
-                </div>
-              </div>
-            )}
+              {showTeam && (
+                <SectionFrame title={`Team — ${profile.teamName ?? name}`}>
+                  <div className="grid grid-cols-4 gap-2">
+                    <StatBox label="Played" value={profile.team.played} icon={<CalendarDays className="h-3.5 w-3.5" />} />
+                    <StatBox label="Won" value={profile.team.wins} tone="emerald" icon={<Trophy className="h-3.5 w-3.5" />} />
+                    <StatBox label="Lost" value={profile.team.losses} tone="destructive" icon={<XCircle className="h-3.5 w-3.5" />} />
+                    <StatBox label="Drawn" value={profile.team.draws} tone="amber" icon={<Equal className="h-3.5 w-3.5" />} />
+                    <StatBox label="Points" value={profile.team.points} icon={<Star className="h-3.5 w-3.5" />} />
+                    <StatBox label="Goals" value={profile.team.goals} icon={<Goal className="h-3.5 w-3.5" />} />
+                    <StatBox label="Present" value={profile.team.present} tone="emerald" icon={<CircleCheck className="h-3.5 w-3.5" />} />
+                    <StatBox label="Absent" value={profile.team.absent} tone="destructive" icon={<UserX className="h-3.5 w-3.5" />} />
+                  </div>
+                </SectionFrame>
+              )}
 
-            {/* Scorer stat */}
-            <div>
-              <div className="text-xs uppercase tracking-wide text-amber-300/80 font-bold mb-1.5">Top Scorer</div>
-              <StatBox label="Total Goals Scored" value={profile.scorerGoals} tone="emerald" />
-            </div>
+              {showShooter && profile.shooter.played + profile.shooter.absent > 0 && (
+                <SectionFrame title={`Shooter — ${profile.name}`}>
+                  <div className="grid grid-cols-4 gap-2">
+                    <StatBox label="Played" value={profile.shooter.played} icon={<CalendarDays className="h-3.5 w-3.5" />} />
+                    <StatBox label="Won" value={profile.shooter.wins} tone="emerald" icon={<Trophy className="h-3.5 w-3.5" />} />
+                    <StatBox label="Lost" value={profile.shooter.losses} tone="destructive" icon={<XCircle className="h-3.5 w-3.5" />} />
+                    <StatBox label="Drawn" value={profile.shooter.draws} tone="amber" icon={<Equal className="h-3.5 w-3.5" />} />
+                    <StatBox label="Points" value={profile.shooter.points} icon={<Star className="h-3.5 w-3.5" />} />
+                    <StatBox label="Kills" value={profile.shooter.kills} icon={<Target className="h-3.5 w-3.5" />} />
+                    <StatBox label="Present" value={profile.shooter.present} tone="emerald" icon={<CircleCheck className="h-3.5 w-3.5" />} />
+                    <StatBox label="Absent" value={profile.shooter.absent} tone="destructive" icon={<UserX className="h-3.5 w-3.5" />} />
+                  </div>
+                </SectionFrame>
+              )}
 
-            {/* Teammates / shooters from this team */}
-            {profile.teammates.length > 0 && (
-              <div>
-                <div className="text-xs uppercase tracking-wide text-amber-300/80 font-bold mb-1.5 flex items-center gap-1.5">
-                  <UsersIcon className="h-3.5 w-3.5" /> Shooters on {profile.teamName}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {profile.teammates.map((t) => (
-                    <span key={t.id} className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/20 bg-black/20 px-2 py-1 text-xs">
-                      <Avatar url={t.avatar_url} name={t.name} />
-                      {t.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Match history */}
-            <div>
-              <div className="text-xs uppercase tracking-wide text-amber-300/80 font-bold mb-1.5">Match History</div>
-              {profile.matchHistory.length === 0 && <div className="text-xs text-muted-foreground">No matches recorded yet.</div>}
-              <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
-                {profile.matchHistory.map((m, idx) => (
-                  <div key={idx} className="flex items-center justify-between rounded-lg border border-amber-400/15 bg-black/15 px-3 py-2 text-xs">
-                    <div className="flex items-center gap-2">
-                      {m.result === "W" ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" /> : m.result === "L" ? <XCircle className="h-3.5 w-3.5 text-destructive shrink-0" /> : <span className="h-3.5 w-3.5 shrink-0 rounded-full bg-amber-400/70" />}
-                      <span className="font-bold">vs {m.opponentName}</span>
-                      <span className="text-[9px] uppercase text-muted-foreground border border-amber-400/20 rounded px-1">{m.kind === "team" ? "Team" : "Shooter"}</span>
-                    </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className="font-black tabular-nums">{m.myScore} – {m.theirScore}</span>
-                      <span className="text-muted-foreground">{new Date(m.timestamp).toLocaleDateString()}</span>
+              {source === "scorers" && (
+                <div className="relative overflow-hidden rounded-2xl border-2 border-amber-400/70 bg-gradient-to-r from-amber-900/40 via-black to-amber-900/40 px-3 py-3 shadow-[0_0_24px_-10px_rgba(212,175,55,0.8)]">
+                  <div className="text-[10px] uppercase tracking-[0.2em] font-black text-amber-200">Top Scorer</div>
+                  <div className="mt-1 flex items-center justify-center gap-3">
+                    <Award className="h-8 w-8 fill-amber-400/20 text-amber-300 drop-shadow-[0_0_10px_rgba(212,175,55,0.8)]" />
+                    <div className="text-center">
+                      <div className="font-display text-3xl font-black text-amber-200 drop-shadow-[0_0_12px_rgba(212,175,55,0.9)] tabular-nums">
+                        {profile.scorerGoals}
+                      </div>
+                      <div className="text-[10px] uppercase tracking-[0.18em] font-bold text-amber-100/85">Total Goals Scored</div>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+                </div>
+              )}
+
+              <SectionFrame title="Match History">
+                {history.length === 0 && <div className="text-xs text-amber-200/70">No matches recorded yet.</div>}
+                <div className="space-y-1.5 max-h-60 overflow-y-auto pr-1">
+                  {history.map((m, idx) => (
+                    <div key={idx} className="flex items-center justify-between gap-2 rounded-xl border border-amber-400/35 bg-black/60 px-2.5 py-2 text-xs">
+                      <div className="flex min-w-0 items-center gap-2">
+                        {m.result === "W" ? (
+                          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+                        ) : m.result === "L" ? (
+                          <XCircle className="h-4 w-4 shrink-0 text-red-500" />
+                        ) : (
+                          <Equal className="h-4 w-4 shrink-0 text-amber-300" />
+                        )}
+                        <span className="truncate font-black text-amber-50">vs {m.opponentName}</span>
+                        <span className="shrink-0 rounded border border-amber-400/40 px-1 text-[9px] uppercase text-amber-200/80">
+                          {m.kind === "team" ? "Team" : "Shooter"}
+                        </span>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-3">
+                        <span className="font-black tabular-nums text-amber-100">{m.myScore} – {m.theirScore}</span>
+                        <span className="text-amber-200/70 tabular-nums">{new Date(m.timestamp).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </SectionFrame>
+
+              {source === "gangs" && profile.teammates.length > 0 && (
+                <SectionFrame title={`Shooters on ${profile.teamName ?? name}`}>
+                  <div className="flex flex-wrap gap-2">
+                    {profile.teammates.map((t) => (
+                      <span key={t.id} className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-black/60 px-2 py-1 text-xs text-amber-50">
+                        <Avatar url={t.avatar_url} name={t.name} />
+                        {t.name}
+                      </span>
+                    ))}
+                  </div>
+                </SectionFrame>
+              )}
+            </>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
