@@ -249,23 +249,23 @@ const handleDownload = async () => {
             </TabsList>
 
             <TabsContent value="gangs" className="mt-3">
-              <Board rows={gangs} firstCol="Team / Scorer" secondCol="Top Player" pick={(g) => g.name} secondPick={(g) => g.top_player || "—"} emptyText="No data yet." onOpen={setOpenName} />
+              <Board rows={gangs} firstCol="Team / Scorer" secondCol="Top Player" pick={(g) => g.name} secondPick={(g) => g.top_player || "—"} emptyText="No data yet." onOpen={(name, image) => setSelected({ name, image, source: "gangs" })} />
             </TabsContent>
 
             <TabsContent value="shooters" className="mt-3">
-              <Board rows={shooters} firstCol="Team & Scorer" secondCol="Player" pick={(p) => p.name} firstPick={(p) => p.gang_faction || "—"} emptyText="No shooters yet." onOpen={setOpenName} />
+              <Board rows={shooters} firstCol="Team & Scorer" secondCol="Player" pick={(p) => p.name} firstPick={(p) => p.gang_faction || "—"} emptyText="No shooters yet." onOpen={(name, image) => setSelected({ name, image, source: "shooters" })} />
             </TabsContent>
 
             <TabsContent value="scorers" className="mt-3">
-              <ScorerBoard rows={scorers} onOpen={setOpenName} />
+              <ScorerBoard rows={scorers} onOpen={(name, image) => setSelected({ name, image, source: "scorers" })} />
             </TabsContent>
           </Tabs>
         </div>
       </div>
 
       <PlayerProfileDialog
-        name={openName}
-        onClose={() => setOpenName(null)}
+        selection={selected}
+        onClose={() => setSelected(null)}
         gangs={gangs}
         shooters={shooters}
         scorers={scorers}
