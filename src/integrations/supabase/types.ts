@@ -65,6 +65,13 @@ export type Database = {
             foreignKeyName: "admin_flags_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_flags_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -694,6 +701,13 @@ export type Database = {
             foreignKeyName: "ban_appeals_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ban_appeals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -865,6 +879,13 @@ export type Database = {
             foreignKeyName: "bets_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -903,6 +924,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "big_wins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "big_wins_user_id_fkey"
             columns: ["user_id"]
@@ -1182,6 +1210,13 @@ export type Database = {
             columns: ["reply_to_id"]
             isOneToOne: false
             referencedRelation: "chat_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
             referencedColumns: ["id"]
           },
           {
@@ -2110,6 +2145,13 @@ export type Database = {
             foreignKeyName: "notifications_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -2206,6 +2248,7 @@ export type Database = {
           name: string
           position: string | null
           team_id: string | null
+          user_id: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -2215,6 +2258,7 @@ export type Database = {
           name: string
           position?: string | null
           team_id?: string | null
+          user_id?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -2224,6 +2268,7 @@ export type Database = {
           name?: string
           position?: string | null
           team_id?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -2231,6 +2276,20 @@ export type Database = {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "players_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "players_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2462,6 +2521,13 @@ export type Database = {
             foreignKeyName: "promo_code_requests_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promo_code_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -2544,6 +2610,13 @@ export type Database = {
             columns: ["promo_id"]
             isOneToOne: false
             referencedRelation: "promo_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promo_redemptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
             referencedColumns: ["id"]
           },
           {
@@ -3047,6 +3120,13 @@ export type Database = {
             foreignKeyName: "support_tickets_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -3193,6 +3273,13 @@ export type Database = {
             foreignKeyName: "ticket_messages_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -3240,6 +3327,13 @@ export type Database = {
             foreignKeyName: "token_requests_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "token_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -3277,6 +3371,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "token_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "token_transactions_user_id_fkey"
             columns: ["user_id"]
@@ -3638,6 +3739,13 @@ export type Database = {
             foreignKeyName: "user_achievements_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_achievements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -3744,6 +3852,13 @@ export type Database = {
             foreignKeyName: "user_roles_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -3838,6 +3953,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_tasks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_tasks_user_id_fkey"
             columns: ["user_id"]
@@ -4575,6 +4697,13 @@ export type Database = {
             foreignKeyName: "withdrawal_requests_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "withdrawal_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -4611,6 +4740,21 @@ export type Database = {
           },
         ]
       }
+      player_public_usernames: {
+        Row: {
+          id: string | null
+          username: string | null
+        }
+        Insert: {
+          id?: string | null
+          username?: never
+        }
+        Update: {
+          id?: string | null
+          username?: never
+        }
+        Relationships: []
+      }
       promo_code_usage_log: {
         Row: {
           amount: number | null
@@ -4634,6 +4778,13 @@ export type Database = {
           used_count: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "promo_redemptions_user_id_fkey"
+            columns: ["used_by"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "promo_redemptions_user_id_fkey"
             columns: ["used_by"]
@@ -4670,6 +4821,13 @@ export type Database = {
             columns: ["promo_id"]
             isOneToOne: false
             referencedRelation: "promo_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promo_redemptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
             referencedColumns: ["id"]
           },
           {
