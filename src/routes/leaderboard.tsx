@@ -1,4 +1,4 @@
-import { Trophy, Medal as MedalIcon, ArrowUp, ArrowDown, Star, Users, Target, Goal, Download, Link2, Link2Off, CheckCircle2, XCircle, Users as UsersIcon } from "lucide-react";
+import { Trophy, Medal as MedalIcon, ArrowUp, ArrowDown, Star, Users, Target, Goal, Download, Link2, Link2Off, CheckCircle2, XCircle, Users as UsersIcon, Crown, CalendarDays, Award, Equal, CircleCheck, UserX, X } from "lucide-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Layout } from "@/components/Layout";
