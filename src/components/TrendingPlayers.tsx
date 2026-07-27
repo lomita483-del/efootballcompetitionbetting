@@ -23,7 +23,7 @@ export function TrendingPlayers() {
       <div className="flex items-center justify-between gap-2 border-b border-primary/20 px-4 py-3">
         <div className="flex items-center gap-2">
           <Star className="h-4 w-4 text-primary" />
-          <h2 className="text-sm font-black uppercase tracking-[0.18em]">Trending Players</h2>
+          <h2 className="text-sm font-black uppercase tracking-[0.18em]">Top Players</h2>
         </div>
         <Link to="/leaderboard" className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition">
           View All <ChevronRight className="h-3.5 w-3.5" />
