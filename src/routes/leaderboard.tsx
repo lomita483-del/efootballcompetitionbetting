@@ -565,15 +565,28 @@ function BootIcon({ className }: { className?: string }) {
 function RankBadgeFull({ rank, label }: { rank: number; label: string }) {
   if (rank < 0) return null;
   return (
-    <div className="relative overflow-hidden rounded-xl border-2 border-amber-400/70 bg-gradient-to-b from-amber-500/15 via-black/40 to-black/40 px-10 py-3 text-center shadow-[0_0_20px_-6px_rgba(212,175,55,0.5)]">
-      <div className="absolute left-1 top-1/2 -translate-y-1/2"><LaurelBranch /></div>
-      <div className="absolute right-1 top-1/2 -translate-y-1/2"><LaurelBranch flip /></div>
-      <div className="relative text-3xl font-black text-amber-200 tabular-nums leading-tight">#{rank + 1}</div>
-      <div className="relative text-[10px] uppercase tracking-widest text-amber-300/80 font-bold mt-0.5">{label}</div>
-      <div className="relative flex justify-center gap-1 mt-1.5">
-        {[0, 1, 2].map((s) => <Star key={s} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />)}
+    <GoldPanel className="px-12 py-4 text-center">
+      <div className="absolute left-2 top-1/2 -translate-y-1/2 opacity-90"><LaurelBranch /></div>
+      <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-90"><LaurelBranch flip /></div>
+      <div
+        className="relative text-[2.6rem] leading-none font-black tabular-nums bg-gradient-to-b from-[#fff3c4] via-[#f0c košík]"
+        style={{
+          backgroundImage: "linear-gradient(180deg,#fff6cf 0%,#f2cf6a 45%,#c8931f 100%)",
+          WebkitBackgroundClip: "text",
+          backgroundClip: "text",
+          color: "transparent",
+          filter: "drop-shadow(0 2px 6px rgba(212,175,55,0.45))",
+        }}
+      >
+        #{rank + 1}
       </div>
-    </div>
+      <div className="relative text-[10px] uppercase tracking-[0.35em] text-amber-200/85 font-bold mt-1.5 pl-[0.35em]">{label}</div>
+      <div className="relative flex justify-center gap-1.5 mt-2">
+        {[0, 1, 2].map((s) => (
+          <Star key={s} className="h-3 w-3 fill-amber-400 text-amber-400 drop-shadow-[0_0_5px_rgba(212,175,55,0.8)]" />
+        ))}
+      </div>
+    </GoldPanel>
   );
 }
 
