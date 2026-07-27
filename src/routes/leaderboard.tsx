@@ -663,11 +663,11 @@ function TopScorerPanel({ value }: { value: number }) {
     <GoldPanel className="px-4 py-4">
       <div className="relative flex items-center gap-4">
         <div className="flex shrink-0 flex-col items-center">
-          <BootIcon className="h-9 w-12 text-amber-300 drop-shadow-[0_0_10px_rgba(212,175,55,0.8)]" />
+          <BootIcon className="h-10 w-14 text-amber-200 drop-shadow-[0_0_12px_rgba(212,175,55,0.85)]" />
           {/* pedestal */}
-          <div className="mt-1 h-1.5 w-12 rounded-sm bg-gradient-to-r from-amber-700 via-amber-300 to-amber-700" />
-          <div className="h-3 w-8 bg-gradient-to-b from-amber-600/80 to-amber-900/70" />
-          <div className="h-1.5 w-14 rounded-sm bg-gradient-to-r from-amber-800 via-amber-400 to-amber-800" />
+          <div className="mt-1.5 h-1.5 w-12 rounded-sm bg-gradient-to-r from-amber-800 via-amber-200 to-amber-800" />
+          <div className="h-3.5 w-7 bg-gradient-to-b from-amber-600/90 to-amber-900/70" />
+          <div className="h-2 w-14 rounded-sm bg-gradient-to-r from-amber-900 via-amber-300 to-amber-900" />
         </div>
         <div className="flex-1 text-center">
           <div className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-200/85">Top Scorer</div>
