@@ -566,6 +566,9 @@ function RankBadgeFull({ rank, label }: { rank: number; label: string }) {
   if (rank < 0) return null;
   return (
     <GoldPanel className="px-12 py-4 text-center">
+  if (rank < 0) return null;
+  return (
+    <GoldPanel className="px-12 py-4 text-center">
       <div className="absolute left-2 top-1/2 -translate-y-1/2 opacity-90"><LaurelBranch /></div>
       <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-90"><LaurelBranch flip /></div>
       <div
