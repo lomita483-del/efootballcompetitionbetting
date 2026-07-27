@@ -569,7 +569,7 @@ function RankBadgeFull({ rank, label }: { rank: number; label: string }) {
       <div className="absolute left-2 top-1/2 -translate-y-1/2 opacity-90"><LaurelBranch /></div>
       <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-90"><LaurelBranch flip /></div>
       <div
-        className="relative text-[2.6rem] leading-none font-black tabular-nums bg-gradient-to-b from-[#fff3c4] via-[#f0c košík]"
+        className="relative text-[2.6rem] leading-none font-black tabular-nums"
         style={{
           backgroundImage: "linear-gradient(180deg,#fff6cf 0%,#f2cf6a 45%,#c8931f 100%)",
           WebkitBackgroundClip: "text",
