@@ -5,6 +5,7 @@ export type LbRow = {
   top_player?: string;
   gang_faction?: string;
   image_url?: string | null;
+  team_id?: string | null;
   TS: number;
   W: number;
   L: number;
@@ -50,6 +51,7 @@ export async function loadStandings(): Promise<Standings> {
   const teamMap = new Map<string, string>(); (teams ?? []).forEach((t) => teamMap.set(t.id, t.name));
   const teamLogo = new Map<string, string | null>(); (teams ?? []).forEach((t: any) => teamLogo.set(t.id, t.logo_url ?? null));
   const teamLogoByName = new Map<string, string | null>(); (teams ?? []).forEach((t: any) => teamLogoByName.set(t.name, t.logo_url ?? null));
+  const teamIdByName = new Map<string, string>(); (teams ?? []).forEach((t: any) => teamIdByName.set(t.name, t.id));
   const playerMap = new Map<string, any>(); (players ?? []).forEach((p) => playerMap.set(p.id, p));
   const playerAvatarByName = new Map<string, string | null>(); (players ?? []).forEach((p: any) => playerAvatarByName.set(p.name, p.avatar_url ?? null));
   const teamPlayers = new Map<string, string[]>();
@@ -123,7 +125,8 @@ export async function loadStandings(): Promise<Standings> {
         : teamScore > opponentScore);
       const gd = teamScore - opponentScore;
       if (countForGangs) {
-        const cur = gangAgg.get(tname) ?? { name: tname, top_player: (teamPlayers.get(tid) ?? [])[0], image_url: teamLogo.get(tid) ?? null, TS: 0, W: 0, L: 0, D: 0, PTS: 0, P: 0, GD: 0 };
+        const cur = gangAgg.get(tname) ?? { name: tname, top_player: (teamPlayers.get(tid) ?? [])[0], image_url: teamLogo.get(tid) ?? null, team_id: tid, TS: 0, W: 0, L: 0, D: 0, PTS: 0, P: 0, GD: 0 };
+        cur.team_id = cur.team_id ?? tid;
         cur.P += 1;
         cur.TS += teamScore; // total kills scored by the gang in this match
         cur.GD += gd; // accumulate goal difference
@@ -137,7 +140,11 @@ export async function loadStandings(): Promise<Standings> {
         if (pid) {
           const pl = playerMap.get(pid);
           if (pl?.name) {
-            const sc = scorerAgg.get(pl.name) ?? { name: pl.name, image_url: pl.avatar_url ?? null, TS: 0, W: 0, L: 0, D: 0, PTS: 0, P: 0, GD: 0 };
+            // Fall back to the player's team logo when they have no personal
+            // avatar uploaded, so "Top Scorer" never shows a blank initial
+            // when a real seeded image already exists at the team level.
+            const fallbackLogo = pl.team_id ? (teamLogo.get(pl.team_id) ?? null) : null;
+            const sc = scorerAgg.get(pl.name) ?? { name: pl.name, image_url: pl.avatar_url ?? fallbackLogo ?? null, team_id: pl.team_id ?? null, TS: 0, W: 0, L: 0, D: 0, PTS: 0, P: 0, GD: 0 };
             sc.P += 1;
             sc.TS += teamScore; // goals this player scored in this match
             scorerAgg.set(pl.name, sc);
@@ -146,8 +153,9 @@ export async function loadStandings(): Promise<Standings> {
       }
       if (countForShooters) {
         (teamPlayers.get(tid) ?? []).forEach((pname) => {
-          const pc = playerAgg.get(pname) ?? { name: pname, gang_faction: tname, image_url: playerAvatarByName.get(pname) ?? null, TS: 0, W: 0, L: 0, D: 0, PTS: 0, P: 0, GD: 0 };
+          const pc = playerAgg.get(pname) ?? { name: pname, gang_faction: tname, image_url: playerAvatarByName.get(pname) ?? null, team_id: tid, TS: 0, W: 0, L: 0, D: 0, PTS: 0, P: 0, GD: 0 };
           pc.gang_faction = pc.gang_faction || tname;
+          pc.team_id = pc.team_id ?? tid;
           pc.P += 1;
           pc.TS += teamScore;
           pc.GD += gd; // accumulate goal difference
@@ -158,6 +166,14 @@ export async function loadStandings(): Promise<Standings> {
         });
       }
     }
+  });
+
+  // Players with no personal avatar still fall back to their team logo, even
+  // if they never appeared as a scorer in a match (e.g. brand-new players).
+  playerAgg.forEach((pc, pname) => {
+    if (pc.image_url) return;
+    const tid = pc.team_id ?? (pc.gang_faction ? teamIdByName.get(pc.gang_faction) : undefined);
+    if (tid) pc.image_url = teamLogo.get(tid) ?? null;
   });
 
   (overrides ?? []).forEach((o: any) => {
@@ -172,6 +188,7 @@ export async function loadStandings(): Promise<Standings> {
         o.image_url ??
         existing?.image_url ??
         (o.kind === "gang" ? (teamLogoByName.get(o.name) ?? null) : (playerAvatarByName.get(o.name) ?? null)),
+      team_id: existing?.team_id ?? (o.kind === "gang" ? (teamIdByName.get(o.name) ?? null) : null),
       TS: o.total_score ?? o.points ?? 0,
       W: o.wins, L: o.losses, D: o.draws, P: o.played, PTS: o.points,
       GD: o.goal_difference ?? existing?.GD ?? 0,
