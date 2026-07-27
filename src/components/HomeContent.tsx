@@ -37,7 +37,14 @@ export function AnnouncementSlider() {
   );
 }
 
-export function HighlightsRow() {
+/**
+ * The "Top Highlights" carousel (renamed from "Highlights").
+ * Pass `embedded` to render it without its own full-width <section>/container
+ * wrapper, so it can sit inside a grid column next to Top Players on the
+ * homepage. Used standalone (no `embedded` prop) it still works full-width
+ * wherever else it might be used.
+ */
+export function HighlightsRow({ embedded = false }: { embedded?: boolean }) {
   const [items, setItems] = useState<any[]>([]);
   const { user } = useAuth();
   const [myReactions, setMyReactions] = useState<Record<string, "like" | "dislike">>({});
@@ -78,45 +85,53 @@ export function HighlightsRow() {
   }
 
   if (items.length === 0) return null;
-  return (
-    <section className="container mt-6">
-      <div className="flex items-center gap-2 mb-3"><Film className="h-5 w-5 text-primary" /><h2 className="text-2xl font-bold">Highlights</h2></div>
-      <Carousel opts={{ align: "start", dragFree: true }}>
-        <CarouselContent>
-          {items.map((h) => (
-            <CarouselItem key={h.id} className="basis-[80%] sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-              <Card className="glass overflow-hidden">
-                {h.media_type === "video"
-                  ? <video src={h.media_url} controls className="w-full h-44 object-cover" />
-                  : <img src={h.media_url} alt={h.title} className="w-full h-44 object-cover" />}
-                <div className="p-2 font-bold text-sm truncate">{h.title}</div>
-                <div className="px-2 pb-2 flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => react(h.id, "like")}
-                    className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold transition ${myReactions[h.id] === "like" ? "border-emerald-500/60 bg-emerald-500/15 text-emerald-300" : "border-border text-muted-foreground hover:text-emerald-300 hover:border-emerald-500/40"}`}
-                    aria-label="Like highlight"
-                  >
-                    <ThumbsUp className="h-3.5 w-3.5" /> {h.likes ?? 0}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => react(h.id, "dislike")}
-                    className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold transition ${myReactions[h.id] === "dislike" ? "border-destructive/60 bg-destructive/15 text-destructive" : "border-border text-muted-foreground hover:text-destructive hover:border-destructive/40"}`}
-                    aria-label="Dislike highlight"
-                  >
-                    <ThumbsDown className="h-3.5 w-3.5" /> {h.dislikes ?? 0}
-                  </button>
-                </div>
-              </Card>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
-      </Carousel>
-    </section>
+
+  const body = (
+    <Card className="glass-strong border-primary/25 overflow-hidden h-full">
+      <div className="flex items-center gap-2 border-b border-primary/20 px-4 py-3">
+        <Film className="h-4 w-4 text-primary" />
+        <h2 className="text-sm font-black uppercase tracking-[0.18em]">Top Highlights</h2>
+      </div>
+      <div className="p-3">
+        <Carousel opts={{ align: "start", dragFree: true }}>
+          <CarouselContent>
+            {items.map((h) => (
+              <CarouselItem key={h.id} className={embedded ? "basis-[85%] sm:basis-1/2" : "basis-[80%] sm:basis-1/2 md:basis-1/3 lg:basis-1/4"}>
+                <Card className="glass overflow-hidden">
+                  {h.media_type === "video"
+                    ? <video src={h.media_url} controls className="w-full h-36 object-cover" />
+                    : <img src={h.media_url} alt={h.title} className="w-full h-36 object-cover" />}
+                  <div className="p-2 font-bold text-sm truncate">{h.title}</div>
+                  <div className="px-2 pb-2 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => react(h.id, "like")}
+                      className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold transition ${myReactions[h.id] === "like" ? "border-emerald-500/60 bg-emerald-500/15 text-emerald-300" : "border-border text-muted-foreground hover:text-emerald-300 hover:border-emerald-500/40"}`}
+                      aria-label="Like highlight"
+                    >
+                      <ThumbsUp className="h-3.5 w-3.5" /> {h.likes ?? 0}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => react(h.id, "dislike")}
+                      className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold transition ${myReactions[h.id] === "dislike" ? "border-destructive/60 bg-destructive/15 text-destructive" : "border-border text-muted-foreground hover:text-destructive hover:border-destructive/40"}`}
+                      aria-label="Dislike highlight"
+                    >
+                      <ThumbsDown className="h-3.5 w-3.5" /> {h.dislikes ?? 0}
+                    </button>
+                  </div>
+                </Card>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          {!embedded && (<><CarouselPrevious /><CarouselNext /></>)}
+        </Carousel>
+      </div>
+    </Card>
   );
+
+  if (embedded) return body;
+  return <section className="container mt-6">{body}</section>;
 }
 
 export function AdsRow() {
