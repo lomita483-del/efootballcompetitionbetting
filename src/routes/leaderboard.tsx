@@ -512,14 +512,14 @@ function ScorerRowCard({ r, i, onOpen }: { r: LbRow; i: number; onOpen: (name: s
 function LaurelBranch({ flip }: { flip?: boolean }) {
   const leaves = [0, 1, 2, 3, 4, 5, 6];
   return (
-    <svg viewBox="0 0 34 90" className={`h-14 w-auto ${flip ? "-scale-x-100" : ""}`} style={{ opacity: 0.75 }}>
-      <path d="M17 88 C 9 70, 6 52, 10 34 C 12 20, 15 9, 19 1" stroke="#d4af37" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+    <svg viewBox="0 0 34 90" className={`h-16 w-auto ${flip ? "-scale-x-100" : ""}`} style={{ opacity: 0.95, filter: "drop-shadow(0 0 4px rgba(212,175,55,0.5))" }}>
+      <path d="M17 88 C 9 70, 6 52, 10 34 C 12 20, 15 9, 19 1" stroke="#e8c559" strokeWidth="2" fill="none" strokeLinecap="round" />
       {leaves.map((i) => {
         const t = i / (leaves.length - 1);
         const y = 84 - t * 78;
         const x = 13 - t * 3;
         const rot = 200 + t * 30;
-        const size = 9 - t * 3.5;
+        const size = 10 - t * 3.5;
         return (
           <ellipse
             key={i}
@@ -527,7 +527,7 @@ function LaurelBranch({ flip }: { flip?: boolean }) {
             cy={y}
             rx={size}
             ry={size / 2.6}
-            fill="#d4af37"
+            fill="#e8c559"
             opacity={0.9 - t * 0.35}
             transform={`rotate(${rot} ${x} ${y})`}
           />
