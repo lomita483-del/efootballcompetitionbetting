@@ -16,6 +16,7 @@ import { NewsSlider } from "@/components/NewsSlider";
 import { LotteryResultsCard } from "@/components/LotteryResultsCard";
 import { SeasonBanner } from "@/components/SeasonBanner";
 import { Spotlight } from "@/components/Spotlight";
+import { TrendingPlayers } from "@/components/TrendingPlayers";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { Crosshair, Flame, Trophy, ChevronRight, Coins, Ticket as TicketIcon, ClipboardPaste, X, Dice5 } from "lucide-react";
@@ -153,6 +154,7 @@ function Index() {
 
       {/* Highlights → Announcements → Ads → Matches */}
       <HighlightsRow />
+      <section className="container mt-4"><TrendingPlayers /></section>
       <AnnouncementSlider />
       <AdsRow />
       {futures.length > 0 && (
