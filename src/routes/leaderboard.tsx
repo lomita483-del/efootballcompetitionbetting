@@ -512,14 +512,14 @@ function ScorerRowCard({ r, i, onOpen }: { r: LbRow; i: number; onOpen: (name: s
 function LaurelBranch({ flip }: { flip?: boolean }) {
   const leaves = [0, 1, 2, 3, 4, 5, 6];
   return (
-    <svg viewBox="0 0 34 90" className={`h-14 w-auto ${flip ? "-scale-x-100" : ""}`} style={{ opacity: 0.75 }}>
-      <path d="M17 88 C 9 70, 6 52, 10 34 C 12 20, 15 9, 19 1" stroke="#d4af37" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+    <svg viewBox="0 0 34 90" className={`h-16 w-auto ${flip ? "-scale-x-100" : ""}`} style={{ opacity: 0.95, filter: "drop-shadow(0 0 4px rgba(212,175,55,0.5))" }}>
+      <path d="M17 88 C 9 70, 6 52, 10 34 C 12 20, 15 9, 19 1" stroke="#e8c559" strokeWidth="2" fill="none" strokeLinecap="round" />
       {leaves.map((i) => {
         const t = i / (leaves.length - 1);
         const y = 84 - t * 78;
         const x = 13 - t * 3;
         const rot = 200 + t * 30;
-        const size = 9 - t * 3.5;
+        const size = 10 - t * 3.5;
         return (
           <ellipse
             key={i}
@@ -527,7 +527,7 @@ function LaurelBranch({ flip }: { flip?: boolean }) {
             cy={y}
             rx={size}
             ry={size / 2.6}
-            fill="#d4af37"
+            fill="#e8c559"
             opacity={0.9 - t * 0.35}
             transform={`rotate(${rot} ${x} ${y})`}
           />
@@ -562,26 +562,81 @@ function BootIcon({ className }: { className?: string }) {
   );
 }
 
-function RankBadgeFull({ rank, label }: { rank: number; label: string }) {
-  if (rank < 0) return null;
+/** Ornate double-bordered gold panel used for every block inside the profile card. */
+function GoldPanel({ className = "", children }: { className?: string; children: React.ReactNode }) {
   return (
-    <div className="relative overflow-hidden rounded-xl border-2 border-amber-400/70 bg-gradient-to-b from-amber-500/15 via-black/40 to-black/40 px-10 py-3 text-center shadow-[0_0_20px_-6px_rgba(212,175,55,0.5)]">
-      <div className="absolute left-1 top-1/2 -translate-y-1/2"><LaurelBranch /></div>
-      <div className="absolute right-1 top-1/2 -translate-y-1/2"><LaurelBranch flip /></div>
-      <div className="relative text-3xl font-black text-amber-200 tabular-nums leading-tight">#{rank + 1}</div>
-      <div className="relative text-[10px] uppercase tracking-widest text-amber-300/80 font-bold mt-0.5">{label}</div>
-      <div className="relative flex justify-center gap-1 mt-1.5">
-        {[0, 1, 2].map((s) => <Star key={s} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />)}
-      </div>
+    <div
+      className={`relative overflow-hidden rounded-2xl border border-amber-400/70 bg-[#080604] shadow-[0_0_22px_-8px_rgba(212,175,55,0.55),inset_0_0_30px_-18px_rgba(212,175,55,0.6)] ${className}`}
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-[3px] rounded-xl border border-amber-400/25"
+      />
+      <ChevronField />
+      {children}
     </div>
   );
 }
 
+/** Faint diagonal chevron texture that gives the card its engraved metal feel. */
+function ChevronField({ opacity = 0.5 }: { opacity?: number }) {
+  return (
+    <span
+      aria-hidden
+      className="pointer-events-none absolute inset-0"
+      style={{
+        opacity,
+        backgroundImage:
+          "repeating-linear-gradient(115deg, rgba(212,175,55,0.09) 0px, rgba(212,175,55,0.09) 2px, transparent 2px, transparent 16px), radial-gradient(120% 90% at 50% 0%, rgba(212,175,55,0.10), transparent 65%)",
+      }}
+    />
+  );
+}
+
+function PanelHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative mb-3 flex items-center gap-2">
+      <span className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-200/90">{children}</span>
+      <span className="h-px flex-1 bg-gradient-to-r from-amber-400/40 to-transparent" />
+    </div>
+  );
+}
+
+function RankBadgeFull({ rank, label }: { rank: number; label: string }) {
+  if (rank < 0) return null;
+  return (
+    <GoldPanel className="px-14 py-4 text-center">
+      <div className="absolute left-3 top-1/2 -translate-y-1/2"><LaurelBranch /></div>
+      <div className="absolute right-3 top-1/2 -translate-y-1/2"><LaurelBranch flip /></div>
+      <div
+        className="relative text-[2.75rem] leading-none font-black tabular-nums"
+        style={{
+          backgroundImage: "linear-gradient(180deg,#fff6cf 0%,#f2cf6a 45%,#c8931f 100%)",
+          WebkitBackgroundClip: "text",
+          backgroundClip: "text",
+          color: "transparent",
+          filter: "drop-shadow(0 2px 7px rgba(212,175,55,0.5))",
+        }}
+      >
+        #{rank + 1}
+      </div>
+      <div className="relative mt-1.5 pl-[0.35em] text-[10px] font-bold uppercase tracking-[0.35em] text-amber-200/85">
+        {label}
+      </div>
+      <div className="relative mt-2 flex justify-center gap-1.5">
+        {[0, 1, 2].map((s) => (
+          <Star key={s} className="h-3 w-3 fill-amber-400 text-amber-400 drop-shadow-[0_0_5px_rgba(212,175,55,0.85)]" />
+        ))}
+      </div>
+    </GoldPanel>
+  );
+}
+
 const TONE_CLASSES: Record<string, string> = {
-  emerald: "border-emerald-500/50 bg-emerald-500/10 text-emerald-300",
-  destructive: "border-red-500/50 bg-red-500/10 text-red-300",
-  amber: "border-amber-400/50 bg-amber-400/10 text-amber-200",
-  neutral: "border-white/15 bg-white/5 text-slate-300",
+  emerald: "text-emerald-400",
+  destructive: "text-red-400",
+  amber: "text-amber-300",
+  neutral: "text-slate-300",
 };
 
 function StatTile({
@@ -592,30 +647,46 @@ function StatTile({
   label: string;
   tone?: "emerald" | "destructive" | "amber" | "neutral";
 }) {
+  const tint = TONE_CLASSES[tone];
   return (
-    <div className={`rounded-xl border-2 px-2 py-2.5 text-center ${TONE_CLASSES[tone]}`}>
-      <Icon className="mx-auto h-4 w-4 mb-1" />
-      <div className="text-lg font-black tabular-nums leading-tight">{value}</div>
-      <div className="text-[9px] uppercase tracking-wide opacity-80 font-bold">{label}</div>
+    <div className="relative overflow-hidden rounded-xl border border-amber-400/35 bg-black/60 px-1.5 py-2.5 text-center shadow-[inset_0_0_18px_-10px_rgba(212,175,55,0.8)]">
+      <ChevronField opacity={0.35} />
+      <Icon className={`relative mx-auto mb-1.5 h-4 w-4 ${tint}`} />
+      <div className={`relative text-xl font-black leading-none tabular-nums ${tint}`}>{value}</div>
+      <div className="relative mt-1.5 text-[8.5px] font-bold uppercase tracking-[0.18em] text-amber-100/60">{label}</div>
     </div>
   );
 }
 
 function TopScorerPanel({ value }: { value: number }) {
   return (
-    <div className="rounded-xl border-2 border-amber-400/70 bg-gradient-to-r from-amber-500/15 via-black/40 to-black/40 px-4 py-3 shadow-[0_0_20px_-6px_rgba(212,175,55,0.5)]">
-      <div className="flex items-center gap-3">
-        <div className="flex flex-col items-center shrink-0">
-          <BootIcon className="h-6 w-8 text-amber-300 drop-shadow-[0_0_6px_rgba(212,175,55,0.6)]" />
-          <div className="mt-1 h-1.5 w-9 rounded-full bg-gradient-to-r from-amber-600/0 via-amber-400/70 to-amber-600/0" />
+    <GoldPanel className="px-4 py-4">
+      <div className="relative flex items-center gap-4">
+        <div className="flex shrink-0 flex-col items-center">
+          <BootIcon className="h-10 w-14 text-amber-200 drop-shadow-[0_0_12px_rgba(212,175,55,0.85)]" />
+          {/* pedestal */}
+          <div className="mt-1.5 h-1.5 w-12 rounded-sm bg-gradient-to-r from-amber-800 via-amber-200 to-amber-800" />
+          <div className="h-3.5 w-7 bg-gradient-to-b from-amber-600/90 to-amber-900/70" />
+          <div className="h-2 w-14 rounded-sm bg-gradient-to-r from-amber-900 via-amber-300 to-amber-900" />
         </div>
-        <div className="flex-1">
-          <div className="text-[10px] uppercase tracking-[0.2em] text-amber-300/80 font-bold">Top Scorer</div>
-          <div className="text-2xl font-black text-amber-200 tabular-nums leading-tight">{value}</div>
+        <div className="flex-1 text-center">
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-200/85">Top Scorer</div>
+          <div
+            className="my-0.5 text-4xl font-black leading-none tabular-nums"
+            style={{
+              backgroundImage: "linear-gradient(180deg,#fff6cf 0%,#f2cf6a 45%,#c8931f 100%)",
+              WebkitBackgroundClip: "text",
+              backgroundClip: "text",
+              color: "transparent",
+              filter: "drop-shadow(0 2px 6px rgba(212,175,55,0.45))",
+            }}
+          >
+            {value}
+          </div>
+          <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-amber-100/70">Total Goals Scored</div>
         </div>
-        <div className="text-[9px] uppercase tracking-wide text-amber-300/70 font-bold text-right max-w-[80px]">Total Goals Scored</div>
       </div>
-    </div>
+    </GoldPanel>
   );
 }
 
@@ -623,15 +694,25 @@ function MatchHistoryRow({ m }: { m: PlayerProfile["matchHistory"][number] }) {
   const won = m.result === "W";
   const lost = m.result === "L";
   return (
-    <div className={`flex items-center justify-between rounded-lg border px-3 py-2 text-xs ${won ? "border-emerald-500/30 bg-emerald-500/5" : lost ? "border-red-500/30 bg-red-500/5" : "border-amber-400/25 bg-amber-400/5"}`}>
-      <div className="flex items-center gap-2 min-w-0">
-        {won ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" /> : lost ? <XCircle className="h-3.5 w-3.5 text-red-400 shrink-0" /> : <Equal className="h-3.5 w-3.5 text-amber-400 shrink-0" />}
-        <span className="font-bold truncate">vs {m.opponentName}</span>
-        <span className="text-[9px] uppercase text-muted-foreground border border-white/15 rounded px-1 shrink-0">{m.kind === "team" ? "Team" : "Shooter"}</span>
+    <div className="flex items-center justify-between gap-2 rounded-xl border border-amber-400/15 bg-black/60 px-3 py-2 text-xs">
+      <div className="flex min-w-0 items-center gap-2">
+        {won ? (
+          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400 drop-shadow-[0_0_5px_rgba(16,185,129,0.7)]" />
+        ) : lost ? (
+          <XCircle className="h-4 w-4 shrink-0 text-red-400 drop-shadow-[0_0_5px_rgba(248,113,113,0.6)]" />
+        ) : (
+          <Equal className="h-4 w-4 shrink-0 text-amber-300" />
+        )}
+        <span className="truncate font-bold text-amber-50">
+          <span className="text-amber-100/55">vs </span>{m.opponentName}
+        </span>
+        <span className="shrink-0 rounded border border-amber-400/30 px-1 py-px text-[8px] font-bold uppercase tracking-[0.15em] text-amber-200/70">
+          {m.kind === "team" ? "Team" : "Shooter"}
+        </span>
       </div>
-      <div className="flex items-center gap-3 shrink-0">
-        <span className="font-black tabular-nums">{m.myScore} – {m.theirScore}</span>
-        <span className="text-muted-foreground">{new Date(m.timestamp).toLocaleDateString()}</span>
+      <div className="flex shrink-0 items-center gap-3">
+        <span className="font-black tabular-nums text-amber-100">{m.myScore} – {m.theirScore}</span>
+        <span className="text-[10px] tabular-nums text-amber-100/45">{new Date(m.timestamp).toLocaleDateString()}</span>
       </div>
     </div>
   );
@@ -668,114 +749,155 @@ function PlayerProfileDialog({
   const contextRank = board === "gangs" ? teamRank : board === "shooters" ? shooterRank : scorerRank;
   const contextLabel = board === "gangs" ? "Team Rank" : board === "shooters" ? "Shooter Rank" : "Scorer Rank";
 
+  const showTeam = board !== "shooters";
+  const showShooter = board !== "gangs" && profile ? profile.shooter.played + profile.shooter.absent > 0 : false;
+  const history = (profile?.matchHistory ?? []).filter((m) =>
+    board === "gangs" ? m.kind === "team" : board === "shooters" ? m.kind === "shooter" : true
+  );
+
   return (
     <Dialog open={!!name} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent hideDefaultClose className="max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border-2 border-amber-400/60 bg-gradient-to-b from-[#0d0a05] via-[#0a0806] to-black p-5 shadow-[0_0_60px_-15px_rgba(212,175,55,0.5)]">
-        <DialogClose className="absolute right-3 top-3 grid place-items-center h-8 w-8 rounded-full border-2 border-amber-400/60 bg-black/60 text-amber-300 hover:bg-amber-400/15 hover:border-amber-300 transition-colors z-10">
+      <DialogContent
+        hideDefaultClose
+        className="max-w-lg max-h-[88vh] overflow-y-auto rounded-[26px] border-2 border-amber-400/80 bg-[#050403] p-0 shadow-[0_0_80px_-10px_rgba(212,175,55,0.65)]"
+      >
+        {/* inner hairline frame */}
+        <span aria-hidden className="pointer-events-none absolute inset-[7px] rounded-[20px] border border-amber-400/30 z-10" />
+        <ChevronField opacity={0.85} />
+
+        <DialogClose className="absolute right-4 top-4 z-30 grid h-9 w-9 place-items-center rounded-full border border-amber-400/70 bg-black/80 text-amber-300 shadow-[0_0_16px_-4px_rgba(212,175,55,0.8)] transition-colors hover:border-amber-300 hover:bg-amber-400/15">
           <XIcon className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </DialogClose>
 
-        {/* Avatar + crown + starburst */}
-        <div className="flex flex-col items-center text-center pt-1 pb-3">
-          <div className="relative">
-            <Starburst />
-            {isTopOfSomething && (
-              <Crown className="absolute -top-4 left-1/2 -translate-x-1/2 h-6 w-6 text-amber-300 fill-amber-300 drop-shadow-[0_0_10px_rgba(212,175,55,0.8)] z-10" />
-            )}
-            <div className="relative h-24 w-24 rounded-full p-1 bg-gradient-to-b from-amber-300 via-amber-500 to-amber-700 shadow-[0_0_30px_-4px_rgba(212,175,55,0.7)]">
-              <div className="h-full w-full rounded-full border-2 border-black/60 overflow-hidden bg-black/40">
-                <Avatar url={profile?.avatarUrl ?? null} name={name} large />
+        <div className="relative z-20 space-y-4 p-6 pt-7">
+          {/* Hero: crown + avatar + name */}
+          <div className="flex flex-col items-center pb-1 text-center">
+            <div className="relative">
+              <Starburst />
+              {isTopOfSomething && (
+                <Crown className="absolute -top-7 left-1/2 z-10 h-7 w-7 -translate-x-1/2 fill-amber-300 text-amber-300 drop-shadow-[0_0_12px_rgba(212,175,55,0.9)]" />
+              )}
+              <div className="relative h-28 w-28 rounded-full p-[3px] bg-[conic-gradient(from_200deg,#8a6112,#f7e08a,#c8931f,#fff3c4,#8a6112)] shadow-[0_0_45px_-6px_rgba(212,175,55,0.85)]">
+                <div className="h-full w-full overflow-hidden rounded-full border-[3px] border-[#0a0806] bg-black/50">
+                  <Avatar url={profile?.avatarUrl ?? null} name={name} large />
+                </div>
               </div>
             </div>
-          </div>
-          <div className="mt-2 text-xl font-black uppercase tracking-wide bg-gradient-to-b from-amber-200 to-amber-500 bg-clip-text text-transparent">
-            {name}
+
+            <div
+              className="mt-4 text-[1.35rem] font-black uppercase leading-none tracking-[0.22em] pl-[0.22em]"
+              style={{
+                backgroundImage: "linear-gradient(180deg,#fff6cf 0%,#f0cb63 50%,#b8811a 100%)",
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                color: "transparent",
+                filter: "drop-shadow(0 2px 8px rgba(212,175,55,0.45))",
+              }}
+            >
+              {name}
+            </div>
+
+            <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-amber-400/35 bg-black/70 px-3.5 py-1.5 text-[11px] text-amber-100/70 shadow-[inset_0_0_14px_-8px_rgba(212,175,55,0.9)]">
+              {profile?.linkedUsername ? (
+                <>
+                  <Link2 className="h-3.5 w-3.5 text-emerald-400" />
+                  <span className="font-bold text-emerald-300">{profile.linkedUsername}</span>
+                </>
+              ) : (
+                <>
+                  <Link2Off className="h-3.5 w-3.5 text-amber-300/70" />
+                  Not linked to a website account
+                </>
+              )}
+            </div>
           </div>
 
-          <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] text-muted-foreground">
-            {profile?.linkedUsername ? (
-              <>
-                <Link2 className="h-3 w-3 text-emerald-400" />
-                <span className="font-bold text-emerald-300">{profile.linkedUsername}</span>
-              </>
-            ) : (
-              <>
-                <Link2Off className="h-3 w-3" />
-                Not linked to a website account
-              </>
-            )}
-          </div>
+          {loading && <div className="py-10 text-center text-sm text-amber-100/60">Loading profile…</div>}
+          {!loading && !profile && (
+            <div className="py-10 text-center text-sm text-amber-100/60">No profile data found for this name.</div>
+          )}
+
+          {!loading && profile && (
+            <div className="space-y-4">
+              <RankBadgeFull rank={contextRank} label={contextLabel} />
+              {board === "scorers" && (
+                <div className="grid grid-cols-2 gap-3">
+                  <RankBadgeFull rank={teamRank} label="Team Rank" />
+                  <RankBadgeFull rank={shooterRank} label="Shooter Rank" />
+                </div>
+              )}
+
+              {showTeam && profile.teamName && (
+                <GoldPanel className="p-3.5">
+                  <div className="relative">
+                    <PanelHeading>Team — {profile.teamName}</PanelHeading>
+                    <div className="grid grid-cols-4 gap-2">
+                      <StatTile icon={CalendarDays} value={profile.team.played} label="Played" tone="amber" />
+                      <StatTile icon={Trophy} value={profile.team.wins} label="Won" tone="emerald" />
+                      <StatTile icon={XCircle} value={profile.team.losses} label="Lost" tone="destructive" />
+                      <StatTile icon={Equal} value={profile.team.draws} label="Drawn" tone="neutral" />
+                      <StatTile icon={Star} value={profile.team.points} label="Points" tone="amber" />
+                      <StatTile icon={CircleDot} value={profile.team.goals} label="Goals" tone="amber" />
+                      <StatTile icon={UserCheck} value={profile.team.present} label="Present" tone="emerald" />
+                      <StatTile icon={UserX} value={profile.team.absent} label="Absent" tone="destructive" />
+                    </div>
+                  </div>
+                </GoldPanel>
+              )}
+
+              {showShooter && (
+                <GoldPanel className="p-3.5">
+                  <div className="relative">
+                    <PanelHeading>Shooter Duels</PanelHeading>
+                    <div className="grid grid-cols-4 gap-2">
+                      <StatTile icon={CalendarDays} value={profile.shooter.played} label="Played" tone="amber" />
+                      <StatTile icon={Trophy} value={profile.shooter.wins} label="Won" tone="emerald" />
+                      <StatTile icon={XCircle} value={profile.shooter.losses} label="Lost" tone="destructive" />
+                      <StatTile icon={Equal} value={profile.shooter.draws} label="Drawn" tone="neutral" />
+                      <StatTile icon={Star} value={profile.shooter.points} label="Points" tone="amber" />
+                      <StatTile icon={Target} value={profile.shooter.kills} label="Kills" tone="amber" />
+                      <StatTile icon={UserCheck} value={profile.shooter.present} label="Present" tone="emerald" />
+                      <StatTile icon={UserX} value={profile.shooter.absent} label="Absent" tone="destructive" />
+                    </div>
+                  </div>
+                </GoldPanel>
+              )}
+
+              {board !== "shooters" && <TopScorerPanel value={profile.scorerGoals} />}
+
+              {board !== "gangs" && profile.teammates.length > 0 && (
+                <GoldPanel className="p-3.5">
+                  <div className="relative">
+                    <PanelHeading>
+                      <span className="inline-flex items-center gap-1.5">
+                        <UsersIcon className="h-3 w-3" /> Shooters on {profile.teamName}
+                      </span>
+                    </PanelHeading>
+                    <div className="flex flex-wrap gap-2">
+                      {profile.teammates.map((t) => (
+                        <span key={t.id} className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/25 bg-black/60 px-2 py-1 text-xs text-amber-50">
+                          <Avatar url={t.avatar_url} name={t.name} />
+                          {t.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </GoldPanel>
+              )}
+
+              <GoldPanel className="p-3.5">
+                <div className="relative">
+                  <PanelHeading>Match History</PanelHeading>
+                  {history.length === 0 && <div className="text-xs text-amber-100/50">No matches recorded yet.</div>}
+                  <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
+                    {history.map((m, idx) => <MatchHistoryRow key={idx} m={m} />)}
+                  </div>
+                </div>
+              </GoldPanel>
+            </div>
+          )}
         </div>
-
-        {loading && <div className="py-8 text-center text-sm text-muted-foreground">Loading profile…</div>}
-        {!loading && !profile && (
-          <div className="py-8 text-center text-sm text-muted-foreground">No profile data found for this name.</div>
-        )}
-
-        {!loading && profile && (
-          <div className="space-y-4">
-            <RankBadgeFull rank={contextRank} label={contextLabel} />
-
-            {profile.teamName && (
-              <div>
-                <div className="text-xs uppercase tracking-wide text-amber-300/80 font-bold mb-1.5">Team — {profile.teamName}</div>
-                <div className="grid grid-cols-4 gap-1.5">
-                  <StatTile icon={CalendarDays} value={profile.team.played} label="Played" tone="amber" />
-                  <StatTile icon={Trophy} value={profile.team.wins} label="Won" tone="emerald" />
-                  <StatTile icon={XCircle} value={profile.team.losses} label="Lost" tone="destructive" />
-                  <StatTile icon={Equal} value={profile.team.draws} label="Drawn" tone="neutral" />
-                  <StatTile icon={Star} value={profile.team.points} label="Points" tone="amber" />
-                  <StatTile icon={CircleDot} value={profile.team.goals} label="Goals" tone="amber" />
-                  <StatTile icon={UserCheck} value={profile.team.present} label="Present" tone="emerald" />
-                  <StatTile icon={UserX} value={profile.team.absent} label="Absent" tone="destructive" />
-                </div>
-              </div>
-            )}
-
-            {profile.shooter.played + profile.shooter.absent > 0 && (
-              <div>
-                <div className="text-xs uppercase tracking-wide text-amber-300/80 font-bold mb-1.5">Shooter Duels</div>
-                <div className="grid grid-cols-4 gap-1.5">
-                  <StatTile icon={CalendarDays} value={profile.shooter.played} label="Played" tone="amber" />
-                  <StatTile icon={Trophy} value={profile.shooter.wins} label="Won" tone="emerald" />
-                  <StatTile icon={XCircle} value={profile.shooter.losses} label="Lost" tone="destructive" />
-                  <StatTile icon={Equal} value={profile.shooter.draws} label="Drawn" tone="neutral" />
-                  <StatTile icon={Star} value={profile.shooter.points} label="Points" tone="amber" />
-                  <StatTile icon={Target} value={profile.shooter.kills} label="Kills" tone="amber" />
-                  <StatTile icon={UserCheck} value={profile.shooter.present} label="Present" tone="emerald" />
-                  <StatTile icon={UserX} value={profile.shooter.absent} label="Absent" tone="destructive" />
-                </div>
-              </div>
-            )}
-
-            <TopScorerPanel value={profile.scorerGoals} />
-
-            {profile.teammates.length > 0 && (
-              <div>
-                <div className="text-xs uppercase tracking-wide text-amber-300/80 font-bold mb-1.5 flex items-center gap-1.5">
-                  <UsersIcon className="h-3.5 w-3.5" /> Shooters on {profile.teamName}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {profile.teammates.map((t) => (
-                    <span key={t.id} className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/20 bg-black/20 px-2 py-1 text-xs">
-                      <Avatar url={t.avatar_url} name={t.name} />
-                      {t.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div>
-              <div className="text-xs uppercase tracking-wide text-amber-300/80 font-bold mb-1.5">Match History</div>
-              {profile.matchHistory.length === 0 && <div className="text-xs text-muted-foreground">No matches recorded yet.</div>}
-              <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
-                {profile.matchHistory.map((m, idx) => <MatchHistoryRow key={idx} m={m} />)}
-              </div>
-            </div>
-          </div>
-        )}
       </DialogContent>
     </Dialog>
   );
@@ -783,7 +905,7 @@ function PlayerProfileDialog({
 
 function Avatar({ url, name, large }: { url: string | null; name: string; large?: boolean }) {
   const initial = (name || "?").trim().charAt(0).toUpperCase();
-  const size = large ? "h-full w-full text-2xl" : "h-6 w-6 text-[10px]";
+  const size = large ? "h-full w-full text-3xl" : "h-6 w-6 text-[10px]";
   if (url) {
     return (
       <img
@@ -797,7 +919,7 @@ function Avatar({ url, name, large }: { url: string | null; name: string; large?
     );
   }
   return (
-    <span className={`${size} grid place-items-center rounded-full border border-amber-400/40 bg-gradient-to-br from-amber-500/30 to-amber-800/30 text-amber-100 font-black`}>
+    <span className={`${size} grid place-items-center rounded-full border border-amber-400/40 bg-gradient-to-br from-amber-500/30 to-amber-800/30 font-black text-amber-100`}>
       {initial}
     </span>
   );
