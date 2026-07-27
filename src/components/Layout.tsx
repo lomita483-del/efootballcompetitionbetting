@@ -19,6 +19,7 @@ import {
   ListChecks,
   Gamepad2,
   ShoppingBag,
+  Download,
 } from "lucide-react";
 import { GangLogo } from "@/components/GangLogo";
 import { Button } from "@/components/ui/button";
@@ -97,6 +98,42 @@ function useForceReloadBroadcast() {
   }, []);
 }
 
+type BIPEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: "accepted" | "dismissed" }> };
+
+function isStandalone() {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia?.("(display-mode: standalone)").matches ||
+    // @ts-ignore iOS legacy
+    (window.navigator as any).standalone === true
+  );
+}
+
+/** Captures the browser's install prompt so a header button can trigger it directly. */
+function useInstallPrompt() {
+  const [deferred, setDeferred] = useState<BIPEvent | null>(null);
+  useEffect(() => {
+    if (typeof window === "undefined" || isStandalone()) return;
+    const onBIP = (e: Event) => {
+      e.preventDefault();
+      setDeferred(e as BIPEvent);
+    };
+    window.addEventListener("beforeinstallprompt", onBIP);
+    return () => window.removeEventListener("beforeinstallprompt", onBIP);
+  }, []);
+  const promptInstall = async () => {
+    if (!deferred) return;
+    try {
+      await deferred.prompt();
+      await deferred.userChoice;
+      setDeferred(null);
+    } catch {
+      /* ignore */
+    }
+  };
+  return { canInstall: !!deferred, promptInstall };
+}
+
 export const Layout = ({ children }: { children: ReactNode }) => {
   const { user, profile, roles, isAdmin, isMod, signOut } = useAuth();
   const nav = useNavigate();
@@ -104,6 +141,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   const isHome = location.pathname === "/";
   useVirtualHeartbeat();
   useForceReloadBroadcast();
+  const { canInstall, promptInstall } = useInstallPrompt();
   const [railOpen, setRailOpen] = useState(false);
   const branding = useBranding();
   // Admin-configurable site-wide background + branding (fall back to bundled art).
@@ -301,15 +339,28 @@ export const Layout = ({ children }: { children: ReactNode }) => {
             </div>
           </div>
         )}
-        {user && roles.length > 0 && (
-          <div className="container mx-auto px-4 pb-2 flex flex-wrap gap-1">
-            {roles.map((r) => (
-              <Badge key={r} variant="outline" className={ROLE_COLORS[r]}>
-                {ROLE_LABELS[r]}
-              </Badge>
-            ))}
+        {(user && roles.length > 0) || canInstall ? (
+          <div className="container mx-auto px-4 pb-2 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap gap-1">
+              {roles.map((r) => (
+                <Badge key={r} variant="outline" className={ROLE_COLORS[r]}>
+                  {ROLE_LABELS[r]}
+                </Badge>
+              ))}
+            </div>
+            {canInstall && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 gap-1.5 border-primary/40 text-primary hover:bg-primary/10"
+                onClick={promptInstall}
+              >
+                <Download className="h-3.5 w-3.5" />
+                Download App
+              </Button>
+            )}
           </div>
-        )}
+        ) : null}
       </header>
       <main className="relative overflow-x-hidden">{children}</main>
       <LevelUpModal />
