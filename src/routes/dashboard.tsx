@@ -9,9 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Ticket as TicketIcon, ChevronRight, Wallet, UserCog, Coins, Tag, Trophy, ListChecks, Sparkles, Lock, ArrowLeftRight, Gift, Receipt } from "lucide-react";
+import {
+  Ticket as TicketIcon, ChevronRight, Wallet, UserCog, Coins, Tag, Trophy, ListChecks,
+  Sparkles, Lock, ArrowLeftRight, Gift, Receipt, Crown, Calendar, Plus, Activity,
+  XCircle, Clock, FileText, PieChart, Bell, LifeBuoy, ArrowUpRight, ArrowDownRight,
+} from "lucide-react";
 import { ChallengesPanel } from "@/components/ChallengesPanel";
-import { VipCard } from "@/components/UserHubSections";
+import { VipCard, ReferralCard } from "@/components/UserHubSections";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -49,53 +53,222 @@ function Dashboard() {
 
   if (!user) return <Layout><div className="container mx-auto px-4 py-16 text-center"><p>Please <Link to="/login" className="text-primary underline">sign in</Link>.</p></div></Layout>;
 
+  const firstName = profile?.full_name?.split(" ")[0] ?? "Shooter";
+  const wins = bets.filter((b) => b.status === "won").length;
+  const losses = bets.filter((b) => b.status === "lost").length;
+  const active = bets.filter((b) => b.status === "open").length;
+  const settled = wins + losses;
+  const winRate = settled > 0 ? Math.round((wins / settled) * 100) : 0;
+  const tier = (profile?.vip_tier ?? "bronze") as string;
+
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-10">
-        <div className="mb-8">
-          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Welcome back</p>
-          <h1 className="text-4xl md:text-5xl font-extrabold gradient-gold-text mt-1">{profile?.full_name?.split(" ")[0] ?? "Shooter"}</h1>
-        </div>
+      <div className="container mx-auto px-4 py-8 space-y-6">
+        {/* ============ WELCOME HERO ============ */}
+        <Card className="relative overflow-hidden border-primary/30 bg-gradient-to-br from-primary/10 via-card/70 to-background p-0">
+          <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
+          <div className="relative grid gap-5 p-5 md:grid-cols-[1fr_320px] md:p-7">
+            <div className="flex items-center gap-5">
+              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-primary/60 bg-primary/10 grid place-items-center shadow-gold md:h-32 md:w-32">
+                {profile?.avatar_url
+                  ? <img src={profile.avatar_url} alt={firstName} className="h-full w-full object-cover" />
+                  : <span className="text-3xl font-black text-primary">{firstName.slice(0, 2).toUpperCase()}</span>}
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">Welcome back,</p>
+                <h1 className="mt-1 truncate text-4xl font-extrabold uppercase gradient-gold-text md:text-6xl">{firstName}</h1>
+                <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary">
+                  <Crown className="h-3.5 w-3.5" /> {tier} member
+                </div>
+                <p className="mt-3 text-xs text-muted-foreground">Keep playing to unlock a mystery tier 🎁</p>
+                <div className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <Calendar className="h-3.5 w-3.5 text-primary" /> Member since {new Date((profile as any)?.created_at ?? user.created_at).toLocaleDateString(undefined, { month: "long", year: "numeric" })}
+                </div>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-primary/25 bg-background/50 p-4 backdrop-blur-xl space-y-3">
+              <HeroStat icon={Coins} label="Token Balance" value={profile?.token_balance?.toLocaleString() ?? "0"} gold />
+              <HeroStat icon={TicketIcon} label="Active Bets" value={String(active)} />
+              <HeroStat icon={FileText} label="Total Bets" value={String(bets.length)} />
+              <Link to="/checkout" className="block">
+                <Button className="btn-luxury w-full font-black">Add Funds <Plus className="ml-1 h-4 w-4" /></Button>
+              </Link>
+            </div>
+          </div>
+        </Card>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <StatCard label="Token Balance" value={profile?.token_balance.toLocaleString() ?? "0"} accent="primary" />
-          <StatCard label="Active Bets" value={String(bets.filter(b => b.status === 'open').length)} />
-          <StatCard label="Won" value={String(bets.filter(b => b.status === 'won').length)} accent="emerald" />
-          <StatCard label="Total Bets" value={String(bets.length)} />
-        </div>
+        {/* ============ QUICK ACCESS ============ */}
+        <section>
+          <h2 className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground"><Sparkles className="h-3.5 w-3.5 text-primary" /> Quick Access</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            <PanelCard to="/bet-history" icon={TicketIcon} title="Bet Slips" subtitle={`${bets.length} total`} />
+            <PanelCard to="/profile" icon={UserCog} title="Edit Profile" subtitle="Update details" />
+            <PanelCard to="/withdraw" icon={Wallet} title="Withdraw" subtitle="Cash out tokens" />
+            <PanelCard onClick={() => setTransferOpen(true)} icon={ArrowLeftRight} title="Transfer Tokens" subtitle="Send to user ID" />
+            <PanelCard to="/checkout" icon={Coins} title="Request Tokens" subtitle="Top up balance" />
+            {isSponsor && <PanelCard onClick={() => setPromoOpen(true)} icon={Tag} title="Promo Codes" subtitle="Sponsor only" gold />}
+            <PanelCard to="/transactions" icon={Receipt} title="Transaction Records" subtitle="Credits & debits" />
+            <PanelCard to="/achievements" icon={Trophy} title="Achievements" subtitle="Your badges" />
+            <PanelCard to="/tasks" icon={ListChecks} title="Tasks" subtitle="Earn tokens" />
+            <PanelCard to="/support" icon={LifeBuoy} title="Help Center" subtitle="Get support" />
+          </div>
+        </section>
 
-        {/* Quick panels */}
-        <h2 className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-3">Quick Access</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
-          <PanelCard to="/bet-history" icon={TicketIcon} title="Bet Slips" subtitle={`${bets.length} total`} />
-          <PanelCard to="/profile" icon={UserCog} title="Edit Profile" subtitle="Update details" />
-          <PanelCard to="/withdraw" icon={Wallet} title="Withdrawal" subtitle="Cash out tokens" />
-          <PanelCard onClick={() => setTransferOpen(true)} icon={ArrowLeftRight} title="Transfer Tokens" subtitle="Send to a user ID" />
-          <PanelCard to="/checkout" icon={Coins} title="Request Tokens" subtitle="Top up balance" />
-          <PanelCard to="/transactions" icon={Receipt} title="Transaction Records" subtitle="Credits & debits" />
-          {isSponsor && (
-            <PanelCard onClick={() => setPromoOpen(true)} icon={Tag} title="Promo Codes" subtitle="Sponsor only" gold />
-          )}
-          <PanelCard to="/tasks" icon={ListChecks} title="Tasks" subtitle="Earn token rewards" />
-          <PanelCard to="/achievements" icon={Trophy} title="Achievements" subtitle="Your badges" />
-        </div>
+        {/* ============ ACTIVITY OVERVIEW ============ */}
+        <Card className="border-primary/20 bg-card/60 p-5 backdrop-blur-xl">
+          <h2 className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">Activity Overview</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            <ActivityStat icon={Activity} label="Active" value={String(active)} tone="text-emerald-300" />
+            <ActivityStat icon={Trophy} label="Wins" value={String(wins)} tone="text-primary" />
+            <ActivityStat icon={XCircle} label="Losses" value={String(losses)} tone="text-destructive" />
+            <ActivityStat icon={Clock} label="Pending" value={String(bets.filter((b) => b.status === "pending").length)} tone="text-amber-300" />
+            <ActivityStat icon={FileText} label="Total" value={String(bets.length)} tone="text-sky-300" />
+            <ActivityStat icon={PieChart} label="Win Rate" value={`${winRate}%`} tone="text-violet-300" />
+          </div>
+        </Card>
 
-        <div className="mb-10">
+        {/* ============ CHALLENGES + VIP ============ */}
+        <div className="grid gap-4 lg:grid-cols-2 items-start">
           <ChallengesPanel />
-        </div>
-
-        <div className="mb-10">
           <VipCard />
         </div>
 
-        <div className="mb-10">
+        {/* ============ WALLET · TRANSACTIONS · REFERRALS ============ */}
+        <div className="grid gap-4 lg:grid-cols-3 items-start">
+          <WalletOverview balance={profile?.token_balance ?? 0} />
+          <RecentTransactions userId={user.id} />
+          <ReferralCard />
+        </div>
+
+        {/* ============ GIFTS · SPIN · NOTIFICATIONS ============ */}
+        <div className="grid gap-4 lg:grid-cols-3 items-start">
           <GiftsAndSpin onClaimed={refresh} />
+          <RecentNotifications userId={user.id} />
         </div>
       </div>
       <PromoRequestDialog open={promoOpen} onClose={() => setPromoOpen(false)} userId={user.id} />
       <TransferDialog open={transferOpen} onClose={() => setTransferOpen(false)} onDone={refresh} />
     </Layout>
+  );
+}
+
+function HeroStat({ icon: Icon, label, value, gold }: { icon: any; label: string; value: string; gold?: boolean }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${gold ? "bg-gradient-to-br from-primary/35 to-primary/10" : "bg-gradient-to-br from-accent/25 to-primary/10"}`}>
+        <Icon className={`h-5 w-5 ${gold ? "text-primary" : "text-accent"}`} />
+      </div>
+      <div className="min-w-0">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
+        <div className={`truncate text-xl font-extrabold ${gold ? "gradient-gold-text" : "text-foreground"}`}>{value}</div>
+      </div>
+    </div>
+  );
+}
+
+function ActivityStat({ icon: Icon, label, value, tone }: { icon: any; label: string; value: string; tone: string }) {
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-primary/15 bg-background/40 p-3">
+      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-card/80 border border-primary/15">
+        <Icon className={`h-4 w-4 ${tone}`} />
+      </div>
+      <div className="min-w-0">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground truncate">{label}</div>
+        <div className={`text-xl font-extrabold ${tone}`}>{value}</div>
+      </div>
+    </div>
+  );
+}
+
+function WalletOverview({ balance }: { balance: number }) {
+  return (
+    <Card className="border-primary/25 bg-card/60 p-5 backdrop-blur-xl">
+      <h2 className="mb-3 flex items-center gap-2 text-sm font-bold"><Wallet className="h-4 w-4 text-primary" /> Wallet Overview</h2>
+      <div className="rounded-xl border border-primary/20 bg-background/40 p-4">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Main balance</div>
+        <div className="mt-1 flex items-center justify-between gap-3">
+          <div className="text-2xl font-extrabold gradient-gold-text">{balance.toLocaleString()}</div>
+          <Link to="/checkout"><Button size="sm" className="btn-luxury">Add Funds</Button></Link>
+        </div>
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        <Link to="/withdraw" className="rounded-xl border border-primary/20 bg-background/40 p-3 hover:border-primary/50 transition">
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Withdraw</div>
+          <div className="text-sm font-bold">Cash out</div>
+        </Link>
+        <Link to="/transactions" className="rounded-xl border border-primary/20 bg-background/40 p-3 hover:border-primary/50 transition">
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">History</div>
+          <div className="text-sm font-bold">All records</div>
+        </Link>
+      </div>
+    </Card>
+  );
+}
+
+function RecentTransactions({ userId }: { userId: string }) {
+  const [rows, setRows] = useState<any[]>([]);
+  useEffect(() => {
+    (supabase as any).from("token_transactions").select("*").eq("user_id", userId)
+      .order("created_at", { ascending: false }).limit(5)
+      .then(({ data }: any) => setRows(data ?? []));
+  }, [userId]);
+  return (
+    <Card className="border-primary/25 bg-card/60 p-5 backdrop-blur-xl">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-sm font-bold"><Receipt className="h-4 w-4 text-primary" /> Recent Transactions</h2>
+        <Link to="/transactions" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary">View All</Link>
+      </div>
+      {rows.length === 0 && <p className="text-sm text-muted-foreground">No transactions yet.</p>}
+      <div className="space-y-2">
+        {rows.map((t) => {
+          const credit = Number(t.amount) >= 0;
+          return (
+            <div key={t.id} className="flex items-center gap-3 rounded-lg border border-primary/15 bg-background/40 p-2.5">
+              <div className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${credit ? "bg-emerald-500/15" : "bg-destructive/15"}`}>
+                {credit ? <ArrowDownRight className="h-4 w-4 text-emerald-300" /> : <ArrowUpRight className="h-4 w-4 text-destructive" />}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-xs font-bold capitalize">{t.description || String(t.kind ?? "").replace(/_/g, " ")}</div>
+                <div className="text-[10px] text-muted-foreground">{new Date(t.created_at).toLocaleString()}</div>
+              </div>
+              <div className={`shrink-0 text-xs font-extrabold ${credit ? "text-emerald-300" : "text-destructive"}`}>
+                {credit ? "+" : "-"}{Math.abs(Number(t.amount)).toLocaleString()}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </Card>
+  );
+}
+
+function RecentNotifications({ userId }: { userId: string }) {
+  const [rows, setRows] = useState<any[]>([]);
+  useEffect(() => {
+    supabase.from("notifications").select("*").eq("user_id", userId)
+      .order("created_at", { ascending: false }).limit(5)
+      .then(({ data }) => setRows(data ?? []));
+  }, [userId]);
+  return (
+    <Card className="border-primary/25 bg-card/60 p-5 backdrop-blur-xl">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-sm font-bold"><Bell className="h-4 w-4 text-primary" /> Notifications</h2>
+        <Link to="/notifications" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary">View All</Link>
+      </div>
+      {rows.length === 0 && <p className="text-sm text-muted-foreground">Nothing new right now.</p>}
+      <div className="space-y-2">
+        {rows.map((n) => (
+          <div key={n.id} className="flex items-start gap-3 rounded-lg border border-primary/15 bg-background/40 p-2.5">
+            <Bell className={`mt-0.5 h-4 w-4 shrink-0 ${n.is_read ? "text-muted-foreground" : "text-primary"}`} />
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-xs font-bold">{n.title}</div>
+              {n.body && <div className="truncate text-[11px] text-muted-foreground">{n.body}</div>}
+            </div>
+            <div className="shrink-0 text-[10px] text-muted-foreground">{new Date(n.created_at).toLocaleDateString()}</div>
+          </div>
+        ))}
+      </div>
+    </Card>
   );
 }
 
@@ -160,7 +333,7 @@ function GiftsAndSpin({ onClaimed }: { onClaimed: () => void }) {
   };
 
   return (
-    <div className="grid md:grid-cols-2 gap-4">
+    <>
       {/* Gifts */}
       <Card className="p-5 border-primary/20">
         <h2 className="text-lg font-bold flex items-center gap-2 mb-3"><Gift className="h-5 w-5 text-primary" />Your Gifts</h2>
@@ -192,36 +365,25 @@ function GiftsAndSpin({ onClaimed }: { onClaimed: () => void }) {
           </>
         )}
       </Card>
-    </div>
-  );
-}
-
-function StatCard({ label, value, accent }: { label: string; value: string; accent?: "primary" | "emerald" }) {
-  const tone = accent === "primary" ? "text-primary" : accent === "emerald" ? "text-emerald-300" : "text-foreground";
-  return (
-    <Card className="p-5 backdrop-blur-xl bg-card/60 border-primary/20 hover:border-primary/40 transition">
-      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
-      <div className={`text-2xl md:text-3xl font-extrabold mt-1 ${tone}`}>{value}</div>
-    </Card>
+    </>
   );
 }
 
 function PanelCard({ to, onClick, icon: Icon, title, subtitle, comingSoon, gold }: any) {
   const inner = (
-    <Card className={`relative overflow-hidden p-4 backdrop-blur-xl bg-card/60 border ${gold ? "border-amber-500/40" : "border-primary/20"} hover:border-primary/60 transition group ${comingSoon ? "opacity-70" : "hover:-translate-y-0.5"} cursor-${comingSoon ? "not-allowed" : "pointer"}`}>
-      <div className={`h-10 w-10 rounded-xl grid place-items-center mb-3 ${gold ? "bg-gradient-to-br from-amber-400/30 to-amber-600/20" : "bg-gradient-to-br from-primary/30 to-accent/20"}`}>
+    <Card className={`relative h-full overflow-hidden p-4 text-center backdrop-blur-xl bg-card/60 border ${gold ? "border-amber-500/40" : "border-primary/20"} hover:border-primary/60 transition group ${comingSoon ? "opacity-70" : "hover:-translate-y-0.5"} cursor-${comingSoon ? "not-allowed" : "pointer"}`}>
+      <div className={`mx-auto h-11 w-11 rounded-xl grid place-items-center mb-2.5 ${gold ? "bg-gradient-to-br from-amber-400/30 to-amber-600/20" : "bg-gradient-to-br from-primary/30 to-accent/20"}`}>
         <Icon className={`h-5 w-5 ${gold ? "text-amber-300" : "text-primary"}`} />
       </div>
-      <div className="font-bold text-sm flex items-center gap-1.5">{title}{comingSoon && <Lock className="h-3 w-3 text-muted-foreground" />}</div>
+      <div className="font-bold text-sm flex items-center justify-center gap-1.5">{title}{comingSoon && <Lock className="h-3 w-3 text-muted-foreground" />}</div>
       <div className="text-[11px] text-muted-foreground mt-0.5">{subtitle}</div>
-      {!comingSoon && <ChevronRight className="absolute top-4 right-4 h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition" />}
       {gold && <Sparkles className="absolute top-3 right-3 h-3 w-3 text-amber-300 animate-pulse" />}
     </Card>
   );
   if (comingSoon) return <div>{inner}</div>;
-  if (to && to.startsWith("#")) return <a href={to}>{inner}</a>;
-  if (to) return <Link to={to}>{inner}</Link>;
-  return <button type="button" onClick={onClick} className="text-left">{inner}</button>;
+  if (to && to.startsWith("#")) return <a href={to} className="block h-full">{inner}</a>;
+  if (to) return <Link to={to} className="block h-full">{inner}</Link>;
+  return <button type="button" onClick={onClick} className="block h-full w-full text-left">{inner}</button>;
 }
 
 function TransferDialog({ open, onClose, onDone }: { open: boolean; onClose: () => void; onDone: () => void }) {
