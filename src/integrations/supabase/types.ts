@@ -252,6 +252,7 @@ export type Database = {
           popup_ad_text: string | null
           referral_bonus_referee: number
           referral_bonus_referrer: number
+          require_login: boolean
           roulette_color_payout: number | null
           roulette_enabled: boolean | null
           roulette_green_payout: number | null
@@ -396,6 +397,7 @@ export type Database = {
           popup_ad_text?: string | null
           referral_bonus_referee?: number
           referral_bonus_referrer?: number
+          require_login?: boolean
           roulette_color_payout?: number | null
           roulette_enabled?: boolean | null
           roulette_green_payout?: number | null
@@ -540,6 +542,7 @@ export type Database = {
           popup_ad_text?: string | null
           referral_bonus_referee?: number
           referral_bonus_referrer?: number
+          require_login?: boolean
           roulette_color_payout?: number | null
           roulette_enabled?: boolean | null
           roulette_green_payout?: number | null
