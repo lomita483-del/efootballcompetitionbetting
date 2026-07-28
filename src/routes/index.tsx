@@ -1,4 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { HomeBannerSlider } from "@/components/HomeBannerSlider";
+import { HomeQuickMenu } from "@/components/HomeQuickMenu";
 import { useEffect, useMemo, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
@@ -120,6 +122,12 @@ function Index() {
 
   return (
     <Layout>
+      <section className="container mt-4 flex items-stretch gap-3">
+  <div className="flex-1 min-w-0">
+    <HomeBannerSlider embedded placement="home" />
+  </div>
+  <HomeQuickMenu />
+</section>
       <HeroBanner settings={settings} tagline={tagline} liveMatchCount={liveMatchCount} teamsInPlay={teamsInPlay} />
 
       <EventBanner />
