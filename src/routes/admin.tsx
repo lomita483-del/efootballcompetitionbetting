@@ -3880,6 +3880,23 @@ function SettingsPanel() {
           <div className="text-sm">Close website</div>
           <Switch checked={!!s.closed_mode} onCheckedChange={(v) => setS({ ...s, closed_mode: v })} />
         </div>
+      </SettingsSection>
+
+      <SettingsSection icon={Lock} title="Site Access" subtitle="Choose whether visitors must sign in before they can browse.">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <div className="text-sm font-semibold">{s.require_login === false ? "Public — anyone can browse" : "Private — login required"}</div>
+            <div className="text-[11px] text-muted-foreground">
+              {s.require_login === false
+                ? "Visitors can view the site without an account. Betting still requires signing in."
+                : "Visitors are sent to the login page before they can view any page."}
+            </div>
+          </div>
+          <Switch checked={s.require_login !== false} onCheckedChange={(v) => setS({ ...s, require_login: v })} />
+        </div>
+      </SettingsSection>
+
+      <SettingsSection icon={Lock} title="Website Closed Notice" subtitle="Message shown while the site is closed.">
         <Textarea placeholder="Message shown to users" value={s.closed_message ?? ""} onChange={(e) => setS({ ...s, closed_message: e.target.value })} />
         <FieldLuxe label="Banner image (optional)"><Input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && uploadInto("closed_image", e.target.files[0])} /></FieldLuxe>
         {s.closed_image && (

@@ -15,7 +15,7 @@ import {
   XCircle, Clock, FileText, PieChart, Bell, LifeBuoy, ArrowUpRight, ArrowDownRight,
 } from "lucide-react";
 import { ChallengesPanel } from "@/components/ChallengesPanel";
-import { VipCard, ReferralCard } from "@/components/UserHubSections";
+import { ReferralCard } from "@/components/UserHubSections";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -127,10 +127,9 @@ function Dashboard() {
           </div>
         </Card>
 
-        {/* ============ CHALLENGES + VIP ============ */}
-        <div className="grid gap-4 lg:grid-cols-2 items-start">
+        {/* ============ CHALLENGES ============ */}
+        <div className="grid gap-4 items-start">
           <ChallengesPanel />
-          <VipCard />
         </div>
 
         {/* ============ WALLET · TRANSACTIONS · REFERRALS ============ */}
@@ -140,10 +139,9 @@ function Dashboard() {
           <ReferralCard />
         </div>
 
-        {/* ============ GIFTS · SPIN · NOTIFICATIONS ============ */}
-        <div className="grid gap-4 lg:grid-cols-3 items-start">
+        {/* ============ GIFTS · SPIN ============ */}
+        <div className="grid gap-4 items-start">
           <GiftsAndSpin onClaimed={refresh} />
-          <RecentNotifications userId={user.id} />
         </div>
       </div>
       <PromoRequestDialog open={promoOpen} onClose={() => setPromoOpen(false)} userId={user.id} />

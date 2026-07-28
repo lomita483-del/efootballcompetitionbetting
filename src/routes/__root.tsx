@@ -171,7 +171,8 @@ import { RouteProgress } from "@/components/RouteProgress";
 import { PushPermissionPrompt } from "@/components/PushPermissionPrompt";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { useBranding } from "@/lib/branding";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { trackPageView } from "@/lib/analytics";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
@@ -185,11 +186,29 @@ function AuthGate() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  // Admin-controlled: when require_login is off the site is public to visitors.
+  const [requireLogin, setRequireLogin] = useState<boolean | null>(null);
   useEffect(() => {
-    if (loading || session) return;
+    let alive = true;
+    supabase
+      .from("app_settings")
+      .select("require_login")
+      .eq("id", 1)
+      .maybeSingle()
+      .then(({ data }: any) => { if (alive) setRequireLogin((data as any)?.require_login ?? true); });
+    const ch = supabase
+      .channel("site-access")
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "app_settings" }, (p: any) => {
+        setRequireLogin(p.new?.require_login ?? true);
+      })
+      .subscribe();
+    return () => { alive = false; supabase.removeChannel(ch); };
+  }, []);
+  useEffect(() => {
+    if (loading || session || requireLogin === null || requireLogin === false) return;
     const isPublic = PUBLIC_ROUTE_PREFIXES.some((p) => pathname === p || pathname.startsWith(p));
     if (!isPublic) navigate({ to: "/login", search: { redirect: pathname } as any, replace: true });
-  }, [session, loading, pathname, navigate]);
+  }, [session, loading, pathname, navigate, requireLogin]);
   return null;
 }
 
