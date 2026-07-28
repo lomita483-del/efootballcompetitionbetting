@@ -41,7 +41,6 @@ import { Route as ArcadeRouteImport } from './routes/arcade'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AchievementsRouteImport } from './routes/achievements'
 import { Route as AboutRouteImport } from './routes/about'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as WagersIndexRouteImport } from './routes/wagers.index'
 import { Route as VirtualIndexRouteImport } from './routes/virtual.index'
 import { Route as WagersIdRouteImport } from './routes/wagers.$id'
@@ -219,11 +218,6 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const WagersIndexRoute = WagersIndexRouteImport.update({
   id: '/wagers/',
   path: '/wagers/',
@@ -310,7 +304,6 @@ const ApiPublicHooksBroadcastPushRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/achievements': typeof AchievementsRoute
   '/admin': typeof AdminRoute
@@ -361,7 +354,6 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/send-push': typeof ApiPublicHooksSendPushRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/achievements': typeof AchievementsRoute
   '/admin': typeof AdminRoute
@@ -413,7 +405,6 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/achievements': typeof AchievementsRoute
   '/admin': typeof AdminRoute
@@ -466,7 +457,6 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
     | '/about'
     | '/achievements'
     | '/admin'
@@ -517,7 +507,6 @@ export interface FileRouteTypes {
     | '/api/public/hooks/send-push'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/about'
     | '/achievements'
     | '/admin'
@@ -568,7 +557,6 @@ export interface FileRouteTypes {
     | '/api/public/hooks/send-push'
   id:
     | '__root__'
-    | '/'
     | '/about'
     | '/achievements'
     | '/admin'
@@ -620,7 +608,6 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AchievementsRoute: typeof AchievementsRoute
   AdminRoute: typeof AdminRoute
@@ -896,13 +883,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/wagers/': {
       id: '/wagers/'
       path: '/wagers'
@@ -1030,7 +1010,6 @@ const MatchesRouteWithChildren =
   MatchesRoute._addFileChildren(MatchesRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AchievementsRoute: AchievementsRoute,
   AdminRoute: AdminRoute,
@@ -1083,3 +1062,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
