@@ -15,7 +15,7 @@ import {
   XCircle, Clock, FileText, PieChart, Bell, LifeBuoy, ArrowUpRight, ArrowDownRight,
 } from "lucide-react";
 import { ChallengesPanel } from "@/components/ChallengesPanel";
-import { VipCard, ReferralCard } from "@/components/UserHubSections";
+import { ReferralCard } from "@/components/UserHubSections";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
