@@ -140,9 +140,9 @@ function Index() {
 
       <BookingCodeFab />
 
-      <section className="container mt-3">
-        <div className="grid gap-3 min-[500px]:gap-5 min-[500px]:grid-cols-[minmax(0,1fr)_minmax(0,200px)] lg:grid-cols-[1fr_300px] xl:grid-cols-[1fr_300px] items-start">
-          <div className="space-y-3 min-w-0">
+      <section className="container mt-6">
+        <div className="grid gap-4 min-[500px]:gap-5 min-[500px]:grid-cols-[minmax(0,1fr)_minmax(0,200px)] lg:grid-cols-[1fr_300px] xl:grid-cols-[1fr_300px] items-start">
+          <div className="space-y-5 min-w-0">
           {loading && <p className="text-muted-foreground">Loading league…</p>}
           {!loading && featuredFallback.length > 0 && (
             <div>
@@ -163,7 +163,7 @@ function Index() {
           {!loading && live.length > 0 && (
             <div>
               <SectionHeader icon={Flame} title="Live Now" subtitle="Live odds. Markets close round-by-round." />
-              <div className="space-y-2 mt-4">
+              <div className="space-y-3 mt-4">
                 {live.map((m) => <MatchCardLive key={m.id} match={m} variant="row" />)}
               </div>
             </div>
@@ -177,17 +177,17 @@ function Index() {
           {categoryGroups.map(([id, g]) => (
             <div key={id}>
               <SectionHeader icon={Crosshair} title={g.name} subtitle={`${g.items.length} match${g.items.length === 1 ? "" : "es"} in this category.`} />
-              <div className="space-y-2 mt-4">
+              <div className="space-y-3 mt-4">
                 {g.items.map((m) => <MatchCardLive key={m.id} match={m} variant="row" />)}
               </div>
             </div>
           ))}
           </div>
-          <aside className="space-y-6 min-w-0 lg:sticky lg:top-20 self-start">
+          <aside className="space-y-4 min-w-0 lg:sticky lg:top-20 self-start">
             <NewsSlider />
-            <div><div className="mt-3"><LotteryResultsCard /></div></div>
-            <div><div className="mt-3"><MiniLiveLeaderboard /></div></div>
-            <div><div className="mt-3"><GrandPrizeWinners /></div></div>
+            <LotteryResultsCard />
+            <MiniLiveLeaderboard />
+            <GrandPrizeWinners />
           </aside>
         </div>
       </section>
@@ -461,7 +461,7 @@ function FuturesSection({ title, markets, maxSelections, featured = [] }: { titl
                   Closes in<br /><span className="font-mono text-primary"><Countdown target={future.start_time} /></span>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-px bg-border/50 p-px">
+      <div className="grid grid-cols-2 gap-2 p-2">
                 {(market?.odds ?? []).map((odd) => {
                   const selected = selections.some((s) => s.odd_id === odd.id);
                   const status = odd.future_status ?? "active";
