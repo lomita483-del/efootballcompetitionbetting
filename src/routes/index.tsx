@@ -382,7 +382,7 @@ function PromoFooterBand() {
     { icon: Award, title: "Glory", body: "Only the best rise" },
   ];
   return (
-    <section className="container mt-12">
+    <section className="container mt-8">
       <div className="rounded-2xl border border-primary/20 bg-card/40 backdrop-blur px-5 py-6 flex flex-wrap items-center justify-between gap-6">
         <div className="flex flex-wrap gap-8">
           {values.map((v) => (
@@ -479,7 +479,7 @@ function FuturesSection({ title, markets, maxSelections, featured = [] }: { titl
                         }
                       }}
                       disabled={blocked && !selected}
-                      className={`min-h-24 bg-card/90 px-3 py-2 text-left transition hover:bg-primary/10 disabled:opacity-45 disabled:hover:bg-card/90 ${selected ? "ring-2 ring-primary bg-primary/15" : ""}`}
+                      className={`min-h-24 rounded-xl border border-border/60 bg-card/90 px-3 py-2 text-left transition hover:bg-primary/10 disabled:opacity-45 disabled:hover:bg-card/90 ${selected ? "ring-2 ring-primary bg-primary/15" : ""}`}
                     >
                       <div className="flex items-center gap-2">
                         <FutureEmblem label={odd.label} url={odd.future_emblem_url} />
