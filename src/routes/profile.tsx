@@ -31,9 +31,24 @@ function ProfilePage() {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState({ next: "", confirm: "" });
   const [busy, setBusy] = useState<"email" | "pw" | null>(null);
+  const [uploading, setUploading] = useState(false);
   useEffect(() => { if (profile) setF({ full_name: profile.full_name, phone: profile.phone ?? "", discord_username: profile.discord_username ?? "", country: profile.country ?? "", gang_name: profile.gang_name ?? "" }); }, [profile?.id]);
   useEffect(() => { if (user?.email) setEmail(user.email); }, [user?.email]);
   if (!user || !profile) return <Layout><div className="container mx-auto p-10">Sign in</div></Layout>;
+  const uploadAvatar = async (file: File) => {
+    if (!file.type.startsWith("image/")) return toast.error("Please choose an image file");
+    if (file.size > 5 * 1024 * 1024) return toast.error("Image must be under 5MB");
+    setUploading(true);
+    const path = `${user.id}/avatar-${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
+    const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+    if (upErr) { setUploading(false); return toast.error(upErr.message); }
+    const url = supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl;
+    const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id);
+    setUploading(false);
+    if (error) return toast.error(error.message);
+    toast.success("Profile photo updated");
+    await refresh();
+  };
   const save = async () => {
     const { error } = await supabase.from("profiles").update(f).eq("id", user.id);
     if (error) return toast.error(error.message);
@@ -63,6 +78,24 @@ function ProfilePage() {
         <h1 className="text-3xl font-bold text-primary mb-6">Your Profile</h1>
         <Card className="p-5 mb-6">
           <LevelBadge xp={(profile as any).xp ?? 0} />
+        </Card>
+        <Card className="p-6 mb-6 flex items-center gap-5 flex-wrap">
+          <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-primary/50 bg-primary/10 grid place-items-center shadow-gold">
+            {profile.avatar_url
+              ? <img src={profile.avatar_url} alt={profile.full_name} className="h-full w-full object-cover" />
+              : <span className="text-2xl font-black text-primary">{(profile.full_name ?? "?").slice(0, 2).toUpperCase()}</span>}
+          </div>
+          <div className="min-w-0 flex-1 space-y-2">
+            <Label>Profile photo</Label>
+            <Input type="file" accept="image/*" disabled={uploading} onChange={(e) => { const file = e.target.files?.[0]; if (file) uploadAvatar(file); e.target.value = ""; }} />
+            <p className="text-xs text-muted-foreground">{uploading ? "Uploading…" : "JPG or PNG, up to 5MB. Shown on your profile and leaderboards."}</p>
+            {profile.avatar_url && (
+              <Button variant="ghost" size="sm" className="text-destructive h-7 px-2"
+                onClick={async () => { await supabase.from("profiles").update({ avatar_url: null }).eq("id", user.id); await refresh(); toast.success("Photo removed"); }}>
+                Remove photo
+              </Button>
+            )}
+          </div>
         </Card>
         <Card className="p-5 mb-6 border-primary/30 bg-gradient-to-r from-primary/10 to-accent/5">
           <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Your Special ID</div>
