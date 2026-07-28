@@ -171,7 +171,8 @@ import { RouteProgress } from "@/components/RouteProgress";
 import { PushPermissionPrompt } from "@/components/PushPermissionPrompt";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { useBranding } from "@/lib/branding";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { trackPageView } from "@/lib/analytics";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
@@ -194,7 +195,7 @@ function AuthGate() {
       .select("require_login")
       .eq("id", 1)
       .maybeSingle()
-      .then(({ data }) => { if (alive) setRequireLogin((data as any)?.require_login ?? true); });
+      .then(({ data }: any) => { if (alive) setRequireLogin((data as any)?.require_login ?? true); });
     const ch = supabase
       .channel("site-access")
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "app_settings" }, (p: any) => {
