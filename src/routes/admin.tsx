@@ -58,6 +58,8 @@ import { ClansAdminPanel } from "@/components/admin/ClansAdminPanel";
 import { LotteryAdminPanel } from "@/components/admin/LotteryAdminPanel";
 import { GiftsSpinAdminPanel } from "@/components/admin/GiftsSpinAdminPanel";
 import { SurveysAdminPanel } from "@/components/admin/SurveysAdminPanel";
+import { TasksAdminPanel } from "@/components/admin/TasksAdminPanel";
+import { FloatingWidgetsAdminPanel } from "@/components/admin/FloatingWidgetsAdminPanel";
 import { PollsAdminPanel, ShopAdminPanel, FaqAdminPanel } from "@/components/admin/CommunityAdminPanel";
 import { NewsAdminPanel } from "@/components/admin/NewsAdminPanel";
 import { PushBroadcastPanel } from "@/components/admin/PushBroadcastPanel";
@@ -221,6 +223,8 @@ export function AdminPage() {
             <TabsContent value="content" className="mt-4"><ContentPanel /></TabsContent>
             <TabsContent value="tickets" className="mt-4"><TicketsPanel /></TabsContent>
             <TabsContent value="tasks" className="mt-4"><TasksAchievementsPanel /></TabsContent>
+            <TabsContent value="quests" className="mt-4"><TasksAdminPanel /></TabsContent>
+            <TabsContent value="floating" className="mt-4"><FloatingWidgetsAdminPanel /></TabsContent>
             <TabsContent value="surveys" className="mt-4"><SurveysAdminPanel /></TabsContent>
             <TabsContent value="polls" className="mt-4"><PollsAdminPanel /></TabsContent>
             <TabsContent value="shop" className="mt-4"><ShopAdminPanel /></TabsContent>
