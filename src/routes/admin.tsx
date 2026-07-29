@@ -3685,6 +3685,8 @@ const QUICK_ACTIONS: { i: any; l: string; t: string }[] = [
   { i: Trophy, l: "Won Bets", t: "wonbets" },
   { i: X, l: "Lost Bets", t: "lostbets" },
   { i: Swords, l: "Wagers", t: "wagers" },
+  { i: ListChecks, l: "Tasks & Quests", t: "quests" },
+  { i: Sparkles, l: "Floating Icons", t: "floating" },
 ];
 
 const QA_PALETTE = [
