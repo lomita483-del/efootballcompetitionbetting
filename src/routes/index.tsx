@@ -547,7 +547,7 @@ function FeaturedGoldenMatches({
   const { selections, add, remove, setOpen } = useBetSlip();
   if (matches.length === 0) return null;
   return (
-    <div className="seasonal-golden relative overflow-hidden rounded-3xl px-4 py-4 md:px-7 md:py-6 space-y-3">
+    <div className={`${bgImage ? "seasonal-golden" : "seasonal-emerald"} relative overflow-hidden rounded-3xl px-4 py-4 md:px-7 md:py-6 space-y-3`}>
       {bgImage && (
         <>
           <img
