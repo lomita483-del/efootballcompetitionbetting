@@ -19,7 +19,7 @@ export function TrendingPlayers() {
   if (rows.length === 0) return null;
 
   return (
-    <Card className="glass-strong border-primary/25 overflow-hidden">
+    <Card className="glass-strong border-primary/25 overflow-hidden flex h-full flex-col">
       <div className="flex items-center justify-between gap-2 border-b border-primary/20 px-4 py-3">
         <div className="flex items-center gap-2">
           <Star className="h-4 w-4 text-primary" />
@@ -29,13 +29,13 @@ export function TrendingPlayers() {
           View All <ChevronRight className="h-3.5 w-3.5" />
         </Link>
       </div>
-      <div className="grid grid-cols-3 gap-2 p-3">
+      <div className="grid flex-1 grid-cols-3 gap-2 p-3">
         {rows.map((r, i) => {
           const initials = r.name.split(/\s+/).filter(Boolean).map((p) => p[0]).slice(0, 2).join("").toUpperCase();
           return (
             <div
               key={r.name}
-              className={`relative overflow-hidden rounded-xl border p-3 text-center transition hover:-translate-y-0.5 ${
+              className={`relative flex flex-col overflow-hidden rounded-xl border p-3 text-center transition hover:-translate-y-0.5 ${
                 i === 0 ? "border-primary/50 bg-gradient-to-b from-primary/15 to-transparent" : "border-primary/20 bg-card/60"
               }`}
             >
@@ -43,10 +43,10 @@ export function TrendingPlayers() {
                 {i + 1}
               </div>
               {i === 0 && <Crown className="absolute right-2 top-2 h-4 w-4 text-primary" />}
-              <div className="mx-auto mt-3 h-14 w-14 overflow-hidden rounded-full border-2 border-primary/40 bg-primary/10 grid place-items-center">
+              <div className="mt-6 aspect-square w-full overflow-hidden rounded-lg border-2 border-primary/40 bg-primary/10 grid place-items-center">
                 {r.image_url
                   ? <img src={r.image_url} alt={r.name} className="h-full w-full object-cover" loading="lazy" />
-                  : <span className="text-sm font-black text-primary">{initials}</span>}
+                  : <span className="text-lg font-black text-primary">{initials}</span>}
               </div>
               <div className="mt-2 truncate text-[11px] font-black uppercase tracking-wide">{r.name}</div>
               <div className="text-[11px] font-bold text-primary">{r.TS} goals</div>
