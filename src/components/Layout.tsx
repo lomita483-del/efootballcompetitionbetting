@@ -371,6 +371,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       <SurveyPopout />
       <PollPopout />
       <PushPermissionPrompt />
+      <FloatingWidgets />
       <SiteFooter isHome={isHome} />
     </div>
   );
