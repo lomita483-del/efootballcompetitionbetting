@@ -135,7 +135,7 @@ function Index() {
       <Spotlight />
 
       {/* Top Highlights + Top Players, side by side */}
-      <section className="container mt-6 grid lg:grid-cols-[1fr_1fr] gap-4 items-start">
+      <section className="container mt-6 grid lg:grid-cols-[1fr_1fr] gap-4 items-stretch">
         <HighlightsRow embedded />
         <TrendingPlayers />
       </section>
