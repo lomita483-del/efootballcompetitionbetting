@@ -1381,6 +1381,48 @@ export type Database = {
         }
         Relationships: []
       }
+      floating_widgets: {
+        Row: {
+          created_at: string
+          destination_type: string
+          destination_value: string
+          icon_name: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          position: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          destination_type?: string
+          destination_value?: string
+          icon_name?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          position?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          destination_type?: string
+          destination_value?: string
+          icon_name?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          position?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       friends: {
         Row: {
           created_at: string
@@ -3209,6 +3251,74 @@ export type Database = {
         }
         Relationships: []
       }
+      task_tiers: {
+        Row: {
+          created_at: string
+          id: string
+          reward_kind: string
+          reward_value: string
+          target_value: number
+          task_id: string
+          tier_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reward_kind?: string
+          reward_value?: string
+          target_value: number
+          task_id: string
+          tier_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reward_kind?: string
+          reward_value?: string
+          target_value?: number
+          task_id?: string
+          tier_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_tiers_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          monitor_metric: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          monitor_metric: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          monitor_metric?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       teams: {
         Row: {
           created_at: string
@@ -3905,6 +4015,71 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_task_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current_value: number
+          id: string
+          reward_claimed: boolean
+          task_id: string
+          tier_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          id?: string
+          reward_claimed?: boolean
+          task_id: string
+          tier_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          id?: string
+          reward_claimed?: boolean
+          task_id?: string
+          tier_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_task_progress_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_task_progress_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "task_tiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_task_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_task_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_tasks: {
         Row: {
@@ -5071,6 +5246,14 @@ export type Database = {
         Args: { _bet_id: string; _reason?: string }
         Returns: undefined
       }
+      admin_task_tier_stats: {
+        Args: never
+        Returns: {
+          completed: number
+          in_progress: number
+          tier_id: string
+        }[]
+      }
       admin_toggle_match_void: {
         Args: { _match_id: string; _reason?: string; _void: boolean }
         Returns: undefined
@@ -5611,6 +5794,10 @@ export type Database = {
       submit_survey: {
         Args: { _answers: Json; _survey_id: string }
         Returns: Json
+      }
+      task_bump_metric: {
+        Args: { _delta: number; _metric: string; _user_id: string }
+        Returns: undefined
       }
       transfer_tokens: {
         Args: { _amount: number; _recipient_special_id: string }
