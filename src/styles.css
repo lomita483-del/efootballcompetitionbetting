@@ -823,6 +823,23 @@ html.light body {
   transform: translateX(-120%);
   animation: shimmer 6s ease-in-out infinite;
 }
+/* Dark green variant — used for Featured Match cards with no uploaded image */
+.seasonal-emerald {
+  border: 1px solid oklch(0.82 0.17 90 / 0.45);
+  background:
+    radial-gradient(120% 140% at 85% 0%, oklch(0.42 0.11 160 / 0.65), transparent 60%),
+    radial-gradient(120% 140% at 0% 100%, oklch(0.30 0.08 158 / 0.55), transparent 60%),
+    linear-gradient(135deg, oklch(0.30 0.08 158), oklch(0.16 0.04 160));
+  box-shadow:
+    inset 0 1px 0 oklch(0.95 0.12 92 / 0.18),
+    0 22px 50px -26px oklch(0 0 0 / 0.8),
+    0 0 40px -16px oklch(0.55 0.13 160 / 0.5);
+}
+.seasonal-golden-shine-legacy {
+  background: linear-gradient(110deg, transparent 25%, oklch(0.95 0.14 92 / 0.18) 50%, transparent 72%);
+  transform: translateX(-120%);
+  animation: shimmer 6s ease-in-out infinite;
+}
 .seasonal-golden-title {
   background: linear-gradient(135deg, oklch(0.99 0.06 95), oklch(0.82 0.18 88) 55%, oklch(0.66 0.15 82));
   -webkit-background-clip: text;

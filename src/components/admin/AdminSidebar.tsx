@@ -75,6 +75,7 @@ const NAV: AdminNavItem[] = [
   { group: "Rewards & Games", key: "giftsspin",   label: "Gifts & Spin",         icon: Gift,            admin: true },
   { group: "Rewards & Games", key: "challenges",  label: "Challenges",           icon: Sparkles,        admin: true },
   { group: "Rewards & Games", key: "tasks",       label: "Tasks & Achievements", icon: ClipboardList,   admin: true },
+  { group: "Rewards & Games", key: "quests",      label: "Tasks & Quests",       icon: ClipboardList,   admin: true },
   { group: "Rewards & Games", key: "surveys",     label: "Surveys",              icon: ClipboardList,   admin: true },
 
   // Content
@@ -89,6 +90,7 @@ const NAV: AdminNavItem[] = [
 
   // Configuration
   { group: "Configuration", key: "branding",    label: "Branding",             icon: Palette,         admin: true },
+  { group: "Configuration", key: "floating",    label: "Floating Icons",       icon: Sparkles,        admin: true },
   { group: "Configuration", key: "settings",    label: "Settings",             icon: SettingsIcon,    admin: true },
 ];
 

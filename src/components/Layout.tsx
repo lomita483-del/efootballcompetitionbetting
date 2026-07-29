@@ -34,6 +34,7 @@ import { BetSuccessPopout } from "@/components/BetSuccessPopout";
 import { SurveyPopout } from "@/components/SurveyPopout";
 import { PollPopout } from "@/components/PollPopout";
 import { PushPermissionPrompt } from "@/components/PushPermissionPrompt";
+import { FloatingWidgets } from "@/components/FloatingWidgets";
 import { ReactNode, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation } from "@tanstack/react-router";
@@ -371,6 +372,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       <SurveyPopout />
       <PollPopout />
       <PushPermissionPrompt />
+      <FloatingWidgets />
       <SiteFooter isHome={isHome} />
     </div>
   );
