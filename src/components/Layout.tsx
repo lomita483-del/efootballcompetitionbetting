@@ -325,7 +325,8 @@ export const Layout = ({ children }: { children: ReactNode }) => {
                 <NavLink to="/tournament" icon={Swords} label="Tournament" />
                 {user && <NavLink to="/wagers" icon={Swords} label="Wagers" />}
                 {user && <NavLink to="/dashboard" icon={LayoutDashboard} label="Dashboard" />}
-                {user && <NavLink to="/tasks" icon={ListChecks} label="Tasks" />}
+                {user && <NavLink to="/tasks" icon={ClipboardCheck} label="Task" />}
+                {user && <NavLink to="/quests" icon={ListChecks} label="Quest" />}
                 {user && <NavLink to="/checkout" icon={Coins} label="Buy" />}
                 {user && <NavLink to="/withdraw" icon={Wallet} label="Withdraw" />}
                 {user && <NavLink to="/support" icon={LifeBuoy} label="Support" />}
