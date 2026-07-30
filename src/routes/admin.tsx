@@ -3673,7 +3673,7 @@ const QUICK_ACTIONS: { i: any; l: string; t: string }[] = [
   { i: SettingsIcon, l: "Settings", t: "settings" },
   { i: Sparkles, l: "Spotlights", t: "spotlights" },
   { i: Sparkles, l: "Streak/Push", t: "streakpush" },
-  { i: ClipboardList, l: "Tasks", t: "tasks" },
+  { i: ClipboardList, l: "Tasks (Legacy/Manual)", t: "tasks" },
   { i: Ticket, l: "Tickets", t: "tickets" },
   { i: Coins, l: "Tokens", t: "tokens" },
   { i: Coins, l: "Token Rules", t: "tokenrules" },
