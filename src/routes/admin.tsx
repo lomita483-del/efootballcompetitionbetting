@@ -3673,7 +3673,7 @@ const QUICK_ACTIONS: { i: any; l: string; t: string }[] = [
   { i: SettingsIcon, l: "Settings", t: "settings" },
   { i: Sparkles, l: "Spotlights", t: "spotlights" },
   { i: Sparkles, l: "Streak/Push", t: "streakpush" },
-  { i: ClipboardList, l: "Tasks (Legacy/Manual)", t: "tasks" },
+  { i: ClipboardList, l: "Task", t: "tasks" },
   { i: Ticket, l: "Tickets", t: "tickets" },
   { i: Coins, l: "Tokens", t: "tokens" },
   { i: Coins, l: "Token Rules", t: "tokenrules" },
@@ -3685,7 +3685,7 @@ const QUICK_ACTIONS: { i: any; l: string; t: string }[] = [
   { i: Trophy, l: "Won Bets", t: "wonbets" },
   { i: X, l: "Lost Bets", t: "lostbets" },
   { i: Swords, l: "Wagers", t: "wagers" },
-  { i: ListChecks, l: "Tasks & Quests", t: "quests" },
+  { i: ListChecks, l: "Quest", t: "quests" },
   { i: Sparkles, l: "Floating Icons", t: "floating" },
 ];
 
