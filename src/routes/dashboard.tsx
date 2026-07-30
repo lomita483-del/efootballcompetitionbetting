@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
-  Ticket as TicketIcon, ChevronRight, Wallet, UserCog, Coins, Tag, Trophy, ListChecks,
+  Ticket as TicketIcon, ChevronRight, Wallet, UserCog, Coins, Tag, Trophy, ListChecks, ClipboardCheck,
   Sparkles, Lock, ArrowLeftRight, Gift, Receipt, Crown, Calendar, Plus, Activity,
   XCircle, Clock, FileText, PieChart, Bell, LifeBuoy, ArrowUpRight, ArrowDownRight,
 } from "lucide-react";
