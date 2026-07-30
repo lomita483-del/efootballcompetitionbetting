@@ -17,6 +17,7 @@ import {
   Swords,
   Clover,
   ListChecks,
+  ClipboardCheck,
   Gamepad2,
   ShoppingBag,
   Download,
