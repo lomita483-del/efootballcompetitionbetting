@@ -109,7 +109,8 @@ function Dashboard() {
             {isSponsor && <PanelCard onClick={() => setPromoOpen(true)} icon={Tag} title="Promo Codes" subtitle="Sponsor only" gold />}
             <PanelCard to="/transactions" icon={Receipt} title="Transaction Records" subtitle="Credits & debits" />
             <PanelCard to="/achievements" icon={Trophy} title="Achievements" subtitle="Your badges" />
-            <PanelCard to="/tasks" icon={ListChecks} title="Tasks" subtitle="Earn tokens" />
+            <PanelCard to="/tasks" icon={ClipboardCheck} title="Task" subtitle="Admin assigned" />
+            <PanelCard to="/quests" icon={ListChecks} title="Quest" subtitle="Earn tokens" />
             <PanelCard to="/support" icon={LifeBuoy} title="Help Center" subtitle="Get support" />
           </div>
         </section>
