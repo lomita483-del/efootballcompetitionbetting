@@ -35,8 +35,10 @@
   --color-emerald: var(--emerald);
   --color-emerald-soft: var(--emerald-soft);
 
-  --font-display: "Cinzel", "Playfair Display", serif;
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Times New Roman", Times, serif;
+  --font-sans: "Times New Roman", Times, serif;
+  --font-serif: "Times New Roman", Times, serif;
+  --font-mono: "Times New Roman", Times, serif;
 
   --animate-slow-spin: slow-spin 18s linear infinite;
   --animate-pulse-glow: pulse-glow 3s ease-in-out infinite;
@@ -183,6 +185,10 @@ html.light body {
     }
   }
   h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: 0.02em; }
+  /* Global typeface: Times New Roman everywhere */
+  html, body, button, input, textarea, select, optgroup, .font-sans, .font-serif, .font-mono, code, pre, kbd, samp {
+    font-family: "Times New Roman", Times, serif;
+  }
 }
 
 @layer utilities {
