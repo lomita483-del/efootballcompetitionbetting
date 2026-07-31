@@ -3532,10 +3532,6 @@ function AnalyticsPanel() {
               );
             })}
           </PanelBlock>
-          <Card className="relative overflow-hidden border-primary/20 bg-card/60 min-h-[140px]">
-            <img src={leagueSkullFire} alt="Competition Betting ECB" loading="lazy" width={512} height={512} className="absolute inset-0 h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/40" />
-          </Card>
           <MiniLeaderboardPanel onOpen={() => setActiveTabFromAnalytics(nav, "leaderboard")} />
         </div>
 
