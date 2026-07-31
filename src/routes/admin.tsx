@@ -3533,6 +3533,24 @@ function AnalyticsPanel() {
             })}
           </PanelBlock>
           <MiniLeaderboardPanel onOpen={() => setActiveTabFromAnalytics(nav, "leaderboard")} />
+          <Card className="border-primary/25 bg-card/70 p-3">
+            <div className="mb-2 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-primary">
+              <Activity className="h-3 w-3" /> Platform Pulse
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { l: "Live wars", v: liveMatches.length },
+                { l: "Broadcasts", v: broadcasts.length },
+                { l: "Highlights", v: highlights.length },
+                { l: "Events", v: event ? 1 : 0 },
+              ].map((s) => (
+                <div key={s.l} className="rounded-lg border border-primary/20 bg-background/50 px-2 py-2">
+                  <div className="text-base font-black text-primary leading-none">{s.v}</div>
+                  <div className="mt-1 text-[8px] uppercase tracking-widest text-muted-foreground">{s.l}</div>
+                </div>
+              ))}
+            </div>
+          </Card>
         </div>
 
         {/* RIGHT: Top 3 Bettors, then two small icon tiles */}
