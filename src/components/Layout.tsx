@@ -558,8 +558,8 @@ function NavLink({
     <Link
       to={to}
       activeProps={{ className: "active" }}
-      className={`group relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold tracking-wide transition-all border
-        text-foreground/80 border-primary/20 bg-primary/[0.06] hover:text-foreground hover:bg-primary/15 hover:border-primary/40
+      className={`group relative flex h-11 shrink-0 items-center justify-center gap-2 px-4 rounded-lg text-sm font-bold tracking-wide transition-all border whitespace-nowrap
+        text-foreground border-primary/45 bg-card/90 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.7)] hover:bg-primary/20 hover:border-primary/70
         [&.active]:text-primary [&.active]:bg-gradient-to-b [&.active]:from-primary/25 [&.active]:to-primary/10 [&.active]:border-primary/60 [&.active]:shadow-[0_0_14px_-4px_rgba(212,175,55,0.6)]
         ${danger ? "hover:text-destructive [&.active]:!text-destructive [&.active]:!from-destructive/15 [&.active]:!to-destructive/5" : ""}`}
     >
