@@ -3542,16 +3542,23 @@ function AnalyticsPanel() {
         {/* RIGHT: Top 3 Bettors, then two small icon tiles */}
         <div className="space-y-3">
           <TopBetsPanel limit={3} />
-          <div className="grid grid-cols-2 gap-3">
-            <Card className="overflow-hidden border-primary/20 bg-card/60 relative aspect-square">
-              <img src={tileClansAsset.url} alt="Gangs" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            </Card>
-            <Card className="overflow-hidden border-primary/20 bg-card/60 relative aspect-square">
-              <img src={leagueSkullFire} alt="League" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            </Card>
-          </div>
+          <Card className="group relative aspect-[16/10] overflow-hidden border-primary/30 bg-card/60">
+            <img
+              src={leagueSkullFire}
+              alt="Live league arena"
+              loading="lazy"
+              className="absolute inset-0 h-full w-full object-cover animate-[kenburns_18s_ease-in-out_infinite_alternate]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-primary/25 to-transparent opacity-0 animate-[shimmer-sweep_4s_linear_infinite]" />
+            <span className="absolute left-2 top-2 inline-flex items-center gap-1.5 rounded-full border border-destructive/50 bg-black/70 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-destructive">
+              <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-ping" />
+              Live
+            </span>
+            <div className="absolute inset-x-0 bottom-1 text-center text-[10px] font-black uppercase tracking-widest text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+              League Arena
+            </div>
+          </Card>
         </div>
       </div>
 

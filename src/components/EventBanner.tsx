@@ -72,7 +72,7 @@ export function EventBanner() {
               <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/10 to-primary/20" />
             )}
             <div className="absolute inset-0 bg-gradient-to-r from-background/55 via-background/20 to-background/55" />
-            <div className="relative p-4 md:p-6 flex items-center gap-4 flex-wrap">
+            <div className="relative min-h-[130px] md:min-h-[170px] p-6 md:p-9 flex items-center gap-4 flex-wrap">
               {hasCountdown && (
                 <div className="h-12 w-12 rounded-full bg-gradient-emerald grid place-items-center shrink-0">
                   <Calendar className="h-6 w-6 text-primary-foreground" />

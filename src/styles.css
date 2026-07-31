@@ -1047,3 +1047,13 @@ html.light body {
   100% { transform: translateX(-50%); }
 }
 .animate-marquee { animation: marquee 28s linear infinite; }
+
+@keyframes kenburns {
+  from { transform: scale(1) translate3d(0, 0, 0); }
+  to { transform: scale(1.15) translate3d(-2%, -2%, 0); }
+}
+@keyframes shimmer-sweep {
+  0% { opacity: 0; transform: translateX(-100%); }
+  40% { opacity: 0.7; }
+  100% { opacity: 0; transform: translateX(100%); }
+}

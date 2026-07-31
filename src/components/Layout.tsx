@@ -315,25 +315,36 @@ export const Layout = ({ children }: { children: ReactNode }) => {
         {!isHome && (
           <div className="border-t border-primary/15 bg-background/20">
             <div className="container mx-auto px-4 relative">
-              <nav className="flex items-center gap-1 flex-nowrap overflow-x-auto no-scrollbar py-2">
-                <NavLink to="/" icon={Home} label="Home" />
-                <NavLink to="/matches" icon={MatchIcon} label="Matches" />
-                <NavLink to="/virtual" icon={Dice5} label="Virtual" />
-                <NavLink to="/lottery" icon={Clover} label="Lottery" />
-                <NavLink to="/arcade" icon={Gamepad2} label="Arcade" />
-                <NavLink to="/shop" icon={ShoppingBag} label="Shop" />
-                <NavLink to="/leaderboard" icon={Trophy} label="Leaderboard" />
-                <NavLink to="/tournament" icon={Swords} label="Tournament" />
-                {user && <NavLink to="/wagers" icon={Swords} label="Wagers" />}
-                {user && <NavLink to="/dashboard" icon={LayoutDashboard} label="Dashboard" />}
-                {user && <NavLink to="/tasks" icon={ClipboardCheck} label="Task" />}
-                {user && <NavLink to="/quests" icon={ListChecks} label="Quest" />}
-                {user && <NavLink to="/checkout" icon={Coins} label="Buy" />}
-                {user && <NavLink to="/withdraw" icon={Wallet} label="Withdraw" />}
-                {user && <NavLink to="/support" icon={LifeBuoy} label="Support" />}
-                {user && <NavLink to="/settings" icon={SettingsIcon} label="Settings" />}
-                {isAdmin && <NavLink to="/admin" icon={Shield} label="Admin" danger />}
-                {!isAdmin && isMod && <NavLink to="/mod" icon={Shield} label="Mod" danger />}
+              <nav className="flex items-stretch gap-1.5 flex-nowrap overflow-x-auto no-scrollbar py-2">
+                {(() => {
+                  const rest: { to: string; icon: any; label: string; danger?: boolean }[] = [
+                    { to: "/matches", icon: MatchIcon, label: "Matches" },
+                    { to: "/virtual", icon: Dice5, label: "Virtual" },
+                    { to: "/lottery", icon: Clover, label: "Lottery" },
+                    { to: "/arcade", icon: Gamepad2, label: "Arcade" },
+                    { to: "/shop", icon: ShoppingBag, label: "Shop" },
+                    { to: "/leaderboard", icon: Trophy, label: "Leaderboard" },
+                    { to: "/tournament", icon: Swords, label: "Tournament" },
+                    ...(user
+                      ? [
+                          { to: "/wagers", icon: Swords, label: "Wagers" },
+                          { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+                          { to: "/checkout", icon: Coins, label: "Buy" },
+                          { to: "/withdraw", icon: Wallet, label: "Withdraw" },
+                          { to: "/support", icon: LifeBuoy, label: "Support" },
+                          { to: "/settings", icon: SettingsIcon, label: "Settings" },
+                        ]
+                      : []),
+                    ...(!isAdmin && isMod ? [{ to: "/mod", icon: Shield, label: "Mod", danger: true }] : []),
+                  ].sort((a, b) => a.label.localeCompare(b.label));
+                  const first = isAdmin
+                    ? { to: "/admin", icon: Shield, label: "Admin", danger: true }
+                    : { to: "/", icon: Home, label: "Home" };
+                  const items = isAdmin ? [first, { to: "/", icon: Home, label: "Home" }, ...rest] : [first, ...rest];
+                  return items.map((it) => (
+                    <NavLink key={it.to} to={it.to} icon={it.icon} label={it.label} danger={it.danger} />
+                  ));
+                })()}
               </nav>
               <div
                 aria-hidden
@@ -547,8 +558,8 @@ function NavLink({
     <Link
       to={to}
       activeProps={{ className: "active" }}
-      className={`group relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold tracking-wide transition-all border
-        text-foreground/80 border-primary/20 bg-primary/[0.06] hover:text-foreground hover:bg-primary/15 hover:border-primary/40
+      className={`group relative flex h-11 shrink-0 items-center justify-center gap-2 px-4 rounded-lg text-sm font-bold tracking-wide transition-all border whitespace-nowrap
+        text-foreground border-primary/45 bg-card/90 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.7)] hover:bg-primary/20 hover:border-primary/70
         [&.active]:text-primary [&.active]:bg-gradient-to-b [&.active]:from-primary/25 [&.active]:to-primary/10 [&.active]:border-primary/60 [&.active]:shadow-[0_0_14px_-4px_rgba(212,175,55,0.6)]
         ${danger ? "hover:text-destructive [&.active]:!text-destructive [&.active]:!from-destructive/15 [&.active]:!to-destructive/5" : ""}`}
     >
