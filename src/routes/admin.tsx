@@ -3535,7 +3535,7 @@ function AnalyticsPanel() {
           <MiniLeaderboardPanel onOpen={() => setActiveTabFromAnalytics(nav, "leaderboard")} />
           <Card className="border-primary/25 bg-card/70 p-3">
             <div className="mb-2 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-primary">
-              <Activity className="h-3 w-3" /> Platform Pulse
+              <BarChart3 className="h-3 w-3" /> Platform Pulse
             </div>
             <div className="grid grid-cols-2 gap-2">
               {[
