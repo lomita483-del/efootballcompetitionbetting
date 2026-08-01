@@ -25,7 +25,7 @@ export function DraggableFab({
     if (saved) {
       try { setPos(constrain(JSON.parse(saved))); return; } catch {}
     }
-    setPos(constrain({ x: defaultSide === "left" ? 16 : window.innerWidth - 196, y: window.innerHeight - 112 }));
+    setPos(constrain({ x: defaultSide === "left" ? 16 : window.innerWidth - 232, y: window.innerHeight - 112 }));
   }, [defaultSide, storageKey]);
 
   useEffect(() => {
