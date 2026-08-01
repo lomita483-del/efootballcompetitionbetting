@@ -300,13 +300,11 @@ function Roulette({ s, onDone }: { s: any; onDone: () => void }) {
               }}
             >
               {numbers.map((n) => (
-                <span
-                  key={n}
-                  className="absolute left-1/2 top-1/2 origin-top text-[9px] font-black leading-none text-white/95 sm:text-[11px]"
-                  style={{ transform: `rotate(${n * SEG + SEG / 2 + 180}deg) translateY(calc(50% - 4px)) translateY(-46%) rotate(180deg)` }}
-                >
-                  {n}
-                </span>
+                <div key={n} className="absolute inset-0" style={{ transform: `rotate(${n * SEG + SEG / 2}deg)` }}>
+                  <span className="absolute left-1/2 top-[2.5%] -translate-x-1/2 text-[9px] font-black leading-none text-white sm:text-[11px]">
+                    {n}
+                  </span>
+                </div>
               ))}
               {/* pocket separators */}
               <div
