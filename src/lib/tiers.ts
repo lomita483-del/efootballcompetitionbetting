@@ -27,7 +27,7 @@ export function getTierProgress(tierKey: string | null | undefined, xp: number) 
   const nextKey = TIER_ORDER[TIER_ORDER.indexOf(key) + 1];
   const nextMeta = nextKey ? TIER_META[nextKey] : undefined;
   const span = meta.next ? meta.next - meta.min : 0;
-  const gained = Math.max(0, xp - meta.min);
+  const gained = Math.min(span, Math.max(0, xp - meta.min));
   const percent = meta.next ? Math.min(100, Math.round((gained / span) * 100)) : 100;
   return { key, meta, nextMeta, gained, span, percent, toNext: meta.next ? Math.max(0, meta.next - xp) : 0 };
 }
