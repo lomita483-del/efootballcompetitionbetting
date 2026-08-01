@@ -54,13 +54,14 @@ export function FloatingWidgets() {
             onClick={go}
             className={i > 0 ? "mt-2" : ""}
           >
-            <span className="flex items-center gap-2 rounded-full border border-primary/50 bg-card/90 py-2 pl-2 pr-3 shadow-[0_10px_28px_-12px_rgba(0,0,0,0.9)] backdrop-blur-xl">
-              <span className="grid h-9 w-9 place-items-center overflow-hidden rounded-full bg-gradient-gold text-background">
+            <span className="relative flex items-center gap-2.5 rounded-full border-2 border-primary/80 bg-card py-2.5 pl-2.5 pr-4 shadow-[0_0_0_4px_rgba(212,175,55,0.15),0_18px_40px_-12px_rgba(0,0,0,0.95)] backdrop-blur-xl">
+              <span className="pointer-events-none absolute inset-0 animate-ping rounded-full border-2 border-primary/40" />
+              <span className="relative grid h-14 w-14 place-items-center overflow-hidden rounded-full bg-gradient-gold text-background shadow-[0_0_22px_-4px_rgba(212,175,55,0.9)]">
                 {w.image_url
                   ? <img src={w.image_url} alt="" className="h-full w-full object-cover" />
-                  : <Icon className="h-4.5 w-4.5" />}
+                  : <Icon className="h-7 w-7" />}
               </span>
-              <span className="max-w-[110px] truncate text-[11px] font-black uppercase tracking-wider text-primary">{w.name}</span>
+              <span className="relative max-w-[130px] truncate text-sm font-black uppercase tracking-wider text-primary">{w.name}</span>
             </span>
           </DraggableFab>
         );

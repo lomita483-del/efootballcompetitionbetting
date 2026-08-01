@@ -244,6 +244,7 @@ function Roulette({ s, onDone }: { s: any; onDone: () => void }) {
   const [busy, setBusy] = useState(false);
   const [last, setLast] = useState<any>(null);
   const [angle, setAngle] = useState(0);
+  const [ballAngle, setBallAngle] = useState(0);
   if (!s.roulette_enabled) return <Card className="p-8 text-center text-muted-foreground">Roulette is currently closed.</Card>;
 
   const currentMult = betType === "number" ? Number(s.roulette_number_payout ?? 55)
@@ -255,8 +256,11 @@ function Roulette({ s, onDone }: { s: any; onDone: () => void }) {
     const { data, error } = await (supabase.rpc as any)("play_roulette", { _bet_type: betType, _bet_value: betValue, _stake: stake });
     if (error) { setBusy(false); return toast.error(error.message); }
     const num = data.detail?.number ?? 0;
-    setAngle((a) => a + 360 * 6 + (num / 61) * 360);
-    await new Promise((r) => setTimeout(r, 2600));
+    const seg = 360 / 61;
+    const wheelFinal = angle + 360 * 8;
+    setAngle(wheelFinal);
+    setBallAngle(wheelFinal + num * seg - 360 * 22);
+    await new Promise((r) => setTimeout(r, 5200));
     setBusy(false);
     setLast(data);
     if (data.payout > 0) toast.success(`${data.outcome}! You won ${Number(data.payout).toLocaleString()} 🎉`);
@@ -266,34 +270,62 @@ function Roulette({ s, onDone }: { s: any; onDone: () => void }) {
 
   const numbers = Array.from({ length: 61 }, (_, i) => i);
   function colorOf(n: number) { return n === 0 ? "green" : n % 2 === 1 ? "red" : "black"; }
+  const SEG = 360 / 61;
+  const pocketGradient = `conic-gradient(${numbers
+    .map((n) => {
+      const c = colorOf(n) === "green" ? "#15803d" : colorOf(n) === "red" ? "#b91c1c" : "#0f172a";
+      return `${c} ${(n * SEG).toFixed(3)}deg ${((n + 1) * SEG).toFixed(3)}deg`;
+    })
+    .join(",")})`;
 
   return (
-    <Card className={`relative overflow-hidden p-8 max-w-lg mx-auto border-2 border-amber-400/50 bg-gradient-to-b from-black/40 via-background to-black/60 shadow-[0_0_60px_-15px_rgba(212,175,55,0.5)] text-center space-y-5 ${last?.payout > 0 ? "animate-win-glow" : ""}`}>
+    <Card className={`relative overflow-hidden p-8 max-w-2xl mx-auto border-2 border-amber-400/50 bg-gradient-to-b from-black/40 via-background to-black/60 shadow-[0_0_60px_-15px_rgba(212,175,55,0.5)] text-center space-y-5 ${last?.payout > 0 ? "animate-win-glow" : ""}`}>
       <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-gold" />
       <div className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-red-500/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-amber-400/10 blur-3xl" />
       <div className="text-[10px] uppercase tracking-[0.3em] text-amber-300/70 font-bold">Royal Roulette</div>
 
-      <div className="relative grid place-items-center py-6">
-        <div className="absolute h-72 w-72 rounded-full border border-amber-400/20 shadow-[0_0_60px_-5px_rgba(212,175,55,0.35)]" />
-        <div className="relative h-64 w-64 rounded-full p-[6px] bg-gradient-to-br from-amber-200 via-amber-500 to-amber-800 shadow-[0_25px_60px_-12px_rgba(212,175,55,0.75)]">
-          <div
-            className="relative h-full w-full rounded-full border-[3px] border-black/40"
-            style={{
-              background: "repeating-conic-gradient(#b91c1c 0deg 5.9deg, #111827 5.9deg 11.8deg)",
-            }}
-          >
-            <div className="absolute inset-0 rounded-full" style={{ background: "conic-gradient(#16a34a 0deg 5.9deg, transparent 5.9deg 360deg)" }} />
-            <div className="absolute inset-6 rounded-full bg-black/70 border border-amber-400/30 grid place-items-center">
-              <span className="h-16 w-16 rounded-full bg-[radial-gradient(circle_at_35%_30%,#fff7d6,transparent_35%),linear-gradient(145deg,#fde68a_0%,#d4af37_40%,#8a6d1f_80%,#4a3a10_100%)] border-2 border-amber-200/70 grid place-items-center text-xl font-black text-black shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_10px_rgba(0,0,0,0.4)]">
-                {last && !busy ? last.detail?.number : "?"}
-              </span>
-            </div>
+      <div className="relative mx-auto grid place-items-center py-6" style={{ width: "min(100%, 420px)" }}>
+        <div className="relative aspect-square w-full max-w-[420px] rounded-full p-[10px] bg-gradient-to-br from-amber-200 via-amber-500 to-amber-800 shadow-[0_30px_80px_-16px_rgba(212,175,55,0.8)]">
+          {/* fixed pointer */}
+          <span className="absolute left-1/2 top-[-6px] z-20 -translate-x-1/2 border-x-[10px] border-t-[18px] border-x-transparent border-t-amber-200 drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]" />
+          <div className="relative h-full w-full overflow-hidden rounded-full border-[3px] border-black/50 bg-black">
+            {/* spinning wheel with numbered pockets */}
             <div
-              className="absolute inset-0"
-              style={{ transition: busy ? "transform 2.6s cubic-bezier(0.12,0.7,0.15,1)" : "none", transform: `rotate(${angle}deg)` }}
+              className="absolute inset-0 rounded-full"
+              style={{
+                background: pocketGradient,
+                transition: "transform 5.2s cubic-bezier(0.15,0.62,0.12,1)",
+                transform: `rotate(${angle}deg)`,
+              }}
             >
-              <span className="absolute left-1/2 top-1 -translate-x-1/2 h-4 w-4 rounded-full bg-white shadow-[0_0_10px_2px_rgba(255,255,255,0.8)] border border-amber-300" />
+              {numbers.map((n) => (
+                <div key={n} className="absolute inset-0" style={{ transform: `rotate(${n * SEG + SEG / 2}deg)` }}>
+                  <span className="absolute left-1/2 top-[2.5%] -translate-x-1/2 text-[9px] font-black leading-none text-white sm:text-[11px]">
+                    {n}
+                  </span>
+                </div>
+              ))}
+              {/* pocket separators */}
+              <div
+                className="pointer-events-none absolute inset-0 rounded-full opacity-60"
+                style={{ background: `repeating-conic-gradient(rgba(255,215,120,0.55) 0deg 0.4deg, transparent 0.4deg ${SEG.toFixed(3)}deg)` }}
+              />
+            </div>
+
+            {/* ball track */}
+            <div
+              className="absolute inset-[14%] z-10"
+              style={{ transition: "transform 5.2s cubic-bezier(0.1,0.55,0.1,1)", transform: `rotate(${ballAngle}deg)` }}
+            >
+              <span className="absolute left-1/2 top-[-4%] h-3.5 w-3.5 -translate-x-1/2 rounded-full bg-white shadow-[0_0_14px_4px_rgba(255,255,255,0.85)] sm:h-4 sm:w-4" />
+            </div>
+
+            {/* hub */}
+            <div className="absolute inset-[26%] z-10 grid place-items-center rounded-full border border-amber-400/40 bg-black/85 backdrop-blur-sm">
+              <span className="grid h-20 w-20 place-items-center rounded-full border-2 border-amber-200/70 bg-[radial-gradient(circle_at_35%_30%,#fff7d6,transparent_35%),linear-gradient(145deg,#fde68a_0%,#d4af37_40%,#8a6d1f_80%,#4a3a10_100%)] text-2xl font-black text-black shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_10px_rgba(0,0,0,0.4)] sm:h-24 sm:w-24 sm:text-3xl">
+                {busy ? "…" : last ? last.detail?.number : "?"}
+              </span>
             </div>
           </div>
         </div>

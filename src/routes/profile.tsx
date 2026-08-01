@@ -82,7 +82,7 @@ function ProfilePage() {
         <Card className="p-6 mb-6 flex items-center gap-5 flex-wrap">
           <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-primary/50 bg-primary/10 grid place-items-center shadow-gold">
             {profile.avatar_url
-              ? <img src={profile.avatar_url} alt={profile.full_name} className="h-full w-full object-cover" />
+              ? <img src={profile.avatar_url} alt={profile.full_name} className="h-full w-full object-contain" />
               : <span className="text-2xl font-black text-primary">{(profile.full_name ?? "?").slice(0, 2).toUpperCase()}</span>}
           </div>
           <div className="min-w-0 flex-1 space-y-2">

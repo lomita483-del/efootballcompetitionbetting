@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { ChallengesPanel } from "@/components/ChallengesPanel";
 import { ReferralCard } from "@/components/UserHubSections";
+import { getTierProgress } from "@/lib/tiers";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -60,33 +61,67 @@ function Dashboard() {
   const settled = wins + losses;
   const winRate = settled > 0 ? Math.round((wins / settled) * 100) : 0;
   const tier = (profile?.vip_tier ?? "bronze") as string;
+  const xp = Number((profile as any)?.xp ?? 0);
+  const { meta: tierMeta, nextMeta, gained, span, percent } = getTierProgress(tier, xp);
 
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 space-y-6">
         {/* ============ WELCOME HERO ============ */}
-        <Card className="relative overflow-hidden border-primary/30 bg-gradient-to-br from-primary/10 via-card/70 to-background p-0">
-          <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
+        <Card
+          className="relative overflow-hidden bg-gradient-to-br from-card/80 via-card/70 to-background p-0"
+          style={{ borderColor: `${tierMeta.accent}66` }}
+        >
+          <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full blur-3xl" style={{ background: `${tierMeta.accent}33` }} />
           <div className="relative grid gap-5 p-5 md:grid-cols-[1fr_320px] md:p-7">
             <div className="flex items-center gap-5">
-              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-primary/60 bg-primary/10 grid place-items-center shadow-gold md:h-32 md:w-32">
+              <div
+                className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 bg-black/40 grid place-items-center md:h-32 md:w-32"
+                style={{ borderColor: tierMeta.accent, boxShadow: `0 0 28px -6px ${tierMeta.accent}` }}
+              >
                 {profile?.avatar_url
-                  ? <img src={profile.avatar_url} alt={firstName} className="h-full w-full object-cover" />
-                  : <span className="text-3xl font-black text-primary">{firstName.slice(0, 2).toUpperCase()}</span>}
+                  ? <img src={profile.avatar_url} alt={firstName} className="h-full w-full object-contain" />
+                  : <span className="text-3xl font-black" style={{ color: tierMeta.accent }}>{firstName.slice(0, 2).toUpperCase()}</span>}
               </div>
               <div className="min-w-0">
                 <p className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">Welcome back,</p>
-                <h1 className="mt-1 truncate text-4xl font-extrabold uppercase gradient-gold-text md:text-6xl">{firstName}</h1>
-                <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary">
-                  <Crown className="h-3.5 w-3.5" /> {tier} member
+                <h1 className={`mt-1 truncate bg-gradient-to-r ${tierMeta.color} bg-clip-text text-4xl font-extrabold uppercase text-transparent md:text-6xl`}>{firstName}</h1>
+                <div
+                  className="mt-2 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide"
+                  style={{ borderColor: `${tierMeta.accent}99`, background: `${tierMeta.accent}22`, color: tierMeta.accent }}
+                >
+                  <Crown className="h-3.5 w-3.5" /> {tierMeta.label} member
                 </div>
-                <p className="mt-3 text-xs text-muted-foreground">Keep playing to unlock a mystery tier 🎁</p>
                 <div className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                  <Calendar className="h-3.5 w-3.5 text-primary" /> Member since {new Date((profile as any)?.created_at ?? user.created_at).toLocaleDateString(undefined, { month: "long", year: "numeric" })}
+                  <Calendar className="h-3.5 w-3.5" style={{ color: tierMeta.accent }} /> Member since {new Date((profile as any)?.created_at ?? user.created_at).toLocaleDateString(undefined, { month: "long", year: "numeric" })}
+                </div>
+
+                {/* ===== TIER RANK-UP PROGRESS ===== */}
+                <div className="mt-3 max-w-sm">
+                  <div className="mb-1 flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
+                    <span style={{ color: tierMeta.accent }}>{tierMeta.label}</span>
+                    <span className="text-muted-foreground">{nextMeta ? nextMeta.label : "Max tier"}</span>
+                  </div>
+                  <div className="h-3 w-full overflow-hidden rounded-full border border-white/10 bg-black/50">
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{
+                        width: `${Math.max(4, percent)}%`,
+                        background: `linear-gradient(90deg, ${tierMeta.accent}, ${nextMeta?.accent ?? tierMeta.accent})`,
+                        boxShadow: `0 0 14px -2px ${tierMeta.accent}`,
+                      }}
+                    />
+                  </div>
+                  <div className="mt-1 flex items-center justify-between text-[11px]">
+                    <span className="font-bold" style={{ color: tierMeta.accent }}>
+                      {gained.toLocaleString()} / {(span || gained).toLocaleString()} XP
+                    </span>
+                    <span className="text-muted-foreground">{percent}%</span>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="rounded-2xl border border-primary/25 bg-background/50 p-4 backdrop-blur-xl space-y-3">
+            <div className="rounded-2xl border bg-background/50 p-4 backdrop-blur-xl space-y-3" style={{ borderColor: `${tierMeta.accent}44` }}>
               <HeroStat icon={Coins} label="Token Balance" value={profile?.token_balance?.toLocaleString() ?? "0"} gold />
               <HeroStat icon={TicketIcon} label="Active Bets" value={String(active)} />
               <HeroStat icon={FileText} label="Total Bets" value={String(bets.length)} />
