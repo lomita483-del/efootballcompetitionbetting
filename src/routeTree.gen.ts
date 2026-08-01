@@ -55,6 +55,7 @@ import { Route as TicketIdRouteImport } from './routes/ticket.$id'
 import { Route as MatchesMatchIdRouteImport } from './routes/matches.$matchId'
 import { Route as GuidesHowItWorksRouteImport } from './routes/guides.how-it-works'
 import { Route as ApiPublicVirtualTickRouteImport } from './routes/api/public/virtual-tick'
+import { Route as AdminMembersRouteImport } from './routes/admin_.members.'
 import { Route as ApiPublicHooksSendPushRouteImport } from './routes/api/public/hooks/send-push'
 import { Route as ApiPublicHooksRecurringPushRouteImport } from './routes/api/public/hooks/recurring-push'
 import { Route as ApiPublicHooksProcessScheduledPushRouteImport } from './routes/api/public/hooks/process-scheduled-push'
@@ -291,6 +292,11 @@ const ApiPublicVirtualTickRoute = ApiPublicVirtualTickRouteImport.update({
   path: '/api/public/virtual-tick',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminMembersRoute = AdminMembersRouteImport.update({
+  id: '/admin_/members/',
+  path: '/admin/members/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksSendPushRoute = ApiPublicHooksSendPushRouteImport.update({
   id: '/api/public/hooks/send-push',
   path: '/api/public/hooks/send-push',
@@ -361,6 +367,7 @@ export interface FileRoutesByFullPath {
   '/wagers/$id': typeof WagersIdRoute
   '/virtual/': typeof VirtualIndexRoute
   '/wagers/': typeof WagersIndexRoute
+  '/admin/members/': typeof AdminMembersRoute
   '/api/public/virtual-tick': typeof ApiPublicVirtualTickRoute
   '/api/public/hooks/broadcast-push': typeof ApiPublicHooksBroadcastPushRoute
   '/api/public/hooks/process-scheduled-push': typeof ApiPublicHooksProcessScheduledPushRoute
@@ -413,6 +420,7 @@ export interface FileRoutesByTo {
   '/wagers/$id': typeof WagersIdRoute
   '/virtual': typeof VirtualIndexRoute
   '/wagers': typeof WagersIndexRoute
+  '/admin/members': typeof AdminMembersRoute
   '/api/public/virtual-tick': typeof ApiPublicVirtualTickRoute
   '/api/public/hooks/broadcast-push': typeof ApiPublicHooksBroadcastPushRoute
   '/api/public/hooks/process-scheduled-push': typeof ApiPublicHooksProcessScheduledPushRoute
@@ -466,6 +474,7 @@ export interface FileRoutesById {
   '/wagers/$id': typeof WagersIdRoute
   '/virtual/': typeof VirtualIndexRoute
   '/wagers/': typeof WagersIndexRoute
+  '/admin_/members/': typeof AdminMembersRoute
   '/api/public/virtual-tick': typeof ApiPublicVirtualTickRoute
   '/api/public/hooks/broadcast-push': typeof ApiPublicHooksBroadcastPushRoute
   '/api/public/hooks/process-scheduled-push': typeof ApiPublicHooksProcessScheduledPushRoute
@@ -520,6 +529,7 @@ export interface FileRouteTypes {
     | '/wagers/$id'
     | '/virtual/'
     | '/wagers/'
+    | '/admin/members/'
     | '/api/public/virtual-tick'
     | '/api/public/hooks/broadcast-push'
     | '/api/public/hooks/process-scheduled-push'
@@ -572,6 +582,7 @@ export interface FileRouteTypes {
     | '/wagers/$id'
     | '/virtual'
     | '/wagers'
+    | '/admin/members'
     | '/api/public/virtual-tick'
     | '/api/public/hooks/broadcast-push'
     | '/api/public/hooks/process-scheduled-push'
@@ -624,6 +635,7 @@ export interface FileRouteTypes {
     | '/wagers/$id'
     | '/virtual/'
     | '/wagers/'
+    | '/admin_/members/'
     | '/api/public/virtual-tick'
     | '/api/public/hooks/broadcast-push'
     | '/api/public/hooks/process-scheduled-push'
@@ -676,6 +688,7 @@ export interface RootRouteChildren {
   WagersIdRoute: typeof WagersIdRoute
   VirtualIndexRoute: typeof VirtualIndexRoute
   WagersIndexRoute: typeof WagersIndexRoute
+  AdminMembersRoute: typeof AdminMembersRoute
   ApiPublicVirtualTickRoute: typeof ApiPublicVirtualTickRoute
   ApiPublicHooksBroadcastPushRoute: typeof ApiPublicHooksBroadcastPushRoute
   ApiPublicHooksProcessScheduledPushRoute: typeof ApiPublicHooksProcessScheduledPushRoute
@@ -1007,6 +1020,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicVirtualTickRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin_/members/': {
+      id: '/admin_/members/'
+      path: '/admin/members'
+      fullPath: '/admin/members/'
+      preLoaderRoute: typeof AdminMembersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/send-push': {
       id: '/api/public/hooks/send-push'
       path: '/api/public/hooks/send-push'
@@ -1094,6 +1114,7 @@ const rootRouteChildren: RootRouteChildren = {
   WagersIdRoute: WagersIdRoute,
   VirtualIndexRoute: VirtualIndexRoute,
   WagersIndexRoute: WagersIndexRoute,
+  AdminMembersRoute: AdminMembersRoute,
   ApiPublicVirtualTickRoute: ApiPublicVirtualTickRoute,
   ApiPublicHooksBroadcastPushRoute: ApiPublicHooksBroadcastPushRoute,
   ApiPublicHooksProcessScheduledPushRoute:

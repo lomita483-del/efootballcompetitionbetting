@@ -418,7 +418,7 @@ function UsersPanel() {
   const [filterRole, setFilterRole] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [sort, setSort] = useState<string>("newest");
-  const [edit, setEdit] = useState<any | null>(null);
+  const navMember = useNavigate();
 
   async function load() {
     const { data: rich } = await (supabase as any).rpc("admin_list_users_with_kyc");
@@ -670,7 +670,7 @@ function UsersPanel() {
 
               <Button
                 size="sm"
-                onClick={() => setEdit(u)}
+                onClick={() => navMember({ to: "/admin/members/$userId", params: { userId: u.id } })}
                 className="btn-luxury w-full mt-3 h-9 font-bold tracking-wide"
               >
                 <Pencil className="h-3 w-3 mr-1" />Manage Member
@@ -687,7 +687,6 @@ function UsersPanel() {
         </div>
       )}
 
-      {edit && <UserEditDialog user={edit} roles={rolesByUser[edit.id] ?? []} onClose={() => { setEdit(null); load(); }} />}
     </div>
   );
 }
