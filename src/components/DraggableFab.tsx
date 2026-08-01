@@ -67,8 +67,8 @@ export function DraggableFab({
 function constrain(p: Point): Point {
   if (typeof window === "undefined") return p;
   const margin = 8;
-  const maxX = Math.max(margin, window.innerWidth - 190);
-  const maxY = Math.max(72, window.innerHeight - 104);
+  const maxX = Math.max(margin, window.innerWidth - 240);
+  const maxY = Math.max(72, window.innerHeight - 130);
   return {
     x: Math.min(Math.max(p.x, margin), maxX),
     y: Math.min(Math.max(p.y, 72), maxY),
