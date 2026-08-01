@@ -16,7 +16,7 @@ import { useAuth, ROLE_LABELS, type AppRole } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/audit";
 
-export const Route = createFileRoute("/admin_/members/")({
+export const Route = createFileRoute("/admin_/members/$userId")({
   head: () => ({
     meta: [
       { title: "Member Management — ECB Admin" },
