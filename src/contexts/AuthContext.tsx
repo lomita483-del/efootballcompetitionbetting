@@ -104,9 +104,7 @@ if (next?.is_banned || wasKicked) {
               if (typeof window !== "undefined") window.location.href = next?.is_banned ? "/login?banned=1" : "/login?kicked=1";
             });
           }
-          // firstSeenKick is intentionally ignored — do not sign out on stale force_logout_at values seen for the first time after login.
-          void firstSeenKick;
-        })
+        }}
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "token_transactions", filter: `user_id=eq.${user.id}` },
         () => loadUserData(user.id))
       .on("postgres_changes", { event: "*", schema: "public", table: "user_roles", filter: `user_id=eq.${user.id}` },
