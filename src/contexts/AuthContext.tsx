@@ -95,14 +95,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setProfile((prev) => ({ ...(prev as Profile), ...next }));
           // Auto kick-out only when force_logout_at is newly set (or strictly newer).
           const wasKicked =
-            !!next?.force_logout_at &&
-            lastForceLogout != null &&
-            next.force_logout_at !== lastForceLogout;
-          const firstSeenKick =
-            !!next?.force_logout_at && lastForceLogout == null;
-          // Track the latest value for future comparisons.
-          lastForceLogout = next?.force_logout_at ?? lastForceLogout;
-          if (next?.is_banned || wasKicked) {
+  !!next?.force_logout_at &&
+  next.force_logout_at !== lastForceLogout;
+// Track the latest value for future comparisons.
+lastForceLogout = next?.force_logout_at ?? lastForceLogout;
+if (next?.is_banned || wasKicked) {
             supabase.auth.signOut().then(() => {
               if (typeof window !== "undefined") window.location.href = next?.is_banned ? "/login?banned=1" : "/login?kicked=1";
             });
