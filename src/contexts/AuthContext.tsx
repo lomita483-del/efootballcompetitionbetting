@@ -103,8 +103,8 @@ if (next?.is_banned || wasKicked) {
             supabase.auth.signOut().then(() => {
               if (typeof window !== "undefined") window.location.href = next?.is_banned ? "/login?banned=1" : "/login?kicked=1";
             });
-          }.
-        }}
+          }
+        })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "token_transactions", filter: `user_id=eq.${user.id}` },
         () => loadUserData(user.id))
       .on("postgres_changes", { event: "*", schema: "public", table: "user_roles", filter: `user_id=eq.${user.id}` },
