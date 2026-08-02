@@ -70,10 +70,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const kicked = !!current && seen !== null && seen !== current;
     if (!current) window.localStorage.removeItem(key);
     else window.localStorage.setItem(key, current);
-    if (p.is_banned || kicked) {
-      if (kicked) window.localStorage.setItem(key, current);
+    // Banned users stay signed in so the BanGate overlay can block the app
+    // while still letting them submit an appeal (appeals require a session).
+    if (kicked) {
+      window.localStorage.setItem(key, current);
       supabase.auth.signOut().then(() => {
-        window.location.href = p.is_banned ? "/login?banned=1" : "/login?kicked=1";
+        window.location.href = "/login?kicked=1";
       });
       return true;
     }
