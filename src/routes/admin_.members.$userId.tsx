@@ -160,16 +160,24 @@ function MemberDetailPage() {
 
   async function applyTokens() {
     if (!tokenDelta || !tokenReason) { toast.error("Amount and reason required"); return; }
-    const newBal = (user?.token_balance ?? 0) + tokenDelta;
-    if (newBal < 0) { toast.error("Balance cannot go negative"); return; }
+    const MAX_TOKENS = 1_000_000_000_000_000; // safe integer ceiling for the ledger
+    if (!Number.isFinite(tokenDelta) || Math.abs(tokenDelta) > MAX_TOKENS) {
+      toast.error("Amount is too large", { description: `Enter a value between -${MAX_TOKENS.toLocaleString()} and ${MAX_TOKENS.toLocaleString()} tokens.` });
+      return;
+    }
+    const delta = Math.trunc(tokenDelta);
+    const newBal = (user?.token_balance ?? 0) + delta;
+    if (newBal < 0) { toast.error("Balance cannot go negative", { description: "The deduction is larger than the member's current balance." }); return; }
+    if (newBal > MAX_TOKENS) { toast.error("Resulting balance is too large", { description: `Maximum supported balance is ${MAX_TOKENS.toLocaleString()} tokens.` }); return; }
     const { error } = await supabase.from("profiles").update({ token_balance: newBal }).eq("id", userId);
-    if (error) { toast.error(error.message); return; }
-    await supabase.from("notifications").insert({ user_id: userId, title: tokenDelta > 0 ? "Tokens credited" : "Tokens debited", body: `${tokenDelta > 0 ? "+" : ""}${tokenDelta} tokens — ${tokenReason}` });
-    await logAudit(tokenDelta > 0 ? "grant_tokens" : "revoke_tokens", "user", userId, {
-      amount: tokenDelta, reason: tokenReason, balance_from: user?.token_balance ?? 0, balance_to: newBal,
+    if (error) { toast.error("Could not apply adjustment", { description: error.message }); return; }
+    await supabase.from("notifications").insert({ user_id: userId, title: delta > 0 ? "Tokens credited" : "Tokens debited", body: `${delta > 0 ? "+" : ""}${delta.toLocaleString()} tokens — ${tokenReason}` });
+    await logAudit(delta > 0 ? "grant_tokens" : "revoke_tokens", "user", userId, {
+      amount: delta, reason: tokenReason, balance_from: user?.token_balance ?? 0, balance_to: newBal,
       target_user_email: user?.email, target_user_name: user?.full_name,
     });
-    toast.success("Applied"); setTokenDelta(0); setTokenReason("");
+    toast.success("Adjustment applied", { description: `New balance: ${newBal.toLocaleString()} tokens.` });
+    setTokenDelta(0); setTokenReason("");
     loadUser(); loadRelated();
   }
 
