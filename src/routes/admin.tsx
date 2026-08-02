@@ -3724,8 +3724,8 @@ const QA_PALETTE = [
   { ic: "text-indigo-400",  bd: "border-indigo-500/30 hover:border-indigo-400/70 hover:bg-indigo-500/10" },
 ];
 
-function QuickActionsBar({ onOpen }: { onOpen: (t: string) => void }) {
-  const actions = [...QUICK_ACTIONS].sort((a, b) => a.l.localeCompare(b.l));
+function QuickActionsBar({ onOpen, actions: actionsProp }: { onOpen: (t: string) => void; actions?: typeof QUICK_ACTIONS }) {
+  const actions = [...(actionsProp ?? QUICK_ACTIONS)].sort((a, b) => a.l.localeCompare(b.l));
   return (
     <Card className="border-primary/20 bg-card/60 p-3">
       <div className="text-[10px] sm:text-xs font-bold tracking-widest text-primary mb-2">QUICK ACTIONS</div>
