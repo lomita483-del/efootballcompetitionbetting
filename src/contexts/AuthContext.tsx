@@ -137,7 +137,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .eq("id", uid)
         .maybeSingle();
       if (stopped || !data) return;
-      const p = data as Profile;
+      const p = data as unknown as Profile;
       setProfile((prev) => ({ ...(prev as Profile), ...p }));
       enforceAccount(p);
     };
