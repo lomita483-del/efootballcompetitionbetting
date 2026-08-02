@@ -60,6 +60,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Enforce admin actions (ban / kick / session revoke) the moment we see them,
+  // even if the user has been offline since the action was taken.
+  const enforceAccount = (p: Profile | null) => {
+    if (!p || typeof window === "undefined") return false;
+    const key = `ecb_force_logout_${p.id}`;
+    const seen = window.localStorage.getItem(key);
+    const current = p.force_logout_at ?? "";
+    const kicked = !!current && seen !== null && seen !== current;
+    if (!current) window.localStorage.removeItem(key);
+    else window.localStorage.setItem(key, current);
+    if (p.is_banned || kicked) {
+      if (kicked) window.localStorage.setItem(key, current);
+      supabase.auth.signOut().then(() => {
+        window.location.href = p.is_banned ? "/login?banned=1" : "/login?kicked=1";
+      });
+      return true;
+    }
+    return false;
+  };
+
   const loadUserData = async (uid: string) => {
     const [{ data: p }, { data: r }] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
@@ -67,6 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     ]);
     setProfile(p as Profile | null);
     setRoles((r ?? []).map((x: any) => x.role));
+    enforceAccount(p as Profile | null);
   };
 
   useEffect(() => {
@@ -87,23 +108,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!user) return;
-    let lastForceLogout: string | null | undefined = (profile as any)?.force_logout_at ?? null;
     const ch = supabase.channel(`me-${user.id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${user.id}` },
         (payload) => {
           const next = payload.new as Profile;
           setProfile((prev) => ({ ...(prev as Profile), ...next }));
-          // Auto kick-out only when force_logout_at is newly set (or strictly newer).
-          const wasKicked =
-  !!next?.force_logout_at &&
-  next.force_logout_at !== lastForceLogout;
-// Track the latest value for future comparisons.
-lastForceLogout = next?.force_logout_at ?? lastForceLogout;
-if (next?.is_banned || wasKicked) {
-            supabase.auth.signOut().then(() => {
-              if (typeof window !== "undefined") window.location.href = next?.is_banned ? "/login?banned=1" : "/login?kicked=1";
-            });
-          }
+          enforceAccount(next);
         })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "token_transactions", filter: `user_id=eq.${user.id}` },
         () => loadUserData(user.id))
@@ -111,6 +121,38 @@ if (next?.is_banned || wasKicked) {
         () => loadUserData(user.id))
       .subscribe();
     return () => { supabase.removeChannel(ch); };
+  }, [user?.id]);
+
+  // Safety net: realtime can drop (sleeping tab, flaky network, PWA resume).
+  // Poll the account state so bans, kicks and balance changes land quickly.
+  useEffect(() => {
+    if (!user || typeof window === "undefined") return;
+    const uid = user.id;
+    let stopped = false;
+    const sync = async () => {
+      if (stopped) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", uid)
+        .maybeSingle();
+      if (stopped || !data) return;
+      const p = data as Profile;
+      setProfile((prev) => ({ ...(prev as Profile), ...p }));
+      enforceAccount(p);
+    };
+    const iv = window.setInterval(sync, 15_000);
+    const onVis = () => { if (document.visibilityState === "visible") sync(); };
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("focus", sync);
+    window.addEventListener("online", sync);
+    return () => {
+      stopped = true;
+      window.clearInterval(iv);
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("focus", sync);
+      window.removeEventListener("online", sync);
+    };
   }, [user?.id]);
 
   // Heartbeat: keep user_sessions fresh so the admin "Online Users" panel works.
