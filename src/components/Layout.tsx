@@ -328,6 +328,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
                     ...(user
                       ? [
                           { to: "/wagers", icon: Swords, label: "Wagers" },
+                          { to: "/chat", icon: MessageSquare, label: "Chat" },
                           { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
                           { to: "/checkout", icon: Coins, label: "Buy" },
                           { to: "/withdraw", icon: Wallet, label: "Withdraw" },
