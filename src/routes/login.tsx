@@ -110,8 +110,7 @@ function LoginPage() {
                   </div>
                   <div className="min-w-0">
                     <h2 className="font-bold text-destructive">Your account has been banned</h2>
-                    <p className="text-xs text-muted-foreground mt-1">You can submit an appeal to our moderation team for review.</p>
-                    <Link to="/support" className="inline-block mt-3 text-xs px-3 py-1.5 rounded-md bg-destructive/20 text-destructive border border-destructive/40 hover:bg-destructive/30 transition">Submit Appeal →</Link>
+                    <p className="text-xs text-muted-foreground mt-1">Sign in below to submit an appeal to our moderation team.</p>
                   </div>
                 </div>
               </Card>
