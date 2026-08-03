@@ -18,7 +18,7 @@ const audienceSchema = z.object({
   role: z.string().trim().optional().default("any"),
   locale: z.string().trim().max(40).optional().default(""),
   lastActiveDays: z.number().int().positive().max(3650).nullable().optional(),
-}).optional().default({});
+}).optional().default({ role: "any", locale: "" });
 
 type Audience = z.infer<typeof audienceSchema>;
 
