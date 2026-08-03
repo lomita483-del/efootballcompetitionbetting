@@ -27,6 +27,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PollsRouteImport } from './routes/polls'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as ModRouteImport } from './routes/mod'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as LotteryRouteImport } from './routes/lottery'
 import { Route as LoginRouteImport } from './routes/login'
@@ -54,8 +55,12 @@ import { Route as VirtualChampionshipRouteImport } from './routes/virtual.champi
 import { Route as TicketIdRouteImport } from './routes/ticket.$id'
 import { Route as MatchesMatchIdRouteImport } from './routes/matches.$matchId'
 import { Route as GuidesHowItWorksRouteImport } from './routes/guides.how-it-works'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as ApiPublicVirtualTickRouteImport } from './routes/api/public/virtual-tick'
 import { Route as AdminMembersUserIdRouteImport } from './routes/admin_.members.$userId'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicHooksSendPushRouteImport } from './routes/api/public/hooks/send-push'
 import { Route as ApiPublicHooksRecurringPushRouteImport } from './routes/api/public/hooks/recurring-push'
 import { Route as ApiPublicHooksProcessScheduledPushRouteImport } from './routes/api/public/hooks/process-scheduled-push'
@@ -149,6 +154,11 @@ const NotificationsRoute = NotificationsRouteImport.update({
 const ModRoute = ModRouteImport.update({
   id: '/mod',
   path: '/mod',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MatchesRoute = MatchesRouteImport.update({
@@ -287,6 +297,18 @@ const GuidesHowItWorksRoute = GuidesHowItWorksRouteImport.update({
   path: '/guides/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicVirtualTickRoute = ApiPublicVirtualTickRouteImport.update({
   id: '/api/public/virtual-tick',
   path: '/api/public/virtual-tick',
@@ -295,6 +317,17 @@ const ApiPublicVirtualTickRoute = ApiPublicVirtualTickRouteImport.update({
 const AdminMembersUserIdRoute = AdminMembersUserIdRouteImport.update({
   id: '/admin_/members/$userId',
   path: '/admin/members/$userId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicHooksSendPushRoute = ApiPublicHooksSendPushRouteImport.update({
@@ -338,6 +371,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/lottery': typeof LotteryRoute
   '/matches': typeof MatchesRouteWithChildren
+  '/mcp': typeof McpRoute
   '/mod': typeof ModRoute
   '/notifications': typeof NotificationsRoute
   '/polls': typeof PollsRoute
@@ -356,6 +390,8 @@ export interface FileRoutesByFullPath {
   '/trivia': typeof TriviaRoute
   '/watchlist': typeof WatchlistRoute
   '/withdraw': typeof WithdrawRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/guides/how-it-works': typeof GuidesHowItWorksRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
   '/ticket/$id': typeof TicketIdRoute
@@ -367,6 +403,8 @@ export interface FileRoutesByFullPath {
   '/wagers/$id': typeof WagersIdRoute
   '/virtual/': typeof VirtualIndexRoute
   '/wagers/': typeof WagersIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/members/$userId': typeof AdminMembersUserIdRoute
   '/api/public/virtual-tick': typeof ApiPublicVirtualTickRoute
   '/api/public/hooks/broadcast-push': typeof ApiPublicHooksBroadcastPushRoute
@@ -391,6 +429,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/lottery': typeof LotteryRoute
   '/matches': typeof MatchesRouteWithChildren
+  '/mcp': typeof McpRoute
   '/mod': typeof ModRoute
   '/notifications': typeof NotificationsRoute
   '/polls': typeof PollsRoute
@@ -409,6 +448,8 @@ export interface FileRoutesByTo {
   '/trivia': typeof TriviaRoute
   '/watchlist': typeof WatchlistRoute
   '/withdraw': typeof WithdrawRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/guides/how-it-works': typeof GuidesHowItWorksRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
   '/ticket/$id': typeof TicketIdRoute
@@ -420,6 +461,8 @@ export interface FileRoutesByTo {
   '/wagers/$id': typeof WagersIdRoute
   '/virtual': typeof VirtualIndexRoute
   '/wagers': typeof WagersIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/members/$userId': typeof AdminMembersUserIdRoute
   '/api/public/virtual-tick': typeof ApiPublicVirtualTickRoute
   '/api/public/hooks/broadcast-push': typeof ApiPublicHooksBroadcastPushRoute
@@ -445,6 +488,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/lottery': typeof LotteryRoute
   '/matches': typeof MatchesRouteWithChildren
+  '/mcp': typeof McpRoute
   '/mod': typeof ModRoute
   '/notifications': typeof NotificationsRoute
   '/polls': typeof PollsRoute
@@ -463,6 +507,8 @@ export interface FileRoutesById {
   '/trivia': typeof TriviaRoute
   '/watchlist': typeof WatchlistRoute
   '/withdraw': typeof WithdrawRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/guides/how-it-works': typeof GuidesHowItWorksRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
   '/ticket/$id': typeof TicketIdRoute
@@ -474,6 +520,8 @@ export interface FileRoutesById {
   '/wagers/$id': typeof WagersIdRoute
   '/virtual/': typeof VirtualIndexRoute
   '/wagers/': typeof WagersIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin_/members/$userId': typeof AdminMembersUserIdRoute
   '/api/public/virtual-tick': typeof ApiPublicVirtualTickRoute
   '/api/public/hooks/broadcast-push': typeof ApiPublicHooksBroadcastPushRoute
@@ -500,6 +548,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/lottery'
     | '/matches'
+    | '/mcp'
     | '/mod'
     | '/notifications'
     | '/polls'
@@ -518,6 +567,8 @@ export interface FileRouteTypes {
     | '/trivia'
     | '/watchlist'
     | '/withdraw'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/guides/how-it-works'
     | '/matches/$matchId'
     | '/ticket/$id'
@@ -529,6 +580,8 @@ export interface FileRouteTypes {
     | '/wagers/$id'
     | '/virtual/'
     | '/wagers/'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/admin/members/$userId'
     | '/api/public/virtual-tick'
     | '/api/public/hooks/broadcast-push'
@@ -553,6 +606,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/lottery'
     | '/matches'
+    | '/mcp'
     | '/mod'
     | '/notifications'
     | '/polls'
@@ -571,6 +625,8 @@ export interface FileRouteTypes {
     | '/trivia'
     | '/watchlist'
     | '/withdraw'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/guides/how-it-works'
     | '/matches/$matchId'
     | '/ticket/$id'
@@ -582,6 +638,8 @@ export interface FileRouteTypes {
     | '/wagers/$id'
     | '/virtual'
     | '/wagers'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/admin/members/$userId'
     | '/api/public/virtual-tick'
     | '/api/public/hooks/broadcast-push'
@@ -606,6 +664,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/lottery'
     | '/matches'
+    | '/mcp'
     | '/mod'
     | '/notifications'
     | '/polls'
@@ -624,6 +683,8 @@ export interface FileRouteTypes {
     | '/trivia'
     | '/watchlist'
     | '/withdraw'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/guides/how-it-works'
     | '/matches/$matchId'
     | '/ticket/$id'
@@ -635,6 +696,8 @@ export interface FileRouteTypes {
     | '/wagers/$id'
     | '/virtual/'
     | '/wagers/'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/admin_/members/$userId'
     | '/api/public/virtual-tick'
     | '/api/public/hooks/broadcast-push'
@@ -660,6 +723,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   LotteryRoute: typeof LotteryRoute
   MatchesRoute: typeof MatchesRouteWithChildren
+  McpRoute: typeof McpRoute
   ModRoute: typeof ModRoute
   NotificationsRoute: typeof NotificationsRoute
   PollsRoute: typeof PollsRoute
@@ -678,6 +742,8 @@ export interface RootRouteChildren {
   TriviaRoute: typeof TriviaRoute
   WatchlistRoute: typeof WatchlistRoute
   WithdrawRoute: typeof WithdrawRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   GuidesHowItWorksRoute: typeof GuidesHowItWorksRoute
   TicketIdRoute: typeof TicketIdRoute
   VirtualChampionshipRoute: typeof VirtualChampionshipRoute
@@ -688,6 +754,8 @@ export interface RootRouteChildren {
   WagersIdRoute: typeof WagersIdRoute
   VirtualIndexRoute: typeof VirtualIndexRoute
   WagersIndexRoute: typeof WagersIndexRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   AdminMembersUserIdRoute: typeof AdminMembersUserIdRoute
   ApiPublicVirtualTickRoute: typeof ApiPublicVirtualTickRoute
   ApiPublicHooksBroadcastPushRoute: typeof ApiPublicHooksBroadcastPushRoute
@@ -822,6 +890,13 @@ declare module '@tanstack/react-router' {
       path: '/mod'
       fullPath: '/mod'
       preLoaderRoute: typeof ModRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/matches': {
@@ -1013,6 +1088,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesHowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/virtual-tick': {
       id: '/api/public/virtual-tick'
       path: '/api/public/virtual-tick'
@@ -1025,6 +1114,20 @@ declare module '@tanstack/react-router' {
       path: '/admin/members/$userId'
       fullPath: '/admin/members/$userId'
       preLoaderRoute: typeof AdminMembersUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/send-push': {
@@ -1086,6 +1189,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   LotteryRoute: LotteryRoute,
   MatchesRoute: MatchesRouteWithChildren,
+  McpRoute: McpRoute,
   ModRoute: ModRoute,
   NotificationsRoute: NotificationsRoute,
   PollsRoute: PollsRoute,
@@ -1104,6 +1208,9 @@ const rootRouteChildren: RootRouteChildren = {
   TriviaRoute: TriviaRoute,
   WatchlistRoute: WatchlistRoute,
   WithdrawRoute: WithdrawRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   GuidesHowItWorksRoute: GuidesHowItWorksRoute,
   TicketIdRoute: TicketIdRoute,
   VirtualChampionshipRoute: VirtualChampionshipRoute,
@@ -1114,6 +1221,8 @@ const rootRouteChildren: RootRouteChildren = {
   WagersIdRoute: WagersIdRoute,
   VirtualIndexRoute: VirtualIndexRoute,
   WagersIndexRoute: WagersIndexRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   AdminMembersUserIdRoute: AdminMembersUserIdRoute,
   ApiPublicVirtualTickRoute: ApiPublicVirtualTickRoute,
   ApiPublicHooksBroadcastPushRoute: ApiPublicHooksBroadcastPushRoute,
@@ -1125,3 +1234,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

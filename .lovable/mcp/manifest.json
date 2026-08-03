@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://sqaesmhqhzojinprofha.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "e-football-competition-betting-platform",
+      "version": "0.1.0",
+      "title": "E-FOOTBALL COMPETITION BETTING PLATFORM"
+    },
+    "tools": [
+      {
+        "name": "get_my_account",
+        "title": "Get my account",
+        "description": "Return the signed-in player's profile: token balance, XP, VIP tier, gang and streak.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_bets",
+        "title": "List my bets",
+        "description": "List the signed-in player's bet tickets, newest first, optionally filtered by status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "status": {
+              "description": "Filter by ticket status.",
+              "type": "string",
+              "enum": [
+                "open",
+                "won",
+                "lost",
+                "void",
+                "cashed_out"
+              ]
+            },
+            "limit": {
+              "description": "Max tickets to return (default 20, max 100).",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_matches",
+        "title": "List matches",
+        "description": "List E-Football competition matches with teams, scores, kickoff time and status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "status": {
+              "description": "Filter by match status.",
+              "type": "string",
+              "enum": [
+                "scheduled",
+                "live",
+                "ended"
+              ]
+            },
+            "limit": {
+              "description": "Max matches to return (default 20, max 100).",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_wagers",
+        "title": "List my P2P wagers",
+        "description": "List player-vs-player wagers the signed-in user created or was challenged to.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "description": "Max wagers to return (default 20, max 100).",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

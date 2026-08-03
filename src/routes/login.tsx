@@ -42,8 +42,12 @@ export const Route = createFileRoute("/login")({
     ],
     links: [{ rel: "canonical", href: "https://lslonlinebetting.lovable.app/login" }],
   }),
-  validateSearch: (s: Record<string, unknown>): { banned?: number } => {
-    return s.banned === "1" || s.banned === 1 ? { banned: 1 } : {};
+  validateSearch: (s: Record<string, unknown>): { banned?: number; next?: string } => {
+    const out: { banned?: number; next?: string } = {};
+    if (s.banned === "1" || s.banned === 1) out.banned = 1;
+    // Only same-origin relative paths are preserved.
+    if (typeof s.next === "string" && s.next.startsWith("/") && !s.next.startsWith("//")) out.next = s.next;
+    return out;
   },
   component: LoginPage,
 });
@@ -51,15 +55,17 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const nav = useNavigate();
   const { user } = useAuth();
-  const { banned } = useSearch({ from: "/login" });
+  const { banned, next } = useSearch({ from: "/login" });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const brandingHero = useBranding().authHeroUrl;
 
   useEffect(() => {
-    if (user) nav({ to: "/dashboard", replace: true });
-  }, [user, nav]);
+    if (!user) return;
+    if (next) { window.location.href = next; return; }
+    nav({ to: "/dashboard", replace: true });
+  }, [user, nav, next]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,7 +75,7 @@ function LoginPage() {
     if (error) return toast.error(error.message);
     toast.success("Welcome back!");
     // Hard navigate to ensure auth state is hydrated everywhere
-    window.location.href = "/dashboard";
+    window.location.href = next || "/dashboard";
   };
 
   return (
