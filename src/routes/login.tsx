@@ -131,7 +131,7 @@ function LoginPage() {
               <Button type="submit" disabled={loading} className="btn-luxury w-full h-11 text-base font-black">{loading ? "Signing in..." : "Sign in"}</Button>
             </form>
             <div className="mt-6 flex items-center justify-between text-sm">
-              <Link to="/forgot-password" className="text-muted-foreground hover:text-primary hover:underline">Forgot password?</Link>
+              <Link to="/forgot-password" className="text-muted-foreground hover:text-primary hover:underline">Forgot password? Get a one-time code</Link>
               <span className="text-muted-foreground">
                 New here? <Link to="/register" className="text-primary font-bold hover:underline">Open an account</Link>
               </span>
