@@ -60,6 +60,7 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as ApiPublicVirtualTickRouteImport } from './routes/api/public/virtual-tick'
 import { Route as AdminMembersUserIdRouteImport } from './routes/admin_.members.$userId'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicHooksSendPushRouteImport } from './routes/api/public/hooks/send-push'
 import { Route as ApiPublicHooksRecurringPushRouteImport } from './routes/api/public/hooks/recurring-push'
 import { Route as ApiPublicHooksProcessScheduledPushRouteImport } from './routes/api/public/hooks/process-scheduled-push'
@@ -324,6 +325,11 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksSendPushRoute = ApiPublicHooksSendPushRouteImport.update({
   id: '/api/public/hooks/send-push',
   path: '/api/public/hooks/send-push',
@@ -397,6 +403,7 @@ export interface FileRoutesByFullPath {
   '/wagers/$id': typeof WagersIdRoute
   '/virtual/': typeof VirtualIndexRoute
   '/wagers/': typeof WagersIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/members/$userId': typeof AdminMembersUserIdRoute
   '/api/public/virtual-tick': typeof ApiPublicVirtualTickRoute
@@ -454,6 +461,7 @@ export interface FileRoutesByTo {
   '/wagers/$id': typeof WagersIdRoute
   '/virtual': typeof VirtualIndexRoute
   '/wagers': typeof WagersIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/members/$userId': typeof AdminMembersUserIdRoute
   '/api/public/virtual-tick': typeof ApiPublicVirtualTickRoute
@@ -512,6 +520,7 @@ export interface FileRoutesById {
   '/wagers/$id': typeof WagersIdRoute
   '/virtual/': typeof VirtualIndexRoute
   '/wagers/': typeof WagersIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin_/members/$userId': typeof AdminMembersUserIdRoute
   '/api/public/virtual-tick': typeof ApiPublicVirtualTickRoute
@@ -571,6 +580,7 @@ export interface FileRouteTypes {
     | '/wagers/$id'
     | '/virtual/'
     | '/wagers/'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/members/$userId'
     | '/api/public/virtual-tick'
@@ -628,6 +638,7 @@ export interface FileRouteTypes {
     | '/wagers/$id'
     | '/virtual'
     | '/wagers'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/members/$userId'
     | '/api/public/virtual-tick'
@@ -685,6 +696,7 @@ export interface FileRouteTypes {
     | '/wagers/$id'
     | '/virtual/'
     | '/wagers/'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/admin_/members/$userId'
     | '/api/public/virtual-tick'
@@ -742,6 +754,7 @@ export interface RootRouteChildren {
   WagersIdRoute: typeof WagersIdRoute
   VirtualIndexRoute: typeof VirtualIndexRoute
   WagersIndexRoute: typeof WagersIndexRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   AdminMembersUserIdRoute: typeof AdminMembersUserIdRoute
   ApiPublicVirtualTickRoute: typeof ApiPublicVirtualTickRoute
@@ -1110,6 +1123,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/send-push': {
       id: '/api/public/hooks/send-push'
       path: '/api/public/hooks/send-push'
@@ -1201,6 +1221,7 @@ const rootRouteChildren: RootRouteChildren = {
   WagersIdRoute: WagersIdRoute,
   VirtualIndexRoute: VirtualIndexRoute,
   WagersIndexRoute: WagersIndexRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   AdminMembersUserIdRoute: AdminMembersUserIdRoute,
   ApiPublicVirtualTickRoute: ApiPublicVirtualTickRoute,
