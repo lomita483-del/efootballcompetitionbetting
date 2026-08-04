@@ -1,6 +1,7 @@
 import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 import { supabaseForUser, unauthenticated } from "../supabase";
+import { auditedToolCall } from "../audit";
 
 export default defineTool({
   name: "list_my_wagers",
@@ -10,7 +11,8 @@ export default defineTool({
     limit: z.number().int().optional().describe("Max wagers to return (default 20, max 100)."),
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: async ({ limit }, ctx) => {
+  handler: async (input, ctx) => auditedToolCall("list_my_wagers", input, ctx, async () => {
+    const { limit } = input;
     if (!ctx.isAuthenticated()) return unauthenticated();
     const take = Math.min(Math.max(limit ?? 20, 1), 100);
     const supabase = supabaseForUser(ctx);
@@ -24,5 +26,5 @@ export default defineTool({
       content: [{ type: "text", text: JSON.stringify(data ?? [], null, 2) }],
       structuredContent: { wagers: data ?? [] },
     };
-  },
+  }),
 });
