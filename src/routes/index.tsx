@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { MatchCardLive } from "@/components/MatchCardLive";
 import { EventBanner } from "@/components/EventBanner";
-import { AnnouncementSlider, HighlightsRow, AdsRow } from "@/components/HomeContent";
+import { AnnouncementSlider, HighlightsRow } from "@/components/HomeContent";
 import { AdvertisementRow } from "@/components/AdvertisementRow";
 import { GrandPrizeWinners } from "@/components/GrandPrizeWinners";
 import { NewsSlider } from "@/components/NewsSlider";
@@ -129,7 +129,6 @@ function Index() {
         <TrendingPlayers />
       </section>
       <AnnouncementSlider />
-      <AdsRow />
       <AdvertisementRow placement="home" />
       {futures.length > 0 && <FuturesSection title={settings?.futures_section_title || "TOURNAMENT FUTURES"} markets={futures} maxSelections={Number(settings?.futures_max_selections ?? 1)} featured={featuredAll} />}
       <BookingCodeFab />

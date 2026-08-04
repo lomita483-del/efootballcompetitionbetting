@@ -48,7 +48,8 @@ function MatchesPage() {
 
   const regular = matches.filter((match) => match.match_kind !== "future");
   const featured = regular.filter((match) => match.is_featured && match.status !== "ended");
-  return <Layout><main className="ecb-home container pb-3"><HomeBannerSlider embedded placement="matches" />{featured.length > 0 && <FeaturedMatch match={featured[0]} arena={arena} />}<TopCompetitors rows={competitors} /><Arena matches={regular} loading={loading} /><AdvertisementRow placement="matches" /><Stats matches={regular} /></main></Layout>;
+  const heroMatch = featured[0] ?? regular.find((match) => match.status === "scheduled" || match.status === "live");
+  return <Layout><main className="ecb-home container pb-3"><HomeBannerSlider embedded placement="matches" />{heroMatch && <FeaturedMatch match={heroMatch} arena={arena} />}<TopCompetitors rows={competitors} /><Arena matches={regular} loading={loading} /><AdvertisementRow placement="matches" /><Stats matches={regular} /></main></Layout>;
 }
 
 function FeaturedMatch({ match, arena }: { match: MatchRow; arena: any }) {
