@@ -2015,6 +2015,213 @@ export type Database = {
           },
         ]
       }
+      lucky_wheel_campaigns: {
+        Row: {
+          base_spins_per_user: number
+          created_at: string
+          created_by: string | null
+          display_mode: string
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          linked_task_id: string | null
+          max_displays_per_user: number | null
+          max_unique_users: number | null
+          page_path: string
+          starts_at: string | null
+          subtitle: string | null
+          task_spin_points: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          base_spins_per_user?: number
+          created_at?: string
+          created_by?: string | null
+          display_mode?: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          linked_task_id?: string | null
+          max_displays_per_user?: number | null
+          max_unique_users?: number | null
+          page_path?: string
+          starts_at?: string | null
+          subtitle?: string | null
+          task_spin_points?: number
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          base_spins_per_user?: number
+          created_at?: string
+          created_by?: string | null
+          display_mode?: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          linked_task_id?: string | null
+          max_displays_per_user?: number | null
+          max_unique_users?: number | null
+          page_path?: string
+          starts_at?: string | null
+          subtitle?: string | null
+          task_spin_points?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lucky_wheel_campaigns_linked_task_id_fkey"
+            columns: ["linked_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lucky_wheel_segments: {
+        Row: {
+          campaign_id: string
+          color_token: string
+          created_at: string
+          id: string
+          label: string
+          outcome_kind: string
+          reward_amount: number
+          sort_order: number
+          weight: number
+        }
+        Insert: {
+          campaign_id: string
+          color_token?: string
+          created_at?: string
+          id?: string
+          label: string
+          outcome_kind?: string
+          reward_amount?: number
+          sort_order?: number
+          weight?: number
+        }
+        Update: {
+          campaign_id?: string
+          color_token?: string
+          created_at?: string
+          id?: string
+          label?: string
+          outcome_kind?: string
+          reward_amount?: number
+          sort_order?: number
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lucky_wheel_segments_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "lucky_wheel_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lucky_wheel_spins: {
+        Row: {
+          balance_after: number | null
+          campaign_id: string
+          created_at: string
+          id: string
+          label: string
+          outcome_kind: string
+          reward_amount: number
+          segment_id: string | null
+          user_id: string
+        }
+        Insert: {
+          balance_after?: number | null
+          campaign_id: string
+          created_at?: string
+          id?: string
+          label: string
+          outcome_kind: string
+          reward_amount?: number
+          segment_id?: string | null
+          user_id: string
+        }
+        Update: {
+          balance_after?: number | null
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          label?: string
+          outcome_kind?: string
+          reward_amount?: number
+          segment_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lucky_wheel_spins_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "lucky_wheel_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lucky_wheel_spins_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "lucky_wheel_segments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lucky_wheel_user_state: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          display_count: number
+          earned_spin_points: number
+          id: string
+          last_displayed_at: string | null
+          last_spun_at: string | null
+          spin_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          display_count?: number
+          earned_spin_points?: number
+          id?: string
+          last_displayed_at?: string | null
+          last_spun_at?: string | null
+          spin_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          display_count?: number
+          earned_spin_points?: number
+          id?: string
+          last_displayed_at?: string | null
+          last_spun_at?: string | null
+          spin_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lucky_wheel_user_state_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "lucky_wheel_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       markets: {
         Row: {
           created_at: string
@@ -5552,6 +5759,11 @@ export type Database = {
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_mod_or_admin: { Args: { _user_id: string }; Returns: boolean }
+      lucky_wheel_register_display: {
+        Args: { _campaign_id: string }
+        Returns: Json
+      }
+      lucky_wheel_spin: { Args: { _campaign_id: string }; Returns: Json }
       notify_admins: {
         Args: { _body: string; _link?: string; _title: string }
         Returns: undefined
