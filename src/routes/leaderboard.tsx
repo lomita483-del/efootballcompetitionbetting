@@ -254,7 +254,7 @@ const handleDownload = async () => {
               </TabsTrigger>
             </TabsList>
 
-            <div className="mt-3 grid grid-cols-[minmax(0,1fr)_280px] items-start gap-3 xl:grid-cols-[minmax(0,1fr)_310px]">
+            <div className="mt-3 grid grid-cols-[minmax(0,1fr)_220px] items-start gap-2 xl:grid-cols-[minmax(0,1fr)_238px]">
               <div className="min-w-0">
                 <TabsContent value="gangs" className="m-0">
                   <Board rows={gangs} firstCol="Team / Scorer" pick={(g) => g.name} emptyText="No data yet." onOpen={(name, image) => setSelected({ name, image, source: "gangs" })} />
@@ -268,7 +268,7 @@ const handleDownload = async () => {
                   <ScorerBoard rows={scorers} onOpen={(name, image) => setSelected({ name, image, source: "scorers" })} />
                 </TabsContent>
               </div>
-              <LeaderboardFeatures board={activeBoard} rows={activeBoard === "gangs" ? gangs : activeBoard === "shooters" ? shooters : scorers} rewards={rewards} achievements={achievements} />
+              <LeaderboardFeatures board={activeBoard} rows={activeBoard === "gangs" ? gangs : activeBoard === "shooters" ? shooters : scorers} totalTeams={gangs.length} totalPlayers={shooters.length} rewards={rewards} achievements={achievements} />
             </div>
           </Tabs>
         </div>
@@ -285,20 +285,27 @@ const handleDownload = async () => {
   );
 }
 
-function LeaderboardFeatures({ board, rows, rewards, achievements }: { board: "gangs" | "shooters" | "scorers"; rows: LbRow[]; rewards: any[]; achievements: any[] }) {
+function LeaderboardFeatures({ board, rows, totalTeams, totalPlayers, rewards, achievements }: { board: "gangs" | "shooters" | "scorers"; rows: LbRow[]; totalTeams: number; totalPlayers: number; rewards: any[]; achievements: any[] }) {
   const [showAll, setShowAll] = useState(false);
   const boardRewards = rewards.filter((reward) => reward.leaderboard_type === board);
   const boardAchievements = achievements.filter((achievement) => !achievement.leaderboard_type || achievement.leaderboard_type === board);
-  const totalPlayed = rows.reduce((sum, row) => sum + row.P, 0);
-  const totalScore = rows.reduce((sum, row) => sum + row.TS, 0);
-  const leader = rows[0];
+  const totalPoints = rows.reduce((sum, row) => sum + row.PTS, 0);
   if (!rows.length && !boardRewards.length && !boardAchievements.length) return null;
-  const visibleRewards = showAll ? boardRewards : boardRewards.slice(0, 3);
-  return <aside className="sticky top-24 grid min-w-0 grid-cols-1 gap-3">
-    {rows.length > 0 && <section className="overflow-hidden rounded-md border border-primary/45 bg-background/80 p-3 shadow-luxury"><div className="mb-2 flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary" /><h2 className="text-sm font-black">Leaderboard Stats</h2></div><div className="grid grid-cols-3 gap-1.5"><StatBox label="Players" value={rows.length} /><StatBox label="Played" value={totalPlayed} /><StatBox label="Score" value={totalScore} /></div>{leader && <p className="mt-2 truncate text-[10px] text-muted-foreground"><b className="text-primary">Current leader:</b> {leader.name}</p>}</section>}
-    {boardRewards.length > 0 && <section className="overflow-hidden rounded-md border border-primary/45 bg-background/80 p-3 shadow-luxury"><div className="mb-2 flex items-center justify-between"><div><p className="text-[8px] font-black uppercase tracking-[0.18em] text-primary">Live positions</p><h2 className="text-sm font-black">Rewards for Top 3</h2></div><Trophy className="h-4 w-4 text-primary" /></div><div className="space-y-1.5">{visibleRewards.map((reward) => { const holder = rows[reward.rank - 1]; return <div key={reward.id} className="grid grid-cols-[32px_30px_minmax(0,1fr)] items-center gap-2 rounded-md border border-primary/25 bg-card/70 p-2"><span className="relative grid h-8 w-8 place-items-center text-primary"><Trophy className="h-8 w-8" fill="currentColor" /><b className="absolute top-[7px] text-[9px] leading-none text-primary-foreground">{reward.rank}</b></span><span className="grid h-7 w-7 place-items-center overflow-hidden rounded-md border border-primary/35 bg-secondary">{holder?.image_url ? <img src={holder.image_url} alt="" className="h-full w-full object-cover" /> : <Users className="h-3.5 w-3.5 text-muted-foreground" />}</span><div className="min-w-0"><div className="flex items-center justify-between gap-1"><b className="truncate text-[11px]">{holder?.name ?? "Position open"}</b><strong className="shrink-0 text-[10px] text-primary">{reward.reward_value}</strong></div><span className="block truncate text-[9px] text-muted-foreground">{reward.title}</span></div></div>; })}</div><Button variant="outline" size="sm" className="mt-2 h-7 w-full border-primary/35 text-[10px] text-primary" onClick={() => setShowAll((value) => !value)}>{showAll ? "Show Top 3" : "View All Rewards"}</Button></section>}
-    {boardAchievements.length > 0 && <section className="overflow-hidden rounded-md border border-accent/40 bg-background/80 p-3 shadow-luxury"><div className="mb-2 flex items-center gap-2"><Award className="h-4 w-4 text-accent" /><h2 className="text-sm font-black">Achievements</h2></div><div className="space-y-1.5">{boardAchievements.slice(0, 4).map((achievement) => <div key={achievement.id} className="flex gap-2 rounded-md border border-accent/25 bg-card/70 p-2"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-accent/10"><Star className="h-3.5 w-3.5 text-accent" /></span><div className="min-w-0"><b className="block truncate text-[11px]">{achievement.title}</b><p className="line-clamp-1 text-[9px] text-muted-foreground">{achievement.description}</p></div></div>)}</div></section>}
+  const topRewards = boardRewards.slice(0, 3);
+  return <aside className="sticky top-24 grid min-w-0 grid-cols-1 gap-2">
+    {rows.length > 0 && <section className="overflow-hidden rounded-md border border-primary/45 bg-background/80 p-2 shadow-luxury"><div className="mb-1.5 flex items-center justify-between"><h2 className="text-[11px] font-black uppercase">Leaderboard Stats</h2><CircleCheck className="h-3 w-3 text-accent" /></div><div className="space-y-1"><CompactStat icon={<Users className="h-3 w-3" />} label="Total Teams" value={totalTeams} /><CompactStat icon={<UsersIcon className="h-3 w-3" />} label="Total Players" value={totalPlayers} /><CompactStat icon={<Target className="h-3 w-3" />} label="Total Points" value={totalPoints.toLocaleString()} /><CompactStat icon={<CalendarDays className="h-3 w-3" />} label="Updated" value="Just now" /></div></section>}
+    {boardRewards.length > 0 && <section className="overflow-hidden rounded-md border border-primary/45 bg-background/80 p-2 shadow-luxury"><div className="mb-1.5 flex items-center justify-between"><div><p className="text-[7px] font-black uppercase text-primary">Live positions</p><h2 className="text-[11px] font-black">Rewards for Top 3</h2></div><Trophy className="h-3.5 w-3.5 text-primary" /></div><div className="space-y-1">{topRewards.map((reward) => { const holder = rows[reward.rank - 1]; return <RewardRow key={reward.id} reward={reward} holder={holder} />; })}</div><Button variant="outline" size="sm" className="mt-1.5 h-6 w-full border-primary/35 px-2 text-[8px] text-primary" onClick={() => setShowAll(true)}>View All Rewards</Button></section>}
+    {boardAchievements.length > 0 && <section className="overflow-hidden rounded-md border border-accent/40 bg-background/80 p-2 shadow-luxury"><div className="mb-1.5 flex items-center gap-1.5"><Award className="h-3.5 w-3.5 text-accent" /><h2 className="text-[11px] font-black">Achievements</h2></div><div className="space-y-1">{boardAchievements.slice(0, 4).map((achievement) => <div key={achievement.id} className="flex gap-1.5 rounded-md border border-accent/25 bg-card/70 p-1.5"><span className="grid h-5 w-5 shrink-0 place-items-center rounded-md bg-accent/10"><Star className="h-3 w-3 text-accent" /></span><div className="min-w-0"><b className="block truncate text-[9px]">{achievement.title}</b><p className="line-clamp-1 text-[7px] text-muted-foreground">{achievement.description}</p></div></div>)}</div></section>}
+    <Dialog open={showAll} onOpenChange={setShowAll}><DialogContent className="max-h-[80vh] max-w-lg overflow-y-auto border-primary/45 bg-background"><DialogHeader><DialogTitle className="flex items-center gap-2"><Trophy className="h-5 w-5 text-primary" />All Leaderboard Rewards</DialogTitle></DialogHeader><div className="space-y-2">{boardRewards.map((reward) => <RewardRow key={reward.id} reward={reward} holder={rows[reward.rank - 1]} expanded />)}</div></DialogContent></Dialog>
   </aside>;
+}
+
+function CompactStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) {
+  return <div className="grid grid-cols-[22px_minmax(0,1fr)_auto] items-center gap-1.5 rounded-md border border-accent/20 bg-card/55 px-1.5 py-1"><span className="grid h-5 w-5 place-items-center rounded-md bg-accent/10 text-accent">{icon}</span><span className="truncate text-[7px] font-bold uppercase text-muted-foreground">{label}</span><strong className="text-[11px] tabular-nums text-foreground">{value}</strong></div>;
+}
+
+function RewardRow({ reward, holder, expanded = false }: { reward: any; holder?: LbRow; expanded?: boolean }) {
+  return <div className={`grid items-center rounded-md border border-primary/25 bg-card/70 ${expanded ? "grid-cols-[36px_34px_minmax(0,1fr)] gap-2 p-2" : "grid-cols-[25px_24px_minmax(0,1fr)] gap-1.5 p-1"}`}><span className={`relative grid place-items-center text-primary ${expanded ? "h-9 w-9" : "h-6 w-6"}`}><Trophy className="h-full w-full" fill="currentColor" /><b className={`absolute leading-none text-primary-foreground ${expanded ? "top-2 text-[10px]" : "top-1.5 text-[7px]"}`}>{reward.rank}</b></span><span className={`grid place-items-center overflow-hidden rounded-md border border-primary/35 bg-secondary ${expanded ? "h-8 w-8" : "h-6 w-6"}`}>{holder?.image_url ? <img src={holder.image_url} alt={`${holder.name} reward holder`} className="h-full w-full object-cover" /> : <Users className="h-3 w-3 text-muted-foreground" />}</span><div className="min-w-0"><div className="flex items-center justify-between gap-1"><b className={`truncate ${expanded ? "text-xs" : "text-[9px]"}`}>{holder?.name ?? "Position open"}</b><strong className={`shrink-0 text-primary ${expanded ? "text-xs" : "text-[8px]"}`}>{reward.reward_value}</strong></div><span className={`block truncate text-muted-foreground ${expanded ? "text-[10px]" : "text-[7px]"}`}>{reward.title}</span></div></div>;
 }
 
 function Board({
@@ -317,10 +324,10 @@ function Board({
   const rest = rows.slice(10);
   return (
     <div className="relative rounded-2xl p-2 sm:p-3 bg-gradient-to-b from-black/20 via-black/10 to-black/20 border-2 border-emerald-500/60 shadow-[0_0_40px_-12px_rgba(16,185,129,0.45),inset_0_0_40px_-20px_rgba(16,185,129,0.3)]">
-      <div className="overflow-x-auto">
-        <div className="min-w-[680px]">
+      <div className="min-w-0 overflow-hidden">
+        <div className="min-w-0">
           {/* header */}
-          <div className={`grid ${secondCol ? "grid-cols-[52px_1.4fr_1fr_48px_38px_38px_38px_48px_38px_52px]" : "grid-cols-[52px_2.4fr_48px_38px_38px_38px_48px_38px_52px]"} items-center gap-1.5 px-2.5 py-1.5 text-[10px] uppercase tracking-widest text-amber-300/90 font-bold`}>
+          <div className={`grid ${secondCol ? "grid-cols-[38px_minmax(75px,1.4fr)_minmax(58px,1fr)_32px_repeat(3,24px)_34px_24px_36px]" : "grid-cols-[38px_minmax(90px,2.4fr)_32px_repeat(3,24px)_34px_24px_36px]"} items-center gap-1 px-1.5 py-1 text-[8px] uppercase text-primary font-bold`}>
             <div>Rank</div>
             <div>{firstCol}</div>
             {secondCol && <div>{secondCol}</div>}
@@ -362,8 +369,8 @@ function Board({
       </div>
 
       {/* legend */}
-      <div className="mt-3 rounded-xl border border-amber-400/40 bg-black/20 px-2.5 py-1.5 overflow-x-auto">
-        <div className="flex items-center gap-3 text-[10px] whitespace-nowrap">
+      <div className="mt-2 rounded-md border border-primary/40 bg-background/20 px-2 py-1">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[8px]">
           <LegendItem k="TS" label="Total Score" color="text-amber-300" />
           <LegendItem k="W" label="Wins" color="text-emerald-400" />
           <LegendItem k="L" label="Losses" color="text-red-400" />
@@ -410,22 +417,21 @@ function LbRowCard({
   const nameLabel = firstPick ? firstPick(r) : pick(r);
   const secondary = secondPick ? secondPick(r) : (firstPick ? pick(r) : (r.top_player || "—"));
   return (
-    <div className={`grid ${showSecondary ? "grid-cols-[52px_1.4fr_1fr_48px_38px_38px_38px_48px_38px_52px]" : "grid-cols-[52px_2.4fr_48px_38px_38px_38px_48px_38px_52px]"} items-center gap-1.5 rounded-xl border-2 px-2.5 py-2 transition-colors ${rowBorder}`}>
+    <div className={`grid ${showSecondary ? "grid-cols-[38px_minmax(75px,1.4fr)_minmax(58px,1fr)_32px_repeat(3,24px)_34px_24px_36px]" : "grid-cols-[38px_minmax(90px,2.4fr)_32px_repeat(3,24px)_34px_24px_36px]"} items-center gap-1 rounded-md border px-1.5 py-1.5 transition-colors ${rowBorder}`}>
       <div><Medal i={i} /></div>
       <div className="flex items-center gap-1.5 min-w-0">
         <Avatar url={r.image_url ?? null} name={nameLabel} />
         <button
           type="button"
           onClick={() => onOpen(nameLabel, r.image_url ?? null)}
-          className="truncate text-sm font-black uppercase tracking-wide text-[#9FD65C] hover:underline hover:text-[#c2f08a] transition-colors text-left"
-          style={{ textShadow: "0 0 8px rgba(159,214,92,0.55)" }}
+          className="truncate text-[10px] font-black uppercase text-accent hover:underline transition-colors text-left"
         >
           {nameLabel}
         </button>
         <RankArrow delta={r.rank_delta} />
       </div>
       {showSecondary && <div className="flex items-center gap-1 min-w-0">
-        <span className="truncate text-xs text-muted-foreground">{secondary}</span>
+        <span className="truncate text-[9px] text-muted-foreground">{secondary}</span>
         {isFirst && (
           <span className="inline-flex items-center gap-0.5 shrink-0 rounded-md border border-amber-300/70 bg-amber-400/15 px-1 py-0.5 text-[9px] font-black text-amber-200">
             <Star className="h-2.5 w-2.5 fill-amber-300 text-amber-300" />MVP
@@ -466,12 +472,13 @@ function ScorerBoard({ rows, onOpen }: { rows: LbRow[]; onOpen: (name: string, i
   const rest = rows.slice(10);
   return (
     <div className="relative rounded-2xl p-2 sm:p-3 bg-gradient-to-b from-black/20 via-black/10 to-black/20 border-2 border-emerald-500/60 shadow-[0_0_40px_-12px_rgba(16,185,129,0.45),inset_0_0_40px_-20px_rgba(16,185,129,0.3)]">
-      <div className="overflow-x-auto">
-        <div className="min-w-[520px]">
+      <div className="min-w-0 overflow-hidden">
+        <div className="min-w-0">
           {/* header */}
-          <div className="grid grid-cols-[52px_1fr_130px_110px] items-center gap-1.5 px-2.5 py-1.5 text-[10px] uppercase tracking-widest text-amber-300/90 font-bold">
+          <div className="grid grid-cols-[38px_minmax(80px,1fr)_minmax(56px,.65fr)_62px_56px] items-center gap-1 px-1.5 py-1 text-[8px] uppercase text-primary font-bold">
             <div>Rank</div>
             <div>Top Player</div>
+            <div>Team</div>
             <div className="text-center">Matches Played</div>
             <div className="text-center">Total Goals</div>
           </div>
@@ -519,21 +526,21 @@ function ScorerRowCard({ r, i, onOpen }: { r: LbRow; i: number; onOpen: (name: s
     ? "border-orange-500/70 shadow-[0_0_18px_-6px_rgba(230,130,40,0.55)] bg-black/30 bg-gradient-to-r from-orange-600/20 via-amber-700/15 to-orange-600/20"
     : "border-emerald-500/50 bg-black/35 hover:border-emerald-400/70 hover:bg-black/45";
   return (
-    <div className={`grid grid-cols-[52px_1fr_130px_110px] items-center gap-1.5 rounded-xl border-2 px-2.5 py-2 transition-colors ${rowBorder}`}>
+    <div className={`grid grid-cols-[38px_minmax(80px,1fr)_minmax(56px,.65fr)_62px_56px] items-center gap-1 rounded-md border px-1.5 py-1.5 transition-colors ${rowBorder}`}>
       <div><Medal i={i} /></div>
       <div className="flex items-center gap-1.5 min-w-0">
         <Avatar url={r.image_url ?? null} name={r.name} />
         <button
           type="button"
           onClick={() => onOpen(r.name, r.image_url ?? null)}
-          className="truncate text-sm font-black uppercase tracking-wide text-[#9FD65C] hover:underline hover:text-[#c2f08a] transition-colors text-left"
-          style={{ textShadow: "0 0 8px rgba(159,214,92,0.55)" }}
+          className="truncate text-[10px] font-black uppercase text-accent hover:underline transition-colors text-left"
         >
           {r.name}
         </button>
         <RankArrow delta={r.rank_delta} />
         {isFirst && <span className="inline-flex shrink-0 items-center gap-0.5 rounded-md border border-amber-300/70 bg-amber-400/15 px-1 py-0.5 text-[9px] font-black text-amber-200"><Star className="h-2.5 w-2.5 fill-amber-300 text-amber-300" />MVP</span>}
       </div>
+      <div className="truncate text-[9px] text-muted-foreground">{r.gang_faction || "—"}</div>
       <StatText className="text-emerald-400">{r.P}</StatText>
       <PtsBox>{r.TS}</PtsBox>
     </div>
