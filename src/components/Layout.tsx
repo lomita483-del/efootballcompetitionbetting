@@ -313,7 +313,8 @@ export const Layout = ({ children }: { children: ReactNode }) => {
             )}
           </div>
         </div>
-        <div className="border-t border-primary/15 bg-background/20">
+        {!isHome && (
+          <div className="border-t border-primary/15 bg-background/20">
             <div className="container mx-auto px-4 relative">
               <nav className="flex items-stretch gap-1.5 flex-nowrap overflow-x-auto no-scrollbar py-2">
                 {(() => {
@@ -354,6 +355,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
               />
             </div>
           </div>
+        )}
         {(user && roles.length > 0) || canInstall ? (
           <div className="container mx-auto px-4 pb-2 flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap gap-1">

@@ -1,13 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { ArrowRight, Calendar, ChevronRight, Crosshair, Gift, Headphones, RefreshCw, Search, SlidersHorizontal, Target, Ticket, X } from "lucide-react";
 import { Layout } from "@/components/Layout";
-import { MatchCardLive } from "@/components/MatchCardLive";
 import { HomeBannerSlider } from "@/components/HomeBannerSlider";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { fetchMatches, type MatchRow } from "@/lib/queries";
-import { Fragment } from "react";
-import { Crosshair } from "lucide-react";
+import { TeamLogo } from "@/components/TeamLogo";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { useBetSlip } from "@/contexts/BetSlipContext";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchMatches, type MatchRow } from "@/lib/queries";
 
 export const Route = createFileRoute("/matches")({
   head: () => ({
@@ -16,122 +19,61 @@ export const Route = createFileRoute("/matches")({
       { name: "description", content: "Browse every upcoming, live, and finished ECB match with real-time odds and quick-pick wagering." },
       { property: "og:title", content: "All Matches — E-Football Competition Bet" },
       { property: "og:description", content: "Upcoming, live, and finished ECB matches with real-time odds." },
-      { property: "og:url", content: "https://lslonlinebetting.lovable.app/matches" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "https://lslonlinebetting.lovable.app/matches" }],
-    scripts: [{
-      type: "application/ld+json",
-      children: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "CollectionPage",
-        name: "ECB Matches",
-        description: "All matches in the E-Football Competition Bet.",
-        url: "https://lslonlinebetting.lovable.app/matches",
-      }),
-    }],
   }),
   component: MatchesPage,
 });
 
 function MatchesPage() {
   const [matches, setMatches] = useState<MatchRow[]>([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
-    fetchMatches().then(setMatches);
+    const refresh = () => fetchMatches().then(setMatches).finally(() => setLoading(false));
+    refresh();
     const ch = supabase.channel("all-matches")
-      .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, () => fetchMatches().then(setMatches))
-      .on("postgres_changes", { event: "*", schema: "public", table: "odds" }, () => fetchMatches().then(setMatches))
+      .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "odds" }, refresh)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
 
-  const groups = {
-    live: matches.filter((m) => m.status === "live"),
-    upcoming: matches.filter((m) => m.status === "scheduled"),
-    ended: matches.filter((m) => m.status === "ended"),
-  };
-
-  return (
-    <Layout>
-      <section className="container mt-4">
-        <HomeBannerSlider embedded placement="matches" />
-      </section>
-      <div className="container py-8 sm:py-10">
-        <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-background via-background to-primary/5 p-5 sm:p-6 mb-6">
-          <div className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-gold opacity-70" />
-          <div className="relative flex items-start gap-3 sm:gap-4">
-            <div className="shrink-0 h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-background/40 border border-primary/40 backdrop-blur grid place-items-center text-primary shadow-inner">
-              <Crosshair className="h-6 w-6 sm:h-7 sm:w-7" />
-            </div>
-            <div className="min-w-0 flex-1 space-y-1">
-              <div className="text-[10px] uppercase tracking-[0.35em] text-primary/80 font-black">The Arena</div>
-              <h1 className="font-display text-3xl sm:text-4xl font-black gradient-gold-text leading-tight">All Matches</h1>
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Every live, upcoming, and finished fixture — real-time odds, quick-pick markets, and instant staking.
-              </p>
-              <div className="flex items-center gap-2 pt-2 text-[10px] uppercase tracking-widest">
-                <span className="rounded-md border border-destructive/40 bg-destructive/10 text-destructive px-2 py-0.5 font-black">● Live {groups.live.length}</span>
-                <span className="rounded-md border border-amber-500/40 bg-amber-500/10 text-amber-300 px-2 py-0.5 font-black">Upcoming {groups.upcoming.length}</span>
-                <span className="rounded-md border border-muted/40 bg-muted/20 text-muted-foreground px-2 py-0.5 font-black">Ended {groups.ended.length}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <Tabs defaultValue="upcoming">
-          <TabsList>
-            <TabsTrigger value="live">Live ({groups.live.length})</TabsTrigger>
-            <TabsTrigger value="upcoming">Upcoming ({groups.upcoming.length})</TabsTrigger>
-            <TabsTrigger value="ended">Ended ({groups.ended.length})</TabsTrigger>
-          </TabsList>
-          {(["live", "upcoming", "ended"] as const).map((k) => (
-            <TabsContent key={k} value={k} className="mt-4">
-              {groups[k].length === 0 ? (
-                <p className="text-muted-foreground text-sm">No matches in this section.</p>
-              ) : (
-                <div className="space-y-2 max-w-3xl">
-                  {k === "ended"
-                    ? groupByDay(groups.ended).map(([day, list]) => (
-                        <Fragment key={day}>
-                          <DateSeparator label={day} />
-                          {list.map((m) => <MatchCardLive key={m.id} match={m} variant="row" />)}
-                        </Fragment>
-                      ))
-                    : groups[k].map((m) => <MatchCardLive key={m.id} match={m} variant="row" />)}
-                </div>
-              )}
-            </TabsContent>
-          ))}
-        </Tabs>
-      </div>
-    </Layout>
-  );
+  const regular = matches.filter((match) => match.match_kind !== "future");
+  const featured = regular.filter((match) => match.is_featured && match.status !== "ended");
+  return <Layout><main className="ecb-home container pb-3"><HomeBannerSlider embedded placement="matches" />{featured.length > 0 && <FeaturedMatch match={featured[0]} />}<Arena matches={regular} loading={loading} /><Stats matches={regular} /></main></Layout>;
 }
 
-function DateSeparator({ label }: { label: string }) {
-  return (
-    <div className="sticky top-0 z-10 flex items-center gap-3 py-2 bg-background/85 backdrop-blur">
-      <span className="flex-1 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-      <span className="text-[11px] uppercase tracking-[0.3em] font-black text-primary/90 whitespace-nowrap">{label}</span>
-      <span className="flex-1 h-px bg-gradient-to-l from-transparent via-primary/40 to-transparent" />
-    </div>
-  );
+function FeaturedMatch({ match }: { match: MatchRow }) {
+  return <section className="ecb-reference-hero mt-4">{match.featured_image_url && <img src={match.featured_image_url} alt={`${match.name} featured match`} className="ecb-reference-hero-image" />}<div className="ecb-reference-hero-shade" /><div className="ecb-reference-hero-copy"><p>FEATURED COMPETITION</p><h1 className="sr-only">Featured E-Football match</h1><span>Real-time odds, quick picks,<br />epic matches and instant staking.</span></div><div className="ecb-reference-hero-title"><span>E-FOOTBALL</span><strong>COMPETITION</strong><b>THE ARENA</b></div><div className="ecb-next-match"><small>NEXT BIG MATCH</small><strong>{match.home_team?.name ?? "HOME"} vs {match.away_team?.name ?? "AWAY"}</strong><span>{new Date(match.start_time).toLocaleString()}</span><Button asChild size="sm" className="btn-luxury"><Link to="/matches/$matchId" params={{ matchId: match.id }}>Bet Now <ArrowRight /></Link></Button></div></section>;
 }
 
-function groupByDay(rows: MatchRow[]): Array<[string, MatchRow[]]> {
-  const fmt = new Intl.DateTimeFormat(undefined, { year: "numeric", month: "long", day: "numeric" });
-  const buckets = new Map<string, { label: string; items: MatchRow[] }>();
-  const sorted = [...rows].sort((a: any, b: any) => {
-    const ta = new Date(a.ended_at || a.settled_at || a.start_time || 0).getTime();
-    const tb = new Date(b.ended_at || b.settled_at || b.start_time || 0).getTime();
-    return tb - ta;
-  });
-  for (const m of sorted) {
-    const raw: any = (m as any).ended_at || (m as any).settled_at || (m as any).start_time;
-    const d = raw ? new Date(raw) : new Date(0);
-    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-    const label = raw ? fmt.format(d) : "Undated";
-    if (!buckets.has(key)) buckets.set(key, { label, items: [] });
-    buckets.get(key)!.items.push(m);
-  }
-  return Array.from(buckets.values()).map((b) => [b.label, b.items] as [string, MatchRow[]]);
+function Arena({ matches, loading }: { matches: MatchRow[]; loading: boolean }) {
+  const [tab, setTab] = useState<"all" | "live" | "upcoming" | "ended">("all");
+  const [search, setSearch] = useState("");
+  const groups = { all: matches, live: matches.filter((m) => m.status === "live"), upcoming: matches.filter((m) => m.status === "scheduled"), ended: matches.filter((m) => m.status === "ended") };
+  const shown = groups[tab].filter((m) => `${m.name} ${m.id} ${m.home_team?.name ?? ""} ${m.away_team?.name ?? ""}`.toLowerCase().includes(search.toLowerCase()));
+  return <section className="ecb-arena"><header className="ecb-arena-header"><div className="ecb-arena-heading"><span><Crosshair /></span><div><small>THE ARENA</small><h2>All Matches <Badge variant="destructive">● LIVE</Badge></h2><p>Every live, upcoming, and finished fixture — real-time odds, quick pick markets, and instant staking.</p></div></div><div className="ecb-arena-search"><Search /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search matches, teams or match ID..." /><Button size="icon" variant="outline" aria-label="Filter matches"><SlidersHorizontal /></Button></div></header><div className="ecb-filter-pills">{(["all", "upcoming", "live", "ended"] as const).map((key) => <Button key={key} size="sm" variant={tab === key ? "default" : "outline"} onClick={() => setTab(key)}>{key.toUpperCase()} ({groups[key].length})</Button>)}</div><div className="ecb-arena-tabs">{(["live", "upcoming", "ended"] as const).map((key) => <button key={key} onClick={() => setTab(key)} className={tab === key ? "active" : ""}>{key[0].toUpperCase() + key.slice(1)} ({groups[key].length})</button>)}</div><div className="ecb-arena-grid"><div className="ecb-match-list"><div className="ecb-odds-head"><span>Competition / Match</span><b>1</b><b>X</b><b>2</b></div>{loading ? <p className="p-6 text-muted-foreground">Loading matches…</p> : shown.length ? shown.map((match) => <ArenaRow key={match.id} match={match} />) : <p className="p-6 text-muted-foreground">No matches in this category.</p>}<Button variant="outline" className="ecb-load-more" onClick={() => setTab("all")}><RefreshCw /> View All Matches</Button></div><aside className="ecb-home-rail"><InlineBetSlip /><PopularMarkets /></aside></div></section>;
+}
+
+function ArenaRow({ match }: { match: MatchRow }) {
+  const { selections, add, remove } = useBetSlip();
+  const market = match.markets?.find((item) => item.is_open) ?? match.markets?.[0];
+  const odds = (market?.odds ?? []).slice(0, 3);
+  const date = new Date(match.start_time);
+  return <article className="ecb-match-row"><Link to="/matches/$matchId" params={{ matchId: match.id }} className="ecb-match-meta"><small>{match.category?.name ?? "EFA CHAMPIONS LEAGUE"}</small><b>{match.name}</b><span>{date.toLocaleDateString(undefined, { weekday: "short" })} · {date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}<br />{match.location ?? `Match ID: ${match.id}`}</span></Link><div className="ecb-versus"><div><TeamLogo name={match.home_team?.name} url={match.home_team?.logo_url} size={30} rounded="full" /><b>{match.home_team?.name ?? "Home"}</b></div><span>VS</span><div><TeamLogo name={match.away_team?.name} url={match.away_team?.logo_url} size={30} rounded="full" /><b>{match.away_team?.name ?? "Away"}</b></div></div><div className="ecb-row-odds">{odds.map((odd) => { const selected = selections.some((pick) => pick.odd_id === odd.id); const locked = match.status !== "scheduled" || !market?.is_open; return <Button key={odd.id} disabled={locked} variant={selected ? "default" : "outline"} onClick={() => selected ? remove(odd.id) : add({ match_id: match.id, match_name: match.name, market_id: market?.id ?? "", market_name: market?.name ?? "Winner", odd_id: odd.id, selection_label: odd.label, odds: Number(odd.value) })}>{Number(odd.value).toFixed(2)}</Button>; })}<span>+{Math.max(0, (market?.odds.length ?? 3) - 3)}</span></div></article>;
+}
+
+function InlineBetSlip() {
+  const { selections, remove, clear, totalOdds, setOpen } = useBetSlip();
+  return <Card className="ecb-rail-card"><div className="ecb-rail-title"><b>BET SLIP <Badge>{selections.length}</Badge></b><button onClick={clear}>Clear All</button></div>{selections.length ? selections.slice(0, 3).map((selection) => <div key={selection.odd_id} className="ecb-slip-pick"><Ticket /><span><b>{selection.selection_label}</b><small>{selection.match_name}</small></span><strong>{selection.odds.toFixed(2)}</strong><button aria-label={`Remove ${selection.selection_label}`} onClick={() => remove(selection.odd_id)}><X /></button></div>) : <p className="py-6 text-center text-xs text-muted-foreground">Choose odds to build your bet slip.</p>}<div className="ecb-slip-total"><span>Total Odds <b>{totalOdds.toFixed(2)}</b></span><span>Potential Win <strong>₦{(totalOdds * 5000).toLocaleString()}</strong></span></div><Button className="btn-luxury w-full" onClick={() => setOpen(true)}>Place Bet <ArrowRight /></Button></Card>;
+}
+
+function PopularMarkets() {
+  return <Card className="ecb-rail-card"><div className="ecb-rail-title"><b>POPULAR MARKETS</b></div>{["Match Winner", "Total Goals", "Both Teams to Score", "Correct Score"].map((name) => <div key={name} className="ecb-market-link"><Target /><span>{name}</span><ChevronRight /></div>)}</Card>;
+}
+
+function Stats({ matches }: { matches: MatchRow[] }) {
+  const stats = [{ icon: Crosshair, value: matches.filter((m) => m.status === "live").length, label: "LIVE MATCHES" }, { icon: Calendar, value: matches.filter((m) => m.status === "scheduled").length, label: "UPCOMING FIXTURES" }, { icon: Target, value: "98.6%", label: "PAYOUT RATE" }, { icon: Headphones, value: "24/7", label: "SUPPORT" }];
+  return <section className="ecb-stats-strip">{stats.map((stat) => <div key={stat.label}><span><stat.icon /></span><b>{stat.value}<small>{stat.label}</small></b></div>)}<div className="ecb-refer"><Gift /><span><b>REFER &amp; EARN</b><small>Invite friends and earn rewards</small></span><Button asChild size="sm" className="btn-luxury"><Link to="/dashboard">Invite Now</Link></Button></div></section>;
 }
