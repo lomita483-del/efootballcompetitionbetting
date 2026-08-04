@@ -2585,6 +2585,7 @@ export type Database = {
           image_url: string | null
           is_read: boolean
           link: string | null
+          skip_push: boolean
           title: string
           user_id: string
         }
@@ -2595,6 +2596,7 @@ export type Database = {
           image_url?: string | null
           is_read?: boolean
           link?: string | null
+          skip_push?: boolean
           title: string
           user_id: string
         }
@@ -2605,6 +2607,7 @@ export type Database = {
           image_url?: string | null
           is_read?: boolean
           link?: string | null
+          skip_push?: boolean
           title?: string
           user_id?: string
         }
