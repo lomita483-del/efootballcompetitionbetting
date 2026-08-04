@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowRight, Calendar, ChevronRight, Crosshair, Gift, Headphones, RefreshCw, Search, Target, Ticket, X } from "lucide-react";
+import { ArrowRight, Calendar, ChevronRight, Crown, Crosshair, Gift, Headphones, RefreshCw, Search, Target, Ticket, Trophy, X } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { HomeBannerSlider } from "@/components/HomeBannerSlider";
 import { ArenaMatchRow } from "@/components/ArenaMatchRow";
@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useBetSlip } from "@/contexts/BetSlipContext";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchMatches, type MatchRow } from "@/lib/queries";
+import { loadStandings, type LbRow } from "@/lib/leaderboard";
+import { AdvertisementRow } from "@/components/AdvertisementRow";
 
 export const Route = createFileRoute("/matches")({
   head: () => ({
@@ -30,9 +32,13 @@ export const Route = createFileRoute("/matches")({
 function MatchesPage() {
   const [matches, setMatches] = useState<MatchRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [arena, setArena] = useState<any>(null);
+  const [competitors, setCompetitors] = useState<LbRow[]>([]);
   useEffect(() => {
     const refresh = () => fetchMatches().then(setMatches).finally(() => setLoading(false));
     refresh();
+    loadStandings().then(({ gangs }) => setCompetitors(gangs.slice(0, 3)));
+    supabase.from("app_settings").select("matches_arena_image_url,matches_arena_image_fit,matches_arena_image_position").eq("id", 1).maybeSingle().then(({ data }) => setArena(data));
     const ch = supabase.channel("all-matches")
       .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "odds" }, refresh)
@@ -42,11 +48,17 @@ function MatchesPage() {
 
   const regular = matches.filter((match) => match.match_kind !== "future");
   const featured = regular.filter((match) => match.is_featured && match.status !== "ended");
-  return <Layout><main className="ecb-home container pb-3"><HomeBannerSlider embedded placement="matches" />{featured.length > 0 && <FeaturedMatch match={featured[0]} />}<Arena matches={regular} loading={loading} /><Stats matches={regular} /></main></Layout>;
+  return <Layout><main className="ecb-home container pb-3"><HomeBannerSlider embedded placement="matches" />{featured.length > 0 && <FeaturedMatch match={featured[0]} arena={arena} />}<TopCompetitors rows={competitors} /><Arena matches={regular} loading={loading} /><AdvertisementRow placement="matches" /><Stats matches={regular} /></main></Layout>;
 }
 
-function FeaturedMatch({ match }: { match: MatchRow }) {
-  return <section className="ecb-reference-hero mt-4">{match.featured_image_url && <img src={match.featured_image_url} alt={`${match.name} featured match`} className="ecb-reference-hero-image" />}<div className="ecb-reference-hero-shade" /><div className="ecb-reference-hero-copy"><p>FEATURED COMPETITION</p><h1 className="sr-only">Featured E-Football match</h1><span>Real-time odds, quick picks,<br />epic matches and instant staking.</span></div><div className="ecb-reference-hero-title"><span>E-FOOTBALL</span><strong>COMPETITION</strong><b>THE ARENA</b></div><div className="ecb-next-match"><small>NEXT BIG MATCH</small><strong>{match.home_team?.name ?? "HOME"} vs {match.away_team?.name ?? "AWAY"}</strong><span>{new Date(match.start_time).toLocaleString()}</span><Button asChild size="sm" className="btn-luxury"><Link to="/matches/$matchId" params={{ matchId: match.id }}>Bet Now <ArrowRight /></Link></Button></div></section>;
+function FeaturedMatch({ match, arena }: { match: MatchRow; arena: any }) {
+  const image = arena?.matches_arena_image_url || match.featured_image_url;
+  return <section className="ecb-reference-hero mt-4">{image && <img src={image} alt="The Arena featured competition" className="ecb-reference-hero-image" style={{ objectFit: arena?.matches_arena_image_fit || "cover", objectPosition: arena?.matches_arena_image_position || "center" }} />}<div className="ecb-reference-hero-shade" /><div className="ecb-reference-hero-copy"><p>FEATURED COMPETITION</p><h1 className="sr-only">Featured E-Football match</h1><span>Real-time odds, quick picks,<br />epic matches and instant staking.</span></div><div className="ecb-reference-hero-title"><span>E-FOOTBALL</span><strong>COMPETITION</strong><b>THE ARENA</b></div><div className="ecb-next-match"><small>NEXT BIG MATCH</small><strong>{match.home_team?.name ?? "HOME"} vs {match.away_team?.name ?? "AWAY"}</strong><span>{new Date(match.start_time).toLocaleString()}</span><Button asChild size="sm" className="btn-luxury"><Link to="/matches/$matchId" params={{ matchId: match.id }}>Bet Now <ArrowRight /></Link></Button></div></section>;
+}
+
+function TopCompetitors({ rows }: { rows: LbRow[] }) {
+  if (!rows.length) return null;
+  return <section className="mt-4 grid gap-3 md:grid-cols-[1.2fr_2fr]"><div className="flex items-center gap-3 rounded-md border border-primary/35 bg-card/70 p-4"><span className="grid h-12 w-12 place-items-center rounded-md border border-primary/50 bg-primary/10"><Trophy className="text-primary" /></span><div><p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary">Live leaderboard</p><h2 className="text-2xl font-black">Top Competitors</h2></div></div><div className="grid grid-cols-3 gap-2">{rows.map((row, index) => <Link key={row.name} to="/leaderboard" className="flex min-w-0 items-center gap-2 rounded-md border border-primary/25 bg-background/60 p-3 hover:border-primary"><Crown className={index === 0 ? "text-primary" : "text-muted-foreground"} /><div className="min-w-0"><b className="block truncate text-xs">{row.name}</b><span className="text-[10px] text-muted-foreground">#{index + 1} · {row.PTS} pts</span></div></Link>)}</div></section>;
 }
 
 function Arena({ matches, loading }: { matches: MatchRow[]; loading: boolean }) {
@@ -79,5 +91,5 @@ function PopularMarkets() {
 
 function Stats({ matches }: { matches: MatchRow[] }) {
   const stats = [{ icon: Crosshair, value: matches.filter((m) => m.status === "live").length, label: "LIVE MATCHES" }, { icon: Calendar, value: matches.filter((m) => m.status === "scheduled").length, label: "UPCOMING FIXTURES" }, { icon: Target, value: "98.6%", label: "PAYOUT RATE" }, { icon: Headphones, value: "24/7", label: "SUPPORT" }];
-  return <section className="ecb-stats-strip">{stats.map((stat) => <div key={stat.label}><span><stat.icon /></span><b>{stat.value}<small>{stat.label}</small></b></div>)}<div className="ecb-refer"><Gift /><span><b>REFER &amp; EARN</b><small>Invite friends and earn rewards</small></span><Button asChild size="sm" className="btn-luxury"><Link to="/dashboard">Invite Now</Link></Button></div></section>;
+  return <section className="ecb-stats-strip">{stats.map((stat) => <div key={stat.label}><span><stat.icon /></span><b>{stat.value}<small>{stat.label}</small></b></div>)}<div className="ecb-refer"><Gift /><span><b>REFER &amp; EARN</b><small>Invite friends and earn rewards</small></span><Button asChild size="sm" className="btn-luxury"><Link to="/referrals">Invite Now</Link></Button></div></section>;
 }
