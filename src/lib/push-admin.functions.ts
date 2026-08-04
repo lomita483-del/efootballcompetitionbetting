@@ -73,6 +73,17 @@ export const broadcastPush = createServerFn({ method: "POST" })
       image: data.image,
     });
 
+    const recipientIds = Array.from(new Set(subs.map((subscription: any) => subscription.user_id).filter(Boolean)));
+    if (recipientIds.length > 0) {
+      await supabaseAdmin.from("notifications").insert(recipientIds.map((recipientId) => ({
+        user_id: recipientId,
+        title: data.title,
+        body: data.body || "",
+        link: data.link || "/notifications",
+        image_url: data.image || null,
+      })) as any);
+    }
+
     await supabaseAdmin.from("broadcasts").insert({
       title: data.title,
       body: data.body || "",

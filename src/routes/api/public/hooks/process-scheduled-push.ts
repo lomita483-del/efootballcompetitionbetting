@@ -53,6 +53,16 @@ export const Route = createFileRoute('/api/public/hooks/process-scheduled-push')
                 link: row.link,
                 image: row.image || undefined,
               })
+              const recipientIds = Array.from(new Set(subs.map((subscription: any) => subscription.user_id).filter(Boolean)))
+              if (recipientIds.length > 0) {
+                await supabaseAdmin.from('notifications').insert(recipientIds.map((recipientId) => ({
+                  user_id: recipientId,
+                  title: row.title,
+                  body: row.body || '',
+                  link: row.link || '/notifications',
+                  image_url: row.image || null,
+                })) as any)
+              }
               await supabaseAdmin.from('scheduled_pushes').update({
                 status: 'sent',
                 sent_count: sent,

@@ -25,9 +25,14 @@ function NotificationsPage() {
   const [items, setItems] = useState<any[]>([]);
   useEffect(() => {
     if (!user) return;
-    supabase.from("notifications").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
+    const load = () => supabase.from("notifications").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
       .then(({ data }) => setItems(data ?? []));
+    load();
     supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false).then(() => {});
+    const channel = supabase.channel(`notifications-${user.id}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, load)
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [user?.id]);
   if (!user) return <Layout><div className="container mx-auto p-10">Sign in</div></Layout>;
   return (
@@ -38,6 +43,7 @@ function NotificationsPage() {
           {items.length === 0 && <p className="text-sm text-muted-foreground">No notifications.</p>}
           {items.map((n) => (
             <Card key={n.id} className="p-4">
+              {n.image_url && <img src={n.image_url} alt="Notification" className="mb-3 aspect-video w-full rounded-md border border-border object-cover" />}
               <div className="font-bold">{n.title}</div>
               {n.body && <div className="text-sm text-muted-foreground">{n.body}</div>}
               <div className="text-xs text-muted-foreground mt-1">{new Date(n.created_at).toLocaleString()}</div>
