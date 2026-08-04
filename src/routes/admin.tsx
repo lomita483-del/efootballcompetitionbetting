@@ -1398,6 +1398,7 @@ function MatchesPanel() {
 
   return (
     <div className="space-y-4">
+      <ArenaImageSettings />
       <div className="flex flex-wrap items-center gap-2">
         <Button className="btn-luxury" onClick={() => setWizard(true)}><Plus className="h-4 w-4 mr-1" />New Match (Wizard)</Button>
         <Button className="btn-luxury" onClick={() => setShooterWizard(true)}><Crosshair className="h-4 w-4 mr-1" />New Shooter Match</Button>
@@ -1546,6 +1547,17 @@ function MatchesPanel() {
       )}
     </div>
   );
+}
+
+function ArenaImageSettings() {
+  const [settings, setSettings] = useState({ matches_arena_image_url: "", matches_arena_image_fit: "cover", matches_arena_image_position: "center" });
+  useEffect(() => { supabase.from("app_settings").select("matches_arena_image_url,matches_arena_image_fit,matches_arena_image_position").eq("id", 1).maybeSingle().then(({ data }) => { if (data) setSettings(data as any); }); }, []);
+  async function save(next: typeof settings) {
+    setSettings(next);
+    const { error } = await supabase.from("app_settings").update(next as any).eq("id", 1);
+    if (error) toast.error(error.message); else toast.success("Arena image settings saved");
+  }
+  return <ImageSettingControl label="The Arena banner image" value={settings.matches_arena_image_url} onChange={(url) => void save({ ...settings, matches_arena_image_url: url ?? "" })} fit={settings.matches_arena_image_fit} onFitChange={(fit) => void save({ ...settings, matches_arena_image_fit: fit })} position={settings.matches_arena_image_position} onPositionChange={(position) => void save({ ...settings, matches_arena_image_position: position })} aspect="16 / 4" help="Displayed above the public Matches page. Upload and crop an image, then adjust its fit and focal point." />;
 }
 
 function EndedScoreEditor({ match, onCancel, onSave }: { match: any; onCancel: () => void; onSave: (m: any, hs: number, as: number) => void }) {
@@ -2774,17 +2786,14 @@ function HighlightsPanel() {
 
 function AdsPanel() {
   const [list, setList] = useState<any[]>([]);
-  const [draft, setDraft] = useState({ title: "", link_url: "", file: null as File | null });
+  const [draft, setDraft] = useState({ title: "", description: "", link_url: "", image_url: "", placement: "both", image_fit: "cover", image_position: "center", display_order: 0 });
   async function load() { setList((await supabase.from("advertisements").select("*").order("created_at", { ascending: false })).data ?? []); }
   useEffect(() => { load(); }, []);
   async function add() {
-    if (!draft.file) { toast.error("Image required"); return; }
-    const path = `ad-${crypto.randomUUID()}.${draft.file.name.split(".").pop()}`;
-    const { error } = await supabase.storage.from("ads").upload(path, draft.file);
+    if (!draft.image_url) { toast.error("Image required"); return; }
+    const { error } = await supabase.from("advertisements").insert({ ...draft, link_url: draft.link_url || null } as any);
     if (error) { toast.error(error.message); return; }
-    const url = supabase.storage.from("ads").getPublicUrl(path).data.publicUrl;
-    await supabase.from("advertisements").insert({ title: draft.title, image_url: url, link_url: draft.link_url || null });
-    setDraft({ title: "", link_url: "", file: null }); load();
+    setDraft({ title: "", description: "", link_url: "", image_url: "", placement: "both", image_fit: "cover", image_position: "center", display_order: 0 }); load();
   }
   async function del(id: string) { await supabase.from("advertisements").delete().eq("id", id); load(); }
   async function toggle(id: string, v: boolean) { await supabase.from("advertisements").update({ is_active: v }).eq("id", id); load(); }
@@ -2792,14 +2801,16 @@ function AdsPanel() {
     <div className="space-y-3">
       <Card className="glass-strong p-4 space-y-2">
         <Input placeholder="Title" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
+        <Textarea placeholder="Description (optional)" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
         <Input placeholder="Link URL (optional)" value={draft.link_url} onChange={(e) => setDraft({ ...draft, link_url: e.target.value })} />
-        <Input type="file" accept="image/*" onChange={(e) => setDraft({ ...draft, file: e.target.files?.[0] ?? null })} />
+        <div className="grid gap-2 md:grid-cols-2"><Select value={draft.placement} onValueChange={(placement) => setDraft({ ...draft, placement })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="both">Home + Matches</SelectItem><SelectItem value="home">Home only</SelectItem><SelectItem value="matches">Matches only</SelectItem></SelectContent></Select><Input type="number" placeholder="Display order" value={draft.display_order} onChange={(e) => setDraft({ ...draft, display_order: Number(e.target.value) })} /></div>
+        <ImageSettingControl label="Advertisement image" value={draft.image_url} onChange={(url) => setDraft({ ...draft, image_url: url ?? "" })} fit={draft.image_fit} onFitChange={(image_fit) => setDraft({ ...draft, image_fit })} position={draft.image_position} onPositionChange={(image_position) => setDraft({ ...draft, image_position })} aspect="2 / 1" help="Crop to a wide promotional card like the reference row." />
         <Button className="btn-luxury" onClick={add}>Add advertisement</Button>
       </Card>
       <div className="grid sm:grid-cols-2 gap-2">
         {list.map((a) => (
           <Card key={a.id} className="glass p-2">
-            <img src={a.image_url} className="w-full h-32 object-cover rounded" alt="" />
+            <img src={a.image_url} className="w-full h-32 rounded" style={{ objectFit: a.image_fit || "cover", objectPosition: a.image_position || "center" }} alt="" />
             <div className="font-bold text-sm mt-1 truncate">{a.title}</div>
             <div className="flex gap-1 mt-1">
               <Button size="sm" variant="outline" onClick={() => toggle(a.id, !a.is_active)}>{a.is_active ? "Hide" : "Show"}</Button>
@@ -4170,6 +4181,8 @@ function LeaderboardAdminPanel() {
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [headerUrl, setHeaderUrl] = useState<string>("");
   const [headerBusy, setHeaderBusy] = useState(false);
+  const [rewards, setRewards] = useState<any[]>([]);
+  const [achievements, setAchievements] = useState<any[]>([]);
   const confirm = useConfirm();
 
   async function load() {
@@ -4177,6 +4190,8 @@ function LeaderboardAdminPanel() {
     setGangs(gangs);
     setShooters(shooters);
     setEdits({});
+    const [{ data: rewardRows }, { data: achievementRows }] = await Promise.all([(supabase as any).from("leaderboard_rewards").select("*").order("leaderboard_type").order("rank"), (supabase as any).from("leaderboard_achievements").select("*").order("display_order")]);
+    setRewards(rewardRows ?? []); setAchievements(achievementRows ?? []);
   }
   useEffect(() => {
     load();
@@ -4327,6 +4342,9 @@ function LeaderboardAdminPanel() {
 
   const numCls = "h-8 w-14 text-center px-1 tabular-nums";
 
+  async function updateReward(id: string, patch: any) { const { error } = await (supabase as any).from("leaderboard_rewards").update(patch).eq("id", id); if (error) toast.error(error.message); else { toast.success("Reward updated"); load(); } }
+  async function updateAchievement(id: string, patch: any) { const { error } = await (supabase as any).from("leaderboard_achievements").update(patch).eq("id", id); if (error) toast.error(error.message); else { toast.success("Achievement updated"); load(); } }
+
   return (
     <div className="space-y-3">
       <Card className="glass-ice p-3 space-y-2 border-amber-500/40">
@@ -4343,6 +4361,12 @@ function LeaderboardAdminPanel() {
           {headerUrl && <Button size="sm" variant="ghost" className="text-destructive" onClick={() => saveHeaderUrl("")}>Clear</Button>}
         </div>
       </Card>
+
+      <Tabs defaultValue="standings">
+        <TabsList><TabsTrigger value="standings">Standings</TabsTrigger><TabsTrigger value="rewards">Rewards</TabsTrigger><TabsTrigger value="achievements">Achievements</TabsTrigger></TabsList>
+        <TabsContent value="rewards" className="mt-3 grid gap-2 md:grid-cols-2">{rewards.map((reward) => <Card key={reward.id} className="glass p-3 space-y-2"><div className="flex items-center justify-between"><Badge>{reward.leaderboard_type} · #{reward.rank}</Badge><Switch checked={reward.is_active} onCheckedChange={(is_active) => void updateReward(reward.id, { is_active })} /></div><Input defaultValue={reward.title} onBlur={(e) => void updateReward(reward.id, { title: e.target.value })} /><Input defaultValue={reward.reward_value} onBlur={(e) => void updateReward(reward.id, { reward_value: e.target.value })} /><Textarea defaultValue={reward.description ?? ""} onBlur={(e) => void updateReward(reward.id, { description: e.target.value })} /></Card>)}</TabsContent>
+        <TabsContent value="achievements" className="mt-3 grid gap-2 md:grid-cols-2">{achievements.map((achievement) => <Card key={achievement.id} className="glass p-3 space-y-2"><div className="flex items-center justify-between"><Badge>{achievement.leaderboard_type ?? "all boards"}</Badge><Switch checked={achievement.is_active} onCheckedChange={(is_active) => void updateAchievement(achievement.id, { is_active })} /></div><Input defaultValue={achievement.title} onBlur={(e) => void updateAchievement(achievement.id, { title: e.target.value })} /><Textarea defaultValue={achievement.description} onBlur={(e) => void updateAchievement(achievement.id, { description: e.target.value })} /></Card>)}</TabsContent>
+        <TabsContent value="standings" className="mt-3">
 
       <Card className="glass-ice p-3 flex flex-wrap items-center gap-2 border-destructive/40">
         <div className="text-xs font-bold tracking-widest text-destructive mr-1">DANGER ZONE</div>
@@ -4412,6 +4436,8 @@ function LeaderboardAdminPanel() {
           </tbody>
         </table>
       </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

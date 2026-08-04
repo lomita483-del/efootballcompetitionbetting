@@ -5,7 +5,7 @@ import { useBetSlip } from "@/contexts/BetSlipContext";
 import type { MatchRow } from "@/lib/queries";
 
 export function ArenaMatchRow({ match }: { match: MatchRow }) {
-  const { selections, add, remove, setOpen } = useBetSlip();
+  const { selections, add, remove } = useBetSlip();
   const market = match.markets?.find((item) => item.is_open) ?? match.markets?.[0];
   const odds = (market?.odds ?? []).slice(0, 3);
   const date = new Date(match.start_time);
@@ -13,8 +13,7 @@ export function ArenaMatchRow({ match }: { match: MatchRow }) {
   return (
     <article className="ecb-match-row">
       <Link to="/matches/$matchId" params={{ matchId: match.id }} className="ecb-match-meta">
-        <small>{match.category?.name ?? "EFA CHAMPIONS LEAGUE"}</small>
-        <b>{match.name}</b>
+        <small className="font-black">{match.category?.name ?? "EFA CHAMPIONS LEAGUE"}</small>
         <span>
           {date.toLocaleDateString(undefined, { weekday: "short" })} · {date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
           <br />
@@ -49,7 +48,6 @@ export function ArenaMatchRow({ match }: { match: MatchRow }) {
                   selection_label: odd.label,
                   odds: Number(odd.value),
                 });
-                setOpen(true);
               }}
             >
               {Number(odd.value).toFixed(2)}

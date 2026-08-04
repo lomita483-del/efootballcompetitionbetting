@@ -143,6 +143,7 @@ function Dashboard() {
             <PanelCard to="/checkout" icon={Coins} title="Request Tokens" subtitle="Top up balance" />
             {isSponsor && <PanelCard onClick={() => setPromoOpen(true)} icon={Tag} title="Promo Codes" subtitle="Sponsor only" gold />}
             <PanelCard to="/transactions" icon={Receipt} title="Transaction Records" subtitle="Credits & debits" />
+            <PanelCard to="/referrals" icon={Gift} title="Invite Now" subtitle="Refer & earn" gold />
             <PanelCard to="/achievements" icon={Trophy} title="Achievements" subtitle="Your badges" />
             <PanelCard to="/tasks" icon={ClipboardCheck} title="Task" subtitle="Admin assigned" />
             <PanelCard to="/quests" icon={ListChecks} title="Quest" subtitle="Earn tokens" />

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { loadStandings, type LbRow } from "@/lib/leaderboard";
 import { loadPlayerProfile, type PlayerProfile } from "@/lib/player-profile";
@@ -90,6 +91,9 @@ function Page() {
   const [headerUrl, setHeaderUrl] = useState<string | null>(leaderboardHeaderAsset.url);
   const [downloading, setDownloading] = useState(false);
   const [selected, setSelected] = useState<{ name: string; source: "gangs" | "shooters" | "scorers"; image: string | null } | null>(null);
+  const [activeBoard, setActiveBoard] = useState<"gangs" | "shooters" | "scorers">("gangs");
+  const [rewards, setRewards] = useState<any[]>([]);
+  const [achievements, setAchievements] = useState<any[]>([]);
   const captureRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -100,6 +104,8 @@ function Page() {
       setScorers(scorers);
     };
     run();
+    (supabase as any).from("leaderboard_rewards").select("*").eq("is_active", true).order("display_order").then(({ data }: any) => setRewards(data ?? []));
+    (supabase as any).from("leaderboard_achievements").select("*").eq("is_active", true).order("display_order").then(({ data }: any) => setAchievements(data ?? []));
     const ch = supabase
       .channel("leaderboard-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "leaderboard_overrides" }, run)
@@ -223,7 +229,7 @@ const handleDownload = async () => {
             </div>
           )}
 
-          <Tabs defaultValue="gangs">
+          <Tabs value={activeBoard} onValueChange={(value) => setActiveBoard(value as typeof activeBoard)}>
             <TabsList className="h-auto bg-black/25 backdrop-blur-[2px] border border-amber-400/40 p-1 gap-1">
               <TabsTrigger
                 value="gangs"
@@ -260,6 +266,7 @@ const handleDownload = async () => {
               <ScorerBoard rows={scorers} onOpen={(name, image) => setSelected({ name, image, source: "scorers" })} />
             </TabsContent>
           </Tabs>
+          <LeaderboardFeatures board={activeBoard} rows={activeBoard === "gangs" ? gangs : activeBoard === "shooters" ? shooters : scorers} rewards={rewards} achievements={achievements} />
         </div>
       </div>
 
@@ -272,6 +279,13 @@ const handleDownload = async () => {
       />
     </Layout>
   );
+}
+
+function LeaderboardFeatures({ board, rows, rewards, achievements }: { board: "gangs" | "shooters" | "scorers"; rows: LbRow[]; rewards: any[]; achievements: any[] }) {
+  const [showAll, setShowAll] = useState(false);
+  const boardRewards = rewards.filter((reward) => reward.leaderboard_type === board);
+  const boardAchievements = achievements.filter((achievement) => !achievement.leaderboard_type || achievement.leaderboard_type === board);
+  return <section className="mt-4 grid gap-3 lg:grid-cols-[1.25fr_1fr]"><div className="rounded-md border border-primary/40 bg-background/65 p-4"><div className="mb-3 flex items-center justify-between"><div><p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary">Live positions</p><h2 className="text-xl font-black">Rewards for Top 3</h2></div><Trophy className="text-primary" /></div><div className="space-y-2">{boardRewards.slice(0, showAll ? undefined : 3).map((reward) => { const holder = rows[reward.rank - 1]; return <div key={reward.id} className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-3 rounded-md border border-primary/20 bg-card/55 p-3"><span className="grid h-9 w-9 place-items-center rounded-md border border-primary/45 font-black text-primary">#{reward.rank}</span><div className="min-w-0"><b className="block truncate">{holder?.name ?? "Position open"}</b><span className="text-[10px] text-muted-foreground">{reward.title} · {reward.description}</span></div><strong className="text-primary">{reward.reward_value}</strong></div>; })}</div>{boardRewards.length > 3 && <Button variant="outline" className="mt-3 w-full" onClick={() => setShowAll((value) => !value)}>{showAll ? "Show Top 3" : "View All Rewards"}</Button>}</div><div className="rounded-md border border-accent/35 bg-background/65 p-4"><div className="mb-3 flex items-center gap-2"><Award className="text-accent" /><h2 className="text-xl font-black">Achievements</h2></div><div className="space-y-2">{boardAchievements.map((achievement) => <div key={achievement.id} className="flex gap-3 rounded-md border border-accent/20 bg-card/55 p-3"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-accent/10"><Star className="text-accent" /></span><div><b className="text-sm">{achievement.title}</b><p className="text-[10px] text-muted-foreground">{achievement.description}</p></div></div>)}</div></div></section>;
 }
 
 function Board({
