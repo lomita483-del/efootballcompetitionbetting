@@ -50,6 +50,15 @@ function ProfilePage() {
     await refresh();
   };
   const save = async () => {
+    const phone = f.phone.trim();
+    if (phone && !/^\+[1-9]\d{7,14}$/.test(phone)) {
+      return toast.error("Use international phone format", { description: "Example: +2348012345678" });
+    }
+    if (phone && phone !== user.phone) {
+      const { error: phoneError } = await supabase.auth.updateUser({ phone });
+      if (phoneError) return toast.error("Could not link phone", { description: phoneError.message });
+      toast.success("Phone verification sent", { description: "Enter the SMS code when prompted to verify this number." });
+    }
     const { error } = await supabase.from("profiles").update(f).eq("id", user.id);
     if (error) return toast.error(error.message);
     toast.success("Saved"); await refresh();
@@ -111,7 +120,7 @@ function ProfilePage() {
         </Card>
         <Card className="p-6 space-y-4">
           {(["full_name","phone","discord_username","country","gang_name"] as const).map((k) => (
-            <div key={k}><Label className="capitalize">{k.replace("_"," ")}</Label><Input value={(f as any)[k]} onChange={(e) => setF((p) => ({ ...p, [k]: e.target.value }))} /></div>
+            <div key={k}><Label className="capitalize">{k.replace("_"," ")}</Label><Input type={k === "phone" ? "tel" : "text"} placeholder={k === "phone" ? "+2348012345678" : undefined} value={(f as any)[k]} onChange={(e) => setF((p) => ({ ...p, [k]: e.target.value }))} />{k === "phone" && <p className="mt-1 text-xs text-muted-foreground">Use international format. Changing it sends a verification SMS.</p>}</div>
           ))}
           <Button onClick={save} className="w-full">Save</Button>
         </Card>

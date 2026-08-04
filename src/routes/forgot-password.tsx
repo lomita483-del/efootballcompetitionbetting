@@ -44,6 +44,7 @@ function ForgotPasswordPage() {
   const sendCode = async () => {
     const value = contact.trim();
     if (!value) return toast.error("Enter your details", { description: `Type the ${channel} linked to your account.` });
+    if (channel === "phone" && !/^\+[1-9]\d{7,14}$/.test(value)) return toast.error("Use international phone format", { description: "Example: +2348012345678" });
     setLoading(true);
     const { error } =
       channel === "email"
