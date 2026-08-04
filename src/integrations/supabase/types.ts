@@ -2481,6 +2481,54 @@ export type Database = {
           },
         ]
       }
+      mcp_audit_logs: {
+        Row: {
+          actor_role: string
+          client_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          input_summary: Json
+          result_summary: Json
+          success: boolean
+          target_id: string | null
+          target_type: string | null
+          tool_name: string
+          user_email: string | null
+          user_id: string
+        }
+        Insert: {
+          actor_role: string
+          client_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input_summary?: Json
+          result_summary?: Json
+          success?: boolean
+          target_id?: string | null
+          target_type?: string | null
+          tool_name: string
+          user_email?: string | null
+          user_id: string
+        }
+        Update: {
+          actor_role?: string
+          client_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input_summary?: Json
+          result_summary?: Json
+          success?: boolean
+          target_id?: string | null
+          target_type?: string | null
+          tool_name?: string
+          user_email?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       motivational_content: {
         Row: {
           created_at: string
