@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "@tanstack/react-router";
-import { Gift, Sparkles, X } from "lucide-react";
+import { Coins, Gift, RotateCw, Sparkles, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -73,31 +73,43 @@ export function LuckyWheelPopout() {
     <div className="fixed inset-0 z-[190] grid place-items-center overflow-y-auto bg-background/90 p-3 backdrop-blur-xl animate-fade-in" role="dialog" aria-modal="true" aria-label={campaign.title}>
       <div className="relative flex min-h-full w-full max-w-[760px] flex-col items-center justify-center py-8">
         <Button variant="outline" size="icon" className="absolute right-0 top-3 z-20" onClick={() => setOpen(false)} aria-label="Close Lucky Wheel"><X className="h-5 w-5" /></Button>
-        <div className="mb-3 text-center">
+        <div className="mb-5 text-center">
           <div className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-[0.3em] text-primary"><Sparkles className="h-4 w-4" />Exclusive reward drop</div>
-          <h2 className="mt-1 text-3xl font-black uppercase text-foreground sm:text-5xl">{campaign.title}</h2>
+          <h2 className="lucky-wheel-title mt-1 text-4xl font-black uppercase sm:text-6xl">{campaign.title}</h2>
           {campaign.subtitle && <p className="mt-1 text-sm text-muted-foreground">{campaign.subtitle}</p>}
         </div>
-        <div className="relative aspect-square w-[min(82vw,560px)]">
-          <div className="absolute left-1/2 top-[-4px] z-20 h-0 w-0 -translate-x-1/2 border-x-[20px] border-t-[42px] border-x-transparent border-t-primary drop-shadow-lg" />
-          <div className="absolute inset-0 rounded-full border-[10px] border-primary bg-card p-2 shadow-gold">
-            <div className="relative h-full w-full overflow-hidden rounded-full border-4 border-background" style={{ background: gradient, transform: `rotate(${rotation}deg)`, transition: spinning ? "transform 4.2s cubic-bezier(.12,.68,.08,1)" : "none" }}>
-              {segments.map((segment, index) => (
-                <div key={segment.id} className="absolute left-1/2 top-1/2 h-1/2 w-1/2 origin-top-left" style={{ transform: `rotate(${index * step + step / 2}deg)` }}>
-                  <span className="absolute left-[18%] top-[12%] block max-w-[38%] -translate-x-1/2 -rotate-90 text-center text-[10px] font-black uppercase leading-tight text-primary-foreground drop-shadow-md sm:text-sm">{segment.label}</span>
-                </div>
+        <div className="lucky-wheel-stage relative aspect-square w-[min(92vw,720px)]">
+          <div className="lucky-wheel-pointer absolute left-1/2 top-[-2.5%] z-40 -translate-x-1/2" aria-hidden="true"><span /></div>
+          <div className="lucky-wheel-frame absolute inset-0 rounded-full">
+            <div className="lucky-wheel-bulbs absolute inset-0 rounded-full" aria-hidden="true">
+              {Array.from({ length: 24 }).map((_, index) => (
+                <span key={index} style={{ transform: `rotate(${index * 15}deg)` }}><i /></span>
               ))}
             </div>
+            <div className="lucky-wheel-bezel absolute rounded-full">
+              <div className="lucky-wheel-face relative h-full w-full overflow-hidden rounded-full" style={{ background: gradient, transform: `rotate(${rotation}deg)`, transition: spinning ? "transform 4.2s cubic-bezier(.12,.68,.08,1)" : "none" }}>
+                <div className="lucky-wheel-face-shine absolute inset-0 rounded-full" />
+              {segments.map((segment, index) => (
+                <div key={segment.id} className="lucky-wheel-segment-label absolute inset-0" style={{ transform: `rotate(${index * step + step / 2}deg)` }}>
+                  <div className="absolute left-1/2 top-[9%] flex w-[26%] -translate-x-1/2 flex-col items-center text-center text-primary-foreground">
+                    {segment.outcome_kind === "tokens" ? <Coins className="mb-1 h-5 w-5 text-primary sm:h-7 sm:w-7" /> : <X className="mb-1 h-5 w-5 text-primary sm:h-7 sm:w-7" />}
+                    <span className="line-clamp-2 text-[9px] font-black uppercase leading-none drop-shadow-md sm:text-sm">{segment.label}</span>
+                    {segment.outcome_kind === "tokens" && segment.reward_amount > 0 && <small className="mt-1 text-[8px] font-bold sm:text-xs">{segment.reward_amount.toLocaleString()} TOKENS</small>}
+                  </div>
+                </div>
+              ))}
+              </div>
+            </div>
           </div>
-          <div className="absolute left-1/2 top-1/2 grid h-24 w-24 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-4 border-primary bg-background shadow-gold sm:h-32 sm:w-32">
-            <Gift className="h-10 w-10 text-primary sm:h-14 sm:w-14" />
+          <div className="lucky-wheel-hub absolute left-1/2 top-1/2 z-30 grid h-[24%] w-[24%] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full">
+            <Gift className="h-[42%] w-[42%] text-primary" />
           </div>
         </div>
-        <div className="mt-4 min-h-14 text-center">
+        <div className="mt-6 min-h-14 text-center">
           {result && <div className={`animate-scale-in text-xl font-black ${result.kind === "tokens" ? "text-accent" : result.kind === "lost" ? "text-destructive" : "text-destructive"}`}>{result.kind === "tokens" ? `YOU WON ${result.amount.toLocaleString()} TOKENS!` : result.label}</div>}
-          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{spins} spin{spins === 1 ? "" : "s"} remaining</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-primary">{spins} spin{spins === 1 ? "" : "s"} remaining today</p>
         </div>
-        <Button className="btn-luxury h-14 min-w-56 text-lg font-black uppercase" disabled={spinning || spins <= 0} onClick={spin}>{spinning ? "Spinning…" : spins > 0 ? "Spin the wheel" : "No spins remaining"}</Button>
+        <Button className="btn-luxury lucky-wheel-spin h-16 min-w-72 text-lg font-black uppercase" disabled={spinning || spins <= 0} onClick={spin}><RotateCw className={spinning ? "animate-spin" : ""} />{spinning ? "Spinning…" : spins > 0 ? "Spin the wheel" : "No spins remaining"}</Button>
       </div>
     </div>
   );
