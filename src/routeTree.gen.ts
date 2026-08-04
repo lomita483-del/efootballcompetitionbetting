@@ -27,6 +27,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PollsRouteImport } from './routes/polls'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as ModRouteImport } from './routes/mod'
+import { Route as McpDocsRouteImport } from './routes/mcp-docs'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as LotteryRouteImport } from './routes/lottery'
@@ -55,6 +56,7 @@ import { Route as VirtualChampionshipRouteImport } from './routes/virtual.champi
 import { Route as TicketIdRouteImport } from './routes/ticket.$id'
 import { Route as MatchesMatchIdRouteImport } from './routes/matches.$matchId'
 import { Route as GuidesHowItWorksRouteImport } from './routes/guides.how-it-works'
+import { Route as AdminMcpAuditRouteImport } from './routes/admin_.mcp-audit'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as ApiPublicVirtualTickRouteImport } from './routes/api/public/virtual-tick'
@@ -154,6 +156,11 @@ const NotificationsRoute = NotificationsRouteImport.update({
 const ModRoute = ModRouteImport.update({
   id: '/mod',
   path: '/mod',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpDocsRoute = McpDocsRouteImport.update({
+  id: '/mcp-docs',
+  path: '/mcp-docs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const McpRoute = McpRouteImport.update({
@@ -297,6 +304,11 @@ const GuidesHowItWorksRoute = GuidesHowItWorksRouteImport.update({
   path: '/guides/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminMcpAuditRoute = AdminMcpAuditRouteImport.update({
+  id: '/admin_/mcp-audit',
+  path: '/admin/mcp-audit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
   Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
     id: '/.well-known/oauth-protected-resource',
@@ -372,6 +384,7 @@ export interface FileRoutesByFullPath {
   '/lottery': typeof LotteryRoute
   '/matches': typeof MatchesRouteWithChildren
   '/mcp': typeof McpRoute
+  '/mcp-docs': typeof McpDocsRoute
   '/mod': typeof ModRoute
   '/notifications': typeof NotificationsRoute
   '/polls': typeof PollsRoute
@@ -392,6 +405,7 @@ export interface FileRoutesByFullPath {
   '/withdraw': typeof WithdrawRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/mcp-audit': typeof AdminMcpAuditRoute
   '/guides/how-it-works': typeof GuidesHowItWorksRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
   '/ticket/$id': typeof TicketIdRoute
@@ -430,6 +444,7 @@ export interface FileRoutesByTo {
   '/lottery': typeof LotteryRoute
   '/matches': typeof MatchesRouteWithChildren
   '/mcp': typeof McpRoute
+  '/mcp-docs': typeof McpDocsRoute
   '/mod': typeof ModRoute
   '/notifications': typeof NotificationsRoute
   '/polls': typeof PollsRoute
@@ -450,6 +465,7 @@ export interface FileRoutesByTo {
   '/withdraw': typeof WithdrawRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/mcp-audit': typeof AdminMcpAuditRoute
   '/guides/how-it-works': typeof GuidesHowItWorksRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
   '/ticket/$id': typeof TicketIdRoute
@@ -489,6 +505,7 @@ export interface FileRoutesById {
   '/lottery': typeof LotteryRoute
   '/matches': typeof MatchesRouteWithChildren
   '/mcp': typeof McpRoute
+  '/mcp-docs': typeof McpDocsRoute
   '/mod': typeof ModRoute
   '/notifications': typeof NotificationsRoute
   '/polls': typeof PollsRoute
@@ -509,6 +526,7 @@ export interface FileRoutesById {
   '/withdraw': typeof WithdrawRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin_/mcp-audit': typeof AdminMcpAuditRoute
   '/guides/how-it-works': typeof GuidesHowItWorksRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
   '/ticket/$id': typeof TicketIdRoute
@@ -549,6 +567,7 @@ export interface FileRouteTypes {
     | '/lottery'
     | '/matches'
     | '/mcp'
+    | '/mcp-docs'
     | '/mod'
     | '/notifications'
     | '/polls'
@@ -569,6 +588,7 @@ export interface FileRouteTypes {
     | '/withdraw'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/mcp-audit'
     | '/guides/how-it-works'
     | '/matches/$matchId'
     | '/ticket/$id'
@@ -607,6 +627,7 @@ export interface FileRouteTypes {
     | '/lottery'
     | '/matches'
     | '/mcp'
+    | '/mcp-docs'
     | '/mod'
     | '/notifications'
     | '/polls'
@@ -627,6 +648,7 @@ export interface FileRouteTypes {
     | '/withdraw'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/mcp-audit'
     | '/guides/how-it-works'
     | '/matches/$matchId'
     | '/ticket/$id'
@@ -665,6 +687,7 @@ export interface FileRouteTypes {
     | '/lottery'
     | '/matches'
     | '/mcp'
+    | '/mcp-docs'
     | '/mod'
     | '/notifications'
     | '/polls'
@@ -685,6 +708,7 @@ export interface FileRouteTypes {
     | '/withdraw'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin_/mcp-audit'
     | '/guides/how-it-works'
     | '/matches/$matchId'
     | '/ticket/$id'
@@ -724,6 +748,7 @@ export interface RootRouteChildren {
   LotteryRoute: typeof LotteryRoute
   MatchesRoute: typeof MatchesRouteWithChildren
   McpRoute: typeof McpRoute
+  McpDocsRoute: typeof McpDocsRoute
   ModRoute: typeof ModRoute
   NotificationsRoute: typeof NotificationsRoute
   PollsRoute: typeof PollsRoute
@@ -744,6 +769,7 @@ export interface RootRouteChildren {
   WithdrawRoute: typeof WithdrawRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  AdminMcpAuditRoute: typeof AdminMcpAuditRoute
   GuidesHowItWorksRoute: typeof GuidesHowItWorksRoute
   TicketIdRoute: typeof TicketIdRoute
   VirtualChampionshipRoute: typeof VirtualChampionshipRoute
@@ -890,6 +916,13 @@ declare module '@tanstack/react-router' {
       path: '/mod'
       fullPath: '/mod'
       preLoaderRoute: typeof ModRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp-docs': {
+      id: '/mcp-docs'
+      path: '/mcp-docs'
+      fullPath: '/mcp-docs'
+      preLoaderRoute: typeof McpDocsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mcp': {
@@ -1088,6 +1121,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesHowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin_/mcp-audit': {
+      id: '/admin_/mcp-audit'
+      path: '/admin/mcp-audit'
+      fullPath: '/admin/mcp-audit'
+      preLoaderRoute: typeof AdminMcpAuditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.well-known/oauth-protected-resource': {
       id: '/.well-known/oauth-protected-resource'
       path: '/.well-known/oauth-protected-resource'
@@ -1190,6 +1230,7 @@ const rootRouteChildren: RootRouteChildren = {
   LotteryRoute: LotteryRoute,
   MatchesRoute: MatchesRouteWithChildren,
   McpRoute: McpRoute,
+  McpDocsRoute: McpDocsRoute,
   ModRoute: ModRoute,
   NotificationsRoute: NotificationsRoute,
   PollsRoute: PollsRoute,
@@ -1211,6 +1252,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  AdminMcpAuditRoute: AdminMcpAuditRoute,
   GuidesHowItWorksRoute: GuidesHowItWorksRoute,
   TicketIdRoute: TicketIdRoute,
   VirtualChampionshipRoute: VirtualChampionshipRoute,
