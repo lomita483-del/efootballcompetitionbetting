@@ -107,26 +107,41 @@ export type Database = {
       advertisements: {
         Row: {
           created_at: string
+          description: string | null
+          display_order: number
           id: string
+          image_fit: string
+          image_position: string
           image_url: string | null
           is_active: boolean
           link_url: string | null
+          placement: string
           title: string
         }
         Insert: {
           created_at?: string
+          description?: string | null
+          display_order?: number
           id?: string
+          image_fit?: string
+          image_position?: string
           image_url?: string | null
           is_active?: boolean
           link_url?: string | null
+          placement?: string
           title: string
         }
         Update: {
           created_at?: string
+          description?: string | null
+          display_order?: number
           id?: string
+          image_fit?: string
+          image_position?: string
           image_url?: string | null
           is_active?: boolean
           link_url?: string | null
+          placement?: string
           title?: string
         }
         Relationships: []
@@ -255,6 +270,9 @@ export type Database = {
           maintenance_image: string | null
           maintenance_message: string | null
           maintenance_mode: boolean
+          matches_arena_image_fit: string
+          matches_arena_image_position: string
+          matches_arena_image_url: string | null
           max_payout: number
           max_selections_per_ticket: number
           min_selections_per_ticket: number
@@ -400,6 +418,9 @@ export type Database = {
           maintenance_image?: string | null
           maintenance_message?: string | null
           maintenance_mode?: boolean
+          matches_arena_image_fit?: string
+          matches_arena_image_position?: string
+          matches_arena_image_url?: string | null
           max_payout?: number
           max_selections_per_ticket?: number
           min_selections_per_ticket?: number
@@ -545,6 +566,9 @@ export type Database = {
           maintenance_image?: string | null
           maintenance_message?: string | null
           maintenance_mode?: boolean
+          matches_arena_image_fit?: string
+          matches_arena_image_position?: string
+          matches_arena_image_url?: string | null
           max_payout?: number
           max_selections_per_ticket?: number
           min_selections_per_ticket?: number
@@ -1749,6 +1773,45 @@ export type Database = {
         }
         Relationships: []
       }
+      leaderboard_achievements: {
+        Row: {
+          created_at: string
+          description: string
+          display_order: number
+          icon: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          leaderboard_type: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          display_order?: number
+          icon?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          leaderboard_type?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          display_order?: number
+          icon?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          leaderboard_type?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       leaderboard_overrides: {
         Row: {
           draws: number
@@ -1814,6 +1877,48 @@ export type Database = {
           board?: string
           name?: string
           rank?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      leaderboard_rewards: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          image_url: string | null
+          is_active: boolean
+          leaderboard_type: string
+          rank: number
+          reward_value: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          leaderboard_type: string
+          rank: number
+          reward_value: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          leaderboard_type?: string
+          rank?: number
+          reward_value?: string
+          title?: string
           updated_at?: string
         }
         Relationships: []
