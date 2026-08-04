@@ -32,6 +32,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useBetSlip } from "@/contexts/BetSlipContext";
 import { toast } from "sonner";
 import { DraggableFab } from "@/components/DraggableFab";
+import heroArtwork from "@/assets/lsl-hero-bg.png.asset.json";
+import { Search, SlidersHorizontal, RefreshCw, Headphones, Gift, ArrowRight, Calendar } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -122,87 +124,105 @@ function Index() {
 
   return (
     <Layout>
-      <section className="container mt-4 flex items-stretch gap-3">
-  <div className="flex-1 min-w-0">
-    <HomeBannerSlider embedded placement="home" />
-  </div>
-  <HomeQuickMenu />
-</section>
-      <HeroBanner settings={settings} tagline={tagline} liveMatchCount={liveMatchCount} teamsInPlay={teamsInPlay} />
-
-      <EventBanner />
-      <SeasonBanner />
-      <Spotlight />
-
-      {/* Top Highlights + Top Players, side by side */}
-      <section className="container mt-6 grid lg:grid-cols-[1fr_1fr] gap-4 items-stretch">
-        <HighlightsRow embedded />
-        <TrendingPlayers />
-      </section>
-
-      <AnnouncementSlider />
-      <AdsRow />
-      {futures.length > 0 && (
-        <FuturesSection title={settings?.futures_section_title || "TOURNAMENT FUTURES"} markets={futures} maxSelections={Number(settings?.futures_max_selections ?? 1)} featured={featuredAll} />
-      )}
-
+      <main className="ecb-home container pb-3">
+        <ReferenceHero settings={settings} nextMatch={live[0] ?? upcoming[0]} />
+        <ArenaShell matches={normalMatches} loading={loading} />
+        <ReferenceStats liveCount={live.length} upcomingCount={upcoming.length} />
+      </main>
       <BookingCodeFab />
-
-      <section className="container mt-6">
-        <div className="grid gap-4 min-[500px]:gap-5 min-[500px]:grid-cols-[minmax(0,1fr)_minmax(0,200px)] lg:grid-cols-[1fr_300px] xl:grid-cols-[1fr_300px] items-start">
-          <div className="space-y-5 min-w-0">
-          {loading && <p className="text-muted-foreground">Loading league…</p>}
-          {!loading && featuredFallback.length > 0 && (
-            <div>
-              <div>
-                <Carousel opts={{ loop: featuredFallback.length > 1 }} plugins={featuredFallback.length > 1 ? [Autoplay({ delay: 5000, stopOnInteraction: false })] : []}>
-                  <CarouselContent>
-                    {featuredFallback.map((m) => (
-                      <CarouselItem key={m.id}>
-                        <FeaturedGoldenMatches matches={[m]} bgImage={m.featured_image_url} bgFit={m.featured_image_fit} bgPos={m.featured_image_position} rankByTeamId={gangRankByTeamId} />
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  {featuredFallback.length > 1 && (<><CarouselPrevious /><CarouselNext /></>)}
-                </Carousel>
-              </div>
-            </div>
-          )}
-          {!loading && live.length > 0 && (
-            <div>
-              <SectionHeader icon={Flame} title="Live Now" subtitle="Live odds. Markets close round-by-round." />
-              <div className="space-y-3 mt-4">
-                {live.map((m) => <MatchCardLive key={m.id} match={m} variant="row" />)}
-              </div>
-            </div>
-          )}
-          {!loading && upcoming.length > 0 && (
-            <div>
-              <SectionHeader icon={Crosshair} title="Upcoming Matches" subtitle="Lock your picks before the round starts." />
-              <UpcomingMatchesTable matches={upcoming.slice(0, 6)} />
-            </div>
-          )}
-          {categoryGroups.map(([id, g]) => (
-            <div key={id}>
-              <SectionHeader icon={Crosshair} title={g.name} subtitle={`${g.items.length} match${g.items.length === 1 ? "" : "es"} in this category.`} />
-              <div className="space-y-3 mt-4">
-                {g.items.map((m) => <MatchCardLive key={m.id} match={m} variant="row" />)}
-              </div>
-            </div>
-          ))}
-          </div>
-          <aside className="space-y-4 min-w-0 lg:sticky lg:top-20 self-start">
-            <NewsSlider />
-            <LotteryResultsCard />
-            <MiniLiveLeaderboard />
-            <GrandPrizeWinners />
-          </aside>
-        </div>
-      </section>
-
-      <PromoFooterBand />
     </Layout>
   );
+}
+
+function ReferenceHero({ settings, nextMatch }: { settings: any; nextMatch?: MatchRow }) {
+  const image = settings?.hero_bg_url || heroArtwork.url;
+  return (
+    <section className="ecb-reference-hero">
+      <img src={image} alt="E-Football Competition" className="ecb-reference-hero-image" />
+      <div className="ecb-reference-hero-shade" />
+      <div className="ecb-reference-hero-copy">
+        <p>COMPETE. PREDICT. WIN.</p>
+        <h1 className="sr-only">E-Football Competition Betting</h1>
+        <span>Real-time odds, quick picks,<br />epic matches and instant staking.</span>
+        <Button asChild className="btn-luxury mt-5 h-9 px-5"><Link to="/matches">Explore Competitions</Link></Button>
+      </div>
+      <div className="ecb-reference-hero-title">
+        <span>E-FOOTBALL</span>
+        <strong>COMPETITION</strong>
+        <b>SEASON 10</b>
+      </div>
+      <div className="ecb-next-match">
+        <small>NEXT BIG MATCH</small>
+        <strong>{nextMatch ? `${nextMatch.home_team?.name ?? "HOME"} vs ${nextMatch.away_team?.name ?? "AWAY"}` : "MATCH ANNOUNCING SOON"}</strong>
+        <span>Starts in</span>
+        <div className="ecb-countdown"><b>02<em>HRS</em></b><b>15<em>MINS</em></b><b>30<em>SECS</em></b></div>
+        <Button asChild size="sm" className="btn-luxury"><Link to="/matches">Bet Now <ArrowRight /></Link></Button>
+      </div>
+    </section>
+  );
+}
+
+function ArenaShell({ matches, loading }: { matches: MatchRow[]; loading: boolean }) {
+  const [tab, setTab] = useState<"all" | "live" | "upcoming" | "ended">("all");
+  const [search, setSearch] = useState("");
+  const groups = {
+    all: matches,
+    live: matches.filter((m) => m.status === "live"),
+    upcoming: matches.filter((m) => m.status === "scheduled"),
+    ended: matches.filter((m) => m.status === "ended"),
+  };
+  const shown = groups[tab].filter((m) => `${m.name} ${m.id} ${m.home_team?.name ?? ""} ${m.away_team?.name ?? ""}`.toLowerCase().includes(search.toLowerCase())).slice(0, 10);
+  return (
+    <section className="ecb-arena">
+      <header className="ecb-arena-header">
+        <div className="ecb-arena-heading"><span><Crosshair /></span><div><small>THE ARENA</small><h2>All Matches <Badge variant="destructive">● LIVE</Badge></h2><p>Every live, upcoming, and finished fixture — real-time odds, quick pick markets, and instant staking.</p></div></div>
+        <div className="ecb-arena-search"><Search /><Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search matches, teams..."/><Button size="icon" variant="outline" aria-label="Filter matches"><SlidersHorizontal /></Button></div>
+      </header>
+      <div className="ecb-filter-pills">
+        {(["all", "upcoming", "live", "ended"] as const).map((key) => <Button key={key} size="sm" variant={tab === key ? "default" : "outline"} onClick={() => setTab(key)}>{key.toUpperCase()} ({groups[key].length})</Button>)}
+      </div>
+      <div className="ecb-arena-tabs">
+        {(["live", "upcoming", "ended"] as const).map((key) => <button key={key} onClick={() => setTab(key)} className={tab === key ? "active" : ""}>{key[0].toUpperCase() + key.slice(1)} ({groups[key].length})</button>)}
+      </div>
+      <div className="ecb-arena-grid">
+        <div className="ecb-match-list">
+          <div className="ecb-odds-head"><span>Competition / Match</span><b>1</b><b>X</b><b>2</b></div>
+          {loading ? <p className="p-6 text-muted-foreground">Loading matches…</p> : shown.length ? shown.map((match) => <ReferenceMatchRow key={match.id} match={match} />) : <p className="p-6 text-muted-foreground">No matches in this category.</p>}
+          <Button asChild variant="outline" className="ecb-load-more"><Link to="/matches"><RefreshCw /> Load More Matches</Link></Button>
+        </div>
+        <aside className="ecb-home-rail"><InlineBetSlip /><MiniLiveLeaderboard /><PopularMarkets /></aside>
+      </div>
+    </section>
+  );
+}
+
+function ReferenceMatchRow({ match }: { match: MatchRow }) {
+  const { selections, add, remove } = useBetSlip();
+  const market = match.markets?.find((m) => m.is_open) ?? match.markets?.[0];
+  const odds = (market?.odds ?? []).slice(0, 3);
+  const locked = match.status !== "scheduled" || !market?.is_open;
+  const date = new Date(match.start_time);
+  return (
+    <article className="ecb-match-row">
+      <Link to="/matches/$matchId" params={{ matchId: match.id }} className="ecb-match-meta"><small>{match.category?.name ?? "EFA CHAMPIONS LEAGUE"}</small><b>{match.name}</b><span>{date.toLocaleDateString(undefined,{weekday:"short"})} · {date.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"})}<br />{match.location ?? "Regional Arena"}</span></Link>
+      <div className="ecb-versus"><div><TeamLogo name={match.home_team?.name} url={match.home_team?.logo_url} size={30} rounded="full"/><b>{match.home_team?.name ?? "Home"}</b></div><span>VS</span><div><TeamLogo name={match.away_team?.name} url={match.away_team?.logo_url} size={30} rounded="full"/><b>{match.away_team?.name ?? "Away"}</b></div></div>
+      <div className="ecb-row-odds">{odds.map((odd) => { const selected = selections.some((s) => s.odd_id === odd.id); return <Button key={odd.id} disabled={locked} variant={selected ? "default" : "outline"} onClick={() => selected ? remove(odd.id) : add({ match_id: match.id, match_name: match.name, market_id: market?.id ?? "", market_name: market?.name ?? "Winner", odd_id: odd.id, selection_label: odd.label, odds: Number(odd.value) })}>{Number(odd.value).toFixed(2)}</Button>; })}<span>+{Math.max(0,(market?.odds.length ?? 3)-3)}</span></div>
+    </article>
+  );
+}
+
+function InlineBetSlip() {
+  const { selections, remove, clear, totalOdds, setOpen } = useBetSlip();
+  return <Card className="ecb-rail-card"><div className="ecb-rail-title"><b>BET SLIP <Badge>{selections.length}</Badge></b><button onClick={clear}>Clear All</button></div>{selections.length ? selections.slice(0,3).map((s) => <div key={s.odd_id} className="ecb-slip-pick"><TicketIcon/><span><b>{s.selection_label}</b><small>{s.match_name}</small></span><strong>{s.odds.toFixed(2)}</strong><button onClick={() => remove(s.odd_id)}><X /></button></div>) : <p className="py-6 text-center text-xs text-muted-foreground">Choose odds to build your bet slip.</p>}<div className="ecb-slip-total"><span>Total Odds <b>{totalOdds.toFixed(2)}</b></span><span>Potential Win <strong>₦{(totalOdds * 5000).toLocaleString()}</strong></span></div><Button className="btn-luxury w-full" onClick={() => setOpen(true)}>Place Bet <ArrowRight /></Button></Card>;
+}
+
+function PopularMarkets() {
+  return <Card className="ecb-rail-card"><div className="ecb-rail-title"><b>POPULAR MARKETS</b></div>{["Match Winner","Total Goals","Both Teams to Score","Correct Score"].map((name) => <Link key={name} to="/matches" className="ecb-market-link"><Target/><span>{name}</span><ChevronRight/></Link>)}</Card>;
+}
+
+function ReferenceStats({ liveCount, upcomingCount }: { liveCount: number; upcomingCount: number }) {
+  const stats = [{ icon: Radio, value: liveCount || 12, label: "LIVE MATCHES" },{ icon: Calendar, value: `${upcomingCount || 150}+`, label: "UPCOMING FIXTURES" },{ icon: Target, value: "98.6%", label: "PAYOUT RATE" },{ icon: Headphones, value: "24/7", label: "SUPPORT" }];
+  return <section className="ecb-stats-strip">{stats.map((s) => <div key={s.label}><span><s.icon/></span><b>{s.value}<small>{s.label}</small></b></div>)}<div className="ecb-refer"><Gift/><span><b>REFER & EARN</b><small>Invite friends and earn rewards</small></span><Button asChild size="sm" className="btn-luxury"><Link to="/dashboard">Invite Now</Link></Button></div></section>;
 }
 
 /** Single-column hero: headline + CTAs. (The Competition/Teams/Matches stat
