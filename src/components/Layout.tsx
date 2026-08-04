@@ -37,6 +37,7 @@ import { SurveyPopout } from "@/components/SurveyPopout";
 import { PollPopout } from "@/components/PollPopout";
 import { PushPermissionPrompt } from "@/components/PushPermissionPrompt";
 import { FloatingWidgets } from "@/components/FloatingWidgets";
+import { LuckyWheelPopout } from "@/components/LuckyWheelPopout";
 import { AdvertisementRow } from "@/components/AdvertisementRow";
 import { ReactNode, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -393,6 +394,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       <PollPopout />
       <PushPermissionPrompt />
       <FloatingWidgets />
+      <LuckyWheelPopout />
       <SiteFooter isHome={isHome} />
     </div>
   );
