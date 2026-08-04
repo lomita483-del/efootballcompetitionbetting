@@ -27,9 +27,9 @@ const playerTools = [
 const adminTools = [
   ["admin_platform_overview", "Summarizes users, matches, bets, open stakes, exposure and token balances."],
   ["admin_list_matches", "Searches scheduled, live, ended, archived and voided matches."],
-  ["admin_manage_match", "Starts, reschedules, scores, settles, voids, unvoids or archives a match."],
+  ["admin_manage_match", "Controls status, schedule, attendance, betting locks, scores, settlement, voiding and archives."],
   ["admin_list_bets", "Searches player tickets with selections and settlement details."],
-  ["admin_manage_bet", "Suspends, reactivates, refunds, voids or deletes a ticket."],
+  ["admin_manage_bet", "Suspends, reactivates, settles, refunds, voids or deletes tickets and individual legs."],
   ["admin_list_mcp_audit", "Reviews the MCP call trail by tool, actor role, outcome and time."],
 ] as const;
 const userPrompts = ["What is my current token balance and streak?", "Show my open bet tickets and their possible payouts.", "Which matches are live or scheduled today?", "List my latest P2P wagers and their status."];

@@ -9,11 +9,13 @@ export default defineTool({
   description: "Start, reschedule, score, settle, void, unvoid or archive a match using the same administrator permissions as the console.",
   inputSchema: {
     match_id: z.string().describe("Match UUID."),
-    action: z.enum(["start", "reschedule", "update_score", "end_and_settle", "void", "unvoid", "archive"]).describe("Administrative action."),
+    action: z.enum(["start", "cancel", "reschedule", "update_score", "end_and_settle", "void", "unvoid", "archive", "lock_betting", "unlock_betting", "set_presence"]).describe("Administrative action."),
     home_score: z.number().int().optional().describe("Home score for score or settlement actions."),
     away_score: z.number().int().optional().describe("Away score for score or settlement actions."),
     start_time: z.string().optional().describe("ISO date-time for rescheduling."),
     reason: z.string().optional().describe("Reason recorded for voiding or administrative traceability."),
+    side: z.enum(["home", "away"]).optional().describe("Required by set_presence."),
+    present: z.boolean().optional().describe("Attendance value required by set_presence."),
   },
   annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },
   handler: async (input, ctx) => auditedToolCall("admin_manage_match", input, ctx, async () => {
@@ -29,6 +31,14 @@ export default defineTool({
       ({ error } = await db.from("matches").update({ is_archived: true }).eq("id", input.match_id));
     } else if (input.action === "start") {
       ({ error } = await db.from("matches").update({ status: "live" }).eq("id", input.match_id));
+    } else if (input.action === "cancel") {
+      ({ error } = await db.from("matches").update({ status: "cancelled" }).eq("id", input.match_id));
+    } else if (input.action === "lock_betting" || input.action === "unlock_betting") {
+      ({ error } = await db.from("markets").update({ is_open: input.action === "unlock_betting" }).eq("match_id", input.match_id));
+    } else if (input.action === "set_presence") {
+      if (!input.side || input.present === undefined) return { content: [{ type: "text", text: "side and present are required for set_presence." }], isError: true };
+      const changes = input.side === "home" ? { home_present: input.present } : { away_present: input.present };
+      ({ error } = await db.from("matches").update(changes).eq("id", input.match_id));
     } else if (input.action === "reschedule") {
       if (!input.start_time) return { content: [{ type: "text", text: "start_time is required for reschedule." }], isError: true };
       ({ error } = await db.from("matches").update({ status: "scheduled", start_time: input.start_time }).eq("id", input.match_id));

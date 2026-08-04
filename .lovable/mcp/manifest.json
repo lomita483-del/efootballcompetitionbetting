@@ -197,12 +197,16 @@
               "type": "string",
               "enum": [
                 "start",
+                "cancel",
                 "reschedule",
                 "update_score",
                 "end_and_settle",
                 "void",
                 "unvoid",
-                "archive"
+                "archive",
+                "lock_betting",
+                "unlock_betting",
+                "set_presence"
               ],
               "description": "Administrative action."
             },
@@ -225,6 +229,18 @@
             "reason": {
               "description": "Reason recorded for voiding or administrative traceability.",
               "type": "string"
+            },
+            "side": {
+              "description": "Required by set_presence.",
+              "type": "string",
+              "enum": [
+                "home",
+                "away"
+              ]
+            },
+            "present": {
+              "description": "Attendance value required by set_presence.",
+              "type": "boolean"
             }
           },
           "required": [
@@ -299,7 +315,11 @@
                 "unsuspend",
                 "refund",
                 "void",
-                "delete"
+                "delete",
+                "force_won",
+                "force_lost",
+                "void_selection",
+                "unvoid_selection"
               ],
               "description": "Administrative ticket action."
             },
@@ -310,6 +330,10 @@
             "refund_stake": {
               "description": "For void or delete, whether to refund the stake.",
               "type": "boolean"
+            },
+            "selection_id": {
+              "description": "Selection UUID required to void or unvoid one ticket leg.",
+              "type": "string"
             }
           },
           "required": [
