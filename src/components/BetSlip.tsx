@@ -147,7 +147,7 @@ function BetSlipDrawer({ open, onClose }: { open: boolean; onClose: () => void }
     if (profile.is_restricted) { toast.error("Your account is restricted from betting."); return; }
     if (stake < minStake) { toast.error(`Minimum stake is ${minStake.toLocaleString()} tokens`); return; }
     if (stake > (profile.token_balance ?? 0)) {
-      toast.error("Insufficient balance", { action: { label: "Buy tokens", onClick: () => { onClose(); navigate({ to: "/checkout" }); } } });
+      toast.error("Insufficient balance", { action: { label: "Buy tokens", onClick: () => { onClose(); nav({ to: "/checkout" }); } } });
       return;
     }
 
