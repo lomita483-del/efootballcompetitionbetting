@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export function AdvertisementRow({ placement }: { placement: "home" | "matches" }) {
+export function AdvertisementRow({ placement }: { placement: string }) {
   const [items, setItems] = useState<any[]>([]);
   useEffect(() => {
-    const load = () => (supabase as any).from("advertisements").select("*").eq("is_active", true).in("placement", [placement, "both"]).order("display_order", { ascending: true }).limit(8).then(({ data }: any) => setItems(data ?? []));
+    const load = () => (supabase as any).from("advertisements").select("*").eq("is_active", true).in("placement", [placement, "all"]).order("display_order", { ascending: true }).limit(8).then(({ data }: any) => setItems(data ?? []));
     void load();
     const channel = supabase.channel(`advertisements-${placement}`).on("postgres_changes", { event: "*", schema: "public", table: "advertisements" }, load).subscribe();
     return () => { void supabase.removeChannel(channel); };
