@@ -9,6 +9,11 @@ import adminManageMatch from "./tools/admin-manage-match";
 import adminListBets from "./tools/admin-list-bets";
 import adminManageBet from "./tools/admin-manage-bet";
 import adminListMcpAudit from "./tools/admin-list-mcp-audit";
+import adminCreateMatch from "./tools/admin-create-match";
+import adminListUsers from "./tools/admin-list-users";
+import adminManageUser from "./tools/admin-manage-user";
+import adminSendNotification from "./tools/admin-send-notification";
+import adminModerateChat from "./tools/admin-moderate-chat";
 
 // The OAuth issuer must be the direct Supabase host; the project ref is the only
 // value that survives publish unchanged.
@@ -28,6 +33,7 @@ export default defineMcp({
   tools: [
     getMyAccount, listMyBets, listMatches, listMyWagers,
     adminPlatformOverview, adminListMatches, adminManageMatch,
-    adminListBets, adminManageBet, adminListMcpAudit,
+    adminListBets, adminManageBet, adminListMcpAudit, adminCreateMatch,
+    adminListUsers, adminManageUser, adminSendNotification, adminModerateChat,
   ],
 });

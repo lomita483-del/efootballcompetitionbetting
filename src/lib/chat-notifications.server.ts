@@ -7,7 +7,7 @@ type ChatNotificationInput = {
 };
 
 export async function deliverChatNotification({ messageId, senderId }: ChatNotificationInput) {
-  const [{ data: message }, { data: sender }] = await Promise.all([
+  const [{ data: message }, { data: sender }, { data: settings }] = await Promise.all([
     supabaseAdmin
       .from("chat_messages")
       .select("id,user_id,room,content,image_url")
@@ -19,9 +19,17 @@ export async function deliverChatNotification({ messageId, senderId }: ChatNotif
       .select("full_name,ingame_name")
       .eq("id", senderId)
       .maybeSingle(),
+    supabaseAdmin
+      .from("app_settings")
+      .select("chat_notifications_enabled,chat_push_enabled,chat_in_app_enabled,chat_notification_rooms")
+      .eq("id", 1)
+      .maybeSingle(),
   ]);
 
   if (!message) throw new Error("Chat message not found");
+  if (settings?.chat_notifications_enabled === false) return { sent: 0, recipients: 0 };
+  const enabledRooms = Array.isArray(settings?.chat_notification_rooms) ? settings.chat_notification_rooms : ["general", "gang", "moderator"];
+  if (!enabledRooms.includes(message.room)) return { sent: 0, recipients: 0 };
 
   const senderName = sender?.ingame_name || sender?.full_name || "A player";
   const content = message.content?.trim() || (message.image_url ? "Sent an image" : "Sent a message");
@@ -57,8 +65,12 @@ export async function deliverChatNotification({ messageId, senderId }: ChatNotif
     image_url: message.image_url || null,
     skip_push: true,
   }));
-  const { error: notificationError } = await supabaseAdmin.from("notifications").insert(notificationRows);
-  if (notificationError) throw notificationError;
+  if (settings?.chat_in_app_enabled !== false) {
+    const { error: notificationError } = await supabaseAdmin.from("notifications").insert(notificationRows);
+    if (notificationError) throw notificationError;
+  }
+
+  if (settings?.chat_push_enabled === false) return { sent: 0, recipients: recipients.length };
 
   const recipientSet = new Set(recipients);
   const recipientSubscriptions = (subscriptions ?? []).filter((subscription) => subscription.user_id && recipientSet.has(subscription.user_id));

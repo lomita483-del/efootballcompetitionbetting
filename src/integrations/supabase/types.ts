@@ -221,6 +221,10 @@ export type Database = {
           championship_booking_seconds: number
           championship_stage_gap_seconds: number
           championship_stage_live_seconds: number
+          chat_in_app_enabled: boolean
+          chat_notification_rooms: string[]
+          chat_notifications_enabled: boolean
+          chat_push_enabled: boolean
           closed_image: string | null
           closed_message: string
           closed_mode: boolean
@@ -369,6 +373,10 @@ export type Database = {
           championship_booking_seconds?: number
           championship_stage_gap_seconds?: number
           championship_stage_live_seconds?: number
+          chat_in_app_enabled?: boolean
+          chat_notification_rooms?: string[]
+          chat_notifications_enabled?: boolean
+          chat_push_enabled?: boolean
           closed_image?: string | null
           closed_message?: string
           closed_mode?: boolean
@@ -517,6 +525,10 @@ export type Database = {
           championship_booking_seconds?: number
           championship_stage_gap_seconds?: number
           championship_stage_live_seconds?: number
+          chat_in_app_enabled?: boolean
+          chat_notification_rooms?: string[]
+          chat_notifications_enabled?: boolean
+          chat_push_enabled?: boolean
           closed_image?: string | null
           closed_message?: string
           closed_mode?: boolean
@@ -2468,6 +2480,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mcp_audit_logs: {
+        Row: {
+          actor_role: string
+          client_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          input_summary: Json
+          result_summary: Json
+          success: boolean
+          target_id: string | null
+          target_type: string | null
+          tool_name: string
+          user_email: string | null
+          user_id: string
+        }
+        Insert: {
+          actor_role: string
+          client_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input_summary?: Json
+          result_summary?: Json
+          success?: boolean
+          target_id?: string | null
+          target_type?: string | null
+          tool_name: string
+          user_email?: string | null
+          user_id: string
+        }
+        Update: {
+          actor_role?: string
+          client_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input_summary?: Json
+          result_summary?: Json
+          success?: boolean
+          target_id?: string | null
+          target_type?: string | null
+          tool_name?: string
+          user_email?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       motivational_content: {
         Row: {
