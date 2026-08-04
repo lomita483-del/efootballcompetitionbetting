@@ -61,6 +61,7 @@ export const Route = createFileRoute('/api/public/hooks/process-scheduled-push')
                   body: row.body || '',
                   link: row.link || '/notifications',
                   image_url: row.image || null,
+                  skip_push: true,
                 })) as any)
               }
               await supabaseAdmin.from('scheduled_pushes').update({

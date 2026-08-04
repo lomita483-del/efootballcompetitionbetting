@@ -55,6 +55,7 @@ export async function deliverChatNotification({ messageId, senderId }: ChatNotif
     body,
     link: "/chat",
     image_url: message.image_url || null,
+    skip_push: true,
   }));
   const { error: notificationError } = await supabaseAdmin.from("notifications").insert(notificationRows);
   if (notificationError) throw notificationError;

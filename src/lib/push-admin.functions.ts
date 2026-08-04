@@ -81,6 +81,7 @@ export const broadcastPush = createServerFn({ method: "POST" })
         body: data.body || "",
         link: data.link || "/notifications",
         image_url: data.image || null,
+        skip_push: true,
       })) as any);
     }
 
