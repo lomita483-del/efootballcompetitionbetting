@@ -2582,8 +2582,10 @@ export type Database = {
           body: string | null
           created_at: string
           id: string
+          image_url: string | null
           is_read: boolean
           link: string | null
+          skip_push: boolean
           title: string
           user_id: string
         }
@@ -2591,8 +2593,10 @@ export type Database = {
           body?: string | null
           created_at?: string
           id?: string
+          image_url?: string | null
           is_read?: boolean
           link?: string | null
+          skip_push?: boolean
           title: string
           user_id: string
         }
@@ -2600,8 +2604,10 @@ export type Database = {
           body?: string | null
           created_at?: string
           id?: string
+          image_url?: string | null
           is_read?: boolean
           link?: string | null
+          skip_push?: boolean
           title?: string
           user_id?: string
         }

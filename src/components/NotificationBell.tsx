@@ -11,7 +11,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-type Notif = { id: string; title: string; body: string | null; link: string | null; is_read: boolean; created_at: string };
+type Notif = { id: string; title: string; body: string | null; link: string | null; image_url: string | null; is_read: boolean; created_at: string };
 
 export function NotificationBell() {
   const { user } = useAuth();
@@ -84,6 +84,7 @@ export function NotificationBell() {
                 <div className="flex items-start gap-2">
                   {!n.is_read && <span className="mt-1.5 h-2 w-2 rounded-full bg-destructive shrink-0" />}
                   <div className="flex-1 min-w-0">
+                    {n.image_url && <img src={n.image_url} alt="" className="mb-2 aspect-video w-full rounded-md border border-border object-cover" />}
                     <div className="font-bold text-sm truncate">{n.title}</div>
                     {n.body && <div className="text-xs text-muted-foreground line-clamp-2">{n.body}</div>}
                     <div className="text-[10px] text-muted-foreground mt-1">{new Date(n.created_at).toLocaleString()}</div>

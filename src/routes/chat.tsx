@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, ROLE_LABELS, type AppRole } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { notifyChatMessage } from "@/lib/chat-notifications.functions";
 
 export const Route = createFileRoute("/chat")({
   head: () => ({ meta: [{ title: "Community Chat — ECB" }, { name: "description", content: "Live chat with shooters, your gang, and moderators." }] }),
@@ -49,6 +51,7 @@ function ChatPage() {
 
 function Room({ room, muted }: { room: Room; muted: boolean }) {
   const { user, isMod } = useAuth();
+  const sendChatNotification = useServerFn(notifyChatMessage);
   const [msgs, setMsgs] = useState<any[]>([]);
   const [reactions, setReactions] = useState<Record<string, any[]>>({});
   const [text, setText] = useState("");
@@ -65,7 +68,10 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
     const m = text.match(/@([\w\s.-]{0,24})$/);
     return m ? m[1].toLowerCase() : null;
   }, [text]);
-  const mentionMatches = useMemo(() => mentionTerm === null ? [] : members.filter((m) => String(m.full_name ?? "").toLowerCase().includes(mentionTerm)).slice(0, 5), [members, mentionTerm]);
+  const mentionMatches = useMemo(() => mentionTerm === null ? [] : [
+    { id: "all", full_name: "all", gang_name: "Notify everyone" },
+    ...members.filter((m) => String(m.full_name ?? "").toLowerCase().includes(mentionTerm)).slice(0, 5),
+  ].filter((m) => String(m.full_name).toLowerCase().includes(mentionTerm)), [members, mentionTerm]);
 
   useEffect(() => {
     let mounted = true;
@@ -115,8 +121,11 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
       if (error) toast.error(error.message); else { setEditing(null); setText(""); }
       return;
     }
-    const { error } = await supabase.from("chat_messages").insert({ user_id: user.id, room, content: text.trim(), reply_to_id: replyTo?.id ?? null });
-    if (error) toast.error(error.message); else { setText(""); setReplyTo(null); }
+    const { data, error } = await supabase.from("chat_messages").insert({ user_id: user.id, room, content: text.trim(), reply_to_id: replyTo?.id ?? null }).select("id").single();
+    if (error) toast.error(error.message); else {
+      setText(""); setReplyTo(null);
+      if (data?.id) sendChatNotification({ data: { messageId: data.id } }).catch(() => {});
+    }
   }
 
   async function pickImage(file: File) {
@@ -125,7 +134,9 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
     const { error: ue } = await supabase.storage.from("chat-images").upload(path, file);
     if (ue) { toast.error(ue.message); return; }
     const { data: { publicUrl } } = supabase.storage.from("chat-images").getPublicUrl(path);
-    await supabase.from("chat_messages").insert({ user_id: user.id, room, image_url: publicUrl, reply_to_id: replyTo?.id ?? null });
+    const { data, error } = await supabase.from("chat_messages").insert({ user_id: user.id, room, image_url: publicUrl, reply_to_id: replyTo?.id ?? null }).select("id").single();
+    if (error) { toast.error(error.message); return; }
+    if (data?.id) sendChatNotification({ data: { messageId: data.id } }).catch(() => {});
     setReplyTo(null);
   }
 
@@ -187,7 +198,7 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
           <div className="flex gap-2">
             <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && pickImage(e.target.files[0])} />
             <Button type="button" variant="outline" size="icon" onClick={() => fileRef.current?.click()}><ImageIcon className="h-4 w-4" /></Button>
-            <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="Message, @tag a member…" />
+             <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="Message, @tag a member or @all…" />
             <Button type="submit" className="btn-luxury"><Send className="h-4 w-4" /></Button>
           </div>
         </form>

@@ -61,12 +61,12 @@ export function LuckyWheelPopout() {
     if (error || !data) { setSpinning(false); setResult({ label: error?.message ?? "Spin failed", kind: "error", amount: 0 }); return; }
     const index = segments.findIndex((s) => s.id === data.segment_id);
     const target = 360 - (index * step + step / 2);
-    setRotation((previous) => previous + 1440 + ((target - (previous % 360) + 360) % 360));
+    setRotation((previous) => previous + 1800 + ((target - (previous % 360) + 360) % 360));
     window.setTimeout(() => {
       setSpinning(false); setSpins(Number(data.spins_remaining ?? 0));
       setResult({ label: String(data.label), kind: String(data.outcome_kind), amount: Number(data.reward_amount ?? 0) });
       refresh();
-    }, 4200);
+    }, 5000);
   }
 
   return (
@@ -79,7 +79,8 @@ export function LuckyWheelPopout() {
           {campaign.subtitle && <p className="mt-1 text-sm text-muted-foreground">{campaign.subtitle}</p>}
         </div>
         <div className="lucky-wheel-stage relative aspect-square w-[min(92vw,720px)]">
-          <div className="lucky-wheel-pointer absolute left-1/2 top-[-2.5%] z-40 -translate-x-1/2" aria-hidden="true"><span /></div>
+          <div className={`lucky-wheel-pointer absolute left-1/2 top-[-2.5%] z-40 -translate-x-1/2 ${spinning ? "is-spinning" : ""}`} aria-hidden="true"><span><i /></span></div>
+          <div className="lucky-wheel-spotlight absolute inset-[-8%] rounded-full" aria-hidden="true" />
           <div className="lucky-wheel-frame absolute inset-0 rounded-full">
             <div className="lucky-wheel-bulbs absolute inset-0 rounded-full" aria-hidden="true">
               {Array.from({ length: 24 }).map((_, index) => (
@@ -87,7 +88,7 @@ export function LuckyWheelPopout() {
               ))}
             </div>
             <div className="lucky-wheel-bezel absolute rounded-full">
-              <div className="lucky-wheel-face relative h-full w-full overflow-hidden rounded-full" style={{ background: gradient, transform: `rotate(${rotation}deg)`, transition: spinning ? "transform 4.2s cubic-bezier(.12,.68,.08,1)" : "none" }}>
+              <div className="lucky-wheel-face relative h-full w-full overflow-hidden rounded-full" style={{ background: gradient, transform: `rotate(${rotation}deg)`, transition: spinning ? "transform 5s cubic-bezier(.08,.62,.04,1)" : "none", "--wheel-count": segments.length } as React.CSSProperties}>
                 <div className="lucky-wheel-face-shine absolute inset-0 rounded-full" />
               {segments.map((segment, index) => (
                 <div key={segment.id} className="lucky-wheel-segment-label absolute inset-0" style={{ transform: `rotate(${index * step + step / 2}deg)` }}>
@@ -102,6 +103,7 @@ export function LuckyWheelPopout() {
             </div>
           </div>
           <div className="lucky-wheel-hub absolute left-1/2 top-1/2 z-30 grid h-[24%] w-[24%] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full">
+            <span className="lucky-wheel-hub-ring absolute inset-[9%] rounded-full" />
             <Gift className="h-[42%] w-[42%] text-primary" />
           </div>
         </div>

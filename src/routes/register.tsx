@@ -77,6 +77,7 @@ function RegisterPage() {
       return toast.error(`${label} name is required`);
     }
     if (!f.region.trim()) return toast.error("Region is required");
+    if (!/^\+[1-9]\d{7,14}$/.test(f.phone.trim())) return toast.error("Use international phone format", { description: "Example: +2348012345678" });
     if (f.password.length < 6) return toast.error("Password must be at least 6 characters");
     if (f.password !== f.confirm_password) return toast.error("Passwords do not match");
     setLoading(true);
@@ -134,7 +135,7 @@ function RegisterPage() {
             <div className="md:col-span-2"><Label>Discord full name *</Label><Input required maxLength={80} value={f.discord_full_name} onChange={(e) => set("discord_full_name", e.target.value)} /></div>
             <div className="md:col-span-2"><Label>Discord username *</Label><Input required maxLength={60} placeholder="e.g. yourname" value={f.discord_username} onChange={(e) => set("discord_username", e.target.value)} /></div>
             <div><Label>Email *</Label><Input type="email" required maxLength={255} value={f.email} onChange={(e) => set("email", e.target.value)} /></div>
-            <div><Label>Phone *</Label><Input required type="tel" maxLength={32} value={f.phone} onChange={(e) => set("phone", e.target.value)} /></div>
+            <div><Label>Phone *</Label><Input required type="tel" maxLength={16} placeholder="+2348012345678" value={f.phone} onChange={(e) => set("phone", e.target.value)} /><p className="mt-1 text-xs text-muted-foreground">Include the country code.</p></div>
             <div><Label>Password *</Label><Input type="password" required minLength={6} value={f.password} onChange={(e) => set("password", e.target.value)} /></div>
             <div><Label>Confirm password *</Label><Input type="password" required minLength={6} value={f.confirm_password} onChange={(e) => set("confirm_password", e.target.value)} /></div>
             <div className="md:col-span-2"><Label>Faction, Gang or E-Football *</Label>
