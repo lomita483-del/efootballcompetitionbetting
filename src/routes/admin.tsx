@@ -335,9 +335,20 @@ function AdminSectionRail({ alerts, onOpen }: { alerts: Record<string, number>; 
 function ChatMonitorPanel() {
   const [msgs, setMsgs] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<Record<string, any>>({});
+  const [preferences, setPreferences] = useState({ enabled: true, push: true, inApp: true, rooms: ["general", "gang", "moderator"] as string[] });
+  const [savingPreferences, setSavingPreferences] = useState(false);
   async function load() {
-    const { data } = await supabase.from("chat_messages").select("*").order("created_at", { ascending: false }).limit(120);
+    const [{ data }, { data: settings }] = await Promise.all([
+      supabase.from("chat_messages").select("*").order("created_at", { ascending: false }).limit(120),
+      supabase.from("app_settings").select("chat_notifications_enabled,chat_push_enabled,chat_in_app_enabled,chat_notification_rooms").eq("id", 1).maybeSingle(),
+    ]);
     setMsgs(data ?? []);
+    if (settings) setPreferences({
+      enabled: settings.chat_notifications_enabled !== false,
+      push: settings.chat_push_enabled !== false,
+      inApp: settings.chat_in_app_enabled !== false,
+      rooms: Array.isArray(settings.chat_notification_rooms) ? settings.chat_notification_rooms.filter((room) => ["general", "gang", "moderator"].includes(room)) : ["general", "gang", "moderator"],
+    });
     const ids = Array.from(new Set((data ?? []).map((m: any) => m.user_id).filter(Boolean)));
     if (ids.length) {
       const { data: p } = await supabase.from("profiles").select("id,full_name,email,gang_name,is_muted,is_banned").in("id", ids);
@@ -350,11 +361,40 @@ function ChatMonitorPanel() {
     return () => { supabase.removeChannel(ch); };
   }, []);
   async function del(id: string) { await supabase.from("chat_messages").delete().eq("id", id); load(); }
+  async function savePreferences() {
+    setSavingPreferences(true);
+    const { error } = await supabase.from("app_settings").update({
+      chat_notifications_enabled: preferences.enabled,
+      chat_push_enabled: preferences.push,
+      chat_in_app_enabled: preferences.inApp,
+      chat_notification_rooms: preferences.rooms,
+    }).eq("id", 1);
+    setSavingPreferences(false);
+    if (error) toast.error("Could not save chat notification settings", { description: error.message });
+    else toast.success("Chat notification preferences saved");
+  }
+  function toggleRoom(room: string) {
+    setPreferences((current) => ({ ...current, rooms: current.rooms.includes(room) ? current.rooms.filter((item) => item !== room) : [...current.rooms, room] }));
+  }
   return (
     <div className="space-y-3">
       <Card className="glass-strong p-4 flex items-center gap-3">
         <MessageSquare className="h-5 w-5 text-primary" />
         <div><div className="font-bold">Live Chat Monitor</div><div className="text-xs text-muted-foreground">Newest messages across all rooms with quick moderation access.</div></div>
+      </Card>
+      <Card className="glass-strong p-4">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div><div className="flex items-center gap-2 font-bold"><BellRing className="h-4 w-4 text-primary" />Chat notification preferences</div><div className="mt-1 text-xs text-muted-foreground">Control offline device alerts and in-app notification history for new chat messages.</div></div>
+          <Button onClick={savePreferences} disabled={savingPreferences}>{savingPreferences ? "Saving…" : "Save preferences"}</Button>
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          {[
+            ["enabled", "Chat notifications", "Master control for all chat alerts."],
+            ["push", "Device push", "Notify subscribed devices, including offline users."],
+            ["inApp", "In-app history", "Archive messages in each recipient's notification page."],
+          ].map(([key, label, description]) => <label key={key} className="flex items-center justify-between gap-3 rounded-md border border-primary/20 bg-background/40 p-3"><span><span className="block text-sm font-bold">{label}</span><span className="block text-xs text-muted-foreground">{description}</span></span><Switch checked={preferences[key as "enabled" | "push" | "inApp"] as boolean} onCheckedChange={(checked) => setPreferences((current) => ({ ...current, [key]: checked }))} /></label>)}
+        </div>
+        <div className="mt-4"><div className="mb-2 text-xs font-bold uppercase text-muted-foreground">Enabled rooms</div><div className="flex flex-wrap gap-2">{["general", "gang", "moderator"].map((room) => <Button key={room} type="button" size="sm" variant={preferences.rooms.includes(room) ? "default" : "outline"} onClick={() => toggleRoom(room)} className="capitalize">{room}</Button>)}</div></div>
       </Card>
       {msgs.map((m) => {
         const p = profiles[m.user_id];

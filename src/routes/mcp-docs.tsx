@@ -31,6 +31,11 @@ const adminTools = [
   ["admin_list_bets", "Searches player tickets with selections and settlement details."],
   ["admin_manage_bet", "Suspends, reactivates, settles, refunds, voids or deletes tickets and individual legs."],
   ["admin_list_mcp_audit", "Reviews the MCP call trail by tool, actor role, outcome and time."],
+  ["admin_create_match", "Creates a scheduled team match and its match-winner odds."],
+  ["admin_list_users", "Searches member accounts, balances, restrictions and assigned roles."],
+  ["admin_manage_user", "Adjusts tokens, restrictions, sessions and role assignments."],
+  ["admin_send_notification", "Sends targeted or platform-wide in-app and device notifications."],
+  ["admin_moderate_chat", "Reviews chat rooms and removes specific messages."],
 ] as const;
 const userPrompts = ["What is my current token balance and streak?", "Show my open bet tickets and their possible payouts.", "Which matches are live or scheduled today?", "List my latest P2P wagers and their status."];
 const adminPrompts = ["Give me a platform overview and calculate current open bet exposure.", "Find all live matches and flag any with missing scores.", "Void match MATCH_ID because the fixture was cancelled.", "Find ticket TRACKING_ID and suspend it pending review.", "Show failed MCP calls made by administrators today."];
