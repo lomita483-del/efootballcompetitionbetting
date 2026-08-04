@@ -22,6 +22,7 @@ import { Route as ShopRouteImport } from './routes/shop'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ReferralsRouteImport } from './routes/referrals'
 import { Route as QuestsRouteImport } from './routes/quests'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PollsRouteImport } from './routes/polls'
@@ -131,6 +132,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReferralsRoute = ReferralsRouteImport.update({
+  id: '/referrals',
+  path: '/referrals',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QuestsRoute = QuestsRouteImport.update({
@@ -390,6 +396,7 @@ export interface FileRoutesByFullPath {
   '/polls': typeof PollsRoute
   '/profile': typeof ProfileRoute
   '/quests': typeof QuestsRoute
+  '/referrals': typeof ReferralsRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
@@ -450,6 +457,7 @@ export interface FileRoutesByTo {
   '/polls': typeof PollsRoute
   '/profile': typeof ProfileRoute
   '/quests': typeof QuestsRoute
+  '/referrals': typeof ReferralsRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
@@ -511,6 +519,7 @@ export interface FileRoutesById {
   '/polls': typeof PollsRoute
   '/profile': typeof ProfileRoute
   '/quests': typeof QuestsRoute
+  '/referrals': typeof ReferralsRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
@@ -573,6 +582,7 @@ export interface FileRouteTypes {
     | '/polls'
     | '/profile'
     | '/quests'
+    | '/referrals'
     | '/register'
     | '/reset-password'
     | '/settings'
@@ -633,6 +643,7 @@ export interface FileRouteTypes {
     | '/polls'
     | '/profile'
     | '/quests'
+    | '/referrals'
     | '/register'
     | '/reset-password'
     | '/settings'
@@ -693,6 +704,7 @@ export interface FileRouteTypes {
     | '/polls'
     | '/profile'
     | '/quests'
+    | '/referrals'
     | '/register'
     | '/reset-password'
     | '/settings'
@@ -754,6 +766,7 @@ export interface RootRouteChildren {
   PollsRoute: typeof PollsRoute
   ProfileRoute: typeof ProfileRoute
   QuestsRoute: typeof QuestsRoute
+  ReferralsRoute: typeof ReferralsRoute
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SettingsRoute: typeof SettingsRoute
@@ -881,6 +894,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/referrals': {
+      id: '/referrals'
+      path: '/referrals'
+      fullPath: '/referrals'
+      preLoaderRoute: typeof ReferralsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/quests': {
@@ -1236,6 +1256,7 @@ const rootRouteChildren: RootRouteChildren = {
   PollsRoute: PollsRoute,
   ProfileRoute: ProfileRoute,
   QuestsRoute: QuestsRoute,
+  ReferralsRoute: ReferralsRoute,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SettingsRoute: SettingsRoute,
