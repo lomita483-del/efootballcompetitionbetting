@@ -15,7 +15,7 @@ import {
   BarChart3, Users, Sparkles, AlertTriangle, History, ClipboardList, Send,
   MessageSquare, Megaphone, Trophy, Calendar, Wallet, ListOrdered, Tag,
   Settings as SettingsIcon, Ticket, Coins, Dice5, Shield, Flame, Target,
-  Gift, Palette,
+  Gift, Palette, Disc3,
 } from "lucide-react";
 import _ecbLogo from "@/assets/ecb-logo.png.asset.json";
 const lslLogo = _ecbLogo.url;
@@ -73,6 +73,7 @@ const NAV: AdminNavItem[] = [
   // Rewards & Games
   { group: "Rewards & Games", key: "lottery",     label: "Lottery",              icon: Dice5,           admin: true },
   { group: "Rewards & Games", key: "giftsspin",   label: "Gifts & Spin",         icon: Gift,            admin: true },
+  { group: "Rewards & Games", key: "luckywheel", label: "Lucky Wheel",          icon: Disc3,           admin: true },
   { group: "Rewards & Games", key: "challenges",  label: "Challenges",           icon: Sparkles,        admin: true },
   { group: "Rewards & Games", key: "tasks",       label: "Tasks & Achievements", icon: ClipboardList,   admin: true },
   { group: "Rewards & Games", key: "quests",      label: "Tasks & Quests",       icon: ClipboardList,   admin: true },

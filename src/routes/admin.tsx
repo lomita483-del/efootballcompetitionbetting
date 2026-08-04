@@ -66,6 +66,7 @@ import { PushBroadcastPanel } from "@/components/admin/PushBroadcastPanel";
 import { RecurringPushPanel } from "@/components/admin/RecurringPushPanel";
 import { HomeBannersAdminPanel } from "@/components/admin/HomeBannersAdminPanel";
 import { ArcadeAdminPanel } from "@/components/admin/ArcadeAdminPanel";
+import { LuckyWheelAdminPanel } from "@/components/admin/LuckyWheelAdminPanel";
 import { CasinoHistoryPanel } from "@/components/admin/CasinoHistoryPanel";
 import { TopBetsPanel } from "@/components/admin/TopBetsPanel";
 import { TournamentAdminPanel } from "@/components/admin/TournamentAdminPanel";
@@ -250,6 +251,7 @@ export function AdminPage() {
             <TabsContent value="pushrecurring" className="mt-4"><RecurringPushPanel /></TabsContent>
             <TabsContent value="banners" className="mt-4"><HomeBannersAdminPanel /></TabsContent>
             <TabsContent value="arcade" className="mt-4"><ArcadeAdminPanel /></TabsContent>
+            <TabsContent value="luckywheel" className="mt-4"><LuckyWheelAdminPanel /></TabsContent>
             <TabsContent value="casinohistory" className="mt-4"><CasinoHistoryPanel /></TabsContent>
             <TabsContent value="activity" className="mt-4"><ActivityPanel /></TabsContent>
             <TabsContent value="streakpush" className="mt-4"><StreakAndPushPanel /></TabsContent>
@@ -3688,6 +3690,7 @@ const QUICK_ACTIONS: { i: any; l: string; t: string }[] = [
   { i: BellRing, l: "Auto Push", t: "pushrecurring" },
   { i: GalleryHorizontalEnd, l: "Home Banners", t: "banners" },
   { i: Gamepad2, l: "Arcade", t: "arcade" },
+  { i: RotateCw, l: "Lucky Wheel", t: "luckywheel" },
   { i: History, l: "Casino History", t: "casinohistory" },
   { i: Sparkles, l: "Challenges", t: "challenges" },
   { i: MessageSquare, l: "Chat", t: "chat" },
