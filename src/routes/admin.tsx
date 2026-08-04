@@ -4181,6 +4181,8 @@ function LeaderboardAdminPanel() {
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [headerUrl, setHeaderUrl] = useState<string>("");
   const [headerBusy, setHeaderBusy] = useState(false);
+  const [rewards, setRewards] = useState<any[]>([]);
+  const [achievements, setAchievements] = useState<any[]>([]);
   const confirm = useConfirm();
 
   async function load() {
@@ -4188,6 +4190,8 @@ function LeaderboardAdminPanel() {
     setGangs(gangs);
     setShooters(shooters);
     setEdits({});
+    const [{ data: rewardRows }, { data: achievementRows }] = await Promise.all([(supabase as any).from("leaderboard_rewards").select("*").order("leaderboard_type").order("rank"), (supabase as any).from("leaderboard_achievements").select("*").order("display_order")]);
+    setRewards(rewardRows ?? []); setAchievements(achievementRows ?? []);
   }
   useEffect(() => {
     load();
@@ -4338,6 +4342,9 @@ function LeaderboardAdminPanel() {
 
   const numCls = "h-8 w-14 text-center px-1 tabular-nums";
 
+  async function updateReward(id: string, patch: any) { const { error } = await (supabase as any).from("leaderboard_rewards").update(patch).eq("id", id); if (error) toast.error(error.message); else { toast.success("Reward updated"); load(); } }
+  async function updateAchievement(id: string, patch: any) { const { error } = await (supabase as any).from("leaderboard_achievements").update(patch).eq("id", id); if (error) toast.error(error.message); else { toast.success("Achievement updated"); load(); } }
+
   return (
     <div className="space-y-3">
       <Card className="glass-ice p-3 space-y-2 border-amber-500/40">
@@ -4354,6 +4361,12 @@ function LeaderboardAdminPanel() {
           {headerUrl && <Button size="sm" variant="ghost" className="text-destructive" onClick={() => saveHeaderUrl("")}>Clear</Button>}
         </div>
       </Card>
+
+      <Tabs defaultValue="standings">
+        <TabsList><TabsTrigger value="standings">Standings</TabsTrigger><TabsTrigger value="rewards">Rewards</TabsTrigger><TabsTrigger value="achievements">Achievements</TabsTrigger></TabsList>
+        <TabsContent value="rewards" className="mt-3 grid gap-2 md:grid-cols-2">{rewards.map((reward) => <Card key={reward.id} className="glass p-3 space-y-2"><div className="flex items-center justify-between"><Badge>{reward.leaderboard_type} · #{reward.rank}</Badge><Switch checked={reward.is_active} onCheckedChange={(is_active) => void updateReward(reward.id, { is_active })} /></div><Input defaultValue={reward.title} onBlur={(e) => void updateReward(reward.id, { title: e.target.value })} /><Input defaultValue={reward.reward_value} onBlur={(e) => void updateReward(reward.id, { reward_value: e.target.value })} /><Textarea defaultValue={reward.description ?? ""} onBlur={(e) => void updateReward(reward.id, { description: e.target.value })} /></Card>)}</TabsContent>
+        <TabsContent value="achievements" className="mt-3 grid gap-2 md:grid-cols-2">{achievements.map((achievement) => <Card key={achievement.id} className="glass p-3 space-y-2"><div className="flex items-center justify-between"><Badge>{achievement.leaderboard_type ?? "all boards"}</Badge><Switch checked={achievement.is_active} onCheckedChange={(is_active) => void updateAchievement(achievement.id, { is_active })} /></div><Input defaultValue={achievement.title} onBlur={(e) => void updateAchievement(achievement.id, { title: e.target.value })} /><Textarea defaultValue={achievement.description} onBlur={(e) => void updateAchievement(achievement.id, { description: e.target.value })} /></Card>)}</TabsContent>
+        <TabsContent value="standings" className="mt-3">
 
       <Card className="glass-ice p-3 flex flex-wrap items-center gap-2 border-destructive/40">
         <div className="text-xs font-bold tracking-widest text-destructive mr-1">DANGER ZONE</div>
@@ -4423,6 +4436,8 @@ function LeaderboardAdminPanel() {
           </tbody>
         </table>
       </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
