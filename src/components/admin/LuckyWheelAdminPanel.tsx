@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Gift, Plus, Save, Trash2 } from "lucide-react";
+import { Gift, History, Plus, Save, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,11 +13,14 @@ import { toast } from "sonner";
 type Campaign = { id: string; title: string; subtitle: string | null; page_path: string; is_active: boolean; max_unique_users: number | null; base_spins_per_user: number; display_mode: string; max_displays_per_user: number | null; linked_task_id: string | null; task_spin_points: number };
 type Segment = { id: string; campaign_id: string; label: string; outcome_kind: string; reward_amount: number; weight: number; color_token: string; sort_order: number };
 type Task = { id: string; name: string };
+type Spin = { id: string; campaign_id: string; user_id: string; outcome_kind: string; label: string; reward_amount: number; page_path: string | null; created_at: string };
 
 export function LuckyWheelAdminPanel() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [segments, setSegments] = useState<Segment[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [spins, setSpins] = useState<Spin[]>([]);
+  const [spinProfiles, setSpinProfiles] = useState<Record<string, { full_name: string; email: string }>>({});
   const [selected, setSelected] = useState<string | null>(null);
   const current = campaigns.find((c) => c.id === selected) ?? null;
 
@@ -31,6 +34,20 @@ export function LuckyWheelAdminPanel() {
     setSelected(preferred ?? selected ?? c.data?.[0]?.id ?? null);
   }
   useEffect(() => { load(); }, []);
+  useEffect(() => {
+    const loadHistory = async () => {
+      const { data } = await (supabase as any).from("lucky_wheel_spins").select("id,campaign_id,user_id,outcome_kind,label,reward_amount,page_path,created_at").order("created_at", { ascending: false }).limit(200);
+      const rows = (data ?? []) as Spin[];
+      setSpins(rows);
+      const ids = Array.from(new Set(rows.map((row) => row.user_id)));
+      if (!ids.length) return;
+      const { data: users } = await supabase.from("profiles").select("id,full_name,email").in("id", ids);
+      setSpinProfiles(Object.fromEntries((users ?? []).map((user: any) => [user.id, user])));
+    };
+    loadHistory();
+    const channel = supabase.channel("admin-lucky-wheel-history").on("postgres_changes", { event: "INSERT", schema: "public", table: "lucky_wheel_spins" }, loadHistory).subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   async function createCampaign() {
     const { data, error } = await (supabase as any).from("lucky_wheel_campaigns").insert({ title: "LUCKY WHEEL", page_path: "/", max_unique_users: 100, base_spins_per_user: 1, display_mode: "once", max_displays_per_user: 1 }).select("id").single();
@@ -87,6 +104,25 @@ export function LuckyWheelAdminPanel() {
         {segments.filter((s) => s.campaign_id === current.id).map((s) => <div key={s.id} className="grid items-end gap-2 border-t border-border pt-3 md:grid-cols-[1.5fr_1fr_1fr_90px_1fr_auto]">
           <Field label="Wheel label"><Input value={s.label} onChange={(e) => patchSegment(s.id, { label: e.target.value })} /></Field><Field label="Outcome"><Select value={s.outcome_kind} onValueChange={(v) => patchSegment(s.id, { outcome_kind: v, reward_amount: v === "lost" ? 0 : s.reward_amount })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="tokens">Token reward</SelectItem><SelectItem value="lost">You lost</SelectItem></SelectContent></Select></Field><Field label="Reward"><Input type="number" min={0} disabled={s.outcome_kind === "lost"} value={s.reward_amount} onChange={(e) => patchSegment(s.id, { reward_amount: Number(e.target.value) })} /></Field><Field label="Weight"><Input type="number" min={1} value={s.weight} onChange={(e) => patchSegment(s.id, { weight: Number(e.target.value) })} /></Field><Field label="Color"><Select value={s.color_token} onValueChange={(v) => patchSegment(s.id, { color_token: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{["gold","emerald","ruby","navy","violet","silver"].map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></Field><div className="flex gap-1"><Button size="icon" onClick={() => saveSegment(s)} aria-label="Save section"><Save className="h-4 w-4" /></Button><Button size="icon" variant="ghost" className="text-destructive" onClick={() => removeSegment(s.id)} aria-label="Delete section"><Trash2 className="h-4 w-4" /></Button></div>
         </div>)}
+      </Card>
+      <Card className="space-y-3 border-primary/25 p-5">
+        <div className="flex items-center gap-2"><History className="h-4 w-4 text-primary" /><div><h3 className="font-black uppercase">Spin history</h3><p className="text-xs text-muted-foreground">Who spun, total spins, date, time, page and result.</p></div></div>
+        <div className="grid gap-2 sm:grid-cols-3">
+          <div className="rounded-md border border-border bg-background/40 p-3"><div className="text-[10px] uppercase text-muted-foreground">Campaign spins</div><div className="text-xl font-black">{spins.filter((spin) => spin.campaign_id === current.id).length}</div></div>
+          <div className="rounded-md border border-border bg-background/40 p-3"><div className="text-[10px] uppercase text-muted-foreground">Unique users</div><div className="text-xl font-black">{new Set(spins.filter((spin) => spin.campaign_id === current.id).map((spin) => spin.user_id)).size}</div></div>
+          <div className="rounded-md border border-border bg-background/40 p-3"><div className="text-[10px] uppercase text-muted-foreground">Tokens awarded</div><div className="text-xl font-black">{spins.filter((spin) => spin.campaign_id === current.id && spin.outcome_kind === "tokens").reduce((sum, spin) => sum + Number(spin.reward_amount), 0).toLocaleString()}</div></div>
+        </div>
+        <div className="max-h-96 overflow-auto rounded-md border border-border">
+          <table className="w-full min-w-[760px] text-left text-xs"><thead className="sticky top-0 bg-card"><tr>{["User", "Spin #", "Result", "Page", "Date", "Time"].map((heading) => <th key={heading} className="border-b border-border px-3 py-2 uppercase text-muted-foreground">{heading}</th>)}</tr></thead><tbody>
+            {spins.filter((spin) => spin.campaign_id === current.id).map((spin, index, filtered) => {
+              const user = spinProfiles[spin.user_id];
+              const spinNumber = filtered.slice(index).filter((row) => row.user_id === spin.user_id).length;
+              const date = new Date(spin.created_at);
+              return <tr key={spin.id} className="border-b border-border/50"><td className="px-3 py-2"><div className="font-bold">{user?.full_name ?? "Unknown"}</div><div className="text-muted-foreground">{user?.email}</div></td><td className="px-3 py-2 font-mono">#{spinNumber}</td><td className={`px-3 py-2 font-bold ${spin.outcome_kind === "tokens" ? "text-accent" : "text-destructive"}`}>{spin.label}{spin.outcome_kind === "tokens" ? ` · ${Number(spin.reward_amount).toLocaleString()}` : ""}</td><td className="px-3 py-2 font-mono">{spin.page_path ?? current.page_path}</td><td className="px-3 py-2">{date.toLocaleDateString()}</td><td className="px-3 py-2">{date.toLocaleTimeString()}</td></tr>;
+            })}
+          </tbody></table>
+          {spins.filter((spin) => spin.campaign_id === current.id).length === 0 && <div className="p-6 text-center text-sm text-muted-foreground">No spins recorded for this wheel yet.</div>}
+        </div>
       </Card>
     </>}
   </div>;

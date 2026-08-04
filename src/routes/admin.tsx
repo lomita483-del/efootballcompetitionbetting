@@ -1,4 +1,5 @@
 import { SuspiciousActivityPanel } from "@/components/admin/SuspiciousActivityPanel";
+import { FlaggedChatQueue } from "@/components/admin/FlaggedChatQueue";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -103,13 +104,12 @@ export function AdminPage() {
   // Toggle the frosted-glass blur on the whole console so admins can verify
   // sensitive data alignment/layout against a clean, unblurred surface.
   const [unblurred, setUnblurred] = useState(false);
-  // Default to analytics for admins; re-sync once auth resolves so a reload
-  // never lands on the Tickets tab when an admin refreshes the page.
+  // Analytics is the default console for both Super Admins and moderators.
   const [activeTab, setActiveTab] = useState<string>("analytics");
   useEffect(() => {
     if (loading) return;
-    setActiveTab((prev) => (isAdmin ? (prev === "tickets" ? "analytics" : prev) : "tickets"));
-  }, [loading, isAdmin]);
+    if (isAdmin || isMod) setActiveTab((prev) => (prev === "tickets" ? "analytics" : prev));
+  }, [loading, isAdmin, isMod]);
   useEffect(() => { if (!loading && !isAdmin && !isMod) nav({ to: "/" }); }, [isAdmin, isMod, loading, nav]);
   useEffect(() => {
     if (!isAdmin) return;
@@ -333,6 +333,7 @@ function AdminSectionRail({ alerts, onOpen }: { alerts: Record<string, number>; 
 }
 
 function ChatMonitorPanel() {
+  const { isAdmin } = useAuth();
   const [msgs, setMsgs] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<Record<string, any>>({});
   const [preferences, setPreferences] = useState({ enabled: true, push: true, inApp: true, rooms: ["general", "gang", "moderator"] as string[] });
@@ -378,6 +379,7 @@ function ChatMonitorPanel() {
   }
   return (
     <div className="space-y-3">
+      {isAdmin && <FlaggedChatQueue />}
       <Card className="glass-strong p-4 flex items-center gap-3">
         <MessageSquare className="h-5 w-5 text-primary" />
         <div><div className="font-bold">Live Chat Monitor</div><div className="text-xs text-muted-foreground">Newest messages across all rooms with quick moderation access.</div></div>
