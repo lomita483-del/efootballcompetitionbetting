@@ -1201,6 +1201,53 @@ export type Database = {
           },
         ]
       }
+      chat_message_flags: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          message_id: string
+          reason: string
+          reporter_id: string
+          resolution: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          message_id: string
+          reason: string
+          reporter_id: string
+          resolution?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          message_id?: string
+          reason?: string
+          reporter_id?: string
+          resolution?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_message_flags_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "chat_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_message_reactions: {
         Row: {
           created_at: string
@@ -2158,6 +2205,7 @@ export type Database = {
           id: string
           label: string
           outcome_kind: string
+          page_path: string | null
           reward_amount: number
           segment_id: string | null
           user_id: string
@@ -2169,6 +2217,7 @@ export type Database = {
           id?: string
           label: string
           outcome_kind: string
+          page_path?: string | null
           reward_amount?: number
           segment_id?: string | null
           user_id: string
@@ -2180,6 +2229,7 @@ export type Database = {
           id?: string
           label?: string
           outcome_kind?: string
+          page_path?: string | null
           reward_amount?: number
           segment_id?: string | null
           user_id?: string

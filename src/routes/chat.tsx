@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { MessageSquare, Send, Image as ImageIcon, Lock, Reply, Pencil, Smile, Trash2, X, AtSign } from "lucide-react";
+import { MessageSquare, Send, Image as ImageIcon, Lock, Reply, Pencil, Smile, Trash2, X, AtSign, Flag } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -190,7 +190,12 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
         })}
         <div ref={endRef} />
       </div>
-      {active && <MessageActions message={active} mine={active.user_id === user?.id} isMod={isMod} onClose={() => setActive(null)} onReply={() => { setReplyTo(active); setActive(null); }} onEdit={() => { setEditing(active); setText(active.content ?? ""); setActive(null); }} onDelete={() => del(active)} onReact={(e: string) => react(active.id, e)} />}
+      {active && <MessageActions message={active} mine={active.user_id === user?.id} isMod={isMod} onClose={() => setActive(null)} onReply={() => { setReplyTo(active); setActive(null); }} onEdit={() => { setEditing(active); setText(active.content ?? ""); setActive(null); }} onDelete={() => del(active)} onReport={async () => {
+        if (!user) return;
+        const { error } = await (supabase as any).from("chat_message_flags").insert({ message_id: active.id, reporter_id: user.id, reason: "inappropriate" });
+        if (error) toast.error(error.code === "23505" ? "You already reported this message" : error.message); else toast.success("Message sent to moderation");
+        setActive(null);
+      }} onReact={(e: string) => react(active.id, e)} />}
       {muted ? <div className="p-3 border-t border-border text-sm text-destructive text-center">You are muted and cannot send messages.</div> : (
         <form onSubmit={send} className="relative p-3 border-t border-border space-y-2">
           {(replyTo || editing) && <div className="flex items-center justify-between rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-xs"><span>{editing ? "Editing" : "Replying to"} <b>{profilesById[(editing ?? replyTo).user_id]?.name ?? "Shooter"}</b></span><button type="button" onClick={() => { setReplyTo(null); setEditing(null); setText(""); }}><X className="h-3.5 w-3.5" /></button></div>}
@@ -207,15 +212,16 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
   );
 }
 
-function MessageActions({ message, mine, isMod, onClose, onReply, onEdit, onDelete, onReact }: any) {
+function MessageActions({ message, mine, isMod, onClose, onReply, onEdit, onDelete, onReport, onReact }: any) {
   const emojis = ["🔥", "💀", "👑", "✅", "😂", "🎯"];
   return <div className="border-t border-border bg-card/95 p-3 backdrop-blur-xl animate-fade-in">
     <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground"><span>Message actions</span><button onClick={onClose}><X className="h-4 w-4" /></button></div>
     <div className="mb-2 flex flex-wrap gap-1">{emojis.map((e) => <button key={e} onClick={() => onReact(e)} className="rounded-full border border-border bg-muted/40 px-3 py-1.5 text-lg hover:bg-primary/10">{e}</button>)}</div>
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
       <Button type="button" variant="outline" size="sm" onClick={onReply}><Reply className="h-3.5 w-3.5 mr-1" />Reply</Button>
       {mine && !message.deleted_at && <Button type="button" variant="outline" size="sm" onClick={onEdit}><Pencil className="h-3.5 w-3.5 mr-1" />Edit</Button>}
       {(mine || isMod) && <Button type="button" variant="outline" size="sm" onClick={onDelete} className="text-destructive"><Trash2 className="h-3.5 w-3.5 mr-1" />Delete</Button>}
+      {!mine && <Button type="button" variant="outline" size="sm" onClick={onReport} className="text-destructive"><Flag className="h-3.5 w-3.5 mr-1" />Report</Button>}
     </div>
   </div>;
 }
