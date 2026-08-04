@@ -2072,6 +2072,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "lucky_wheel_campaigns_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lucky_wheel_campaigns_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "lucky_wheel_campaigns_linked_task_id_fkey"
             columns: ["linked_task_id"]
             isOneToOne: false
@@ -2173,6 +2187,20 @@ export type Database = {
             referencedRelation: "lucky_wheel_segments"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "lucky_wheel_spins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lucky_wheel_spins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       lucky_wheel_user_state: {
@@ -2218,6 +2246,20 @@ export type Database = {
             columns: ["campaign_id"]
             isOneToOne: false
             referencedRelation: "lucky_wheel_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lucky_wheel_user_state_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lucky_wheel_user_state_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
