@@ -2786,14 +2786,14 @@ function HighlightsPanel() {
 
 function AdsPanel() {
   const [list, setList] = useState<any[]>([]);
-  const [draft, setDraft] = useState({ title: "", description: "", link_url: "", image_url: "", placement: "both", image_fit: "cover", image_position: "center", display_order: 0 });
+  const [draft, setDraft] = useState({ title: "", description: "", link_url: "", image_url: "", placement: "all", image_fit: "cover", image_position: "center", display_order: 0 });
   async function load() { setList((await supabase.from("advertisements").select("*").order("created_at", { ascending: false })).data ?? []); }
   useEffect(() => { load(); }, []);
   async function add() {
     if (!draft.image_url) { toast.error("Image required"); return; }
     const { error } = await supabase.from("advertisements").insert({ ...draft, link_url: draft.link_url || null } as any);
     if (error) { toast.error(error.message); return; }
-    setDraft({ title: "", description: "", link_url: "", image_url: "", placement: "both", image_fit: "cover", image_position: "center", display_order: 0 }); load();
+    setDraft({ title: "", description: "", link_url: "", image_url: "", placement: "all", image_fit: "cover", image_position: "center", display_order: 0 }); load();
   }
   async function del(id: string) { await supabase.from("advertisements").delete().eq("id", id); load(); }
   async function toggle(id: string, v: boolean) { await supabase.from("advertisements").update({ is_active: v }).eq("id", id); load(); }
@@ -2803,7 +2803,8 @@ function AdsPanel() {
         <Input placeholder="Title" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
         <Textarea placeholder="Description (optional)" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
         <Input placeholder="Link URL (optional)" value={draft.link_url} onChange={(e) => setDraft({ ...draft, link_url: e.target.value })} />
-        <div className="grid gap-2 md:grid-cols-2"><Select value={draft.placement} onValueChange={(placement) => setDraft({ ...draft, placement })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="both">Home + Matches</SelectItem><SelectItem value="home">Home only</SelectItem><SelectItem value="matches">Matches only</SelectItem></SelectContent></Select><Input type="number" placeholder="Display order" value={draft.display_order} onChange={(e) => setDraft({ ...draft, display_order: Number(e.target.value) })} /></div>
+        <div className="grid gap-2 md:grid-cols-2"><Select value={draft.placement} onValueChange={(placement) => setDraft({ ...draft, placement })}><SelectTrigger><SelectValue placeholder="Choose page" /></SelectTrigger><SelectContent><SelectItem value="all">Every page</SelectItem><SelectItem value="/">Home</SelectItem><SelectItem value="/matches">Matches</SelectItem><SelectItem value="/leaderboard">Leaderboard</SelectItem><SelectItem value="/dashboard">Dashboard</SelectItem><SelectItem value="/wagers">Wagers</SelectItem><SelectItem value="/virtual">Virtual</SelectItem><SelectItem value="/lottery">Lottery</SelectItem><SelectItem value="/arcade">Arcade</SelectItem><SelectItem value="/shop">Shop</SelectItem><SelectItem value="/tournament">Tournament</SelectItem><SelectItem value="/chat">Chat</SelectItem><SelectItem value="/referrals">Referrals</SelectItem><SelectItem value="/profile">Profile</SelectItem><SelectItem value="/settings">Settings</SelectItem><SelectItem value="/support">Support</SelectItem></SelectContent></Select><Input type="number" placeholder="Display order" value={draft.display_order} onChange={(e) => setDraft({ ...draft, display_order: Number(e.target.value) })} /></div>
+        <Input placeholder="Or enter any page path, e.g. /quests" value={draft.placement === "all" ? "" : draft.placement} onChange={(e) => setDraft({ ...draft, placement: e.target.value.trim().toLowerCase() || "all" })} />
         <ImageSettingControl label="Advertisement image" value={draft.image_url} onChange={(url) => setDraft({ ...draft, image_url: url ?? "" })} fit={draft.image_fit} onFitChange={(image_fit) => setDraft({ ...draft, image_fit })} position={draft.image_position} onPositionChange={(image_position) => setDraft({ ...draft, image_position })} aspect="2 / 1" help="Crop to a wide promotional card like the reference row." />
         <Button className="btn-luxury" onClick={add}>Add advertisement</Button>
       </Card>
@@ -2812,6 +2813,7 @@ function AdsPanel() {
           <Card key={a.id} className="glass p-2">
             <img src={a.image_url} className="w-full h-32 rounded" style={{ objectFit: a.image_fit || "cover", objectPosition: a.image_position || "center" }} alt="" />
             <div className="font-bold text-sm mt-1 truncate">{a.title}</div>
+            <div className="text-xs text-muted-foreground">{a.placement === "all" ? "Every page" : a.placement}</div>
             <div className="flex gap-1 mt-1">
               <Button size="sm" variant="outline" onClick={() => toggle(a.id, !a.is_active)}>{a.is_active ? "Hide" : "Show"}</Button>
               <Button size="sm" variant="destructive" onClick={() => del(a.id)}><Trash2 className="h-3 w-3" /></Button>

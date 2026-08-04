@@ -13,7 +13,6 @@ import { useBetSlip } from "@/contexts/BetSlipContext";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchMatches, type MatchRow } from "@/lib/queries";
 import { loadStandings, type LbRow } from "@/lib/leaderboard";
-import { AdvertisementRow } from "@/components/AdvertisementRow";
 
 export const Route = createFileRoute("/matches")({
   head: () => ({
@@ -49,7 +48,7 @@ function MatchesPage() {
   const regular = matches.filter((match) => match.match_kind !== "future");
   const featured = regular.filter((match) => match.is_featured && match.status !== "ended");
   const heroMatch = featured[0] ?? regular.find((match) => match.status === "scheduled" || match.status === "live");
-  return <Layout><main className="ecb-home container pb-3"><HomeBannerSlider embedded placement="matches" />{heroMatch && <FeaturedMatch match={heroMatch} arena={arena} />}<TopCompetitors rows={competitors} /><Arena matches={regular} loading={loading} /><AdvertisementRow placement="matches" /><Stats matches={regular} /></main></Layout>;
+  return <Layout><main className="ecb-home container pb-3"><HomeBannerSlider embedded placement="matches" />{heroMatch && <FeaturedMatch match={heroMatch} arena={arena} />}<TopCompetitors rows={competitors} /><Arena matches={regular} loading={loading} /><Stats matches={regular} /></main></Layout>;
 }
 
 function FeaturedMatch({ match, arena }: { match: MatchRow; arena: any }) {
