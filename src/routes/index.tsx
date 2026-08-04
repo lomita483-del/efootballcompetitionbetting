@@ -33,7 +33,7 @@ import { useBetSlip } from "@/contexts/BetSlipContext";
 import { toast } from "sonner";
 import { DraggableFab } from "@/components/DraggableFab";
 import heroArtwork from "@/assets/lsl-hero-bg.png.asset.json";
-import { Search, SlidersHorizontal, Clock3, RefreshCw, Headphones, Gift, ArrowRight } from "lucide-react";
+import { Search, SlidersHorizontal, RefreshCw, Headphones, Gift, ArrowRight, Calendar } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
