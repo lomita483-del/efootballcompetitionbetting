@@ -221,6 +221,10 @@ export type Database = {
           championship_booking_seconds: number
           championship_stage_gap_seconds: number
           championship_stage_live_seconds: number
+          chat_in_app_enabled: boolean
+          chat_notification_rooms: string[]
+          chat_notifications_enabled: boolean
+          chat_push_enabled: boolean
           closed_image: string | null
           closed_message: string
           closed_mode: boolean
@@ -369,6 +373,10 @@ export type Database = {
           championship_booking_seconds?: number
           championship_stage_gap_seconds?: number
           championship_stage_live_seconds?: number
+          chat_in_app_enabled?: boolean
+          chat_notification_rooms?: string[]
+          chat_notifications_enabled?: boolean
+          chat_push_enabled?: boolean
           closed_image?: string | null
           closed_message?: string
           closed_mode?: boolean
@@ -517,6 +525,10 @@ export type Database = {
           championship_booking_seconds?: number
           championship_stage_gap_seconds?: number
           championship_stage_live_seconds?: number
+          chat_in_app_enabled?: boolean
+          chat_notification_rooms?: string[]
+          chat_notifications_enabled?: boolean
+          chat_push_enabled?: boolean
           closed_image?: string | null
           closed_message?: string
           closed_mode?: boolean
