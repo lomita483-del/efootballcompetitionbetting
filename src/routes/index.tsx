@@ -15,7 +15,6 @@ import { NewsSlider } from "@/components/NewsSlider";
 import { LotteryResultsCard } from "@/components/LotteryResultsCard";
 import { SeasonBanner } from "@/components/SeasonBanner";
 import { Spotlight } from "@/components/Spotlight";
-import { TrendingPlayers } from "@/components/TrendingPlayers";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import {
@@ -123,9 +122,8 @@ function Index() {
       <EventBanner />
       <SeasonBanner />
       <Spotlight />
-      <section className="container mt-6 grid lg:grid-cols-[1fr_1fr] gap-4 items-stretch">
+      <section className="container mt-6">
         <HighlightsRow embedded />
-        <TrendingPlayers />
       </section>
       <AnnouncementSlider />
       {futures.length > 0 && <FuturesSection title={settings?.futures_section_title || "TOURNAMENT FUTURES"} markets={futures} maxSelections={Number(settings?.futures_max_selections ?? 1)} featured={featuredAll} />}
