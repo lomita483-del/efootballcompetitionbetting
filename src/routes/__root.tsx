@@ -179,7 +179,7 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 
 const PUBLIC_ROUTE_PREFIXES = [
   "/login", "/register", "/forgot-password", "/reset-password",
-  "/about", "/faq", "/guides", "/api/", "/sitemap.xml",
+  "/about", "/faq", "/guides", "/mcp-docs", "/api/", "/sitemap.xml",
 ];
 
 function AuthGate() {

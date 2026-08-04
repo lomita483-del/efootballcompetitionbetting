@@ -21,6 +21,7 @@ import {
   Gamepad2,
   ShoppingBag,
   Download,
+  Bot,
 } from "lucide-react";
 import { GangLogo } from "@/components/GangLogo";
 import { Button } from "@/components/ui/button";
@@ -337,6 +338,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
                         ]
                       : []),
                     ...(!isAdmin && isMod ? [{ to: "/mod", icon: Shield, label: "Mod", danger: true }] : []),
+                    { to: "/mcp-docs", icon: Bot, label: "MCP" },
                   ].sort((a, b) => a.label.localeCompare(b.label));
                   const first = isAdmin
                     ? { to: "/admin", icon: Shield, label: "Admin", danger: true }
@@ -431,6 +433,9 @@ function SiteFooter({ isHome = false }: { isHome?: boolean }) {
             </button>
             <Link to="/faq" className="text-primary hover:underline">
               Help & FAQ
+            </Link>
+            <Link to="/mcp-docs" className="text-primary hover:underline">
+              MCP Agent Tools
             </Link>
           </div>
         </div>

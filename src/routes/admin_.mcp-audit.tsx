@@ -1,0 +1,33 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, CheckCircle2, History, Search, XCircle } from "lucide-react";
+import { Layout } from "@/components/Layout";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+
+export const Route = createFileRoute("/admin_/mcp-audit")({ head: () => ({ meta: [
+  { title: "MCP Audit Log — ECB Admin" }, { name: "description", content: "Administrator traceability log for ECB MCP tool calls." },
+  { property: "og:title", content: "ECB MCP Audit Log" }, { property: "og:description", content: "Administrator traceability log for MCP agent activity." },
+  { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+] }), component: McpAuditPage });
+
+type AuditRow = { id: string; user_id: string; user_email: string | null; actor_role: string; tool_name: string; success: boolean; target_type: string | null; target_id: string | null; input_summary: Record<string, unknown>; error_message: string | null; client_id: string | null; created_at: string };
+
+function McpAuditPage() {
+  const { isAdmin, loading } = useAuth(); const navigate = useNavigate();
+  const [rows, setRows] = useState<AuditRow[]>([]); const [busy, setBusy] = useState(true); const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState(""); const [role, setRole] = useState("all"); const [outcome, setOutcome] = useState("all");
+  useEffect(() => { if (!loading && !isAdmin) navigate({ to: "/" }); }, [isAdmin, loading, navigate]);
+  useEffect(() => { if (!isAdmin) return; let active = true; const load = async () => { setBusy(true); const result = await (supabase as any).from("mcp_audit_logs").select("id,user_id,user_email,actor_role,tool_name,success,target_type,target_id,input_summary,error_message,client_id,created_at").order("created_at", { ascending: false }).limit(500); if (!active) return; setError(result.error?.message ?? null); setRows((result.data ?? []) as AuditRow[]); setBusy(false); }; load(); const channel = supabase.channel("mcp-audit-admin").on("postgres_changes", { event: "INSERT", schema: "public", table: "mcp_audit_logs" }, load).subscribe(); return () => { active = false; supabase.removeChannel(channel); }; }, [isAdmin]);
+  const filtered = useMemo(() => rows.filter((row) => { const needle = query.trim().toLowerCase(); const matches = !needle || [row.tool_name, row.user_email, row.user_id, row.target_id, row.client_id].some((value) => value?.toLowerCase().includes(needle)); return matches && (role === "all" || row.actor_role === role) && (outcome === "all" || String(row.success) === outcome); }), [rows, query, role, outcome]);
+  if (loading || !isAdmin) return <Layout><main className="mx-auto max-w-7xl p-8">Loading…</main></Layout>;
+  return <Layout><main className="mx-auto w-full max-w-7xl px-6 py-8"><div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-primary/20 pb-6"><div className="flex items-center gap-4"><Button asChild variant="outline" size="icon" title="Back to admin"><Link to="/admin"><ArrowLeft className="h-4 w-4" /></Link></Button><div><p className="text-xs uppercase text-primary">Security & traceability</p><h1 className="text-3xl font-black">MCP Audit Log</h1></div></div><Button asChild variant="outline"><Link to="/mcp-docs">View MCP documentation</Link></Button></div>
+    <Card className="mb-5 flex flex-wrap gap-3 border-primary/20 bg-card/70 p-4"><div className="relative min-w-72 flex-1"><Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" /><Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search tool, actor, target or client…" className="pl-9" /></div><Select value={role} onValueChange={setRole}><SelectTrigger className="w-44"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All roles</SelectItem><SelectItem value="admin">Admin</SelectItem><SelectItem value="moderator">Moderator</SelectItem><SelectItem value="user">User</SelectItem></SelectContent></Select><Select value={outcome} onValueChange={setOutcome}><SelectTrigger className="w-44"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All outcomes</SelectItem><SelectItem value="true">Successful</SelectItem><SelectItem value="false">Failed</SelectItem></SelectContent></Select></Card>
+    {error ? <Card className="border-destructive/40 bg-destructive/10 p-6 text-destructive">Audit data is unavailable: {error}</Card> : busy ? <Card className="p-8 text-center text-muted-foreground">Loading audit activity…</Card> : <div className="overflow-hidden rounded-md border border-primary/20 bg-card/70"><table className="w-full text-left text-sm"><thead className="bg-primary/10 text-xs uppercase text-muted-foreground"><tr><th className="p-3">Time</th><th className="p-3">Tool</th><th className="p-3">Actor</th><th className="p-3">Target</th><th className="p-3">Outcome</th></tr></thead><tbody>{filtered.map((row) => <tr key={row.id} className="border-t border-border/70 align-top"><td className="whitespace-nowrap p-3 text-muted-foreground">{new Date(row.created_at).toLocaleString()}</td><td className="p-3"><code className="font-bold text-primary">{row.tool_name}</code><div className="mt-1 max-w-md truncate text-xs text-muted-foreground">{JSON.stringify(row.input_summary)}</div></td><td className="p-3"><div>{row.user_email ?? row.user_id}</div><Badge variant="outline" className="mt-1 capitalize">{row.actor_role}</Badge></td><td className="p-3 text-muted-foreground">{row.target_type ? `${row.target_type}: ${row.target_id ?? "—"}` : "—"}</td><td className="p-3">{row.success ? <span className="inline-flex items-center gap-1 text-emerald-500"><CheckCircle2 className="h-4 w-4" />Success</span> : <span className="inline-flex items-center gap-1 text-destructive" title={row.error_message ?? undefined}><XCircle className="h-4 w-4" />Failed</span>}</td></tr>)}</tbody></table>{filtered.length === 0 && <div className="grid place-items-center gap-2 p-12 text-muted-foreground"><History className="h-8 w-8" />No matching MCP calls.</div>}</div>}
+  </main></Layout>;
+}
