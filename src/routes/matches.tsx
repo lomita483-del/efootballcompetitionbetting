@@ -13,6 +13,20 @@ import { useBetSlip } from "@/contexts/BetSlipContext";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchMatches, type MatchRow } from "@/lib/queries";
 import { loadStandings, type LbRow } from "@/lib/leaderboard";
+import { TourGuide, type TourStep } from "@/components/TourGuide";
+
+const MATCHES_TOUR: TourStep[] = [
+  { target: "[data-tour='top-navigation']", title: "Match Navigation", description: "Top navigation — move from the match arena to your Dashboard, Wagers, Virtual games, Leaderboard, wallet tools, and support.", placement: "bottom" },
+  { target: "[data-tour='matches-promo']", title: "Match Promotions", description: "Promo banners — review active match announcements and offers; use the slider controls when more than one banner is available." },
+  { target: "[data-tour='matches-hero']", title: "Featured Competition", description: "Featured Competition — see the next highlighted fixture, scheduled start time, arena artwork, and open its betting markets with Bet Now." },
+  { target: "[data-tour='matches-top']", title: "Top Competitors", description: "Top Competitors — compare the current leading teams and open the full leaderboard to inspect rankings and points." },
+  { target: "[data-tour='matches-filters']", title: "Match Search & Categories", description: "Search and category filters — find a fixture by team or Match ID, then narrow the arena to a specific competition category." },
+  { target: "[data-tour='matches-tabs']", title: "Live, Upcoming & Ended", description: "Status tabs — switch between every active fixture, upcoming matches, live matches in progress, and completed match history." },
+  { target: "[data-tour='matches-list']", title: "All Matches & Odds", description: "All Matches list — scan each competition and choose the 1, X, or 2 odds for a home win, draw, or away win." },
+  { target: "[data-tour='matches-betslip']", title: "Bet Slip", description: "Bet Slip — review selected markets, remove unwanted picks, see combined odds and potential winnings, then place your bet." },
+  { target: "[data-tour='matches-markets']", title: "Popular Markets", description: "Popular Markets — identify common betting types such as Match Winner, Total Goals, Both Teams to Score, and Correct Score." },
+  { target: "[data-tour='matches-stats']", title: "Live Arena Statistics", description: "Live stats bar — see current live and upcoming match totals, the platform payout rate, support availability, and referral shortcut." },
+];
 
 export const Route = createFileRoute("/matches")({
   head: () => ({
@@ -48,7 +62,7 @@ function MatchesPage() {
   const regular = matches.filter((match) => match.match_kind !== "future");
   const featured = regular.filter((match) => match.is_featured && match.status !== "ended");
   const heroMatch = featured[0] ?? regular.find((match) => match.status === "scheduled" || match.status === "live");
-  return <Layout><main className="ecb-home container pb-3"><HomeBannerSlider embedded placement="matches" />{heroMatch && <FeaturedMatch match={heroMatch} arena={arena} />}<TopCompetitors rows={competitors} /><Arena matches={regular} loading={loading} /><Stats matches={regular} /></main></Layout>;
+  return <Layout><main className="ecb-home container pb-3"><div data-tour="matches-promo"><HomeBannerSlider embedded placement="matches" /></div>{heroMatch && <FeaturedMatch match={heroMatch} arena={arena} />}<TopCompetitors rows={competitors} /><Arena matches={regular} loading={loading} /><Stats matches={regular} /></main><TourGuide tourKey="matches" steps={MATCHES_TOUR} /></Layout>;
 }
 
 function FeaturedMatch({ match, arena }: { match: MatchRow; arena: any }) {
