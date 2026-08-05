@@ -35,6 +35,7 @@ export function TourGuide({ tourKey, steps }: { tourKey: string; steps: TourStep
   const [stepIndex, setStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<Rect | null>(null);
   const localKey = `ecb-tutorial:${tourKey}:${user?.id ?? "visitor"}`;
+  const signInSessionKey = `ecb-tutorial-signin:${tourKey}:${user?.id ?? "visitor"}`;
 
   useEffect(() => {
     let alive = true;
@@ -59,8 +60,9 @@ export function TourGuide({ tourKey, steps }: { tourKey: string; steps: TourStep
       const createdAt = (profile as (typeof profile & { created_at?: string }) | null)?.created_at;
       const isNewUser = !createdAt || Date.now() - new Date(createdAt).getTime() < 14 * 24 * 60 * 60 * 1000;
       const reminderDue = data?.status === "remind_later" && (!data.remind_after || new Date(data.remind_after).getTime() <= Date.now());
-      const eligible = (settings.tutorials_for_new_users && isNewUser) || settings.tutorials_for_new_signins || reminderDue;
-      if (!eligible || data?.status === "completed" || data?.status === "skipped") return;
+      const signInTourDue = settings.tutorials_for_new_signins && !window.sessionStorage.getItem(signInSessionKey);
+      const eligible = (settings.tutorials_for_new_users && isNewUser) || signInTourDue || reminderDue;
+      if (!eligible || (!signInTourDue && (data?.status === "completed" || data?.status === "skipped"))) return;
       if (data?.status === "in_progress") {
         setStepIndex(Math.min(Number(data.current_step ?? 0), steps.length - 1));
         setMode("tour");
@@ -68,7 +70,7 @@ export function TourGuide({ tourKey, steps }: { tourKey: string; steps: TourStep
     };
     decide();
     return () => { alive = false; };
-  }, [loading, localKey, profile, settings, steps.length, tourKey, user]);
+  }, [loading, localKey, profile, settings, signInSessionKey, steps.length, tourKey, user]);
 
   const saveState = useCallback(async (status: "in_progress" | "completed" | "skipped" | "remind_later", currentStep = stepIndex) => {
     if (!user) {
@@ -109,7 +111,12 @@ export function TourGuide({ tourKey, steps }: { tourKey: string; steps: TourStep
     };
   }, [activeStep, mode, updateTarget]);
 
-  const start = async () => { setStepIndex(0); await saveState("in_progress", 0); setMode("tour"); };
+  const start = async () => {
+    setStepIndex(0);
+    if (user) window.sessionStorage.setItem(signInSessionKey, "started");
+    await saveState("in_progress", 0);
+    setMode("tour");
+  };
   const dismiss = async (status: "skipped" | "remind_later") => { await saveState(status); setMode("hidden"); };
   const go = async (next: number) => {
     if (next >= steps.length) { await saveState("completed", steps.length - 1); setMode("hidden"); return; }
@@ -119,6 +126,7 @@ export function TourGuide({ tourKey, steps }: { tourKey: string; steps: TourStep
   };
 
   const cardPosition = useMemo(() => positionCard(targetRect, activeStep?.placement), [activeStep?.placement, targetRect]);
+  const connector = useMemo(() => getConnector(targetRect, cardPosition), [cardPosition, targetRect]);
   const displayName = profile?.full_name?.trim() || user?.user_metadata?.full_name || "Guest";
 
   return <>
@@ -142,6 +150,7 @@ export function TourGuide({ tourKey, steps }: { tourKey: string; steps: TourStep
     {mode === "tour" && activeStep && <div className="fixed inset-0 z-[250]" role="dialog" aria-modal="true" aria-label={`${activeStep.title} tutorial step`}>
       <div className="absolute inset-0 bg-background/78 backdrop-blur-[1px]" />
       {targetRect && <div className="pointer-events-none fixed rounded-md border-2 border-primary bg-primary/5 shadow-[0_0_0_9999px_color-mix(in_oklab,var(--background)_78%,transparent),0_0_30px_var(--primary)] transition-all duration-300" style={{ top: targetRect.top - 7, left: targetRect.left - 7, width: targetRect.width + 14, height: targetRect.height + 14 }} />}
+      {connector && <svg className="pointer-events-none fixed inset-0 h-full w-full overflow-visible" aria-hidden><defs><marker id="tour-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" className="fill-primary" /></marker></defs><line x1={connector.x1} y1={connector.y1} x2={connector.x2} y2={connector.y2} className="stroke-primary" strokeWidth="2" strokeDasharray="5 5" markerEnd="url(#tour-arrow)" /></svg>}
       <section className="fixed w-[min(360px,calc(100vw-24px))] rounded-md border border-primary/60 bg-card p-4 shadow-gold" style={cardPosition}>
         <div className="flex items-start gap-3">
           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-gold text-lg font-black text-primary-foreground">{stepIndex + 1}</span>
@@ -172,4 +181,19 @@ function positionCard(rect: Rect | null, preferred: TourStep["placement"]): CSSP
   if (placement === "left") { left = rect.left - cardWidth - margin; top = rect.top; }
   if (placement === "top") { left = rect.left; top = rect.top - cardHeight - margin; }
   return { left: Math.min(Math.max(12, left), window.innerWidth - cardWidth - 12), top: Math.min(Math.max(12, top), window.innerHeight - cardHeight - 12) };
+}
+
+function getConnector(rect: Rect | null, card: CSSProperties) {
+  if (!rect || typeof card.left !== "number" || typeof card.top !== "number") return null;
+  const cardWidth = Math.min(360, window.innerWidth - 24);
+  const cardHeight = 260;
+  const targetX = rect.left + rect.width / 2;
+  const targetY = rect.top + rect.height / 2;
+  const cardX = card.left + cardWidth / 2;
+  const cardY = card.top + cardHeight / 2;
+  const dx = targetX - cardX;
+  const dy = targetY - cardY;
+  const x1 = Math.abs(dx) > Math.abs(dy) ? cardX + Math.sign(dx) * cardWidth / 2 : cardX;
+  const y1 = Math.abs(dx) > Math.abs(dy) ? cardY : cardY + Math.sign(dy) * cardHeight / 2;
+  return { x1, y1, x2: targetX, y2: targetY };
 }
