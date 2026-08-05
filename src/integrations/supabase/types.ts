@@ -329,6 +329,10 @@ export type Database = {
           ticker_speed: number | null
           ticker_text: string | null
           trivia_enabled: boolean | null
+          tutorials_enabled: boolean
+          tutorials_for_new_signins: boolean
+          tutorials_for_new_users: boolean
+          tutorials_for_visitors: boolean
           updated_at: string
           vapid_public_key: string | null
           vip_enabled: boolean
@@ -481,6 +485,10 @@ export type Database = {
           ticker_speed?: number | null
           ticker_text?: string | null
           trivia_enabled?: boolean | null
+          tutorials_enabled?: boolean
+          tutorials_for_new_signins?: boolean
+          tutorials_for_new_users?: boolean
+          tutorials_for_visitors?: boolean
           updated_at?: string
           vapid_public_key?: string | null
           vip_enabled?: boolean
@@ -633,6 +641,10 @@ export type Database = {
           ticker_speed?: number | null
           ticker_text?: string | null
           trivia_enabled?: boolean | null
+          tutorials_enabled?: boolean
+          tutorials_for_new_signins?: boolean
+          tutorials_for_new_users?: boolean
+          tutorials_for_visitors?: boolean
           updated_at?: string
           vapid_public_key?: string | null
           vip_enabled?: boolean
@@ -4352,6 +4364,45 @@ export type Database = {
           options?: Json
           question?: string
           reward?: number
+        }
+        Relationships: []
+      }
+      tutorial_states: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current_step: number
+          id: string
+          remind_after: string | null
+          started_at: string | null
+          status: string
+          tour_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number
+          id?: string
+          remind_after?: string | null
+          started_at?: string | null
+          status?: string
+          tour_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number
+          id?: string
+          remind_after?: string | null
+          started_at?: string | null
+          status?: string
+          tour_key?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

@@ -17,6 +17,22 @@ import {
 import { ChallengesPanel } from "@/components/ChallengesPanel";
 import { ReferralCard } from "@/components/UserHubSections";
 import { getTierProgress } from "@/lib/tiers";
+import { TourGuide, type TourStep } from "@/components/TourGuide";
+
+const DASHBOARD_TOUR: TourStep[] = [
+  { target: "[data-tour='top-navigation']", title: "Platform Navigation", description: "Top navigation — move directly between Matches, Virtual, Lottery, Wagers, Support, Settings, and the other platform areas.", placement: "bottom" },
+  { target: "[data-tour='dashboard-welcome']", title: "Account Summary", description: "Welcome panel — review your profile image, membership tier, member date, and progress toward your next XP tier." },
+  { target: "[data-tour='dashboard-balance']", title: "Balance & Active Stakes", description: "Account summary — see your current token balance, active bets, total bet count, and use Add Funds when you need more tokens.", placement: "left" },
+  { target: "[data-tour='dashboard-quick']", title: "Quick Access", description: "Quick Access — open your bet slips, edit your profile, withdraw, transfer tokens, request tokens, and reach frequently used account tools." },
+  { target: "[data-tour='dashboard-transactions-link']", title: "Transaction Records", description: "Transaction Records — open the complete history of token credits, debits, deposits, stakes, rewards, and transfers." },
+  { target: "[data-tour='dashboard-referrals-link']", title: "Referrals", description: "Invite Now — share your referral details and track the rewards earned when new competitors join through you." },
+  { target: "[data-tour='dashboard-rewards-link']", title: "Rewards & Achievements", description: "Achievements — review badges and milestones you have unlocked through matches, activity, and platform challenges." },
+  { target: "[data-tour='dashboard-support-link']", title: "Support Center", description: "Help Center — create and follow support tickets when you need account, payment, match, or betting assistance." },
+  { target: "[data-tour='dashboard-activity']", title: "Activity Overview", description: "Activity Overview — compare active, won, lost, pending, and total bets alongside your current win rate." },
+  { target: "[data-tour='dashboard-challenges']", title: "Challenges & Streaks", description: "Challenges — monitor challenge progress, daily streak goals, and claimable rewards tied to your activity." },
+  { target: "[data-tour='dashboard-wallet']", title: "Wallet", description: "Wallet Overview — check your main token balance and jump directly to funding, withdrawal, or full wallet history." },
+  { target: "[data-tour='dashboard-recent']", title: "Recent Transactions", description: "Recent Transactions — inspect your five latest balance movements, including the amount, reason, and exact time." },
+];
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -68,7 +84,7 @@ function Dashboard() {
     <Layout>
       <div className="container mx-auto px-4 py-8 space-y-6">
         {/* ============ WELCOME HERO ============ */}
-        <Card
+        <Card data-tour="dashboard-welcome"
           className="relative overflow-hidden bg-gradient-to-br from-card/80 via-card/70 to-background p-0"
           style={{ borderColor: `${tierMeta.accent}66` }}
         >
@@ -121,7 +137,7 @@ function Dashboard() {
                 </div>
               </div>
             </div>
-            <div className="rounded-2xl border bg-background/50 p-4 backdrop-blur-xl space-y-3" style={{ borderColor: `${tierMeta.accent}44` }}>
+            <div data-tour="dashboard-balance" className="rounded-2xl border bg-background/50 p-4 backdrop-blur-xl space-y-3" style={{ borderColor: `${tierMeta.accent}44` }}>
               <HeroStat icon={Coins} label="Token Balance" value={profile?.token_balance?.toLocaleString() ?? "0"} gold />
               <HeroStat icon={TicketIcon} label="Active Bets" value={String(active)} />
               <HeroStat icon={FileText} label="Total Bets" value={String(bets.length)} />
@@ -133,7 +149,7 @@ function Dashboard() {
         </Card>
 
         {/* ============ QUICK ACCESS ============ */}
-        <section>
+        <section data-tour="dashboard-quick">
           <h2 className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground"><Sparkles className="h-3.5 w-3.5 text-primary" /> Quick Access</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             <PanelCard to="/bet-history" icon={TicketIcon} title="Bet Slips" subtitle={`${bets.length} total`} />
@@ -142,17 +158,17 @@ function Dashboard() {
             <PanelCard onClick={() => setTransferOpen(true)} icon={ArrowLeftRight} title="Transfer Tokens" subtitle="Send to user ID" />
             <PanelCard to="/checkout" icon={Coins} title="Request Tokens" subtitle="Top up balance" />
             {isSponsor && <PanelCard onClick={() => setPromoOpen(true)} icon={Tag} title="Promo Codes" subtitle="Sponsor only" gold />}
-            <PanelCard to="/transactions" icon={Receipt} title="Transaction Records" subtitle="Credits & debits" />
-            <PanelCard to="/referrals" icon={Gift} title="Invite Now" subtitle="Refer & earn" gold />
-            <PanelCard to="/achievements" icon={Trophy} title="Achievements" subtitle="Your badges" />
+            <div data-tour="dashboard-transactions-link"><PanelCard to="/transactions" icon={Receipt} title="Transaction Records" subtitle="Credits & debits" /></div>
+            <div data-tour="dashboard-referrals-link"><PanelCard to="/referrals" icon={Gift} title="Invite Now" subtitle="Refer & earn" gold /></div>
+            <div data-tour="dashboard-rewards-link"><PanelCard to="/achievements" icon={Trophy} title="Achievements" subtitle="Your badges" /></div>
             <PanelCard to="/tasks" icon={ClipboardCheck} title="Task" subtitle="Admin assigned" />
             <PanelCard to="/quests" icon={ListChecks} title="Quest" subtitle="Earn tokens" />
-            <PanelCard to="/support" icon={LifeBuoy} title="Help Center" subtitle="Get support" />
+            <div data-tour="dashboard-support-link"><PanelCard to="/support" icon={LifeBuoy} title="Help Center" subtitle="Get support" /></div>
           </div>
         </section>
 
         {/* ============ ACTIVITY OVERVIEW ============ */}
-        <Card className="border-primary/20 bg-card/60 p-5 backdrop-blur-xl">
+        <Card data-tour="dashboard-activity" className="border-primary/20 bg-card/60 p-5 backdrop-blur-xl">
           <h2 className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">Activity Overview</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             <ActivityStat icon={Activity} label="Active" value={String(active)} tone="text-emerald-300" />
@@ -165,14 +181,14 @@ function Dashboard() {
         </Card>
 
         {/* ============ CHALLENGES ============ */}
-        <div className="grid gap-4 items-start">
+        <div data-tour="dashboard-challenges" className="grid gap-4 items-start">
           <ChallengesPanel />
         </div>
 
         {/* ============ WALLET · TRANSACTIONS · REFERRALS ============ */}
         <div className="grid gap-4 lg:grid-cols-3 items-start">
-          <WalletOverview balance={profile?.token_balance ?? 0} />
-          <RecentTransactions userId={user.id} />
+          <div data-tour="dashboard-wallet"><WalletOverview balance={profile?.token_balance ?? 0} /></div>
+          <div data-tour="dashboard-recent"><RecentTransactions userId={user.id} /></div>
           <ReferralCard />
         </div>
 
@@ -183,6 +199,7 @@ function Dashboard() {
       </div>
       <PromoRequestDialog open={promoOpen} onClose={() => setPromoOpen(false)} userId={user.id} />
       <TransferDialog open={transferOpen} onClose={() => setTransferOpen(false)} onDone={refresh} />
+      <TourGuide tourKey="dashboard" steps={DASHBOARD_TOUR} />
     </Layout>
   );
 }

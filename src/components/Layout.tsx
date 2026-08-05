@@ -318,7 +318,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
         {!isHome && (
           <div className="border-t border-primary/15 bg-background/20">
             <div className="container mx-auto px-4 relative">
-              <nav className="flex items-stretch gap-1.5 flex-nowrap overflow-x-auto no-scrollbar py-2">
+              <nav data-tour="top-navigation" className="flex items-stretch gap-1.5 flex-nowrap overflow-x-auto no-scrollbar py-2">
                 {(() => {
                   const rest: { to: string; icon: any; label: string; danger?: boolean }[] = [
                     { to: "/matches", icon: MatchIcon, label: "Matches" },

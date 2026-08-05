@@ -22,7 +22,7 @@ import {
   Shield, Users, Trophy, Coins, Megaphone, Settings as SettingsIcon, Ticket, AlertTriangle,
   Calendar, Tag, Image as ImageIcon, BarChart3, History, Send, Plus, Trash2, Pencil, ChevronRight, ChevronLeft, Wallet, ListOrdered, Sparkles, ClipboardList, ListChecks, Lock, Pause, Play, Check, X, MessageSquare, Eye, RotateCw, Copy, Globe, MapPin, Smartphone, Clock, Filter,
   Dice5, LogOut, Crosshair, Target, Flame, ThumbsUp, ThumbsDown,
-  Gift, BellRing, GalleryHorizontalEnd, Gamepad2, Vote, ShoppingBag, LifeBuoy, Newspaper,
+  Gift, BellRing, GalleryHorizontalEnd, Gamepad2, Vote, ShoppingBag, LifeBuoy, Newspaper, GraduationCap,
   Swords,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -3990,6 +3990,20 @@ function SettingsPanel() {
           </div>
           <Switch checked={s.require_login !== false} onCheckedChange={(v) => setS({ ...s, require_login: v })} />
         </div>
+      </SettingsSection>
+
+      <SettingsSection icon={GraduationCap} title="Tutorial Settings" subtitle="Control who sees the guided platform walkthroughs.">
+        {[
+          ["tutorials_enabled", "Enable Tutorials", "Master switch for all guided tutorials."],
+          ["tutorials_for_new_users", "For New Users", "Show the welcome tour to recently created accounts."],
+          ["tutorials_for_new_signins", "For New Sign-ins", "Offer page tours again when a user signs in."],
+          ["tutorials_for_visitors", "For Visitors", "Allow signed-out visitors to preview tutorials on public pages."],
+        ].map(([key, label, description]) => (
+          <label key={key} className="flex items-center justify-between gap-4 rounded-md border border-primary/20 bg-background/35 p-3">
+            <span><span className="block text-sm font-bold">{label}</span><span className="block text-[11px] text-muted-foreground">{description}</span></span>
+            <Switch disabled={key !== "tutorials_enabled" && !s.tutorials_enabled} checked={!!s[key]} onCheckedChange={(value) => setS({ ...s, [key]: value })} />
+          </label>
+        ))}
       </SettingsSection>
 
       <SettingsSection icon={Lock} title="Website Closed Notice" subtitle="Message shown while the site is closed.">
