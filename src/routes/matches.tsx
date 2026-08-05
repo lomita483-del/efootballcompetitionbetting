@@ -18,14 +18,14 @@ import { TourGuide, type TourStep } from "@/components/TourGuide";
 const MATCHES_TOUR: TourStep[] = [
   { target: "[data-tour='top-navigation']", title: "Match Navigation", description: "Top navigation — move from the match arena to your Dashboard, Wagers, Virtual games, Leaderboard, wallet tools, and support.", placement: "bottom" },
   { target: "[data-tour='matches-promo']", title: "Match Promotions", description: "Promo banners — review active match announcements and offers; use the slider controls when more than one banner is available." },
-  { target: "[data-tour='matches-hero']", title: "Featured Competition", description: "Featured Competition — see the next highlighted fixture, scheduled start time, arena artwork, and open its betting markets with Bet Now." },
-  { target: "[data-tour='matches-top']", title: "Top Competitors", description: "Top Competitors — compare the current leading teams and open the full leaderboard to inspect rankings and points." },
-  { target: "[data-tour='matches-filters']", title: "Match Search & Categories", description: "Search and category filters — find a fixture by team or Match ID, then narrow the arena to a specific competition category." },
-  { target: "[data-tour='matches-tabs']", title: "Live, Upcoming & Ended", description: "Status tabs — switch between every active fixture, upcoming matches, live matches in progress, and completed match history." },
-  { target: "[data-tour='matches-list']", title: "All Matches & Odds", description: "All Matches list — scan each competition and choose the 1, X, or 2 odds for a home win, draw, or away win." },
-  { target: "[data-tour='matches-betslip']", title: "Bet Slip", description: "Bet Slip — review selected markets, remove unwanted picks, see combined odds and potential winnings, then place your bet." },
-  { target: "[data-tour='matches-markets']", title: "Popular Markets", description: "Popular Markets — identify common betting types such as Match Winner, Total Goals, Both Teams to Score, and Correct Score." },
-  { target: "[data-tour='matches-stats']", title: "Live Arena Statistics", description: "Live stats bar — see current live and upcoming match totals, the platform payout rate, support availability, and referral shortcut." },
+  { target: ".ecb-reference-hero", title: "Featured Competition", description: "Featured Competition — see the next highlighted fixture, scheduled start time, arena artwork, and open its betting markets with Bet Now." },
+  { target: ".ecb-reference-hero + section", title: "Top Competitors", description: "Top Competitors — compare the current leading teams and open the full leaderboard to inspect rankings and points." },
+  { target: ".ecb-arena-search", title: "Match Search & Categories", description: "Search and category filters — find a fixture by team or Match ID, then narrow the arena to a specific competition category." },
+  { target: ".ecb-filter-pills", title: "Live, Upcoming & Ended", description: "Status tabs — switch between every active fixture, upcoming matches, live matches in progress, and completed match history." },
+  { target: ".ecb-match-list", title: "All Matches & Odds", description: "All Matches list — scan each competition and choose the 1, X, or 2 odds for a home win, draw, or away win." },
+  { target: ".ecb-home-rail .ecb-rail-card:first-child", title: "Bet Slip", description: "Bet Slip — review selected markets, remove unwanted picks, see combined odds and potential winnings, then place your bet." },
+  { target: ".ecb-home-rail .ecb-rail-card:last-child", title: "Popular Markets", description: "Popular Markets — identify common betting types such as Match Winner, Total Goals, Both Teams to Score, and Correct Score." },
+  { target: ".ecb-stats-strip", title: "Live Arena Statistics", description: "Live stats bar — see current live and upcoming match totals, the platform payout rate, support availability, and referral shortcut." },
 ];
 
 export const Route = createFileRoute("/matches")({
