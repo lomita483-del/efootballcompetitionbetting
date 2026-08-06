@@ -37,6 +37,7 @@ import { SurveyPopout } from "@/components/SurveyPopout";
 import { PollPopout } from "@/components/PollPopout";
 import { PushPermissionPrompt } from "@/components/PushPermissionPrompt";
 import { FloatingWidgets } from "@/components/FloatingWidgets";
+import { PageTour } from "@/components/PageTour";
 import { LuckyWheelPopout } from "@/components/LuckyWheelPopout";
 import { AdvertisementRow } from "@/components/AdvertisementRow";
 import { ReactNode, useEffect, useState } from "react";
