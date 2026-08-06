@@ -105,10 +105,10 @@ const TOURS: Record<string, Omit<TourDefinition, "key">> = {
   "/about": page("About", "About — who runs the platform, how it operates and how to get in touch.", []),
   "/guides/how-it-works": page("How It Works", "How It Works — a step-by-step explanation of tokens, placing bets, settlement and withdrawals.", []),
   "/mcp-docs": page("Agent Integrations", "Agent Integrations — connect an AI assistant to your account and see exactly which tools it can use on your behalf.", []),
-  "/admin": page("Admin Console", "Admin Console — the command center. The sidebar groups every management area; the panel on the right is the tool you selected.", [
-    { target: "[data-tour='admin-hero']", title: "Console Header", description: "Console header — shows your role, lets you toggle the frosted-glass view, reload the console and broadcast a forced reload to every active browser." },
-    { target: "[data-tour='admin-sidebar']", title: "Management Sidebar", description: "Sidebar — grouped by Overview, Users & Community, Betting & Battles, Wallet & Payments, Rewards & Games, Content, Notifications and Configuration. Red badges show items waiting for action." },
-    { target: "[data-tour='admin-panel']", title: "Active Panel", description: "Active panel — the selected management tool loads here. Analytics is the default landing panel for both Super Admins and moderators." },
+  "/admin": page("Admin Console", "Admin Console — the command center for the whole platform: analytics, users, matches, wallets, rewards, content, notifications and configuration.", [
+    { target: "[data-tour='admin-hero']", title: "Console Header", description: "Console header — shows your role and gives you the theme toggle, the frosted-glass switch, a console reload, a hard refresh that clears caches, and Broadcast reload which forces every active browser to reload." },
+    { target: "[data-tour='admin-panel']", title: "Management Panels", description: "Management area — Analytics is the default landing panel. Its quick-action tiles open every other tool: Users, Matches, Bet Tracker, Withdrawals, Tokens, House Wallet, Lottery, Lucky Wheel, Tasks, Chat moderation, Broadcasts, Branding and Settings." },
+    { target: "[data-tour='admin-panel']", title: "Working Safely", description: "Every destructive action asks for confirmation and is written to the audit log with your account, the target and a timestamp — so match voids, refunds, bans and token adjustments can always be traced." },
   ]),
   "/mod": page("Moderation Console", "Moderation Console — the moderator view of the admin tools: chat moderation, tickets, appeals, users and match oversight.", []),
   "/admin/mcp-audit": page("MCP Audit Log", "MCP Audit Log — a traceable record of every AI-assistant tool call, with the acting user, the tool used and the exact timestamp.", []),
