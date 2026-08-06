@@ -746,6 +746,46 @@ function BookingCodeFab() {
   );
 }
 
+/**
+ * Homepage upcoming fixtures, grouped by the category they were seeded into.
+ * Each seeded category gets its own board (with an "UPCOMING MATCHES" caption
+ * so players can tell what the list is), and fixtures without a category are
+ * collected under a separate "Uncategorized Matches" board.
+ */
+function UpcomingByCategory({ matches }: { matches: MatchRow[] }) {
+  const groups = new Map<string, { name: string; icon?: string | null; rows: MatchRow[] }>();
+  const uncategorized: MatchRow[] = [];
+  for (const match of matches) {
+    const category = (match as any).category as { id: string; name: string; icon?: string | null } | null | undefined;
+    if (!category) { uncategorized.push(match); continue; }
+    const bucket = groups.get(category.id) ?? { name: category.name, icon: category.icon, rows: [] };
+    bucket.rows.push(match);
+    groups.set(category.id, bucket);
+  }
+  const sections = [
+    ...Array.from(groups.values()).map((g) => ({ title: `${g.icon ? `${g.icon} ` : ""}${g.name}`, rows: g.rows })),
+    ...(uncategorized.length ? [{ title: "Uncategorized Matches", rows: uncategorized }] : []),
+  ];
+  return (
+    <div className="space-y-5" data-tour={uncategorized.length ? "home-uncategorized" : undefined}>
+      {sections.map((section) => (
+        <div key={section.title}>
+          <SectionHeader icon={Crosshair} title={section.title} subtitle="UPCOMING MATCHES" />
+          <div className="ecb-match-list mt-4">
+            <div className="ecb-odds-head"><span>Competition / Match</span><b>1</b><b>X</b><b>2</b></div>
+            {section.rows.slice(0, 5).map((match) => <ArenaMatchRow key={match.id} match={match} />)}
+            <div className="border-t border-border/60 px-3 py-3 text-right">
+              <Link to="/matches" className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground transition hover:text-primary">
+                View more matches <ChevronRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function SectionHeader({ icon: Icon, title, subtitle }: { icon: any; title: string; subtitle: string }) {
   return (
     <div className="relative overflow-hidden rounded-2xl border-2 border-primary/50 bg-gradient-to-r from-emerald-950/80 via-background/80 to-emerald-950/80 px-4 py-3 shadow-[0_8px_30px_-12px_rgba(212,175,55,0.5)]">
