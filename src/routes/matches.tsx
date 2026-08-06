@@ -62,14 +62,13 @@ function TopCompetitors({ rows }: { rows: LbRow[] }) {
 }
 
 function Arena({ matches, loading }: { matches: MatchRow[]; loading: boolean }) {
-  const [tab, setTab] = useState<"all" | "live" | "upcoming" | "ended">("all");
+  const [tab, setTab] = useState<"all" | "live" | "ended">("all");
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState("all");
   const categories = Array.from(new Map(matches.filter((match) => match.category).map((match) => [match.category?.id, match.category])).values()).filter((category) => category !== null && category !== undefined);
   const groups = {
     all: matches.filter((match) => match.status === "live" || match.status === "scheduled"),
     live: matches.filter((match) => match.status === "live"),
-    upcoming: matches.filter((match) => match.status === "scheduled"),
     ended: matches.filter((match) => match.status === "ended"),
   };
   const shown = groups[tab].filter((match) => {
@@ -77,7 +76,26 @@ function Arena({ matches, loading }: { matches: MatchRow[]; loading: boolean }) 
     const matchesSearch = `${match.name} ${match.id} ${match.home_team?.name ?? ""} ${match.away_team?.name ?? ""}`.toLowerCase().includes(search.toLowerCase());
     return matchesCategory && matchesSearch;
   });
-  return <section className="ecb-arena"><header className="ecb-arena-header"><div className="ecb-arena-heading"><span><Crosshair /></span><div><small>THE ARENA</small><h2>All Matches <Badge variant="destructive">● LIVE</Badge></h2><p>Browse active fixtures here, with completed fixtures kept separately under Ended.</p></div></div><div className="ecb-arena-search"><Search /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search matches, teams or match ID..." /><Select value={categoryId} onValueChange={setCategoryId}><SelectTrigger aria-label="Filter by match category"><SelectValue placeholder="All categories" /></SelectTrigger><SelectContent><SelectItem value="all">All categories</SelectItem>{categories.map((category) => <SelectItem key={category.id} value={category.id}>{category.icon ? `${category.icon} ` : ""}{category.name}</SelectItem>)}<SelectItem value="uncategorized">Uncategorized</SelectItem></SelectContent></Select></div></header><div className="ecb-filter-pills">{(["all", "upcoming", "live", "ended"] as const).map((key) => <Button key={key} size="sm" variant={tab === key ? "default" : "outline"} onClick={() => setTab(key)}>{key.toUpperCase()} ({groups[key].length})</Button>)}</div><div className="ecb-arena-tabs">{(["live", "upcoming", "ended"] as const).map((key) => <button key={key} onClick={() => setTab(key)} className={tab === key ? "active" : ""}>{key[0].toUpperCase() + key.slice(1)} ({groups[key].length})</button>)}</div><div className="ecb-arena-grid"><div className="ecb-match-list"><div className="ecb-odds-head"><span>Competition / Match</span><b>1</b><b>X</b><b>2</b></div>{loading ? <p className="p-6 text-muted-foreground">Loading matches…</p> : shown.length ? shown.map((match) => <ArenaMatchRow key={match.id} match={match} />) : <p className="p-6 text-muted-foreground">No matches in this category.</p>}<Button variant="outline" className="ecb-load-more" onClick={() => { setTab("all"); setCategoryId("all"); }}><RefreshCw /> View All Active Matches</Button></div><aside className="ecb-home-rail"><InlineBetSlip /><PopularMarkets /></aside></div></section>;
+  // In the "All" view every fixture is presented under its own competition
+  // category (with uncategorized fixtures collected at the end) so players can
+  // tell at a glance which competition a match belongs to.
+  const sections = (() => {
+    if (tab !== "all") return [{ id: "flat", title: "", rows: shown }];
+    const buckets = new Map<string, { title: string; rows: MatchRow[] }>();
+    const loose: MatchRow[] = [];
+    for (const match of shown) {
+      const category = match.category;
+      if (!category) { loose.push(match); continue; }
+      const bucket = buckets.get(category.id) ?? { title: `${category.icon ? `${category.icon} ` : ""}${category.name}`, rows: [] };
+      bucket.rows.push(match);
+      buckets.set(category.id, bucket);
+    }
+    return [
+      ...Array.from(buckets.entries()).map(([id, bucket]) => ({ id, ...bucket })),
+      ...(loose.length ? [{ id: "uncategorized", title: "Uncategorized Matches", rows: loose }] : []),
+    ];
+  })();
+  return <section className="ecb-arena"><header className="ecb-arena-header"><div className="ecb-arena-heading"><span><Crosshair /></span><div><small>THE ARENA</small><h2>All Matches <Badge variant="destructive">● LIVE</Badge></h2><p>Browse active fixtures here, with completed fixtures kept separately under Ended.</p></div></div><div className="ecb-arena-search"><Search /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search matches, teams or match ID..." /><Select value={categoryId} onValueChange={setCategoryId}><SelectTrigger aria-label="Filter by match category"><SelectValue placeholder="All categories" /></SelectTrigger><SelectContent><SelectItem value="all">All categories</SelectItem>{categories.map((category) => <SelectItem key={category.id} value={category.id}>{category.icon ? `${category.icon} ` : ""}{category.name}</SelectItem>)}<SelectItem value="uncategorized">Uncategorized</SelectItem></SelectContent></Select></div></header><div className="ecb-filter-pills">{(["all", "live", "ended"] as const).map((key) => <Button key={key} size="sm" variant={tab === key ? "default" : "outline"} onClick={() => setTab(key)}>{key.toUpperCase()} ({groups[key].length})</Button>)}</div><div className="ecb-arena-tabs">{(["all", "live", "ended"] as const).map((key) => <button key={key} onClick={() => setTab(key)} className={tab === key ? "active" : ""}>{key[0].toUpperCase() + key.slice(1)} ({groups[key].length})</button>)}</div><div className="ecb-arena-grid"><div className="ecb-match-list"><div className="ecb-odds-head"><span>Competition / Match</span><b>1</b><b>X</b><b>2</b></div>{loading ? <p className="p-6 text-muted-foreground">Loading matches…</p> : shown.length ? sections.map((section) => <div key={section.id}>{section.title && <div className="flex items-center justify-between gap-2 border-y border-primary/25 bg-primary/5 px-3 py-2"><b className="truncate text-[11px] font-black uppercase tracking-[0.2em] text-primary">{section.title}</b><span className="shrink-0 text-[10px] uppercase tracking-widest text-muted-foreground">{section.rows.length} match{section.rows.length === 1 ? "" : "es"}</span></div>}{section.rows.map((match) => <ArenaMatchRow key={match.id} match={match} />)}</div>) : <p className="p-6 text-muted-foreground">No matches in this category.</p>}<Button variant="outline" className="ecb-load-more" onClick={() => { setTab("all"); setCategoryId("all"); setSearch(""); }}><RefreshCw /> View All Active Matches</Button></div><aside className="ecb-home-rail"><InlineBetSlip /><PopularMarkets /></aside></div></section>;
 }
 
 function InlineBetSlip() {
