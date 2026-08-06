@@ -55,7 +55,15 @@ function Page() {
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [matchId]);
-Card
+
+  // Deep links such as /matches/<id>#correct-score must land on the market even
+  // though markets render after the async fetch resolves.
+  useEffect(() => {
+    if (!m || typeof window === "undefined" || window.location.hash !== "#correct-score") return;
+    const timer = window.setTimeout(() => document.getElementById("correct-score")?.scrollIntoView({ behavior: "smooth", block: "center" }), 250);
+    return () => window.clearTimeout(timer);
+  }, [m]);
+
   if (loading) return <Layout><div className="container py-10">Loading…</div></Layout>;
   if (!m) return <Layout><div className="container py-10">Match not found. <Link to="/matches" className="text-primary underline">Back</Link></div></Layout>;
 

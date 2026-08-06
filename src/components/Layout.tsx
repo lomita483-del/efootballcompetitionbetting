@@ -37,6 +37,7 @@ import { SurveyPopout } from "@/components/SurveyPopout";
 import { PollPopout } from "@/components/PollPopout";
 import { PushPermissionPrompt } from "@/components/PushPermissionPrompt";
 import { FloatingWidgets } from "@/components/FloatingWidgets";
+import { PageTour } from "@/components/PageTour";
 import { LuckyWheelPopout } from "@/components/LuckyWheelPopout";
 import { AdvertisementRow } from "@/components/AdvertisementRow";
 import { ReactNode, useEffect, useState } from "react";
@@ -382,7 +383,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
         ) : null}
       </header>
       <main className="relative overflow-x-hidden">{children}</main>
-      <div className="container pb-4">
+      <div className="container pb-4" data-tour="page-ads">
         <AdvertisementRow placement={location.pathname} />
       </div>
       <LevelUpModal />
@@ -395,6 +396,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       <PushPermissionPrompt />
       <FloatingWidgets />
       <LuckyWheelPopout />
+      <PageTour />
       <SiteFooter isHome={isHome} />
     </div>
   );

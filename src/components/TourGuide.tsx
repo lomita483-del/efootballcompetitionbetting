@@ -28,7 +28,7 @@ const DEFAULT_SETTINGS: TutorialSettings = {
   tutorials_for_visitors: false,
 };
 
-export function TourGuide({ tourKey, steps }: { tourKey: string; steps: TourStep[] }) {
+export function TourGuide({ tourKey, steps, pageName }: { tourKey: string; steps: TourStep[]; pageName?: string }) {
   const { user, profile, loading } = useAuth();
   const [settings, setSettings] = useState<TutorialSettings | null>(null);
   const [mode, setMode] = useState<"hidden" | "welcome" | "tour">("hidden");
@@ -57,12 +57,11 @@ export function TourGuide({ tourKey, steps }: { tourKey: string; steps: TourStep
       const { data } = await supabase.from("tutorial_states").select("status,current_step,remind_after")
         .eq("user_id", user.id).eq("tour_key", tourKey).maybeSingle();
       if (!alive) return;
-      const createdAt = (profile as (typeof profile & { created_at?: string }) | null)?.created_at;
-      const isNewUser = !createdAt || Date.now() - new Date(createdAt).getTime() < 14 * 24 * 60 * 60 * 1000;
-      const reminderDue = data?.status === "remind_later" && (!data.remind_after || new Date(data.remind_after).getTime() <= Date.now());
-      const signInTourDue = settings.tutorials_for_new_signins && !window.sessionStorage.getItem(signInSessionKey);
-      const eligible = (settings.tutorials_for_new_users && isNewUser) || signInTourDue || reminderDue;
-      if (!eligible || (!signInTourDue && (data?.status === "completed" || data?.status === "skipped"))) return;
+      // Every member — new or long-standing — is offered each page tour once,
+      // until they explicitly finish or skip it on that page.
+      const reminderDue = !data?.remind_after || new Date(data.remind_after).getTime() <= Date.now();
+      if (data?.status === "completed" || data?.status === "skipped") return;
+      if (data?.status === "remind_later" && !reminderDue) return;
       if (data?.status === "in_progress") {
         setStepIndex(Math.min(Number(data.current_step ?? 0), steps.length - 1));
         setMode("tour");
@@ -135,9 +134,12 @@ export function TourGuide({ tourKey, steps }: { tourKey: string; steps: TourStep
         <div className="h-1 bg-gradient-gold" />
         <div className="p-6 sm:p-8">
           <span className="mb-5 grid h-14 w-14 place-items-center rounded-md border border-primary/40 bg-primary/10 text-primary"><Compass className="h-7 w-7" /></span>
+          {pageName && <div className="mb-2 text-[10px] font-black uppercase tracking-[0.3em] text-primary">Page tour • {pageName}</div>}
           <DialogHeader>
-            <DialogTitle className="text-left text-3xl font-black">Welcome, {displayName}! 👋</DialogTitle>
-            <DialogDescription className="pt-2 text-left text-base leading-relaxed">Let&apos;s take a quick tour to help you get the most out of the platform.</DialogDescription>
+            <DialogTitle className="text-left text-3xl font-black">Welcome to {pageName ?? "the platform"}, {displayName}! 👋</DialogTitle>
+            <DialogDescription className="pt-2 text-left text-base leading-relaxed">
+              This quick walkthrough explains every section of the <b className="text-foreground">{pageName ?? "current"}</b> page — what each area does and how to use it. {steps.length} short steps.
+            </DialogDescription>
           </DialogHeader>
           <div className="mt-7 grid gap-2 sm:grid-cols-2">
             <Button className="btn-luxury sm:col-span-2" onClick={start}>Start Tutorial <ChevronRight className="h-4 w-4" /></Button>
@@ -154,7 +156,7 @@ export function TourGuide({ tourKey, steps }: { tourKey: string; steps: TourStep
       <section className="fixed w-[min(360px,calc(100vw-24px))] rounded-md border border-primary/60 bg-card p-4 shadow-gold" style={cardPosition}>
         <div className="flex items-start gap-3">
           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-gold text-lg font-black text-primary-foreground">{stepIndex + 1}</span>
-          <div className="min-w-0 flex-1"><div className="text-[10px] font-black uppercase text-primary">Tutorial • Page {stepIndex + 1}/{steps.length}</div><h2 className="mt-1 text-lg font-black">{activeStep.title}</h2></div>
+          <div className="min-w-0 flex-1"><div className="truncate text-[10px] font-black uppercase text-primary">{pageName ? `${pageName} • ` : "Tutorial • "}Step {stepIndex + 1}/{steps.length}</div><h2 className="mt-1 text-lg font-black">{activeStep.title}</h2></div>
           <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Close tutorial" onClick={() => dismiss("remind_later")}><X className="h-4 w-4" /></Button>
         </div>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{activeStep.description}</p>

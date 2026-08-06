@@ -158,6 +158,7 @@ export function AdminPage() {
         <div className="mx-auto w-full max-w-[1280px] px-3 sm:px-4 py-4 sm:py-6 space-y-4">
 
           <div
+            data-tour="admin-hero"
             className="admin-hero-frame relative overflow-hidden rounded-2xl p-5 sm:p-7"
             style={{ backgroundImage: `linear-gradient(90deg, rgba(3,12,10,0.76) 0%, rgba(3,12,10,0.44) 42%, rgba(3,12,10,0.18) 100%), url(${heroBg || adminConsoleSeed})`, backgroundSize: `auto, ${heroFit === "contain" ? "contain" : heroFit === "fill" ? "100% 100%" : "cover"}`, backgroundPosition: `center, ${heroPos || "center right"}`, backgroundRepeat: "no-repeat" }}
           >
@@ -202,7 +203,7 @@ export function AdminPage() {
             </div>
           </div>
 
-            <Tabs value={activeTab} onValueChange={setActiveTab}> 
+            <Tabs data-tour="admin-panel" value={activeTab} onValueChange={setActiveTab}> 
             <TabsContent value="flags" className="mt-4"><SuspiciousActivityPanel /></TabsContent>
             <TabsContent value="users" className="mt-4"><UsersPanel /></TabsContent>
             <TabsContent value="bannedusers" className="mt-4"><BannedUsersPanel /></TabsContent>

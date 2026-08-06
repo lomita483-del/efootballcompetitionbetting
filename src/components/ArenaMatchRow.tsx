@@ -6,7 +6,12 @@ import type { MatchRow } from "@/lib/queries";
 
 export function ArenaMatchRow({ match }: { match: MatchRow }) {
   const { selections, add, remove } = useBetSlip();
-  const market = match.markets?.find((item) => item.is_open) ?? match.markets?.[0];
+  // The 1 / X / 2 buttons must always come from the match-winner market — never
+  // from Correct Score, which also has open odds but is not a 1X2 market.
+  const isCorrectScore = (name?: string) => /correct\s*score/i.test(name ?? "");
+  const winnerMarkets = (match.markets ?? []).filter((item) => !isCorrectScore(item.name));
+  const market = winnerMarkets.find((item) => item.is_open) ?? winnerMarkets[0];
+  const correctScore = (match.markets ?? []).find((item) => isCorrectScore(item.name) && item.is_open);
   const odds = (market?.odds ?? []).slice(0, 3);
   const date = new Date(match.start_time);
 
@@ -54,7 +59,19 @@ export function ArenaMatchRow({ match }: { match: MatchRow }) {
             </Button>
           );
         })}
-        <span>+{Math.max(0, (market?.odds.length ?? 3) - 3)}</span>
+        {correctScore ? (
+          <Link
+            to="/matches/$matchId"
+            params={{ matchId: match.id }}
+            hash="correct-score"
+            className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline"
+            title="Open the Correct Score market"
+          >
+            CS +{correctScore.odds.length}
+          </Link>
+        ) : (
+          <span>+{Math.max(0, (market?.odds.length ?? 3) - 3)}</span>
+        )}
       </div>
     </article>
   );
