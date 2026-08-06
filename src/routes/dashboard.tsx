@@ -17,22 +17,6 @@ import {
 import { ChallengesPanel } from "@/components/ChallengesPanel";
 import { ReferralCard } from "@/components/UserHubSections";
 import { getTierProgress } from "@/lib/tiers";
-import { TourGuide, type TourStep } from "@/components/TourGuide";
-
-const DASHBOARD_TOUR: TourStep[] = [
-  { target: "[data-tour='top-navigation']", title: "Platform Navigation", description: "Top navigation — move directly between Matches, Virtual, Lottery, Wagers, Support, Settings, and the other platform areas.", placement: "bottom" },
-  { target: "[data-tour='dashboard-welcome']", title: "Account Summary", description: "Welcome panel — review your profile image, membership tier, member date, and progress toward your next XP tier." },
-  { target: "[data-tour='dashboard-balance']", title: "Balance & Active Stakes", description: "Account summary — see your current token balance, active bets, total bet count, and use Add Funds when you need more tokens.", placement: "left" },
-  { target: "[data-tour='dashboard-quick']", title: "Quick Access", description: "Quick Access — open your bet slips, edit your profile, withdraw, transfer tokens, request tokens, and reach frequently used account tools." },
-  { target: "[data-tour='dashboard-transactions-link']", title: "Transaction Records", description: "Transaction Records — open the complete history of token credits, debits, deposits, stakes, rewards, and transfers." },
-  { target: "[data-tour='dashboard-referrals-link']", title: "Referrals", description: "Invite Now — share your referral details and track the rewards earned when new competitors join through you." },
-  { target: "[data-tour='dashboard-rewards-link']", title: "Rewards & Achievements", description: "Achievements — review badges and milestones you have unlocked through matches, activity, and platform challenges." },
-  { target: "[data-tour='dashboard-support-link']", title: "Support Center", description: "Help Center — create and follow support tickets when you need account, payment, match, or betting assistance." },
-  { target: "[data-tour='dashboard-activity']", title: "Activity Overview", description: "Activity Overview — compare active, won, lost, pending, and total bets alongside your current win rate." },
-  { target: "[data-tour='dashboard-challenges']", title: "Challenges & Streaks", description: "Challenges — monitor challenge progress, daily streak goals, and claimable rewards tied to your activity." },
-  { target: "[data-tour='dashboard-wallet']", title: "Wallet", description: "Wallet Overview — check your main token balance and jump directly to funding, withdrawal, or full wallet history." },
-  { target: "[data-tour='dashboard-recent']", title: "Recent Transactions", description: "Recent Transactions — inspect your five latest balance movements, including the amount, reason, and exact time." },
-];
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -199,7 +183,6 @@ function Dashboard() {
       </div>
       <PromoRequestDialog open={promoOpen} onClose={() => setPromoOpen(false)} userId={user.id} />
       <TransferDialog open={transferOpen} onClose={() => setTransferOpen(false)} onDone={refresh} />
-      <TourGuide tourKey="dashboard" steps={DASHBOARD_TOUR} />
     </Layout>
   );
 }
