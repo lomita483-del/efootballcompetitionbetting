@@ -157,19 +157,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [user?.id]);
 
-  // Heartbeat: keep user_sessions fresh so the admin "Online Users" panel works.
+// Heartbeat: keep user_sessions fresh so the admin "Online Users" panel works.
+  // Routed through a server endpoint (not a direct client upsert) so the real
+  // IP + device/browser/OS can be captured, which browser JS can't see itself.
   useEffect(() => {
     if (!user || typeof window === "undefined") return;
     let stopped = false;
     const ping = async () => {
       if (stopped) return;
       try {
-        await supabase.from("user_sessions").upsert({
-          user_id: user.id,
-          last_seen: new Date().toISOString(),
-          route: window.location.pathname,
-          user_agent: navigator.userAgent.slice(0, 255),
-        }, { onConflict: "user_id" });
+        const { data: { session: s } } = await supabase.auth.getSession();
+        const token = s?.access_token;
+        if (!token) return;
+        await fetch("/api/public/hooks/log-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ route: window.location.pathname }),
+        });
       } catch {}
     };
     ping();
