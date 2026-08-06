@@ -382,7 +382,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
         ) : null}
       </header>
       <main className="relative overflow-x-hidden">{children}</main>
-      <div className="container pb-4">
+      <div className="container pb-4" data-tour="page-ads">
         <AdvertisementRow placement={location.pathname} />
       </div>
       <LevelUpModal />
@@ -395,6 +395,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       <PushPermissionPrompt />
       <FloatingWidgets />
       <LuckyWheelPopout />
+      <PageTour />
       <SiteFooter isHome={isHome} />
     </div>
   );
