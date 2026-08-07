@@ -84,16 +84,21 @@ export function VideoAd() {
 
   return (
     <div className="fixed inset-0 z-[200] bg-black flex items-center justify-center">
-  <div className="w-full aspect-video max-h-full">
-    <video
-      ref={videoRef}
-      src={ad.video_url}
-      autoPlay
-      loop
-      playsInline
-      className="h-full w-full object-contain"
-      onClick={needsSoundTap ? enableSound : undefined}
-    />
+  <div className="fixed inset-0 z-[200] bg-black overflow-hidden flex items-center justify-center">
+  <video
+    ref={videoRef}
+    src={ad.video_url}
+    autoPlay
+    loop
+    playsInline
+    className="object-cover"
+    style={{
+      width: "100vh",
+      height: "100vw",
+      transform: "rotate(90deg)",
+    }}
+    onClick={needsSoundTap ? enableSound : undefined}
+  />
   </div>
 
       {needsSoundTap && (
