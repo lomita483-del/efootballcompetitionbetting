@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Upload, Link2, Trash2, Loader2 } from "lucide-react";
-import { validateAndResize, type ImageKind } from "@/lib/image-validation";
+import { validateAndResize, isAnimatedImage, type ImageKind } from "@/lib/image-validation";
 import { ImageCropDialog } from "@/components/admin/ImageCropDialog";
 
 const FIT_OPTIONS = [
@@ -61,16 +61,22 @@ export function ImageSettingControl({
   const [busy, setBusy] = useState(false);
   const [pendingCrop, setPendingCrop] = useState<File | null>(null);
 
-  function onPickFile(f: File) {
-    // Open crop dialog first; user can confirm/skip crop.
+  async function onPickFile(f: File) {
+    // Animated media (GIF / animated WEBP / APNG) must bypass crop + resize:
+    // both run through <canvas>, which would flatten them to one frame.
+    if (await isAnimatedImage(f)) {
+      toast.info("Animated image detected — uploading with animation preserved (no crop).");
+      void upload(f, true);
+      return;
+    }
     setPendingCrop(f);
   }
 
-  async function upload(input: File) {
+  async function upload(input: File, animated = false) {
     setBusy(true);
     try {
       let f = input;
-      if (validation) {
+      if (validation && !animated) {
         try {
           const v = await validateAndResize(input, validation);
           f = v.file;
@@ -134,7 +140,7 @@ export function ImageSettingControl({
           className="hidden"
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) onPickFile(f);
+            if (f) void onPickFile(f);
             if (fileRef.current) fileRef.current.value = "";
           }}
         />
