@@ -22,6 +22,38 @@ const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/avif"];
 
 export type ValidatedImage = { file: File; width: number; height: number };
 
+/**
+ * True for animated media (GIF, animated WEBP, APNG). These must never be run
+ * through <canvas> — that would flatten them to a single frame.
+ */
+export async function isAnimatedImage(file: File): Promise<boolean> {
+  if (file.type === "image/gif") return true;
+  if (file.type !== "image/webp" && file.type !== "image/png" && file.type !== "image/apng") return false;
+  try {
+    const buf = new Uint8Array(await file.arrayBuffer());
+    const ascii = (start: number, len: number) =>
+      String.fromCharCode(...buf.slice(start, start + len));
+    if (file.type === "image/webp") {
+      // Animated WEBP files contain an "ANIM"/"ANMF" chunk.
+      for (let i = 12; i < Math.min(buf.length - 4, 4096); i++) {
+        const tag = ascii(i, 4);
+        if (tag === "ANIM" || tag === "ANMF") return true;
+      }
+      return false;
+    }
+    // APNG files contain an "acTL" chunk before the first "IDAT".
+    const limit = Math.min(buf.length - 4, 1_000_000);
+    for (let i = 8; i < limit; i++) {
+      const tag = ascii(i, 4);
+      if (tag === "acTL") return true;
+      if (tag === "IDAT") return false;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export async function validateAndResize(file: File, kind: ImageKind): Promise<ValidatedImage> {
   const rule = RULES[kind];
   if (!ALLOWED_TYPES.includes(file.type)) {
