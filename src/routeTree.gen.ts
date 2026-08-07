@@ -67,6 +67,7 @@ import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.
 import { Route as ApiPublicHooksSendPushRouteImport } from './routes/api/public/hooks/send-push'
 import { Route as ApiPublicHooksRecurringPushRouteImport } from './routes/api/public/hooks/recurring-push'
 import { Route as ApiPublicHooksProcessScheduledPushRouteImport } from './routes/api/public/hooks/process-scheduled-push'
+import { Route as ApiPublicHooksLogSessionRouteImport } from './routes/api/public/hooks/log-session'
 import { Route as ApiPublicHooksBroadcastPushRouteImport } from './routes/api/public/hooks/broadcast-push'
 
 const WithdrawRoute = WithdrawRouteImport.update({
@@ -365,6 +366,12 @@ const ApiPublicHooksProcessScheduledPushRoute =
     path: '/api/public/hooks/process-scheduled-push',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksLogSessionRoute =
+  ApiPublicHooksLogSessionRouteImport.update({
+    id: '/api/public/hooks/log-session',
+    path: '/api/public/hooks/log-session',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksBroadcastPushRoute =
   ApiPublicHooksBroadcastPushRouteImport.update({
     id: '/api/public/hooks/broadcast-push',
@@ -429,6 +436,7 @@ export interface FileRoutesByFullPath {
   '/admin/members/$userId': typeof AdminMembersUserIdRoute
   '/api/public/virtual-tick': typeof ApiPublicVirtualTickRoute
   '/api/public/hooks/broadcast-push': typeof ApiPublicHooksBroadcastPushRoute
+  '/api/public/hooks/log-session': typeof ApiPublicHooksLogSessionRoute
   '/api/public/hooks/process-scheduled-push': typeof ApiPublicHooksProcessScheduledPushRoute
   '/api/public/hooks/recurring-push': typeof ApiPublicHooksRecurringPushRoute
   '/api/public/hooks/send-push': typeof ApiPublicHooksSendPushRoute
@@ -490,6 +498,7 @@ export interface FileRoutesByTo {
   '/admin/members/$userId': typeof AdminMembersUserIdRoute
   '/api/public/virtual-tick': typeof ApiPublicVirtualTickRoute
   '/api/public/hooks/broadcast-push': typeof ApiPublicHooksBroadcastPushRoute
+  '/api/public/hooks/log-session': typeof ApiPublicHooksLogSessionRoute
   '/api/public/hooks/process-scheduled-push': typeof ApiPublicHooksProcessScheduledPushRoute
   '/api/public/hooks/recurring-push': typeof ApiPublicHooksRecurringPushRoute
   '/api/public/hooks/send-push': typeof ApiPublicHooksSendPushRoute
@@ -552,6 +561,7 @@ export interface FileRoutesById {
   '/admin_/members/$userId': typeof AdminMembersUserIdRoute
   '/api/public/virtual-tick': typeof ApiPublicVirtualTickRoute
   '/api/public/hooks/broadcast-push': typeof ApiPublicHooksBroadcastPushRoute
+  '/api/public/hooks/log-session': typeof ApiPublicHooksLogSessionRoute
   '/api/public/hooks/process-scheduled-push': typeof ApiPublicHooksProcessScheduledPushRoute
   '/api/public/hooks/recurring-push': typeof ApiPublicHooksRecurringPushRoute
   '/api/public/hooks/send-push': typeof ApiPublicHooksSendPushRoute
@@ -615,6 +625,7 @@ export interface FileRouteTypes {
     | '/admin/members/$userId'
     | '/api/public/virtual-tick'
     | '/api/public/hooks/broadcast-push'
+    | '/api/public/hooks/log-session'
     | '/api/public/hooks/process-scheduled-push'
     | '/api/public/hooks/recurring-push'
     | '/api/public/hooks/send-push'
@@ -676,6 +687,7 @@ export interface FileRouteTypes {
     | '/admin/members/$userId'
     | '/api/public/virtual-tick'
     | '/api/public/hooks/broadcast-push'
+    | '/api/public/hooks/log-session'
     | '/api/public/hooks/process-scheduled-push'
     | '/api/public/hooks/recurring-push'
     | '/api/public/hooks/send-push'
@@ -737,6 +749,7 @@ export interface FileRouteTypes {
     | '/admin_/members/$userId'
     | '/api/public/virtual-tick'
     | '/api/public/hooks/broadcast-push'
+    | '/api/public/hooks/log-session'
     | '/api/public/hooks/process-scheduled-push'
     | '/api/public/hooks/recurring-push'
     | '/api/public/hooks/send-push'
@@ -798,6 +811,7 @@ export interface RootRouteChildren {
   AdminMembersUserIdRoute: typeof AdminMembersUserIdRoute
   ApiPublicVirtualTickRoute: typeof ApiPublicVirtualTickRoute
   ApiPublicHooksBroadcastPushRoute: typeof ApiPublicHooksBroadcastPushRoute
+  ApiPublicHooksLogSessionRoute: typeof ApiPublicHooksLogSessionRoute
   ApiPublicHooksProcessScheduledPushRoute: typeof ApiPublicHooksProcessScheduledPushRoute
   ApiPublicHooksRecurringPushRoute: typeof ApiPublicHooksRecurringPushRoute
   ApiPublicHooksSendPushRoute: typeof ApiPublicHooksSendPushRoute
@@ -1211,6 +1225,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksProcessScheduledPushRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/log-session': {
+      id: '/api/public/hooks/log-session'
+      path: '/api/public/hooks/log-session'
+      fullPath: '/api/public/hooks/log-session'
+      preLoaderRoute: typeof ApiPublicHooksLogSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/broadcast-push': {
       id: '/api/public/hooks/broadcast-push'
       path: '/api/public/hooks/broadcast-push'
@@ -1289,6 +1310,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminMembersUserIdRoute: AdminMembersUserIdRoute,
   ApiPublicVirtualTickRoute: ApiPublicVirtualTickRoute,
   ApiPublicHooksBroadcastPushRoute: ApiPublicHooksBroadcastPushRoute,
+  ApiPublicHooksLogSessionRoute: ApiPublicHooksLogSessionRoute,
   ApiPublicHooksProcessScheduledPushRoute:
     ApiPublicHooksProcessScheduledPushRoute,
   ApiPublicHooksRecurringPushRoute: ApiPublicHooksRecurringPushRoute,

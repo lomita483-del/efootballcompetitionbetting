@@ -66,6 +66,7 @@ import { NewsAdminPanel } from "@/components/admin/NewsAdminPanel";
 import { PushBroadcastPanel } from "@/components/admin/PushBroadcastPanel";
 import { RecurringPushPanel } from "@/components/admin/RecurringPushPanel";
 import { HomeBannersAdminPanel } from "@/components/admin/HomeBannersAdminPanel";
+import { PopupAdsAdminPanel } from "@/components/admin/PopupAdsAdminPanel";
 import { ArcadeAdminPanel } from "@/components/admin/ArcadeAdminPanel";
 import { LuckyWheelAdminPanel } from "@/components/admin/LuckyWheelAdminPanel";
 import { CasinoHistoryPanel } from "@/components/admin/CasinoHistoryPanel";
@@ -4056,23 +4057,17 @@ function SettingsPanel() {
         <FieldLuxe label="Terms & Conditions"><Textarea rows={6} value={s.terms_content ?? ""} onChange={(e) => setS({ ...s, terms_content: e.target.value })} /></FieldLuxe>
       </SettingsSection>
 
-      <SettingsSection icon={ImageIcon} title="Pop-up Ad" subtitle="Promo modal across the platform." right={<Switch checked={!!s.popup_ad_active} onCheckedChange={(v) => setS({ ...s, popup_ad_active: v })} />}>
-        <FieldLuxe label="Size">
-          <Select value={s.popup_ad_size ?? "large"} onValueChange={(v) => setS({ ...s, popup_ad_size: v })}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="large">Large</SelectItem>
-              <SelectItem value="xl">Extra Large</SelectItem>
-              <SelectItem value="full">Full screen (covers home page)</SelectItem>
-            </SelectContent>
-          </Select>
-        </FieldLuxe>
-        <FieldLuxe label="Image"><Input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && uploadPopup(e.target.files[0])} /></FieldLuxe>
-        {s.popup_ad_image && <img src={s.popup_ad_image} alt="" className="w-full max-h-48 object-contain rounded border border-border" />}
-        <FieldLuxe label="Body text/HTML"><Textarea rows={3} value={s.popup_ad_text ?? ""} onChange={(e) => setS({ ...s, popup_ad_text: e.target.value })} /></FieldLuxe>
-        <FieldLuxe label="Link (optional)"><Input value={s.popup_ad_link ?? ""} onChange={(e) => setS({ ...s, popup_ad_link: e.target.value })} /></FieldLuxe>
-      </SettingsSection>
+      <div className="lg:col-span-2">
+        <SettingsSection icon={ImageIcon} title="Pop-out Ads" subtitle="Translucent promo pop-ups with page targeting, scheduling and animated media.">
+          {s.popup_ad_active && (
+            <div className="flex items-center justify-between gap-3 rounded-md border border-amber-400/30 bg-amber-500/10 p-2 text-[11px]">
+              <span>A legacy single pop-up ad is still enabled. It shows only while no ad below is active.</span>
+              <Button size="sm" variant="outline" onClick={() => setS({ ...s, popup_ad_active: false })}>Disable legacy ad</Button>
+            </div>
+          )}
+          <PopupAdsAdminPanel />
+        </SettingsSection>
+      </div>
 
       <SettingsSection icon={Sparkles} title="Platform Identity" subtitle="Rename the platform and set the home-page logo.">
         <FieldLuxe label="Platform name (shown in header, footer & home page)">
