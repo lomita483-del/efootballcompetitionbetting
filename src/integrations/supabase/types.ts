@@ -104,11 +104,55 @@ export type Database = {
         }
         Relationships: []
       }
+      advertisement_views: {
+        Row: {
+          advertisement_id: string
+          id: string
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          advertisement_id: string
+          id?: string
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          advertisement_id?: string
+          id?: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advertisement_views_advertisement_id_fkey"
+            columns: ["advertisement_id"]
+            isOneToOne: false
+            referencedRelation: "advertisements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "advertisement_views_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "advertisement_views_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       advertisements: {
         Row: {
           created_at: string
           description: string | null
           display_order: number
+          display_style: string
           id: string
           image_fit: string
           image_position: string
@@ -116,12 +160,14 @@ export type Database = {
           is_active: boolean
           link_url: string | null
           placement: string
+          show_once: boolean
           title: string
         }
         Insert: {
           created_at?: string
           description?: string | null
           display_order?: number
+          display_style?: string
           id?: string
           image_fit?: string
           image_position?: string
@@ -129,12 +175,14 @@ export type Database = {
           is_active?: boolean
           link_url?: string | null
           placement?: string
+          show_once?: boolean
           title: string
         }
         Update: {
           created_at?: string
           description?: string | null
           display_order?: number
+          display_style?: string
           id?: string
           image_fit?: string
           image_position?: string
@@ -142,6 +190,7 @@ export type Database = {
           is_active?: boolean
           link_url?: string | null
           placement?: string
+          show_once?: boolean
           title?: string
         }
         Relationships: []
@@ -6455,6 +6504,7 @@ export type Database = {
         | "moderator"
         | "admin"
         | "sponsor"
+        | "support"
       bet_status:
         | "open"
         | "won"
@@ -6627,6 +6677,7 @@ export const Constants = {
         "moderator",
         "admin",
         "sponsor",
+        "support",
       ],
       bet_status: [
         "open",
