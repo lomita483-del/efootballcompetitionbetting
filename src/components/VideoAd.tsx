@@ -107,7 +107,7 @@ export function VideoAd() {
         autoPlay
         loop
         playsInline
-        className={isPortrait ? "absolute top-1/2 left-1/2 object-contain" : "h-full w-full object-contain"}
+        className={isPortrait ? "absolute top-1/2 left-1/2 object-cover" : "h-full w-full object-cover"}
         style={
           isPortrait
             ? { width: vh || "100vh", height: vw || "100vw", transform: "translate(-50%, -50%) rotate(90deg)" }
