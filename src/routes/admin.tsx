@@ -66,6 +66,7 @@ import { NewsAdminPanel } from "@/components/admin/NewsAdminPanel";
 import { PushBroadcastPanel } from "@/components/admin/PushBroadcastPanel";
 import { RecurringPushPanel } from "@/components/admin/RecurringPushPanel";
 import { HomeBannersAdminPanel } from "@/components/admin/HomeBannersAdminPanel";
+import { PopupAdsAdminPanel } from "@/components/admin/PopupAdsAdminPanel";
 import { ArcadeAdminPanel } from "@/components/admin/ArcadeAdminPanel";
 import { LuckyWheelAdminPanel } from "@/components/admin/LuckyWheelAdminPanel";
 import { CasinoHistoryPanel } from "@/components/admin/CasinoHistoryPanel";
