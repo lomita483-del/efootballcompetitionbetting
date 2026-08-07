@@ -1201,3 +1201,9 @@ html.light body {
 @media (prefers-reduced-motion: reduce) {
   .lucky-wheel-bulbs i, .lucky-wheel-pointer.is-spinning, .lucky-wheel-spotlight { animation: none; }
 }
+
+/* Floating decorative accents inside pop-out ads */
+@keyframes popup-float-a { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-8px) rotate(8deg); } }
+@keyframes popup-float-b { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(6px) rotate(-10deg); } }
+.popup-float { animation: popup-float-a 4s ease-in-out infinite; }
+.popup-float-slow { animation: popup-float-b 6s ease-in-out infinite; }
