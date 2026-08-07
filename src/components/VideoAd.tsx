@@ -84,22 +84,22 @@ export function VideoAd() {
 
   return (
     <div className="fixed inset-0 z-[200] bg-black flex items-center justify-center">
-  <div className="fixed inset-0 z-[200] bg-black overflow-hidden flex items-center justify-center">
+  <div className="fixed inset-0 z-[200] bg-black overflow-hidden">
   <video
     ref={videoRef}
     src={ad.video_url}
     autoPlay
     loop
     playsInline
-    className="object-cover"
+    className="absolute top-1/2 left-1/2 object-cover"
     style={{
-      width: "100vh",
-      height: "100vw",
-      transform: "rotate(90deg)",
+      width: "100dvh",
+      height: "100dvw",
+      transform: "translate(-50%, -50%) rotate(90deg)",
     }}
     onClick={needsSoundTap ? enableSound : undefined}
   />
-  </div>
+</div>
 
       {needsSoundTap && (
         <button
