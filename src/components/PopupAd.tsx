@@ -37,6 +37,7 @@ export const POPUP_PAGE_OPTIONS: { value: string; label: string }[] = [
   { value: "/shop", label: "Shop" },
   { value: "/tasks", label: "Tasks & Quests" },
   { value: "/virtual", label: "Virtual league" },
+  { value: "/admin", label: "Admin Console" },
 ];
 
 function targetsPath(pages: string[] | null, pathname: string) {
