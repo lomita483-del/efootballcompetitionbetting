@@ -83,16 +83,18 @@ export function VideoAd() {
   const skip = () => setDismissed((d) => [...d, ad.id]);
 
   return (
-    <div className="fixed inset-0 z-[200] bg-black">
-      <video
-        ref={videoRef}
-        src={ad.video_url}
-        autoPlay
-        loop
-        playsInline
-        className="absolute inset-0 h-full w-full object-cover"
-        onClick={needsSoundTap ? enableSound : undefined}
-      />
+    <div className="fixed inset-0 z-[200] bg-black flex items-center justify-center">
+  <div className="w-full aspect-video max-h-full">
+    <video
+      ref={videoRef}
+      src={ad.video_url}
+      autoPlay
+      loop
+      playsInline
+      className="h-full w-full object-contain"
+      onClick={needsSoundTap ? enableSound : undefined}
+    />
+  </div>
 
       {needsSoundTap && (
         <button
