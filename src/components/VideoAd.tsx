@@ -98,39 +98,52 @@ export function VideoAd() {
   const skip = () => setDismissed((d) => [...d, ad.id]);
 
   const isPortrait = vh > vw;
+const boxStyle = isPortrait
+  ? { width: vh || "100vh", height: vw || "100vw", transform: "translate(-50%, -50%) rotate(90deg)" }
+  : undefined;
 
-  return (
-    <div className="fixed inset-0 z-[200] bg-black overflow-hidden flex items-center justify-center">
-      <video
-        ref={videoRef}
-        src={ad.video_url}
-        autoPlay
-        loop
-        playsInline
-        className={isPortrait ? "absolute top-1/2 left-1/2 object-cover" : "h-full w-full object-cover"}
-        style={
-          isPortrait
-            ? { width: vh || "100vh", height: vw || "100vw", transform: "translate(-50%, -50%) rotate(90deg)" }
-            : undefined
-        }
-        onClick={needsSoundTap ? enableSound : undefined}
-      />
+return (
+  <div className="fixed inset-0 z-[200] bg-black overflow-hidden flex items-center justify-center">
+    {/* Blurred backdrop — fills every edge, cropping is invisible because it's blurred */}
+    <video
+      src={ad.video_url}
+      autoPlay
+      loop
+      muted
+      playsInline
+      aria-hidden
+      className={isPortrait ? "absolute top-1/2 left-1/2 object-cover blur-3xl scale-110 opacity-60" : "absolute inset-0 h-full w-full object-cover blur-3xl scale-110 opacity-60"}
+      style={boxStyle}
+    />
+    <div className="absolute inset-0 bg-black/20" />
 
-      {needsSoundTap && (
-        <button
-          onClick={enableSound}
-          className="absolute left-1/2 top-6 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full border border-primary/50 bg-black/80 px-4 py-2 text-sm font-bold text-primary shadow-lg backdrop-blur"
-        >
-          <Volume2 className="h-4 w-4" /> Tap to enable sound
-        </button>
-      )}
+    {/* Sharp foreground — the real video, always fully visible, never cropped */}
+    <video
+      ref={videoRef}
+      src={ad.video_url}
+      autoPlay
+      loop
+      playsInline
+      className={isPortrait ? "absolute top-1/2 left-1/2 object-contain z-10" : "absolute inset-0 h-full w-full object-contain z-10"}
+      style={boxStyle}
+      onClick={needsSoundTap ? enableSound : undefined}
+    />
 
+    {needsSoundTap && (
       <button
-        onClick={skip}
-        className="absolute bottom-6 right-6 z-10 flex items-center gap-2 rounded-full border border-primary/50 bg-black/70 px-5 py-2.5 text-sm font-black text-primary-foreground shadow-lg backdrop-blur hover:bg-black/90"
+        onClick={enableSound}
+        className="absolute left-1/2 top-6 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-primary/50 bg-black/80 px-4 py-2 text-sm font-bold text-primary shadow-lg backdrop-blur"
       >
-        {ad.skip_label || "Skip Intro"} <X className="h-4 w-4" />
+        <Volume2 className="h-4 w-4" /> Tap to enable sound
       </button>
-    </div>
-  );
+    )}
+
+    <button
+      onClick={skip}
+      className="absolute bottom-6 right-6 z-20 flex items-center gap-2 rounded-full border-2 border-primary bg-primary px-6 py-3 text-base font-black text-black shadow-[0_0_20px_rgba(212,175,55,0.8)] hover:scale-105 transition-transform"
+    >
+      {ad.skip_label || "Skip Intro"} <X className="h-5 w-5" />
+    </button>
+  </div>
+);
 }
