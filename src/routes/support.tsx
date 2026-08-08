@@ -57,7 +57,7 @@ function SupportPage() {
     if (!subject.trim() || !message.trim()) { toast.error("Subject and message required"); return; }
     setSubmitting(true);
     try {
-      const { data: ticket, error } = await supabase.from("support_tickets").insert({ user_id: user.id, subject }).select().single();
+      const { data: ticket, error } = await supabase.from("support_tickets").insert({ user_id: user.id, subject, status: "open" }).select().single();
       if (error) throw error;
       let imageUrl: string | null = null;
       if (imageFile) {

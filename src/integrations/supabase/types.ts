@@ -65,6 +65,13 @@ export type Database = {
             foreignKeyName: "admin_flags_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_flags_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -122,6 +129,13 @@ export type Database = {
             columns: ["advertisement_id"]
             isOneToOne: false
             referencedRelation: "advertisements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "advertisement_views_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
             referencedColumns: ["id"]
           },
           {
@@ -814,6 +828,13 @@ export type Database = {
             foreignKeyName: "ban_appeals_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ban_appeals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -978,6 +999,13 @@ export type Database = {
             foreignKeyName: "bets_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -1016,6 +1044,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "big_wins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "big_wins_user_id_fkey"
             columns: ["user_id"]
@@ -1342,6 +1377,13 @@ export type Database = {
             columns: ["reply_to_id"]
             isOneToOne: false
             referencedRelation: "chat_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
             referencedColumns: ["id"]
           },
           {
@@ -2243,6 +2285,13 @@ export type Database = {
             foreignKeyName: "lucky_wheel_spins_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lucky_wheel_spins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -2291,6 +2340,13 @@ export type Database = {
             columns: ["campaign_id"]
             isOneToOne: false
             referencedRelation: "lucky_wheel_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lucky_wheel_user_state_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
             referencedColumns: ["id"]
           },
           {
@@ -2695,6 +2751,13 @@ export type Database = {
             foreignKeyName: "notifications_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -2812,6 +2875,13 @@ export type Database = {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "players_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
             referencedColumns: ["id"]
           },
           {
@@ -3113,6 +3183,13 @@ export type Database = {
             foreignKeyName: "promo_code_requests_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promo_code_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -3188,6 +3265,13 @@ export type Database = {
             columns: ["promo_id"]
             isOneToOne: false
             referencedRelation: "promo_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promo_redemptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
             referencedColumns: ["id"]
           },
           {
@@ -3691,6 +3775,13 @@ export type Database = {
             foreignKeyName: "support_tickets_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -3727,6 +3818,13 @@ export type Database = {
             columns: ["survey_id"]
             isOneToOne: false
             referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "survey_responses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
             referencedColumns: ["id"]
           },
           {
@@ -3878,6 +3976,13 @@ export type Database = {
             foreignKeyName: "teams_linked_user_id_fkey"
             columns: ["linked_user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teams_linked_user_id_fkey"
+            columns: ["linked_user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -3917,6 +4022,13 @@ export type Database = {
             columns: ["ticket_id"]
             isOneToOne: false
             referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
             referencedColumns: ["id"]
           },
           {
@@ -3970,6 +4082,13 @@ export type Database = {
             foreignKeyName: "token_requests_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "token_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -4007,6 +4126,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "token_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "token_transactions_user_id_fkey"
             columns: ["user_id"]
@@ -4307,6 +4433,13 @@ export type Database = {
             foreignKeyName: "trivia_attempts_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trivia_attempts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -4384,6 +4517,13 @@ export type Database = {
             foreignKeyName: "tutorial_states_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutorial_states_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -4418,6 +4558,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_achievements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_achievements_user_id_fkey"
             columns: ["user_id"]
@@ -4470,6 +4617,13 @@ export type Database = {
             foreignKeyName: "user_challenge_progress_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_challenge_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -4507,6 +4661,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_gifts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_gifts_user_id_fkey"
             columns: ["user_id"]
@@ -4579,6 +4740,13 @@ export type Database = {
             foreignKeyName: "user_sessions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -4631,6 +4799,13 @@ export type Database = {
             columns: ["tier_id"]
             isOneToOne: false
             referencedRelation: "task_tiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_task_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
             referencedColumns: ["id"]
           },
           {
@@ -4696,6 +4871,13 @@ export type Database = {
             foreignKeyName: "user_tasks_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_tasks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -4748,6 +4930,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_virtual_rounds_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_virtual_rounds_user_id_fkey"
             columns: ["user_id"]
@@ -4901,6 +5090,13 @@ export type Database = {
             foreignKeyName: "virtual_payout_requests_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "virtual_payout_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -4990,6 +5186,13 @@ export type Database = {
             foreignKeyName: "wager_dispute_messages_sender_id_fkey"
             columns: ["sender_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wager_dispute_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -5043,6 +5246,13 @@ export type Database = {
           wager_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "wager_disputes_opened_by_fkey"
+            columns: ["opened_by"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "wager_disputes_opened_by_fkey"
             columns: ["opened_by"]
@@ -5142,6 +5352,13 @@ export type Database = {
             foreignKeyName: "wager_payments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wager_payments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -5237,6 +5454,13 @@ export type Database = {
             foreignKeyName: "wager_termination_reqs_requested_by_fkey"
             columns: ["requested_by"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wager_termination_reqs_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -5291,6 +5515,13 @@ export type Database = {
             foreignKeyName: "wager_wallet_txns_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wager_wallet_txns_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -5336,6 +5567,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "wager_wallets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "wager_wallets_user_id_fkey"
             columns: ["user_id"]
@@ -5447,6 +5685,13 @@ export type Database = {
             foreignKeyName: "wagers_challenger_id_fkey"
             columns: ["challenger_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wagers_challenger_id_fkey"
+            columns: ["challenger_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -5455,6 +5700,13 @@ export type Database = {
             columns: ["match_id"]
             isOneToOne: false
             referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wagers_opponent_id_fkey"
+            columns: ["opponent_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
             referencedColumns: ["id"]
           },
           {
@@ -5489,6 +5741,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "watchlist_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "watchlist_user_id_fkey"
             columns: ["user_id"]
@@ -5543,6 +5802,13 @@ export type Database = {
             foreignKeyName: "withdrawal_requests_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "player_public_usernames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "withdrawal_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -5550,10 +5816,257 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      hot_bets_v1: {
+        Row: {
+          bets_count: number | null
+          last_bet_at: string | null
+          match_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bet_selections_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      player_public_usernames: {
+        Row: {
+          id: string | null
+          username: string | null
+        }
+        Insert: {
+          id?: string | null
+          username?: string | null
+        }
+        Update: {
+          id?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      exec_sql: { Args: { sql: string }; Returns: undefined }
+      _casino_settle: {
+        Args: {
+          _detail: Json
+          _game: string
+          _outcome: string
+          _payout: number
+          _stake: number
+          _user: string
+        }
+        Returns: Json
+      }
+      _settle_lottery_draw: {
+        Args: { _draw_id: string; _winning: number[] }
+        Returns: Json
+      }
+      admin_adjust_xp: {
+        Args: { _delta: number; _reason?: string; _user_id: string }
+        Returns: Json
+      }
+      admin_award_achievement: {
+        Args: {
+          _code: string
+          _description?: string
+          _icon?: string
+          _title: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      admin_broadcast: {
+        Args: {
+          _body: string
+          _link?: string
+          _segment?: string
+          _title: string
+        }
+        Returns: number
+      }
+      admin_clear_leaderboard: { Args: never; Returns: undefined }
+      admin_delete_bet: {
+        Args: { _bet_id: string; _reason?: string; _refund?: boolean }
+        Returns: undefined
+      }
+      admin_exposure_per_match: {
+        Args: never
+        Returns: {
+          bets_count: number
+          exposure: number
+          match_id: string
+          match_name: string
+          stake_total: number
+        }[]
+      }
+      admin_kick_user: {
+        Args: { _reason?: string; _user_id: string }
+        Returns: undefined
+      }
+      admin_list_users_with_kyc: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          created_at: string
+          discord_full_name: string
+          discord_username: string
+          email: string
+          email_confirmed: boolean
+          full_name: string
+          gang_name: string
+          gang_type: string
+          id: string
+          is_banned: boolean
+          is_muted: boolean
+          is_restricted: boolean
+          phone: string
+          token_balance: number
+          total_bets: number
+          vip_tier: string
+          xp: number
+        }[]
+      }
+      admin_lock_virtual_round: {
+        Args: { _match_id: string }
+        Returns: undefined
+      }
+      admin_log_action: {
+        Args: {
+          _action: string
+          _metadata?: Json
+          _target_id?: string
+          _target_type?: string
+        }
+        Returns: undefined
+      }
+      admin_pnl_summary: { Args: { _days?: number }; Returns: Json }
+      admin_refund_bet: {
+        Args: { _bet_id: string; _reason?: string }
+        Returns: undefined
+      }
+      admin_resolve_virtual_round: {
+        Args: {
+          _away_score?: number
+          _first_blood_team_id?: string
+          _home_score?: number
+          _match_id: string
+        }
+        Returns: Json
+      }
+      admin_review_virtual_payout: {
+        Args: { _approve: boolean; _id: string; _reason?: string }
+        Returns: undefined
+      }
+      admin_risk_summary: { Args: never; Returns: Json }
+      admin_send_gift: {
+        Args: { _amount: number; _message?: string; _user_id: string }
+        Returns: Json
+      }
+      admin_set_virtual_cycle: { Args: { _running: boolean }; Returns: Json }
+      admin_suspend_bet: {
+        Args: { _bet_id: string; _reason?: string }
+        Returns: undefined
+      }
+      admin_task_tier_stats: {
+        Args: never
+        Returns: {
+          completed: number
+          in_progress: number
+          tier_id: string
+        }[]
+      }
+      admin_toggle_match_void: {
+        Args: { _match_id: string; _reason?: string; _void: boolean }
+        Returns: undefined
+      }
+      admin_toggle_selection_void: {
+        Args: { _bet_id: string; _selection_id: string; _void: boolean }
+        Returns: undefined
+      }
+      admin_unsuspend_bet: { Args: { _bet_id: string }; Returns: undefined }
+      admin_void_bet: {
+        Args: { _bet_id: string; _reason?: string; _refund?: boolean }
+        Returns: undefined
+      }
+      answer_trivia: {
+        Args: { _question_id: string; _selected_index: number }
+        Returns: Json
+      }
+      apply_referral_code: { Args: { _code: string }; Returns: Json }
+      approve_promo_request: {
+        Args: { _id: string; _note?: string }
+        Returns: undefined
+      }
+      auto_draw_due_lotteries: { Args: never; Returns: number }
+      cancel_championship_bet: { Args: { p_tournament: string }; Returns: Json }
+      champ_gen_event: {
+        Args: { p_match_id: string; p_minute: number; p_sport: string }
+        Returns: undefined
+      }
+      championship_autostart: {
+        Args: { p_tournament: string }
+        Returns: undefined
+      }
+      championship_bootstrap_if_needed: { Args: never; Returns: number }
+      championship_start: { Args: { p_tournament: string }; Returns: Json }
+      championship_tick: { Args: never; Returns: Json }
+      claim_challenge: { Args: { _progress_id: string }; Returns: Json }
+      claim_daily_login: { Args: never; Returns: Json }
+      claim_gift: { Args: { _gift_id: string }; Returns: Json }
+      create_withdrawal_request: {
+        Args: {
+          _amount: number
+          _gang: string
+          _ingame: string
+          _ticket?: string
+        }
+        Returns: string
+      }
+      credit_championship_payouts: {
+        Args: { p_tournament: string }
+        Returns: undefined
+      }
+      decline_promo_request: {
+        Args: { _id: string; _note?: string }
+        Returns: undefined
+      }
+      delete_players_bulk: { Args: { p_ids: string[] }; Returns: Json }
+      delete_teams_bulk: { Args: { p_ids: string[] }; Returns: Json }
+      dismiss_survey: { Args: { _survey_id: string }; Returns: Json }
+      display_name_for: { Args: { _uid: string }; Returns: string }
+      draw_lottery: {
+        Args: { _draw_id: string; _winning_number?: number }
+        Returns: Json
+      }
+      ensure_wager_wallet: { Args: { _uid: string }; Returns: string }
+      gang_directory: {
+        Args: never
+        Returns: {
+          members: number
+          name: string
+          sample: string[]
+          tokens: number
+          type: string
+        }[]
+      }
+      gen_match_public_id: { Args: never; Returns: string }
+      gen_special_id: { Args: never; Returns: string }
+      gen_wager_public_id: { Args: never; Returns: string }
+      get_display_roles: { Args: { _user_id: string }; Returns: string[] }
+      get_opponent_profile: {
+        Args: { _id: string }
+        Returns: {
+          avatar_url: string
+          discord_username: string
+          email: string
+          full_name: string
+          id: string
+          special_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -5561,11 +6074,443 @@ export type Database = {
         }
         Returns: boolean
       }
+      house_manual_adjust: {
+        Args: { _amount: number; _reason: string }
+        Returns: undefined
+      }
+      house_set_paused: {
+        Args: { _paused: boolean; _reason?: string }
+        Returns: undefined
+      }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      lucky_wheel_register_display: {
+        Args: { _campaign_id: string }
+        Returns: Json
+      }
+      lucky_wheel_spin: { Args: { _campaign_id: string }; Returns: Json }
       notify_admins: {
         Args: { _body: string; _link?: string; _title: string }
         Returns: undefined
       }
+      p2p_accept_wager: {
+        Args: { _wager_id: string }
+        Returns: {
+          activated_at: string | null
+          admin_notes: string | null
+          agreement: string | null
+          bet_type: string
+          category: string
+          challenger_id: string
+          created_at: string
+          event_label: string | null
+          expires_at: string | null
+          final_score_away: number | null
+          final_score_home: number | null
+          funded_at: string | null
+          id: string
+          is_draw: boolean
+          is_locked: boolean
+          live_at: string | null
+          loser_id: string | null
+          match_id: string | null
+          match_starts_at: string | null
+          opponent_id: string
+          platform_fee_pct: number
+          prize_paid: number | null
+          public_id: string
+          settled_at: string | null
+          settlement_notes: string | null
+          stake: number
+          status: Database["public"]["Enums"]["wager_status"]
+          total_pot: number
+          updated_at: string
+          winner_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wagers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      p2p_admin_terminate: {
+        Args: { _reason: string; _refund?: boolean; _wager_id: string }
+        Returns: {
+          activated_at: string | null
+          admin_notes: string | null
+          agreement: string | null
+          bet_type: string
+          category: string
+          challenger_id: string
+          created_at: string
+          event_label: string | null
+          expires_at: string | null
+          final_score_away: number | null
+          final_score_home: number | null
+          funded_at: string | null
+          id: string
+          is_draw: boolean
+          is_locked: boolean
+          live_at: string | null
+          loser_id: string | null
+          match_id: string | null
+          match_starts_at: string | null
+          opponent_id: string
+          platform_fee_pct: number
+          prize_paid: number | null
+          public_id: string
+          settled_at: string | null
+          settlement_notes: string | null
+          stake: number
+          status: Database["public"]["Enums"]["wager_status"]
+          total_pot: number
+          updated_at: string
+          winner_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wagers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      p2p_refund_wager: {
+        Args: { _reason?: string; _wager_id: string }
+        Returns: {
+          activated_at: string | null
+          admin_notes: string | null
+          agreement: string | null
+          bet_type: string
+          category: string
+          challenger_id: string
+          created_at: string
+          event_label: string | null
+          expires_at: string | null
+          final_score_away: number | null
+          final_score_home: number | null
+          funded_at: string | null
+          id: string
+          is_draw: boolean
+          is_locked: boolean
+          live_at: string | null
+          loser_id: string | null
+          match_id: string | null
+          match_starts_at: string | null
+          opponent_id: string
+          platform_fee_pct: number
+          prize_paid: number | null
+          public_id: string
+          settled_at: string | null
+          settlement_notes: string | null
+          stake: number
+          status: Database["public"]["Enums"]["wager_status"]
+          total_pot: number
+          updated_at: string
+          winner_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wagers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      p2p_reject_wager: {
+        Args: { _reason?: string; _wager_id: string }
+        Returns: {
+          activated_at: string | null
+          admin_notes: string | null
+          agreement: string | null
+          bet_type: string
+          category: string
+          challenger_id: string
+          created_at: string
+          event_label: string | null
+          expires_at: string | null
+          final_score_away: number | null
+          final_score_home: number | null
+          funded_at: string | null
+          id: string
+          is_draw: boolean
+          is_locked: boolean
+          live_at: string | null
+          loser_id: string | null
+          match_id: string | null
+          match_starts_at: string | null
+          opponent_id: string
+          platform_fee_pct: number
+          prize_paid: number | null
+          public_id: string
+          settled_at: string | null
+          settlement_notes: string | null
+          stake: number
+          status: Database["public"]["Enums"]["wager_status"]
+          total_pot: number
+          updated_at: string
+          winner_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wagers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      p2p_request_termination: {
+        Args: { _reason: string; _wager_id: string }
+        Returns: {
+          admin_id: string | null
+          admin_notes: string | null
+          admin_status: string
+          created_at: string
+          id: string
+          opponent_response: string | null
+          opponent_response_at: string | null
+          reason: string | null
+          requested_by: string
+          wager_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wager_termination_reqs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      p2p_settle_wager: {
+        Args: {
+          _final_away?: number
+          _final_home?: number
+          _is_draw?: boolean
+          _notes?: string
+          _wager_id: string
+          _winner_id: string
+        }
+        Returns: {
+          activated_at: string | null
+          admin_notes: string | null
+          agreement: string | null
+          bet_type: string
+          category: string
+          challenger_id: string
+          created_at: string
+          event_label: string | null
+          expires_at: string | null
+          final_score_away: number | null
+          final_score_home: number | null
+          funded_at: string | null
+          id: string
+          is_draw: boolean
+          is_locked: boolean
+          live_at: string | null
+          loser_id: string | null
+          match_id: string | null
+          match_starts_at: string | null
+          opponent_id: string
+          platform_fee_pct: number
+          prize_paid: number | null
+          public_id: string
+          settled_at: string | null
+          settlement_notes: string | null
+          stake: number
+          status: Database["public"]["Enums"]["wager_status"]
+          total_pot: number
+          updated_at: string
+          winner_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wagers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      p2p_verify_payment: {
+        Args: { _payment_id: string }
+        Returns: {
+          activated_at: string | null
+          admin_notes: string | null
+          agreement: string | null
+          bet_type: string
+          category: string
+          challenger_id: string
+          created_at: string
+          event_label: string | null
+          expires_at: string | null
+          final_score_away: number | null
+          final_score_home: number | null
+          funded_at: string | null
+          id: string
+          is_draw: boolean
+          is_locked: boolean
+          live_at: string | null
+          loser_id: string | null
+          match_id: string | null
+          match_starts_at: string | null
+          opponent_id: string
+          platform_fee_pct: number
+          prize_paid: number | null
+          public_id: string
+          settled_at: string | null
+          settlement_notes: string | null
+          stake: number
+          status: Database["public"]["Enums"]["wager_status"]
+          total_pot: number
+          updated_at: string
+          winner_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wagers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      place_championship_bet: {
+        Args: {
+          p_kind: string
+          p_match: string
+          p_odds: number
+          p_stage: string
+          p_stake: number
+          p_team: string
+          p_tournament: string
+        }
+        Returns: string
+      }
+      place_lottery_ticket: {
+        Args: { _draw_id: string; _number: number; _stake: number }
+        Returns: Json
+      }
+      place_lottery_ticket_multi: {
+        Args: { _draw_id: string; _numbers: number[]; _stake: number }
+        Returns: Json
+      }
+      place_real_ticket: {
+        Args: { _selections: Json; _stake: number }
+        Returns: Json
+      }
+      place_virtual_ticket: {
+        Args: { _selections: Json; _stake: number }
+        Returns: Json
+      }
+      play_coinflip: {
+        Args: { _choice: string; _stake: number }
+        Returns: Json
+      }
+      play_scratch: { Args: never; Returns: Json }
+      play_wheel: { Args: { _stake: number }; Returns: Json }
+      prune_dead_push_subscriptions: { Args: never; Returns: number }
+      public_profiles: {
+        Args: { _ids?: string[] }
+        Returns: {
+          avatar_url: string
+          country: string
+          full_name: string
+          gang_name: string
+          gang_type: string
+          id: string
+          ingame_name: string
+          longest_streak: number
+          profile_title: string
+          streak_days: number
+          vip_tier: string
+          xp: number
+        }[]
+      }
+      recalc_vip_tier: { Args: { _user_id: string }; Returns: string }
+      recalculate_open_bet_totals: {
+        Args: { _bet_id: string }
+        Returns: undefined
+      }
+      redeem_promo_code: { Args: { _code: string }; Returns: Json }
+      redeem_referral_code: { Args: { _code: string }; Returns: Json }
+      redeem_shop_item: { Args: { _item_id: string }; Returns: Json }
+      refund_shop_redemption: { Args: { _id: string }; Returns: Json }
+      resettle_won_bets: { Args: never; Returns: number }
+      resolve_auto_championship: { Args: never; Returns: number }
+      resolve_open_bets: { Args: never; Returns: number }
+      resolve_special_id: {
+        Args: { _special_id: string }
+        Returns: {
+          full_name: string
+          id: string
+          special_id: string
+        }[]
+      }
+      resolve_virtual_round: {
+        Args: {
+          _away_score?: number
+          _first_blood_team_id?: string
+          _home_score?: number
+          _match_id: string
+        }
+        Returns: Json
+      }
+      review_gang_emblem: {
+        Args: { _approve: boolean; _id: string; _note?: string }
+        Returns: undefined
+      }
+      review_withdrawal_request: {
+        Args: { _approve: boolean; _id: string; _note?: string }
+        Returns: undefined
+      }
+      run_suspicious_activity_scan: { Args: never; Returns: number }
+      search_opponents: {
+        Args: { _q: string }
+        Returns: {
+          avatar_url: string
+          discord_username: string
+          email: string
+          full_name: string
+          id: string
+          special_id: string
+        }[]
+      }
+      server_now: { Args: never; Returns: string }
+      set_tournament_result: {
+        Args: {
+          _dq_id?: string
+          _match_id: string
+          _outcome?: string
+          _score_a: number
+          _score_b: number
+          _winner_id: string
+        }
+        Returns: Json
+      }
+      settle_pay_winning_bet: { Args: { _bet_id: string }; Returns: undefined }
+      spin_wheel: { Args: never; Returns: Json }
+      start_user_virtual_round: {
+        Args: {
+          p_away: string
+          p_home: string
+          p_side: string
+          p_stake: number
+        }
+        Returns: Json
+      }
+      submit_survey: {
+        Args: { _answers: Json; _survey_id: string }
+        Returns: Json
+      }
+      task_bump_metric: {
+        Args: { _delta: number; _metric: string; _user_id: string }
+        Returns: undefined
+      }
+      transfer_tokens: {
+        Args: { _amount: number; _recipient_special_id: string }
+        Returns: Json
+      }
+      user_cashout_bet: { Args: { _bet_id: string }; Returns: Json }
+      user_claim_or_settle_virtual: { Args: { _bet_id: string }; Returns: Json }
+      verify_xp_consistency: { Args: { _user_id?: string }; Returns: Json }
+      virtual_tick: { Args: never; Returns: Json }
+      virtual_wallet_admin_adjust: {
+        Args: { _amount: number; _reason: string }
+        Returns: undefined
+      }
+      wipe_all_tokens: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role:
