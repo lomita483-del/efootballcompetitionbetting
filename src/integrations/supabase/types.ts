@@ -6042,7 +6042,6 @@ export type Database = {
         Returns: Json
       }
       ensure_wager_wallet: { Args: { _uid: string }; Returns: string }
-      exec_sql: { Args: { sql: string }; Returns: undefined }
       gang_directory: {
         Args: never
         Returns: {
