@@ -1,111 +1,56 @@
-# Build Plan
+# Migrate the app to your own Supabase project
 
-Three chunks in one turn. Given the P2P surface, expect this to be a large diff (~25 files). I'll ship it end-to-end; the follow-up turn will be for polish/bug fixes you find while using it.
+Target project: `udwsxqdegrtaqlbwnrqg`. The app currently runs against the old, paused Lovable Cloud database (`sqaesmhqhzojinprofha`), which is why signup fails with "Failed to fetch".
 
-## 1. Top nav fixes
+## Current state (verified)
 
-- **Pin Balance + Profile + Logout** to the right of the top nav on every page (non-scrollable anchor group).
-- Middle nav links (Matches, Virtual, Lottery, Arcade, Shop, Leaderboard, Tournament, Dashboard, Tasks, etc.) become horizontally scrollable inside the remaining space, sliding under the pinned group with a soft gradient fade so nothing gets clipped off-screen.
-- Remove the top nav row entirely from the **home page** (`/`) on ALL viewports since the home already has its own quick menu / sidebar.
+- The generated `.env` and the sandbox runtime env still point at the OLD project. Only the pasted `dot-env.txt` contains the new project's URL/keys.
+- `supabase/config.toml` still pins the old project ref.
+- There are 115 migration files in `supabase/migrations` that describe the full schema (profiles, roles, matches, bets, wagers, wallets, chat, push, MCP audit, tasks, lucky wheel, popup ads, etc.).
+- App-level secrets currently live on the old project: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `PUSH_WEBHOOK_SECRET`, `LOVABLE_API_KEY`, plus a Google Search Console connector.
 
-## 2. Admin quick-action buttons
+## Step 1 — Point the platform at the new project
 
-Bump tile size in the Admin Quick Actions grid (~10-15% larger padding + icon), keep column count on desktop, avoid regressing mobile density.
+Rebind the project's Supabase environment so `SUPABASE_URL`, publishable key and service-role key all resolve to `udwsxqdegrtaqlbwnrqg`, and update `supabase/config.toml` to the new ref.
 
-## 3. P2P Wager System (full spec)
+If the integration binding still resolves to the old ref after rebinding, you'll need to re-authorize Supabase in project settings and re-select `udwsxqdegrtaqlbwnrqg` — I'll tell you exactly when that's the blocker rather than guessing around it.
 
-### Data model (one migration)
+## Step 2 — Rebuild the schema on the new project
 
-```text
-wager_wallets           user_id, balance, locked_balance
-wager_wallet_txns       wallet_id, kind, amount, ref_type, ref_id, admin_id, notes
-wagers                  id, public_id (WGR-XXXXXX), challenger_id, opponent_id,
-                        match_id/event_ref, category, bet_type, stake, total_pot,
-                        platform_fee, agreement, status, expires_at, funded_at,
-                        activated_at, settled_at, winner_id, loser_id, is_draw,
-                        settlement_notes, final_score_home, final_score_away
-wager_rounds            wager_id, round_no, home_score, away_score, winner_id, ended_at
-wager_payments          wager_id, user_id, amount, method, receipt_url, status,
-                        verified_by, verified_at, notes
-wager_live_events       wager_id, ts, kind (score|round|status|commentary|stat),
-                        payload jsonb
-wager_termination_reqs  wager_id, requested_by, reason, opponent_response,
-                        admin_status, admin_id, admin_notes
-wager_disputes          wager_id, opened_by, reason, evidence_urls[], status,
-                        admin_id, resolution_notes, messages jsonb
-wager_notifications     reuses existing notifications table with kind='wager_*'
-wager_audit_log         actor_id, action, prev jsonb, next jsonb, ref_id, reason,
-                        ip, ua
-```
+Replay the full schema into the empty project as one consolidated migration set:
+- All tables in `public`, with GRANTs, RLS enabled and every policy.
+- Enums (`app_role`, wager/bet status types, etc.), functions and triggers — including `has_role`, `handle_new_user`, `resolve_open_bets`, `resolve_auto_championship`, `credit_championship_payouts`, `recalculate_open_bet_totals`, `search_opponents`.
+- Realtime publication + `REPLICA IDENTITY FULL` on the tables the leaderboard and live feeds depend on.
+- Storage buckets (avatars, banners, ads, emblems, evidence) and their policies.
+- Cron/scheduled jobs used by push reminders and the virtual tick.
 
-Status enum: `pending_approval, awaiting_payment, awaiting_funding, funded, active, live, awaiting_settlement, settled, cancelled, refunded, disputed, terminated`.
+## Step 3 — Copy the old data across
 
-RLS: challenger/opponent see their own wagers + slips; admin role sees all. Every table has `GRANT` + policies scoped to `auth.uid()` or `has_role`.
+Export from the old project and import into the new one, in dependency order:
+1. Auth users (`auth.users`) — recreated via the Admin API so IDs are preserved; existing passwords cannot be exported, so affected users sign in via password reset / OTP unless you accept re-registration.
+2. `profiles`, `user_roles`, wallets and `token_transactions`.
+3. Matches, categories, odds/markets, bets and bet legs, wagers and disputes.
+4. Chat, notifications, tasks/quests, leaderboard-feeding tables, ads/banners/events, MCP audit logs.
+5. Storage objects (uploaded images) re-uploaded to the new buckets, with URLs rewritten to the new project host.
 
-DB functions:
-- `p2p_create_wager`, `p2p_accept_wager`, `p2p_reject_wager`
-- `p2p_verify_payment` (admin) → credits Wager Wallet, transitions status
-- `p2p_settle_wager` (admin) → pays winner from pot, records txn, marks settled
-- `p2p_request_termination`, `p2p_respond_termination`, `p2p_admin_terminate`
-- `p2p_open_dispute`, `p2p_resolve_dispute`
-- Audit trigger writes to `wager_audit_log` on every mutation.
+The old project is paused, so it must be resumed first for the export to run. Data copy happens after the schema is verified, so foreign keys land cleanly.
 
-### User-facing routes
+## Step 4 — Secrets and auth config
 
-- `/wagers` — Wager History with tabs (All / Pending / Awaiting Funding / Active / Live / Won / Lost / Draw / Cancelled / Refunded), search + filter.
-- `/wagers/new` — Challenge creator (opponent search, match picker, category, bet type, stake, expiration, agreement).
-- `/wagers/$publicId` — Premium bet slip: QR, countdown, status timeline, funding CTA, terminate/dispute actions.
-- `/wagers/$publicId/live` — Live match UI (scoreboard, round scores, timer, timeline, commentary, live badge), realtime via Supabase channel.
-- Inbox banner on `/notifications` + toast for incoming challenges.
+- Re-add `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `PUSH_WEBHOOK_SECRET` to the new project (reusing the same VAPID pair so existing push subscriptions keep working).
+- Re-apply auth settings: email/password on, signup enabled, anonymous off, HIBP as currently configured, plus the SMS/OTP template.
+- Re-point the MCP OAuth issuer, which derives from `VITE_SUPABASE_PROJECT_ID`, and update `/mcp-docs` references.
+- Re-link the Google Search Console connector if you still want it.
 
-### Admin
+## Step 5 — Verify end to end
 
-New **Wagers** button in Admin Quick Actions → `/admin/wagers` panel (component: `src/components/admin/WagersAdminPanel.tsx`) with:
-
-- Stat header: Total / Pending / Awaiting Payment / Awaiting Funding / Active / Live / Awaiting Settlement / Settled / Cancelled / Refunded / Disputed / Platform Revenue (D/W/M).
-- Tabbed queue mirroring status enum + Search/Filter/Sort by Bet ID, user, match, stake, date, status.
-- Wager detail drawer: full review (payments, wallet balances, evidence, notes, audit log) + action bar:
-  - Approve / Decline / Request changes / Cancel / Reopen / Lock / Unlock / Freeze / Resume
-  - Verify payment / Reject payment / Credit / Deduct / Refund one / Refund both / Partial refund
-  - Assign match / Change match / Edit kickoff / Postpone / Restart / Force start / Force end / Lock match
-  - Live update panel: score, round score, timer, current round, round winner, stat, commentary, timeline, status (realtime broadcast)
-  - Settle: final score, round results, winner/loser/draw/split/void; Approve / Reject / Reverse / Recalc payout + notes
-  - Override: correct final score, correct round, change winner, reverse wallet, re-credit, deduct — requires reason + confirm, writes audit entry
-  - Terminate (admin emergency) with reason enum
-  - Dispute panel: evidence viewer, chat with players, request more evidence, approve/reject, modify settlement, refund, close
-  - Notifications: send payment reminder, wager approved/declined, match cancelled/postponed, settlement complete, refund issued, dispute update, custom announcement.
-- Read-only Audit Log tab with search.
-
-### Notifications & realtime
-
-- New `notifications.kind` values covering all 15 wager events.
-- Live match page subscribes to `wager_live_events` and `wagers` row updates via Supabase Realtime (`REPLICA IDENTITY FULL` for both).
-- Recurring push adds "Wager awaiting your action" reminder.
-
-### Security & roles
-
-- Super Admin: full (payment approval, wallet adjust, settlement override, user management).
-- Admin: manage wagers, verify payments, live updates, settle, disputes (no wallet override).
-- Moderator: view + live match data only.
-- All privileged server fns use `requireSupabaseAuth` + `has_role` check before importing `supabaseAdmin`.
-
-### UI/UX
-
-- Glassmorphism cards, gold/emerald accents matching current sportsbook theme.
-- Animated status badges, countdown timers (reuses `Countdown`), trophy celebration on settlement (reuses `GlobalWinAnimation`), QR via `qrcode.react`.
-- Fully responsive under the existing 1280 canvas.
+- Sign up a fresh account, confirm the `profiles` row and default role are created by the trigger.
+- Sign in, check token balance, leaderboard, matches, bet placement and a wager flow.
+- Fire a push broadcast and hit `/api/public/virtual-tick` to confirm server routes and the service-role client work.
+- Run the security linter on the new project and fix anything it flags.
 
 ## Technical notes
 
-- Single migration file for all P2P schema + GRANTs + policies + triggers + functions.
-- Client files: `src/lib/wagers.ts` (queries/helpers), `src/lib/wagers.functions.ts` (server fns), `src/components/wager/*` (BetSlip, LiveMatch, ChallengeForm, StatusBadge, ActionBar), route files under `src/routes/wagers.*`, admin panel + wired into `admin.tsx` Quick Actions.
-- Nav pinning done in `src/components/Layout.tsx` with `flex` + `overflow-x-auto` for the scroll region and `sticky right-0` for the pinned group with a `bg-gradient-to-l` mask; home-page suppression via a `hideTopNav` prop or route check.
-- Admin tile size change is a single class swap in the Quick Actions grid.
-
-## What's NOT in this turn
-
-- SMS/email delivery for the new notification kinds beyond the existing push/in-app channels.
-- Custom payment-provider integration (spec says manual admin verification — I'll build that flow, no Stripe/Paddle).
-- Automated fraud detection heuristics (admin can still terminate manually).
-
-Reply "go" to build, or tell me what to cut/add before I start.
+- No application code needs rewriting: every client reads `VITE_SUPABASE_*` / `SUPABASE_*`, so the swap is environment + data, not source. The only literal refs are `supabase/config.toml` and the MCP issuer, which is already derived from the env var.
+- Table-level data copy uses CSV export/import per table rather than a full dump.
+- Row counts are compared per table after import so nothing silently drops.
