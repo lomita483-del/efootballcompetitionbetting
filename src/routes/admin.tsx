@@ -4014,6 +4014,14 @@ function SettingsPanel() {
           <div className="text-sm">Close website</div>
           <Switch checked={!!s.closed_mode} onCheckedChange={(v) => setS({ ...s, closed_mode: v })} />
         </div>
+        <Textarea placeholder="Message shown to visitors while closed" value={s.closed_message ?? ""} onChange={(e) => setS({ ...s, closed_message: e.target.value })} />
+        <FieldLuxe label="Closed image / GIF (optional)"><Input type="file" accept="image/*,image/gif" onChange={(e) => e.target.files?.[0] && uploadInto("closed_image", e.target.files[0])} /></FieldLuxe>
+        {s.closed_image && (
+          <div className="space-y-1">
+            <img src={s.closed_image} alt="" className="w-full max-h-40 object-contain rounded border border-border" />
+            <Button variant="ghost" size="sm" className="text-destructive h-7" onClick={() => setS({ ...s, closed_image: null })}>Remove image</Button>
+          </div>
+        )}
       </SettingsSection>
 
       <SettingsSection icon={Lock} title="Site Access" subtitle="Choose whether visitors must sign in before they can browse.">
