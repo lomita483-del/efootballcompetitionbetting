@@ -4,7 +4,7 @@
   "path": "/mcp",
   "auth": {
     "type": "oauth",
-    "issuer": "https://sqaesmhqhzojinprofha.supabase.co/auth/v1",
+    "issuer": "https://udwsxqdegrtaqlbwnrqg.supabase.co/auth/v1",
     "resource_documentation": "https://efootballcompetitionbetting.lovable.app/mcp-docs",
     "accepted_audiences": [
       "authenticated"
