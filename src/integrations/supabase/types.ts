@@ -316,6 +316,9 @@ export type Database = {
           leaderboard_gangs_reset_at: string | null
           leaderboard_header_url: string | null
           leaderboard_shooters_reset_at: string | null
+          league_arena_fit: string | null
+          league_arena_position: string | null
+          league_arena_url: string | null
           lottery_enabled: boolean
           lottery_intro: string | null
           lottery_max_stake: number
@@ -472,6 +475,9 @@ export type Database = {
           leaderboard_gangs_reset_at?: string | null
           leaderboard_header_url?: string | null
           leaderboard_shooters_reset_at?: string | null
+          league_arena_fit?: string | null
+          league_arena_position?: string | null
+          league_arena_url?: string | null
           lottery_enabled?: boolean
           lottery_intro?: string | null
           lottery_max_stake?: number
@@ -628,6 +634,9 @@ export type Database = {
           leaderboard_gangs_reset_at?: string | null
           leaderboard_header_url?: string | null
           leaderboard_shooters_reset_at?: string | null
+          league_arena_fit?: string | null
+          league_arena_position?: string | null
+          league_arena_url?: string | null
           lottery_enabled?: boolean
           lottery_intro?: string | null
           lottery_max_stake?: number
