@@ -316,6 +316,9 @@ export type Database = {
           leaderboard_gangs_reset_at: string | null
           leaderboard_header_url: string | null
           leaderboard_shooters_reset_at: string | null
+          league_arena_fit: string | null
+          league_arena_position: string | null
+          league_arena_url: string | null
           lottery_enabled: boolean
           lottery_intro: string | null
           lottery_max_stake: number
@@ -472,6 +475,9 @@ export type Database = {
           leaderboard_gangs_reset_at?: string | null
           leaderboard_header_url?: string | null
           leaderboard_shooters_reset_at?: string | null
+          league_arena_fit?: string | null
+          league_arena_position?: string | null
+          league_arena_url?: string | null
           lottery_enabled?: boolean
           lottery_intro?: string | null
           lottery_max_stake?: number
@@ -628,6 +634,9 @@ export type Database = {
           leaderboard_gangs_reset_at?: string | null
           leaderboard_header_url?: string | null
           leaderboard_shooters_reset_at?: string | null
+          league_arena_fit?: string | null
+          league_arena_position?: string | null
+          league_arena_url?: string | null
           lottery_enabled?: boolean
           lottery_intro?: string | null
           lottery_max_stake?: number
@@ -4891,6 +4900,42 @@ export type Database = {
           side?: string
           stake?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      video_ads: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          skip_label: string
+          target_page: string
+          title: string | null
+          updated_at: string
+          video_url: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          skip_label?: string
+          target_page?: string
+          title?: string | null
+          updated_at?: string
+          video_url: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          skip_label?: string
+          target_page?: string
+          title?: string | null
+          updated_at?: string
+          video_url?: string
         }
         Relationships: []
       }
