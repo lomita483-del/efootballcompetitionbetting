@@ -146,6 +146,7 @@ export async function loadStandings(): Promise<Standings> {
             const fallbackLogo = pl.team_id ? (teamLogo.get(pl.team_id) ?? null) : null;
             const sc = scorerAgg.get(pl.name) ?? { name: pl.name, gang_faction: pl.team_id ? (teamMap.get(pl.team_id) || "—") : "—", image_url: pl.avatar_url ?? fallbackLogo ?? null, team_id: pl.team_id ?? null, TS: 0, W: 0, L: 0, D: 0, PTS: 0, P: 0, GD: 0 };
             sc.gang_faction = pl.team_id ? (teamMap.get(pl.team_id) || "—") : "—";
+            sc.gang_faction = tname || sc.gang_faction || "—";
             sc.P += 1;
             sc.TS += teamScore; // goals this player scored in this match
             scorerAgg.set(pl.name, sc);
