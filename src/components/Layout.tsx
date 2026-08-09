@@ -35,7 +35,6 @@ import { WagerMilestone } from "@/components/WagerMilestone";
 import { BetSuccessPopout } from "@/components/BetSuccessPopout";
 import { SurveyPopout } from "@/components/SurveyPopout";
 import { PollPopout } from "@/components/PollPopout";
-import { PushPermissionPrompt } from "@/components/PushPermissionPrompt";
 import { FloatingWidgets } from "@/components/FloatingWidgets";
 import { PageTour } from "@/components/PageTour";
 import { LuckyWheelPopout } from "@/components/LuckyWheelPopout";
@@ -394,7 +393,6 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       <BetSuccessPopout />
       <SurveyPopout />
       <PollPopout />
-      <PushPermissionPrompt />
       <FloatingWidgets />
       <LuckyWheelPopout />
       <PageTour />

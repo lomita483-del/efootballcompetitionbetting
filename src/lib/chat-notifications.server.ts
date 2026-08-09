@@ -57,6 +57,20 @@ export async function deliverChatNotification({ messageId, senderId }: ChatNotif
 
   if (recipients.length === 0) return { sent: 0, recipients: 0 };
 
+  // Respect each user's notification preferences: skip anyone who turned push
+  // off or opted out of chat pings. Missing rows keep the default (opted in).
+  const { data: prefRows } = await supabaseAdmin
+    .from("notification_prefs")
+    .select("user_id,push_enabled,chat_mentions")
+    .in("user_id", recipients);
+  const optedOut = new Set(
+    (prefRows ?? [])
+      .filter((p: any) => p.push_enabled === false || p.chat_mentions === false)
+      .map((p: any) => p.user_id),
+  );
+  recipients = recipients.filter((id) => !optedOut.has(id));
+  if (recipients.length === 0) return { sent: 0, recipients: 0 };
+
   const notificationRows = recipients.map((userId) => ({
     user_id: userId,
     title,
