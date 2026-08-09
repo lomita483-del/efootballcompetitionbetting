@@ -261,7 +261,16 @@ const handleDownload = async () => {
                 </TabsContent>
 
                 <TabsContent value="shooters" className="m-0">
-                  <Board rows={shooters} firstCol="Top Shooter" pick={(p) => p.name} emptyText="No shooters yet." onOpen={(name, image) => setSelected({ name, image, source: "shooters" })} />
+                  <Board
+                    rows={shooters}
+                    firstCol="Top Shooter"
+                    secondCol="Team"
+                    secondClass="text-amber-300 font-bold"
+                    pick={(p) => p.name}
+                    secondPick={(p) => p.gang_faction || "—"}
+                    emptyText="No shooters yet."
+                    onOpen={(name, image) => setSelected({ name, image, source: "shooters" })}
+                  />
                 </TabsContent>
 
                 <TabsContent value="scorers" className="m-0">
@@ -309,11 +318,12 @@ function RewardRow({ reward, holder, expanded = false }: { reward: any; holder?:
 }
 
 function Board({
-  rows, firstCol, secondCol, pick, firstPick, secondPick, emptyText, onOpen,
+  rows, firstCol, secondCol, secondClass, pick, firstPick, secondPick, emptyText, onOpen,
 }: {
   rows: LbRow[];
   firstCol: string;
   secondCol?: string;
+  secondClass?: string;
   pick: (r: LbRow) => string;
   firstPick?: (r: LbRow) => string;
   secondPick?: (r: LbRow) => string;
@@ -346,7 +356,7 @@ function Board({
 
           <div className="flex flex-col gap-1.5">
             {top.map((r, i) => (
-              <LbRowCard key={r.name} r={r} i={i} firstPick={firstPick} pick={pick} secondPick={secondPick} showSecondary={!!secondCol} onOpen={onOpen} />
+              <LbRowCard key={r.name} r={r} i={i} firstPick={firstPick} pick={pick} secondPick={secondPick} secondClass={secondClass} showSecondary={!!secondCol} onOpen={onOpen} />
             ))}
           </div>
 
@@ -362,7 +372,7 @@ function Board({
 
           <div className="flex flex-col gap-1.5">
             {rest.map((r, idx) => (
-              <LbRowCard key={r.name} r={r} i={idx + 10} firstPick={firstPick} pick={pick} secondPick={secondPick} showSecondary={!!secondCol} onOpen={onOpen} />
+              <LbRowCard key={r.name} r={r} i={idx + 10} firstPick={firstPick} pick={pick} secondPick={secondPick} secondClass={secondClass} showSecondary={!!secondCol} onOpen={onOpen} />
             ))}
           </div>
         </div>
@@ -394,13 +404,14 @@ function LegendItem({ k, label, color }: { k: string; label: string; color: stri
 }
 
 function LbRowCard({
-  r, i, firstPick, pick, secondPick, showSecondary, onOpen,
+  r, i, firstPick, pick, secondPick, secondClass, showSecondary, onOpen,
 }: {
   r: LbRow;
   i: number;
   firstPick?: (r: LbRow) => string;
   pick: (r: LbRow) => string;
   secondPick?: (r: LbRow) => string;
+  secondClass?: string;
   showSecondary: boolean;
   onOpen: (name: string, image: string | null) => void;
 }) {
@@ -431,7 +442,7 @@ function LbRowCard({
         <RankArrow delta={r.rank_delta} />
       </div>
       {showSecondary && <div className="flex items-center gap-1 min-w-0">
-        <span className="truncate text-[9px] text-muted-foreground">{secondary}</span>
+        <span className={`truncate text-[9px] ${secondClass ?? "text-muted-foreground"}`}>{secondary}</span>
         {isFirst && (
           <span className="inline-flex items-center gap-0.5 shrink-0 rounded-md border border-amber-300/70 bg-amber-400/15 px-1 py-0.5 text-[9px] font-black text-amber-200">
             <Star className="h-2.5 w-2.5 fill-amber-300 text-amber-300" />MVP
