@@ -6503,10 +6503,15 @@ export type Database = {
         Args: { _answers: Json; _survey_id: string }
         Returns: Json
       }
-      task_bump_metric: {
-        Args: { _delta: number; _metric: string; _user_id: string }
-        Returns: undefined
-      }
+      task_bump_metric:
+        | {
+            Args: { _delta: number; _metric: string; _user_id: string }
+            Returns: undefined
+          }
+        | {
+            Args: { _delta: number; _metric: string; _user_id: string }
+            Returns: undefined
+          }
       transfer_tokens: {
         Args: { _amount: number; _recipient_special_id: string }
         Returns: Json
