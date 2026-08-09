@@ -155,20 +155,8 @@ export async function loadStandings(): Promise<Standings> {
           }
         }
       }
-      if (countForShooters) {
-        (teamPlayers.get(tid) ?? []).forEach((pname) => {
-          const pc = playerAgg.get(pname) ?? { name: pname, gang_faction: tname, image_url: playerAvatarByName.get(pname) ?? null, team_id: tid, TS: 0, W: 0, L: 0, D: 0, PTS: 0, P: 0, GD: 0 };
-          pc.gang_faction = pc.gang_faction || tname;
-          pc.team_id = pc.team_id ?? tid;
-          pc.P += 1;
-          pc.TS += teamScore;
-          pc.GD += gd; // accumulate goal difference
-          if (draw) { pc.D += 1; pc.PTS += 1; }
-          else if (won) { pc.W += 1; pc.PTS += 3; }
-          else { pc.L += 1; }
-          playerAgg.set(pname, pc);
-        });
-      }
+      // Top Shooters is driven exclusively by seeded 1v1 shooter matches.
+      // Team (non-shooter) matches never credit a team's players here.
     }
   });
 
