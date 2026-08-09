@@ -178,8 +178,15 @@ export async function loadStandings(): Promise<Standings> {
     if (tid) pc.image_url = teamLogo.get(tid) ?? null;
   });
 
+  // Resolve each gang's top player = highest individual goal tally on that team.
+  gangAgg.forEach((row, tname) => {
+    const bucket = gangPlayerGoals.get(tname);
+    if (!bucket || bucket.size === 0) return;
+    const best = Array.from(bucket.entries()).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0];
+    if (best && best[1] > 0) row.top_player = best[0];
+  });
+
   (overrides ?? []).forEach((o: any) => {
-    // no-op marker
     const target = o.kind === "gang" ? gangAgg : playerAgg;
     if (o.is_hidden) { target.delete(o.name); return; }
     const existing = target.get(o.name);
