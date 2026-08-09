@@ -490,7 +490,7 @@ function ScorerBoard({ rows, onOpen }: { rows: LbRow[]; onOpen: (name: string, i
             <div>Rank</div>
             <div>Player Name</div>
             <div>Team</div>
-            <div className="text-center">Total Score</div>
+            <div className="text-center">Goals</div>
           </div>
 
           {rows.length === 0 && (
