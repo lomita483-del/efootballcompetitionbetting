@@ -486,12 +486,11 @@ function ScorerBoard({ rows, onOpen }: { rows: LbRow[]; onOpen: (name: string, i
       <div className="min-w-0 overflow-hidden">
         <div className="min-w-0">
           {/* header */}
-          <div className="grid grid-cols-[38px_minmax(80px,1fr)_minmax(56px,.65fr)_62px_56px] items-center gap-1 px-1.5 py-1 text-[8px] uppercase text-primary font-bold">
+          <div className="grid grid-cols-[38px_minmax(80px,1fr)_minmax(56px,.65fr)_56px] items-center gap-1 px-1.5 py-1 text-[8px] uppercase text-primary font-bold">
             <div>Rank</div>
-            <div>Top Player</div>
+            <div>Player Name</div>
             <div>Team</div>
-            <div className="text-center">Matches Played</div>
-            <div className="text-center">Total Goals</div>
+            <div className="text-center">Total Score</div>
           </div>
 
           {rows.length === 0 && (
@@ -537,7 +536,7 @@ function ScorerRowCard({ r, i, onOpen }: { r: LbRow; i: number; onOpen: (name: s
     ? "border-orange-500/70 shadow-[0_0_18px_-6px_rgba(230,130,40,0.55)] bg-black/30 bg-gradient-to-r from-orange-600/20 via-amber-700/15 to-orange-600/20"
     : "border-emerald-500/50 bg-black/35 hover:border-emerald-400/70 hover:bg-black/45";
   return (
-    <div className={`grid grid-cols-[38px_minmax(80px,1fr)_minmax(56px,.65fr)_62px_56px] items-center gap-1 rounded-md border px-1.5 py-1.5 transition-colors ${rowBorder}`}>
+    <div className={`grid grid-cols-[38px_minmax(80px,1fr)_minmax(56px,.65fr)_56px] items-center gap-1 rounded-md border px-1.5 py-1.5 transition-colors ${rowBorder}`}>
       <div><Medal i={i} /></div>
       <div className="flex items-center gap-1.5 min-w-0">
         <Avatar url={r.image_url ?? null} name={r.name} />
@@ -552,7 +551,6 @@ function ScorerRowCard({ r, i, onOpen }: { r: LbRow; i: number; onOpen: (name: s
         {isFirst && <span className="inline-flex shrink-0 items-center gap-0.5 rounded-md border border-amber-300/70 bg-amber-400/15 px-1 py-0.5 text-[9px] font-black text-amber-200"><Star className="h-2.5 w-2.5 fill-amber-300 text-amber-300" />MVP</span>}
       </div>
       <div className="truncate text-[9px] text-muted-foreground">{r.gang_faction || "—"}</div>
-      <StatText className="text-emerald-400">{r.P}</StatText>
       <PtsBox>{r.TS}</PtsBox>
     </div>
   );
