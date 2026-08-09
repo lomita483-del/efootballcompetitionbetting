@@ -179,6 +179,7 @@ export async function loadStandings(): Promise<Standings> {
   });
 
   (overrides ?? []).forEach((o: any) => {
+    // no-op marker
     const target = o.kind === "gang" ? gangAgg : playerAgg;
     if (o.is_hidden) { target.delete(o.name); return; }
     const existing = target.get(o.name);
