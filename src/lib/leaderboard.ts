@@ -65,6 +65,9 @@ export async function loadStandings(): Promise<Standings> {
   const gangAgg = new Map<string, LbRow>();
   const playerAgg = new Map<string, LbRow>();
   const scorerAgg = new Map<string, LbRow>();
+  // team name -> (player name -> goals scored) so each gang card can show its
+  // actual top scorer instead of an arbitrary first roster member.
+  const gangPlayerGoals = new Map<string, Map<string, number>>();
   (players ?? []).forEach((p) => {
     if (!p.name) return;
     const tname = p.team_id ? (teamMap.get(p.team_id) || "") : "";
@@ -134,6 +137,13 @@ export async function loadStandings(): Promise<Standings> {
         else if (won) { cur.W += 1; cur.PTS += 3; }
         else { cur.L += 1; }
         gangAgg.set(tname, cur);
+        const pidForGoals = side === "home" ? m.home_player_id : m.away_player_id;
+        const plForGoals = pidForGoals ? playerMap.get(pidForGoals) : null;
+        if (plForGoals?.name) {
+          const bucket = gangPlayerGoals.get(tname) ?? new Map<string, number>();
+          bucket.set(plForGoals.name, (bucket.get(plForGoals.name) ?? 0) + teamScore);
+          gangPlayerGoals.set(tname, bucket);
+        }
       }
       if (countForGangs) {
         const pid = side === "home" ? m.home_player_id : m.away_player_id;
