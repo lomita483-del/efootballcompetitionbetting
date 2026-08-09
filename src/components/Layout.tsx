@@ -394,7 +394,6 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       <BetSuccessPopout />
       <SurveyPopout />
       <PollPopout />
-      <PushPermissionPrompt />
       <FloatingWidgets />
       <LuckyWheelPopout />
       <PageTour />
