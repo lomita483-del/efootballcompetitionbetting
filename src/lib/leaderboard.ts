@@ -148,7 +148,9 @@ export async function loadStandings(): Promise<Standings> {
             sc.gang_faction = pl.team_id ? (teamMap.get(pl.team_id) || "—") : "—";
             sc.gang_faction = tname || sc.gang_faction || "—";
             sc.P += 1;
-            sc.TS += teamScore; // goals this player scored in this match
+            // Individual tally: only the goals this player personally scored in
+            // the match they played — never a team-wide aggregate.
+            sc.TS += teamScore;
             scorerAgg.set(pl.name, sc);
           }
         }
@@ -202,7 +204,9 @@ export async function loadStandings(): Promise<Standings> {
 
   const gangsSorted = Array.from(gangAgg.values()).sort(sortRows);
   const shootersSorted = Array.from(playerAgg.values()).sort(sortRows);
-  const scorersSorted = Array.from(scorerAgg.values()).sort((a, b) => b.TS - a.TS || b.P - a.P);
+  const scorersSorted = Array.from(scorerAgg.values())
+    .filter((r) => r.TS > 0)
+    .sort((a, b) => b.TS - a.TS || a.P - b.P || a.name.localeCompare(b.name));
 
   await Promise.all([
     applyRankDeltas("gangs", gangsSorted),
