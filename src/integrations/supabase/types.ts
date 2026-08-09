@@ -973,7 +973,7 @@ export type Database = {
           stake: number
           status: Database["public"]["Enums"]["bet_status"]
           total_odds: number
-          tracking_id: string
+          tracking_id?: string
           user_id: string
           virtual_round_id?: string | null
         }
