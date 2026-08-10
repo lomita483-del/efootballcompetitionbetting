@@ -3029,6 +3029,9 @@ export type Database = {
           accepted_terms: boolean
           avatar_url: string | null
           ban_reason: string | null
+          bg_preference_fit: string | null
+          bg_preference_position: string | null
+          bg_preference_url: string | null
           chat_color: string | null
           country: string | null
           created_at: string
@@ -3059,6 +3062,7 @@ export type Database = {
           showcase_achievement_ids: string[]
           special_id: string | null
           streak_days: number
+          theme_preference: string | null
           token_balance: number
           updated_at: string
           vip_tier: string
@@ -3068,6 +3072,9 @@ export type Database = {
           accepted_terms?: boolean
           avatar_url?: string | null
           ban_reason?: string | null
+          bg_preference_fit?: string | null
+          bg_preference_position?: string | null
+          bg_preference_url?: string | null
           chat_color?: string | null
           country?: string | null
           created_at?: string
@@ -3098,6 +3105,7 @@ export type Database = {
           showcase_achievement_ids?: string[]
           special_id?: string | null
           streak_days?: number
+          theme_preference?: string | null
           token_balance?: number
           updated_at?: string
           vip_tier?: string
@@ -3107,6 +3115,9 @@ export type Database = {
           accepted_terms?: boolean
           avatar_url?: string | null
           ban_reason?: string | null
+          bg_preference_fit?: string | null
+          bg_preference_position?: string | null
+          bg_preference_url?: string | null
           chat_color?: string | null
           country?: string | null
           created_at?: string
@@ -3137,6 +3148,7 @@ export type Database = {
           showcase_achievement_ids?: string[]
           special_id?: string | null
           streak_days?: number
+          theme_preference?: string | null
           token_balance?: number
           updated_at?: string
           vip_tier?: string
