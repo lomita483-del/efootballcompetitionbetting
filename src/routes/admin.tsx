@@ -3598,109 +3598,113 @@ function AnalyticsPanel() {
         {row5.map((x) => <MetricSquare key={x.title} {...x} compact />)}
       </div>
 
-      {/* ROW 6 — 3 wider squares + image cell */}
+      {/* ROW 6 — 3 wider squares + system logs cell */}
       <div className="grid grid-cols-4 gap-2 sm:gap-3">
         {row6.map((x) => <MetricSquare key={x.title} {...x} compact />)}
-        <Card className="overflow-hidden border-primary/20 bg-card/60 relative min-h-[80px] group">
-          <img src={leagueSkullFire} alt="League" loading="lazy" width={512} height={512}
-               className="absolute inset-0 h-full w-full object-cover scale-110 animate-pulse-glow group-hover:scale-125 transition-transform duration-[3000ms]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-          <div className="absolute inset-x-0 bottom-1 text-center text-[10px] uppercase tracking-widest text-white font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">League</div>
-        </Card>
+        <button type="button" onClick={() => goTab("audit")} className="relative overflow-hidden rounded-xl border border-primary/30 bg-card/60 min-h-[46px] sm:min-h-[58px] group">
+          <img src={leagueSkullFire} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-[3000ms]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+          <span className="absolute inset-x-0 bottom-1 text-center text-[7px] sm:text-[9px] font-black uppercase tracking-widest text-white drop-shadow">View System Logs</span>
+        </button>
       </div>
 
-      {/* ROW 7 — Recent Activity + Broadcast Center | Live Gang Wars + big logo + Leaderboard | Top 3 Bettors + icon tiles */}
-      <div className="grid grid-cols-3 gap-3">
-        {/* LEFT: Recent Activity, then Broadcast Center — admin only */}
-        {isAdmin && (
-        <div className="space-y-3">
-          <PanelBlock title="RECENT ACTIVITY" accent="sky" count={activity.length} hideWhenEmpty onView={() => goTab("activity")}>
-            {activity.length === 0 && <div className="text-[10px] text-muted-foreground">No activity yet</div>}
-            {activity.slice(0, 5).map((a, i) => (
-              <button key={i} onClick={() => goTab("audit")} className="w-full text-left flex items-start gap-1.5 text-[9px] sm:text-xs py-1 border-b border-border/40 last:border-0 hover:bg-sky-500/10 rounded transition">
-                <Sparkles className="h-3 w-3 text-sky-400 shrink-0 mt-0.5" />
-                <div className="min-w-0 flex-1">
-                  <div className="text-foreground truncate">{a.action?.replace(/_/g, " ")}</div>
-                  <div className="text-muted-foreground text-[8px] sm:text-[10px]">{ts(a.created_at)}</div>
+      {/* ROW 7 — Broadcast Center | Live Game Stats | Top Platform + League Arena */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        {/* LEFT: Broadcast Center */}
+        <Card className="border-primary/25 bg-card/70 p-3 flex flex-col">
+          <div className="mb-2 flex items-center gap-2">
+            <span className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-primary">Broadcast Center</span>
+            <span className="rounded-full bg-emerald-500/20 px-1.5 py-px text-[7px] font-black uppercase tracking-widest text-emerald-300">New</span>
+            <button onClick={() => goTab("broadcast")} className="ml-auto text-muted-foreground hover:text-primary"><X className="h-3 w-3" /></button>
+          </div>
+          <div className="flex-1 space-y-2">
+            {broadcasts.length === 0 && <div className="text-[10px] text-muted-foreground">No broadcasts yet</div>}
+            {broadcasts.slice(0, 2).map((b) => (
+              <button key={b.id} onClick={() => goTab("broadcast")} className="w-full rounded-lg border border-primary/15 bg-background/40 p-2 text-left hover:bg-primary/5 transition">
+                <div className="flex items-baseline justify-between gap-2">
+                  <div className="truncate text-[10px] sm:text-xs"><span className="text-muted-foreground">Title: </span><span className="font-semibold text-foreground">{b.title || "Broadcast"}</span></div>
+                  <div className="shrink-0 text-[7px] sm:text-[9px] text-muted-foreground">{ts(b.created_at)}</div>
                 </div>
+                {b.body && <div className="mt-1 text-[9px] sm:text-[11px] text-muted-foreground line-clamp-2"><span className="uppercase tracking-widest text-[7px]">Message: </span>{b.body}</div>}
+                <div className="mt-1 text-[8px] sm:text-[10px] text-muted-foreground">Sent By: {isAdmin ? "Super Admin" : "Admin"}</div>
               </button>
             ))}
-          </PanelBlock>
-          <PanelBlock title="BROADCAST CENTER" compact count={broadcasts.length} hideWhenEmpty onView={() => goTab("broadcast")}>
-            {broadcasts.length === 0 && <div className="text-[10px] text-muted-foreground">No broadcasts</div>}
-            {broadcasts.map((b) => (
-              <button key={b.id} onClick={() => goTab("broadcast")} className="w-full text-left text-[9px] sm:text-xs py-1 border-b border-primary/10 last:border-0 hover:bg-primary/5 rounded px-1 transition">
-                <div className="flex items-center gap-1"><Megaphone className="h-2.5 w-2.5 text-primary shrink-0" /><div className="truncate text-foreground font-semibold">{b.title || "Broadcast"}</div></div>
-                {b.body && <div className="text-[8px] sm:text-[10px] text-muted-foreground truncate pl-3.5">{b.body}</div>}
-                <div className="text-[7px] sm:text-[9px] text-muted-foreground pl-3.5">{ts(b.created_at)}</div>
-              </button>
-            ))}
-          </PanelBlock>
-        </div>
-        )}
+          </div>
+          <Button size="sm" variant="outline" className="mt-2 h-7 w-full border-primary/40 text-[9px] uppercase tracking-widest text-primary" onClick={() => goTab("broadcast")}>View All Broadcasts</Button>
+        </Card>
 
-        {/* MIDDLE: Live Gang Wars, big league logo, Leaderboard mini widget */}
+        {/* MIDDLE: Live Game Stats */}
+        <Card className="border-primary/25 bg-card/70 p-3 flex flex-col">
+          <div className="mb-2 flex items-center gap-2">
+            <span className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-primary">Live Game Stats</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-destructive/90 px-1.5 py-px text-[7px] font-black uppercase tracking-widest text-destructive-foreground">
+              <span className="h-1 w-1 rounded-full bg-white animate-ping" />Live
+            </span>
+            <button onClick={() => nav({ to: "/matches" })} className="ml-auto text-[8px] sm:text-[10px] text-muted-foreground hover:text-primary">View All ›</button>
+          </div>
+          <div className="flex-1 space-y-2">
+            {liveMatches.length === 0 && <div className="text-[10px] text-muted-foreground">No live games</div>}
+            {liveMatches.slice(0, 3).map((m: any) => (
+              <button key={m.id} onClick={() => nav({ to: "/matches/$matchId", params: { matchId: m.id } })}
+                className="flex w-full items-center gap-2 rounded-lg border border-primary/20 bg-background/40 px-2 py-2 hover:border-primary/50 hover:bg-primary/5 transition">
+                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-destructive/50 bg-destructive/15 text-[6px] font-black uppercase text-destructive">Live</span>
+                <span className="flex-1 truncate text-center text-[10px] sm:text-xs font-bold uppercase tracking-wide text-foreground">
+                  {m.home_team?.name ?? "Home"} <span className="text-muted-foreground">vs</span> {m.away_team?.name ?? "Away"}
+                </span>
+                <span className="shrink-0 text-[11px] sm:text-sm font-black tabular-nums text-primary">{m.home_score ?? 0} - {m.away_score ?? 0}</span>
+              </button>
+            ))}
+          </div>
+        </Card>
+
+        {/* RIGHT: Top Platform + League Arena (occupies the old Top Bettors space) */}
         <div className="space-y-3">
-          <PanelBlock title="LIVE GANG WARS" accent="rose" compact count={liveMatches.length} hideWhenEmpty onView={() => nav({ to: "/matches" })}>
-            {liveMatches.length === 0 && <div className="text-[10px] text-muted-foreground">No live wars</div>}
-            {liveMatches.slice(0, 2).map((m: any) => {
-              const home = m.home_team; const away = m.away_team;
-              const initial = (n?: string) => (n ? n.charAt(0).toUpperCase() : "?");
-              return (
-                <button key={m.id} onClick={() => nav({ to: "/matches/$matchId", params: { matchId: m.id } })} className="w-full flex items-center gap-1.5 text-[9px] sm:text-xs py-1 border-b border-border/40 last:border-0 hover:bg-rose-500/10 rounded px-1 transition">
-                  {home?.logo_url ? <img src={home.logo_url} alt="" className="h-5 w-5 rounded-full object-cover border border-rose-500/40" /> : <div className="h-5 w-5 rounded-full bg-rose-500/20 grid place-items-center text-[8px] font-bold text-rose-300 border border-rose-500/40">{initial(home?.name)}</div>}
-                  <div className="flex-1 min-w-0 text-center text-foreground font-semibold truncate">{home?.name ?? "Home"} <span className="text-muted-foreground">vs</span> {away?.name ?? "Away"}</div>
-                  {away?.logo_url ? <img src={away.logo_url} alt="" className="h-5 w-5 rounded-full object-cover border border-rose-500/40" /> : <div className="h-5 w-5 rounded-full bg-rose-500/20 grid place-items-center text-[8px] font-bold text-rose-300 border border-rose-500/40">{initial(away?.name)}</div>}
-                </button>
-              );
-            })}
-          </PanelBlock>
-          {isAdmin && <MiniLeaderboardPanel onOpen={() => goTab("leaderboard")} />}
           <Card className="border-primary/25 bg-card/70 p-3">
-            <div className="mb-2 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-primary">
-              <BarChart3 className="h-3 w-3" /> Platform Pulse
+            <div className="mb-2 flex items-start gap-2">
+              <div>
+                <div className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-primary">Top Platform</div>
+                <div className="text-[7px] uppercase tracking-[0.3em] text-muted-foreground">Stats overview</div>
+              </div>
+              <button onClick={() => goTab("pnl")} className="ml-auto text-[8px] sm:text-[10px] text-muted-foreground hover:text-primary">View More Platforms</button>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { l: "Live wars", v: liveMatches.length },
-                { l: "Broadcasts", v: broadcasts.length },
-                { l: "Highlights", v: highlights.length },
-                { l: "Events", v: event ? 1 : 0 },
-              ].map((s) => (
-                <div key={s.l} className="rounded-lg border border-primary/20 bg-background/50 px-2 py-2">
-                  <div className="text-base font-black text-primary leading-none">{s.v}</div>
-                  <div className="mt-1 text-[8px] uppercase tracking-widest text-muted-foreground">{s.l}</div>
+            <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-background/40 p-2">
+              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-gradient-gold text-primary-foreground"><Trophy className="h-3.5 w-3.5" /></span>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[10px] sm:text-xs font-black uppercase text-primary">E-Football Betting</div>
+                <div className="truncate text-[7px] sm:text-[9px] text-muted-foreground">
+                  Total Users {fmt(stats.totalUsers)} · Total Volume {short(stats.circulating)} · Ranked #1
                 </div>
-              ))}
+              </div>
+              <div className="shrink-0 text-[9px] sm:text-[11px] font-black tabular-nums text-emerald-400">{short(stats.totalStaked)}</div>
             </div>
+            <Button size="sm" variant="outline" className="mt-2 h-6 w-full border-primary/40 text-[8px] uppercase tracking-widest text-primary" onClick={() => goTab("pnl")}>View More Platforms</Button>
           </Card>
-        </div>
 
-        {/* RIGHT: Top 3 Bettors, then two small icon tiles */}
-        <div className="space-y-3">
-          <TopBetsPanel limit={3} />
-          <Card className="group relative aspect-[16/10] overflow-hidden border-primary/30 bg-card/60">
+          <Card className="group relative min-h-[220px] flex-1 overflow-hidden border-primary/30 bg-card/60">
             <img
               src={arenaImg || leagueSkullFire}
-              alt="Live league arena"
+              alt="League arena"
               loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover animate-[kenburns_18s_ease-in-out_infinite_alternate]"
+              className="absolute inset-0 h-full w-full animate-[kenburns_18s_ease-in-out_infinite_alternate]"
               style={{ objectFit: (arenaFit as any) || "cover", objectPosition: arenaPos || "center" }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-primary/25 to-transparent opacity-0 animate-[shimmer-sweep_4s_linear_infinite]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 animate-[shimmer-sweep_4s_linear_infinite]" />
             <span className="absolute left-2 top-2 inline-flex items-center gap-1.5 rounded-full border border-destructive/50 bg-black/70 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-destructive">
-              <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-ping" />
-              Live
+              <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-ping" />Live
             </span>
-            <div className="absolute inset-x-0 bottom-1 text-center text-[10px] font-black uppercase tracking-widest text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-              League Arena
+            <div className="absolute inset-x-0 bottom-0 p-3 text-center">
+              <div className="text-lg sm:text-2xl font-black uppercase tracking-[0.12em] text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">League Arena</div>
+              <div className="text-[8px] sm:text-[10px] uppercase tracking-[0.35em] text-primary">Compete. Win. Repeat.</div>
+              <Button size="sm" className="mt-2 h-7 rounded-full bg-gradient-gold px-4 text-[9px] font-black uppercase tracking-widest text-primary-foreground" onClick={() => nav({ to: "/matches" })}>
+                <Trophy className="mr-1 h-3 w-3" />Enter Arena
+              </Button>
             </div>
           </Card>
         </div>
       </div>
 
-      {/* Event countdown — admin only, tucked under the 3-column row */}
+      {/* Event countdown — admin only */}
       {isAdmin && event && (
         <PanelBlock title="EVENT COUNTDOWN" compact count={1} onView={() => goTab("events")}>
           <button onClick={() => goTab("events")} className="relative w-full min-h-24 text-left rounded-lg p-2 transition space-y-1 overflow-hidden border border-primary/20 bg-card/50">
@@ -3713,9 +3717,8 @@ function AnalyticsPanel() {
         </PanelBlock>
       )}
 
-      {/* Highlights hub — kept, full width below */}
+      {/* Highlights hub */}
       <PanelBlock title="HIGHLIGHTS HUB" accent="violet" count={highlights.length} hideWhenEmpty onView={() => goTab("content")}>
-        {highlights.length === 0 && <div className="text-[10px] text-muted-foreground">No highlights yet</div>}
         {highlights.slice(0, 4).map((h) => (
           <button key={h.id} onClick={() => goTab("content")} className="w-full flex items-center gap-1.5 text-[9px] sm:text-xs py-1 border-b border-border/40 last:border-0 hover:bg-violet-500/10 rounded px-1 transition">
             {h.media_type === "video" ? <Play className="h-3 w-3 text-violet-400 shrink-0" /> : <ImageIcon className="h-3 w-3 text-violet-400 shrink-0" />}
@@ -3726,37 +3729,63 @@ function AnalyticsPanel() {
         ))}
       </PanelBlock>
 
-      {/* ROW 9 — module tiles (admin-only tiles hidden from moderators) */}
-      <div className="grid grid-cols-6 gap-3">
+      {/* ROW 8 — module tiles */}
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
         {[
-          { l: "VIRTUAL", s: "Manage virtual matches and rounds", t: "virtual", img: tileVirtualAsset.url },
-          { l: "BATTLE", s: "Manage matches, fixtures and outcomes", t: "matches", img: tileBattleAsset.url },
-          { l: "CHALLENGES", s: "Create and manage gang challenges", t: "challenges", img: tileChallengesAsset.url },
-          { l: "REFERRALS", s: "Manage referrals and commissions", t: "referrals", img: tileReferrals },
-          { l: "USERS", s: "Manage users, profiles and access", t: "users", img: tileUsersAsset.url },
-          { l: "CLANS", s: "Manage gangs, teams and players", t: "clans", img: tileClansAsset.url },
+          { l: "VIRTUAL STADIUM", s: "Manage virtual matches and events", t: "virtual", img: tileVirtualAsset.url },
+          { l: "BATTLE ARENA", s: "Manage real-time tournaments", t: "matches", img: tileBattleAsset.url },
+          { l: "CHALLENGES", s: "Create and manage challenges", t: "challenges", img: tileChallengesAsset.url },
+          { l: "REFERRALS", s: "Manage referral rewards", t: "referrals", img: tileReferrals },
+          { l: "USER REWARDS", s: "Manage user rewards and points", t: "users", img: tileUsersAsset.url },
+          { l: "CLANS", s: "Manage clans and tournaments", t: "clans", img: tileClansAsset.url },
         ].filter((m) => isAdmin || MOD_SAFE_TABS.has(m.t)).map((m) => (
-          <Card key={m.l} className="border-primary/20 bg-card/60 p-2 sm:p-3 flex flex-col">
-            <button type="button" onClick={() => goTab(m.t)} className="relative aspect-square w-full mb-1 rounded overflow-hidden border border-primary/20 hover:border-primary/60 transition active:scale-95">
+          <Card key={m.l} className="border-primary/25 bg-card/60 p-2 flex flex-col">
+            <button type="button" onClick={() => goTab(m.t)} className="relative aspect-[4/3] w-full mb-1.5 rounded-lg overflow-hidden border border-primary/25 hover:border-primary/60 transition active:scale-95">
               <img src={m.img} alt={m.l} loading="lazy" width={512} height={512} className="w-full h-full object-cover" />
-              <img src={lslLogo} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 m-auto h-1/2 w-1/2 object-contain opacity-15 mix-blend-screen drop-shadow-[0_4px_18px_rgba(0,0,0,0.65)]" />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
             </button>
-            <div className="text-[8px] sm:text-[10px] font-bold text-primary leading-tight">{m.l}</div>
-            <div className="text-[6px] sm:text-[8px] text-muted-foreground leading-tight mt-0.5 line-clamp-2">{m.s}</div>
-            <Button size="sm" variant="outline" className="mt-1 h-5 sm:h-6 text-[7px] sm:text-[9px] border-primary/40 text-primary px-1" onClick={() => goTab(m.t)}>Manage</Button>
+            <div className="text-[7px] sm:text-[9px] font-black uppercase tracking-widest text-primary leading-tight text-center">{m.l}</div>
+            <div className="mt-0.5 text-[6px] sm:text-[8px] text-muted-foreground leading-tight text-center line-clamp-2">{m.s}</div>
+            <Button size="sm" variant="outline" className="mt-1.5 h-6 w-full border-primary/40 text-primary text-[7px] sm:text-[9px] uppercase tracking-widest" onClick={() => goTab(m.t)}>Access</Button>
           </Card>
         ))}
       </div>
 
+      {/* PLATFORM POLICE */}
+      {isAdmin && (
+        <Card className="border-primary/25 bg-card/60 p-3">
+          <div className="mb-2 text-[9px] sm:text-[11px] font-black uppercase tracking-[0.25em] text-primary">Platform Police</div>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            {[
+              { i: Users, v: stats.bannedUsers, l: "Live bans", t: "bannedusers" },
+              { i: Eye, v: counts.pendingAppeals ?? 0, l: "Suspicious", t: "flags" },
+              { i: AlertTriangle, v: 0, l: "Fraud alerts", t: "risk" },
+              { i: LifeBuoy, v: counts.openTickets ?? 0, l: "Complaints", t: "tickets" },
+              { i: Shield, v: 0, l: "Warnings", t: "audit" },
+            ].map((x) => (
+              <button key={x.l} onClick={() => goTab(x.t)} className="flex items-center gap-2 rounded-lg border border-primary/20 bg-background/40 px-2 py-2 hover:border-primary/50 hover:bg-primary/5 transition text-left">
+                <x.i className="h-4 w-4 shrink-0 text-primary/80" />
+                <div className="min-w-0">
+                  <div className="text-xs sm:text-sm font-black leading-none text-foreground">{x.v}</div>
+                  <div className="mt-0.5 text-[6px] sm:text-[8px] uppercase tracking-[0.2em] text-muted-foreground">{x.l}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* SYSTEM STATUS */}
       {isAdmin && (
       <Card className="border-primary/20 bg-card/60 p-3">
-        <div className="text-[10px] sm:text-xs font-bold tracking-widest text-primary mb-2">SYSTEM STATUS <span className="text-muted-foreground font-normal">(COMING SOON)</span></div>
-        <div className="grid grid-cols-5 gap-1 sm:gap-2">
-          {["Platform", "Database", "Payments", "Broadcast", "AI Engine"].map((s) => (
-            <div key={s} className="flex items-center justify-between gap-1 text-[8px] sm:text-[10px] px-1.5 py-1 rounded bg-background/40 border border-primary/10">
+        <div className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.25em] text-primary mb-2">
+          System Status <span className="text-muted-foreground font-normal normal-case tracking-normal">(all systems operational)</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-6 gap-1.5 sm:gap-2">
+          {["Platform", "Database", "Payments", "Broadcast", "AI Engine", "Security"].map((s) => (
+            <div key={s} className="flex items-center gap-1.5 text-[8px] sm:text-[10px] px-2 py-1.5 rounded-lg bg-background/40 border border-primary/10">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
               <span className="text-foreground truncate">{s}</span>
-              <span className="text-emerald-400 font-bold">●</span>
             </div>
           ))}
         </div>
