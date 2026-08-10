@@ -176,45 +176,66 @@ export function AdminPage() {
             style={{ backgroundImage: `linear-gradient(90deg, rgba(3,12,10,0.76) 0%, rgba(3,12,10,0.44) 42%, rgba(3,12,10,0.18) 100%), url(${heroBg || adminConsoleSeed})`, backgroundSize: `auto, ${heroFit === "contain" ? "contain" : heroFit === "fill" ? "100% 100%" : "cover"}`, backgroundPosition: `center, ${heroPos || "center right"}`, backgroundRepeat: "no-repeat" }}
           >
             <div className="absolute inset-x-0 top-0 h-1 bg-gradient-gold" />
-            <div className="relative flex items-center gap-3 flex-wrap">
+            <div className="relative min-h-[120px] sm:min-h-[180px] flex flex-col justify-center">
+              <p className="text-xl sm:text-4xl font-black tracking-tight text-foreground/90 uppercase">Welcome</p>
+              <h1 className="text-2xl sm:text-5xl font-black uppercase leading-[1.05] gradient-gold-text">
+                {isAdmin ? "Administrator" : "Administrator"}
+              </h1>
+              <h2 className="text-2xl sm:text-5xl font-black uppercase leading-[1.05] text-emerald-400">E-Football</h2>
+              <p className="mt-2 text-[11px] sm:text-sm text-muted-foreground">You have full control over the platform.</p>
+              <p className="text-[11px] sm:text-sm font-semibold text-primary">Monitor. Manage. Dominate.</p>
+            </div>
+          </div>
+
+          {/* COMMAND CENTRE bar — console title + global actions */}
+          <Card className="border-primary/25 bg-card/70 rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <button
                 type="button"
                 onClick={() => setActiveTab("analytics")}
-                className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-gradient-gold text-primary-foreground grid place-items-center shadow-gold overflow-hidden ring-2 ring-primary/40 shrink-0 hover:ring-primary/70 transition"
+                className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gradient-gold grid place-items-center shadow-gold overflow-hidden ring-2 ring-primary/40 shrink-0 hover:ring-primary/70 transition"
                 title="Open analytics"
               >
-                <img src={lslLogo} alt="ECB" className="h-14 w-14 sm:h-16 sm:w-16 object-contain" />
+                <img src={lslLogo} alt="ECB" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" />
               </button>
-              <div>
-                <p className="text-[11px] sm:text-xs uppercase tracking-[0.3em] text-muted-foreground">Command center</p>
-                <h1 className="text-3xl sm:text-4xl font-bold gradient-gold-text">{isAdmin ? "Super Admin Console" : "Admin Panel"}</h1>
+              <div className="min-w-0">
+                <p className="text-[8px] sm:text-[10px] uppercase tracking-[0.35em] text-muted-foreground">Command centre</p>
+                <h2 className="text-lg sm:text-2xl font-black gradient-gold-text leading-tight truncate">{isAdmin ? "Super Admin Console" : "Admin Panel"}</h2>
               </div>
-              <Badge variant="outline" className={`ml-auto ${isAdmin ? "border-accent/50 text-accent" : "border-primary/50 text-primary"}`}>
-                {isAdmin ? "Super Admin" : "Admin"}
-              </Badge>
-              {isAdmin && (
-                <div className="flex items-center gap-1 w-full sm:w-auto sm:ml-2">
-                  <ThemeToggleInline />
-                  <Button size="sm" variant="outline" className="text-[11px]" onClick={() => setUnblurred((v) => !v)} title="Toggle frosted-glass blur to verify alignment & layout">
-                    {unblurred ? "🔍 Unblurred" : "✨ Blurred"}
-                  </Button>
-                  <Button size="sm" variant="outline" className="text-[11px]" onClick={() => { if (typeof window !== "undefined") window.location.reload(); }} title="Reload this admin page">⟳ Reload</Button>
-                  <Button size="sm" variant="outline" className="text-[11px]" onClick={async () => {
+              <div className="ml-auto flex items-center gap-1.5 flex-wrap justify-end">
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-emerald-300">
+                  <Shield className="h-3 w-3" />{isAdmin ? "Super Admin" : "Admin"}
+                </span>
+                <ConsolePill icon={Shield} label="Bans" onClick={() => setActiveTab("bannedusers")} />
+                <ConsolePill icon={BarChart3} label="Reports" onClick={() => setActiveTab("reports")} />
+                <ConsolePill icon={Sparkles} label="Activity" onClick={() => setActiveTab("activity")} />
+                {isAdmin && <ThemeToggleInline />}
+                {isAdmin && <ConsolePill icon={Eye} label={unblurred ? "Unblurred" : "Blurred"} onClick={() => setUnblurred((v) => !v)} />}
+                {isAdmin && (
+                  <ConsolePill icon={RotateCw} label="Hard Refresh" onClick={async () => {
                     try {
                       if ("serviceWorker" in navigator) { const regs = await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map((r) => r.unregister())); }
                       if (typeof caches !== "undefined") { const keys = await caches.keys(); await Promise.all(keys.map((k) => caches.delete(k))); }
                     } catch {}
                     if (typeof window !== "undefined") window.location.reload();
-                  }} title="Clear caches & service workers, then reload">⚡ Hard refresh</Button>
-                  <Button size="sm" variant="destructive" className="text-[11px]" onClick={async () => {
-                    const { error } = await (supabase as any).from("app_settings").update({ force_reload_at: new Date().toISOString() }).eq("id", 1);
-                    if (error) { (await import("sonner")).toast.error(error.message); return; }
-                    (await import("sonner")).toast.success("Reload broadcast sent to every active browser.");
-                  }} title="Force every logged-in browser to reload right now">📣 Broadcast reload</Button>
-                </div>
-              )}
+                  }} />
+                )}
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const { error } = await (supabase as any).from("app_settings").update({ force_reload_at: new Date().toISOString() }).eq("id", 1);
+                      if (error) { (await import("sonner")).toast.error(error.message); return; }
+                      (await import("sonner")).toast.success("Reload broadcast sent to every active browser.");
+                    }}
+                    className="inline-flex items-center gap-1 rounded-full bg-destructive px-2.5 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-destructive-foreground hover:brightness-110 active:scale-95 transition"
+                  >
+                    <Megaphone className="h-3 w-3" />Broadcast Global
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+          </Card>
 
             <Tabs data-tour="admin-panel" value={activeTab} onValueChange={setActiveTab}> 
             <TabsContent value="flags" className="mt-4"><SuspiciousActivityPanel /></TabsContent>
