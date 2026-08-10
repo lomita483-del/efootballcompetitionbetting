@@ -176,45 +176,66 @@ export function AdminPage() {
             style={{ backgroundImage: `linear-gradient(90deg, rgba(3,12,10,0.76) 0%, rgba(3,12,10,0.44) 42%, rgba(3,12,10,0.18) 100%), url(${heroBg || adminConsoleSeed})`, backgroundSize: `auto, ${heroFit === "contain" ? "contain" : heroFit === "fill" ? "100% 100%" : "cover"}`, backgroundPosition: `center, ${heroPos || "center right"}`, backgroundRepeat: "no-repeat" }}
           >
             <div className="absolute inset-x-0 top-0 h-1 bg-gradient-gold" />
-            <div className="relative flex items-center gap-3 flex-wrap">
+            <div className="relative min-h-[120px] sm:min-h-[180px] flex flex-col justify-center">
+              <p className="text-xl sm:text-4xl font-black tracking-tight text-foreground/90 uppercase">Welcome</p>
+              <h1 className="text-2xl sm:text-5xl font-black uppercase leading-[1.05] gradient-gold-text">
+                {isAdmin ? "Administrator" : "Administrator"}
+              </h1>
+              <h2 className="text-2xl sm:text-5xl font-black uppercase leading-[1.05] text-emerald-400">E-Football</h2>
+              <p className="mt-2 text-[11px] sm:text-sm text-muted-foreground">You have full control over the platform.</p>
+              <p className="text-[11px] sm:text-sm font-semibold text-primary">Monitor. Manage. Dominate.</p>
+            </div>
+          </div>
+
+          {/* COMMAND CENTRE bar — console title + global actions */}
+          <Card className="border-primary/25 bg-card/70 rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <button
                 type="button"
                 onClick={() => setActiveTab("analytics")}
-                className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-gradient-gold text-primary-foreground grid place-items-center shadow-gold overflow-hidden ring-2 ring-primary/40 shrink-0 hover:ring-primary/70 transition"
+                className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gradient-gold grid place-items-center shadow-gold overflow-hidden ring-2 ring-primary/40 shrink-0 hover:ring-primary/70 transition"
                 title="Open analytics"
               >
-                <img src={lslLogo} alt="ECB" className="h-14 w-14 sm:h-16 sm:w-16 object-contain" />
+                <img src={lslLogo} alt="ECB" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" />
               </button>
-              <div>
-                <p className="text-[11px] sm:text-xs uppercase tracking-[0.3em] text-muted-foreground">Command center</p>
-                <h1 className="text-3xl sm:text-4xl font-bold gradient-gold-text">{isAdmin ? "Super Admin Console" : "Admin Panel"}</h1>
+              <div className="min-w-0">
+                <p className="text-[8px] sm:text-[10px] uppercase tracking-[0.35em] text-muted-foreground">Command centre</p>
+                <h2 className="text-lg sm:text-2xl font-black gradient-gold-text leading-tight truncate">{isAdmin ? "Super Admin Console" : "Admin Panel"}</h2>
               </div>
-              <Badge variant="outline" className={`ml-auto ${isAdmin ? "border-accent/50 text-accent" : "border-primary/50 text-primary"}`}>
-                {isAdmin ? "Super Admin" : "Admin"}
-              </Badge>
-              {isAdmin && (
-                <div className="flex items-center gap-1 w-full sm:w-auto sm:ml-2">
-                  <ThemeToggleInline />
-                  <Button size="sm" variant="outline" className="text-[11px]" onClick={() => setUnblurred((v) => !v)} title="Toggle frosted-glass blur to verify alignment & layout">
-                    {unblurred ? "🔍 Unblurred" : "✨ Blurred"}
-                  </Button>
-                  <Button size="sm" variant="outline" className="text-[11px]" onClick={() => { if (typeof window !== "undefined") window.location.reload(); }} title="Reload this admin page">⟳ Reload</Button>
-                  <Button size="sm" variant="outline" className="text-[11px]" onClick={async () => {
+              <div className="ml-auto flex items-center gap-1.5 flex-wrap justify-end">
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-emerald-300">
+                  <Shield className="h-3 w-3" />{isAdmin ? "Super Admin" : "Admin"}
+                </span>
+                <ConsolePill icon={Shield} label="Bans" onClick={() => setActiveTab("bannedusers")} />
+                <ConsolePill icon={BarChart3} label="Reports" onClick={() => setActiveTab("reports")} />
+                <ConsolePill icon={Sparkles} label="Activity" onClick={() => setActiveTab("activity")} />
+                {isAdmin && <ThemeToggleInline />}
+                {isAdmin && <ConsolePill icon={Eye} label={unblurred ? "Unblurred" : "Blurred"} onClick={() => setUnblurred((v) => !v)} />}
+                {isAdmin && (
+                  <ConsolePill icon={RotateCw} label="Hard Refresh" onClick={async () => {
                     try {
                       if ("serviceWorker" in navigator) { const regs = await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map((r) => r.unregister())); }
                       if (typeof caches !== "undefined") { const keys = await caches.keys(); await Promise.all(keys.map((k) => caches.delete(k))); }
                     } catch {}
                     if (typeof window !== "undefined") window.location.reload();
-                  }} title="Clear caches & service workers, then reload">⚡ Hard refresh</Button>
-                  <Button size="sm" variant="destructive" className="text-[11px]" onClick={async () => {
-                    const { error } = await (supabase as any).from("app_settings").update({ force_reload_at: new Date().toISOString() }).eq("id", 1);
-                    if (error) { (await import("sonner")).toast.error(error.message); return; }
-                    (await import("sonner")).toast.success("Reload broadcast sent to every active browser.");
-                  }} title="Force every logged-in browser to reload right now">📣 Broadcast reload</Button>
-                </div>
-              )}
+                  }} />
+                )}
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const { error } = await (supabase as any).from("app_settings").update({ force_reload_at: new Date().toISOString() }).eq("id", 1);
+                      if (error) { (await import("sonner")).toast.error(error.message); return; }
+                      (await import("sonner")).toast.success("Reload broadcast sent to every active browser.");
+                    }}
+                    className="inline-flex items-center gap-1 rounded-full bg-destructive px-2.5 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-destructive-foreground hover:brightness-110 active:scale-95 transition"
+                  >
+                    <Megaphone className="h-3 w-3" />Broadcast Global
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+          </Card>
 
             <Tabs data-tour="admin-panel" value={activeTab} onValueChange={setActiveTab}> 
             <TabsContent value="flags" className="mt-4"><SuspiciousActivityPanel /></TabsContent>
@@ -3396,7 +3417,7 @@ function AnalyticsPanel() {
         supabase.from("bets").select("status, stake, potential_payout, created_at"),
         supabase.from("token_transactions").select("amount, kind, created_at"),
         supabase.from("token_requests").select("status, amount"),
-        supabase.from("matches").select("id,name,status,created_at,home_team:teams!home_team_id(name,logo_url),away_team:teams!away_team_id(name,logo_url)").eq("is_virtual", false).in("status", ["live", "scheduled"]).limit(5),
+        supabase.from("matches").select("id,name,status,created_at,home_score,away_score,home_team:teams!home_team_id(name,logo_url),away_team:teams!away_team_id(name,logo_url)").eq("is_virtual", false).in("status", ["live", "scheduled"]).limit(5),
         supabase.from("token_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("withdrawal_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("promo_code_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
@@ -3480,37 +3501,37 @@ function AnalyticsPanel() {
     setActiveTabFromAnalytics(nav, t);
   };
   const row1 = [
-    { icon: Users, value: stats.totalUsers, title: "USERS", sub: "TOTAL USERS", tone: "gold", onClick: () => goTab("users") },
-    { icon: Trophy, value: counts.gangWars ?? 0, title: "GANG WARS", sub: "LIVE & UPCOMING", tone: "gold", onClick: () => goTab("matches") },
-    { icon: AlertTriangle, value: counts.pendingTotal ?? 0, title: "PENDING REQUESTS", sub: "AWAITING ACTION", tone: "amber", onClick: () => goTab("tokens") },
-    { icon: Coins, value: short(stats.circulating), title: "TOTAL VOLUME", sub: "IN CIRCULATION", tone: "gold-lg" },
-    { icon: Calendar, value: counts.openTickets ?? 0, title: "OPEN REPORTS", sub: "REPORTED ITEMS", tone: "gold", onClick: () => goTab("tickets") },
+    { icon: Users, value: stats.totalUsers, title: "TOTAL USERS", sub: "FROM LAST WEEK", tone: "gold", onClick: () => goTab("users") },
+    { icon: Gamepad2, value: counts.gangWars ?? 0, title: "GAMES PLAYED", sub: "LIVE MATCHES", tone: "gold", onClick: () => goTab("matches") },
+    { icon: ClipboardList, value: counts.pendingTotal ?? 0, title: "PENDING REQUESTS", sub: "WAITING REVIEW", tone: "amber", onClick: () => goTab("tokens") },
+    { icon: Coins, value: short(stats.circulating), title: "TOTAL VOLUME", sub: "TODAY'S VOLUME", tone: "gold-lg", onClick: () => goTab("pnl") },
+    { icon: Swords, value: counts.openTickets ?? 0, title: "OPEN DISPUTES", sub: "WAITING ACTION", tone: "gold", onClick: () => goTab("tickets") },
   ];
   const row2 = [
-    { icon: Ticket, value: counts.bookedTickets ?? 0, title: "TICKETS BOOKED", sub: "TOTAL BOOKED", onClick: () => goTab("bettracker") },
-    { icon: Coins, value: counts.pendingTokens ?? 0, title: "TOKEN REQUESTS", sub: "REQUESTED TOKENS", onClick: () => goTab("tokens") },
-    { icon: Wallet, value: counts.pendingWithdrawals ?? 0, title: "WITHDRAWALS", sub: "PENDING PAYOUTS", onClick: () => goTab("withdrawals") },
-    { icon: Tag, value: counts.pendingPromos ?? 0, title: "PENDING REQUESTS", sub: "PENDING PROOFS", onClick: () => goTab("promoreqs") },
-    { icon: AlertTriangle, value: counts.pendingAppeals ?? 0, title: "BAN APPEALS", sub: "PENDING APPEALS", onClick: () => goTab("appeals") },
+    { icon: Ticket, value: counts.openTickets ?? 0, title: "TICKETS PENDING", sub: "NEED RESPONSE", onClick: () => goTab("tickets") },
+    { icon: Megaphone, value: counts.pendingPromos ?? 0, title: "PROMO REQUESTS", sub: "PENDING TODAY", onClick: () => goTab("promoreqs") },
+    { icon: Wallet, value: counts.pendingWithdrawals ?? 0, title: "WITHDRAWALS", sub: "PENDING APPROVAL", onClick: () => goTab("withdrawals") },
+    { icon: Coins, value: counts.pendingTokens ?? 0, title: "PENDING DEPOSITS", sub: "PENDING APPROVAL", onClick: () => goTab("tokens") },
+    { icon: Users, value: counts.pendingAppeals ?? 0, title: "DAILY REFERRALS", sub: "FROM ALL SOURCES", onClick: () => goTab("referrals") },
   ];
   const row4 = [
-    { icon: Users, value: stats.totalUsers, title: "TOTAL USERS", onClick: () => goTab("users") },
+    { icon: Users, value: stats.totalUsers, title: "TOTAL LOGINS", onClick: () => goTab("users") },
     { icon: Shield, value: stats.bannedUsers, title: "BANNED USERS", onClick: () => goTab("bannedusers") },
-    { icon: Coins, value: short(stats.circulating), title: "TOKENS CIRCULATING", onClick: () => goTab("pnl") },
+    { icon: Coins, value: short(stats.circulating), title: "TOTAL CIRCULATING", onClick: () => goTab("pnl") },
     { icon: Ticket, value: stats.totalBets, title: "TOTAL BETS", onClick: () => goTab("bettracker") },
-    { icon: Trophy, value: stats.wonBets, title: "WON BETS", onClick: () => goTab("wonbets") },
+    { icon: Trophy, value: stats.wonBets, title: "WIN BETS", onClick: () => goTab("wonbets") },
   ];
   const row5 = [
     { icon: X, value: stats.lostBets, title: "LOST BETS", onClick: () => goTab("lostbets") },
     { icon: Eye, value: stats.openBets, title: "OPEN BETS", onClick: () => goTab("bettracker") },
-    { icon: Coins, value: short(stats.totalStaked), title: "TOTAL STAKED", onClick: () => goTab("pnl") },
+    { icon: Coins, value: short(stats.totalStaked), title: "TOTAL STAKES", onClick: () => goTab("pnl") },
     { icon: Wallet, value: short(stats.totalPaid), title: "TOTAL PAID OUT", onClick: () => goTab("pnl") },
-    { icon: BarChart3, value: short(stats.houseEdge), title: "NET (HOUSE)", onClick: () => goTab("pnl") },
+    { icon: BarChart3, value: short(stats.houseEdge), title: "POT MONEY", onClick: () => goTab("pnl") },
   ];
   const row6 = [
-    { icon: Check, value: short(stats.approvedRequests), title: "TOKENS APPROVED", onClick: () => goTab("tokens") },
-    { icon: Coins, value: short(stats.credits), title: "TOKEN CREDITS", onClick: () => goTab("tokenmovement") },
-    { icon: Coins, value: short(stats.debits), title: "TOKEN DEBITS", onClick: () => goTab("tokenmovement") },
+    { icon: Check, value: short(stats.approvedRequests), title: "TICKETS APPROVED", onClick: () => goTab("tokens") },
+    { icon: Coins, value: short(stats.credits), title: "TODAY DEPOSITS", onClick: () => goTab("tokenmovement") },
+    { icon: Coins, value: short(stats.debits), title: "TODAY WITHDRAWALS", onClick: () => goTab("tokenmovement") },
   ];
 
   const ts = (ts: string) => {
@@ -3577,109 +3598,113 @@ function AnalyticsPanel() {
         {row5.map((x) => <MetricSquare key={x.title} {...x} compact />)}
       </div>
 
-      {/* ROW 6 — 3 wider squares + image cell */}
+      {/* ROW 6 — 3 wider squares + system logs cell */}
       <div className="grid grid-cols-4 gap-2 sm:gap-3">
         {row6.map((x) => <MetricSquare key={x.title} {...x} compact />)}
-        <Card className="overflow-hidden border-primary/20 bg-card/60 relative min-h-[80px] group">
-          <img src={leagueSkullFire} alt="League" loading="lazy" width={512} height={512}
-               className="absolute inset-0 h-full w-full object-cover scale-110 animate-pulse-glow group-hover:scale-125 transition-transform duration-[3000ms]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-          <div className="absolute inset-x-0 bottom-1 text-center text-[10px] uppercase tracking-widest text-white font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">League</div>
-        </Card>
+        <button type="button" onClick={() => goTab("audit")} className="relative overflow-hidden rounded-xl border border-primary/30 bg-card/60 min-h-[46px] sm:min-h-[58px] group">
+          <img src={leagueSkullFire} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-[3000ms]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+          <span className="absolute inset-x-0 bottom-1 text-center text-[7px] sm:text-[9px] font-black uppercase tracking-widest text-white drop-shadow">View System Logs</span>
+        </button>
       </div>
 
-      {/* ROW 7 — Recent Activity + Broadcast Center | Live Gang Wars + big logo + Leaderboard | Top 3 Bettors + icon tiles */}
-      <div className="grid grid-cols-3 gap-3">
-        {/* LEFT: Recent Activity, then Broadcast Center — admin only */}
-        {isAdmin && (
-        <div className="space-y-3">
-          <PanelBlock title="RECENT ACTIVITY" accent="sky" count={activity.length} hideWhenEmpty onView={() => goTab("activity")}>
-            {activity.length === 0 && <div className="text-[10px] text-muted-foreground">No activity yet</div>}
-            {activity.slice(0, 5).map((a, i) => (
-              <button key={i} onClick={() => goTab("audit")} className="w-full text-left flex items-start gap-1.5 text-[9px] sm:text-xs py-1 border-b border-border/40 last:border-0 hover:bg-sky-500/10 rounded transition">
-                <Sparkles className="h-3 w-3 text-sky-400 shrink-0 mt-0.5" />
-                <div className="min-w-0 flex-1">
-                  <div className="text-foreground truncate">{a.action?.replace(/_/g, " ")}</div>
-                  <div className="text-muted-foreground text-[8px] sm:text-[10px]">{ts(a.created_at)}</div>
+      {/* ROW 7 — Broadcast Center | Live Game Stats | Top Platform + League Arena */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        {/* LEFT: Broadcast Center */}
+        <Card className="border-primary/25 bg-card/70 p-3 flex flex-col">
+          <div className="mb-2 flex items-center gap-2">
+            <span className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-primary">Broadcast Center</span>
+            <span className="rounded-full bg-emerald-500/20 px-1.5 py-px text-[7px] font-black uppercase tracking-widest text-emerald-300">New</span>
+            <button onClick={() => goTab("broadcast")} className="ml-auto text-muted-foreground hover:text-primary"><X className="h-3 w-3" /></button>
+          </div>
+          <div className="flex-1 space-y-2">
+            {broadcasts.length === 0 && <div className="text-[10px] text-muted-foreground">No broadcasts yet</div>}
+            {broadcasts.slice(0, 2).map((b) => (
+              <button key={b.id} onClick={() => goTab("broadcast")} className="w-full rounded-lg border border-primary/15 bg-background/40 p-2 text-left hover:bg-primary/5 transition">
+                <div className="flex items-baseline justify-between gap-2">
+                  <div className="truncate text-[10px] sm:text-xs"><span className="text-muted-foreground">Title: </span><span className="font-semibold text-foreground">{b.title || "Broadcast"}</span></div>
+                  <div className="shrink-0 text-[7px] sm:text-[9px] text-muted-foreground">{ts(b.created_at)}</div>
                 </div>
+                {b.body && <div className="mt-1 text-[9px] sm:text-[11px] text-muted-foreground line-clamp-2"><span className="uppercase tracking-widest text-[7px]">Message: </span>{b.body}</div>}
+                <div className="mt-1 text-[8px] sm:text-[10px] text-muted-foreground">Sent By: {isAdmin ? "Super Admin" : "Admin"}</div>
               </button>
             ))}
-          </PanelBlock>
-          <PanelBlock title="BROADCAST CENTER" compact count={broadcasts.length} hideWhenEmpty onView={() => goTab("broadcast")}>
-            {broadcasts.length === 0 && <div className="text-[10px] text-muted-foreground">No broadcasts</div>}
-            {broadcasts.map((b) => (
-              <button key={b.id} onClick={() => goTab("broadcast")} className="w-full text-left text-[9px] sm:text-xs py-1 border-b border-primary/10 last:border-0 hover:bg-primary/5 rounded px-1 transition">
-                <div className="flex items-center gap-1"><Megaphone className="h-2.5 w-2.5 text-primary shrink-0" /><div className="truncate text-foreground font-semibold">{b.title || "Broadcast"}</div></div>
-                {b.body && <div className="text-[8px] sm:text-[10px] text-muted-foreground truncate pl-3.5">{b.body}</div>}
-                <div className="text-[7px] sm:text-[9px] text-muted-foreground pl-3.5">{ts(b.created_at)}</div>
-              </button>
-            ))}
-          </PanelBlock>
-        </div>
-        )}
+          </div>
+          <Button size="sm" variant="outline" className="mt-2 h-7 w-full border-primary/40 text-[9px] uppercase tracking-widest text-primary" onClick={() => goTab("broadcast")}>View All Broadcasts</Button>
+        </Card>
 
-        {/* MIDDLE: Live Gang Wars, big league logo, Leaderboard mini widget */}
+        {/* MIDDLE: Live Game Stats */}
+        <Card className="border-primary/25 bg-card/70 p-3 flex flex-col">
+          <div className="mb-2 flex items-center gap-2">
+            <span className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-primary">Live Game Stats</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-destructive/90 px-1.5 py-px text-[7px] font-black uppercase tracking-widest text-destructive-foreground">
+              <span className="h-1 w-1 rounded-full bg-white animate-ping" />Live
+            </span>
+            <button onClick={() => nav({ to: "/matches" })} className="ml-auto text-[8px] sm:text-[10px] text-muted-foreground hover:text-primary">View All ›</button>
+          </div>
+          <div className="flex-1 space-y-2">
+            {liveMatches.length === 0 && <div className="text-[10px] text-muted-foreground">No live games</div>}
+            {liveMatches.slice(0, 3).map((m: any) => (
+              <button key={m.id} onClick={() => nav({ to: "/matches/$matchId", params: { matchId: m.id } })}
+                className="flex w-full items-center gap-2 rounded-lg border border-primary/20 bg-background/40 px-2 py-2 hover:border-primary/50 hover:bg-primary/5 transition">
+                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-destructive/50 bg-destructive/15 text-[6px] font-black uppercase text-destructive">Live</span>
+                <span className="flex-1 truncate text-center text-[10px] sm:text-xs font-bold uppercase tracking-wide text-foreground">
+                  {m.home_team?.name ?? "Home"} <span className="text-muted-foreground">vs</span> {m.away_team?.name ?? "Away"}
+                </span>
+                <span className="shrink-0 text-[11px] sm:text-sm font-black tabular-nums text-primary">{m.home_score ?? 0} - {m.away_score ?? 0}</span>
+              </button>
+            ))}
+          </div>
+        </Card>
+
+        {/* RIGHT: Top Platform + League Arena (occupies the old Top Bettors space) */}
         <div className="space-y-3">
-          <PanelBlock title="LIVE GANG WARS" accent="rose" compact count={liveMatches.length} hideWhenEmpty onView={() => nav({ to: "/matches" })}>
-            {liveMatches.length === 0 && <div className="text-[10px] text-muted-foreground">No live wars</div>}
-            {liveMatches.slice(0, 2).map((m: any) => {
-              const home = m.home_team; const away = m.away_team;
-              const initial = (n?: string) => (n ? n.charAt(0).toUpperCase() : "?");
-              return (
-                <button key={m.id} onClick={() => nav({ to: "/matches/$matchId", params: { matchId: m.id } })} className="w-full flex items-center gap-1.5 text-[9px] sm:text-xs py-1 border-b border-border/40 last:border-0 hover:bg-rose-500/10 rounded px-1 transition">
-                  {home?.logo_url ? <img src={home.logo_url} alt="" className="h-5 w-5 rounded-full object-cover border border-rose-500/40" /> : <div className="h-5 w-5 rounded-full bg-rose-500/20 grid place-items-center text-[8px] font-bold text-rose-300 border border-rose-500/40">{initial(home?.name)}</div>}
-                  <div className="flex-1 min-w-0 text-center text-foreground font-semibold truncate">{home?.name ?? "Home"} <span className="text-muted-foreground">vs</span> {away?.name ?? "Away"}</div>
-                  {away?.logo_url ? <img src={away.logo_url} alt="" className="h-5 w-5 rounded-full object-cover border border-rose-500/40" /> : <div className="h-5 w-5 rounded-full bg-rose-500/20 grid place-items-center text-[8px] font-bold text-rose-300 border border-rose-500/40">{initial(away?.name)}</div>}
-                </button>
-              );
-            })}
-          </PanelBlock>
-          {isAdmin && <MiniLeaderboardPanel onOpen={() => goTab("leaderboard")} />}
           <Card className="border-primary/25 bg-card/70 p-3">
-            <div className="mb-2 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-primary">
-              <BarChart3 className="h-3 w-3" /> Platform Pulse
+            <div className="mb-2 flex items-start gap-2">
+              <div>
+                <div className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-primary">Top Platform</div>
+                <div className="text-[7px] uppercase tracking-[0.3em] text-muted-foreground">Stats overview</div>
+              </div>
+              <button onClick={() => goTab("pnl")} className="ml-auto text-[8px] sm:text-[10px] text-muted-foreground hover:text-primary">View More Platforms</button>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { l: "Live wars", v: liveMatches.length },
-                { l: "Broadcasts", v: broadcasts.length },
-                { l: "Highlights", v: highlights.length },
-                { l: "Events", v: event ? 1 : 0 },
-              ].map((s) => (
-                <div key={s.l} className="rounded-lg border border-primary/20 bg-background/50 px-2 py-2">
-                  <div className="text-base font-black text-primary leading-none">{s.v}</div>
-                  <div className="mt-1 text-[8px] uppercase tracking-widest text-muted-foreground">{s.l}</div>
+            <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-background/40 p-2">
+              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-gradient-gold text-primary-foreground"><Trophy className="h-3.5 w-3.5" /></span>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[10px] sm:text-xs font-black uppercase text-primary">E-Football Betting</div>
+                <div className="truncate text-[7px] sm:text-[9px] text-muted-foreground">
+                  Total Users {fmt(stats.totalUsers)} · Total Volume {short(stats.circulating)} · Ranked #1
                 </div>
-              ))}
+              </div>
+              <div className="shrink-0 text-[9px] sm:text-[11px] font-black tabular-nums text-emerald-400">{short(stats.totalStaked)}</div>
             </div>
+            <Button size="sm" variant="outline" className="mt-2 h-6 w-full border-primary/40 text-[8px] uppercase tracking-widest text-primary" onClick={() => goTab("pnl")}>View More Platforms</Button>
           </Card>
-        </div>
 
-        {/* RIGHT: Top 3 Bettors, then two small icon tiles */}
-        <div className="space-y-3">
-          <TopBetsPanel limit={3} />
-          <Card className="group relative aspect-[16/10] overflow-hidden border-primary/30 bg-card/60">
+          <Card className="group relative min-h-[220px] flex-1 overflow-hidden border-primary/30 bg-card/60">
             <img
               src={arenaImg || leagueSkullFire}
-              alt="Live league arena"
+              alt="League arena"
               loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover animate-[kenburns_18s_ease-in-out_infinite_alternate]"
+              className="absolute inset-0 h-full w-full animate-[kenburns_18s_ease-in-out_infinite_alternate]"
               style={{ objectFit: (arenaFit as any) || "cover", objectPosition: arenaPos || "center" }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-primary/25 to-transparent opacity-0 animate-[shimmer-sweep_4s_linear_infinite]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 animate-[shimmer-sweep_4s_linear_infinite]" />
             <span className="absolute left-2 top-2 inline-flex items-center gap-1.5 rounded-full border border-destructive/50 bg-black/70 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-destructive">
-              <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-ping" />
-              Live
+              <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-ping" />Live
             </span>
-            <div className="absolute inset-x-0 bottom-1 text-center text-[10px] font-black uppercase tracking-widest text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-              League Arena
+            <div className="absolute inset-x-0 bottom-0 p-3 text-center">
+              <div className="text-lg sm:text-2xl font-black uppercase tracking-[0.12em] text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">League Arena</div>
+              <div className="text-[8px] sm:text-[10px] uppercase tracking-[0.35em] text-primary">Compete. Win. Repeat.</div>
+              <Button size="sm" className="mt-2 h-7 rounded-full bg-gradient-gold px-4 text-[9px] font-black uppercase tracking-widest text-primary-foreground" onClick={() => nav({ to: "/matches" })}>
+                <Trophy className="mr-1 h-3 w-3" />Enter Arena
+              </Button>
             </div>
           </Card>
         </div>
       </div>
 
-      {/* Event countdown — admin only, tucked under the 3-column row */}
+      {/* Event countdown — admin only */}
       {isAdmin && event && (
         <PanelBlock title="EVENT COUNTDOWN" compact count={1} onView={() => goTab("events")}>
           <button onClick={() => goTab("events")} className="relative w-full min-h-24 text-left rounded-lg p-2 transition space-y-1 overflow-hidden border border-primary/20 bg-card/50">
@@ -3692,9 +3717,8 @@ function AnalyticsPanel() {
         </PanelBlock>
       )}
 
-      {/* Highlights hub — kept, full width below */}
+      {/* Highlights hub */}
       <PanelBlock title="HIGHLIGHTS HUB" accent="violet" count={highlights.length} hideWhenEmpty onView={() => goTab("content")}>
-        {highlights.length === 0 && <div className="text-[10px] text-muted-foreground">No highlights yet</div>}
         {highlights.slice(0, 4).map((h) => (
           <button key={h.id} onClick={() => goTab("content")} className="w-full flex items-center gap-1.5 text-[9px] sm:text-xs py-1 border-b border-border/40 last:border-0 hover:bg-violet-500/10 rounded px-1 transition">
             {h.media_type === "video" ? <Play className="h-3 w-3 text-violet-400 shrink-0" /> : <ImageIcon className="h-3 w-3 text-violet-400 shrink-0" />}
@@ -3705,37 +3729,63 @@ function AnalyticsPanel() {
         ))}
       </PanelBlock>
 
-      {/* ROW 9 — module tiles (admin-only tiles hidden from moderators) */}
-      <div className="grid grid-cols-6 gap-3">
+      {/* ROW 8 — module tiles */}
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
         {[
-          { l: "VIRTUAL", s: "Manage virtual matches and rounds", t: "virtual", img: tileVirtualAsset.url },
-          { l: "BATTLE", s: "Manage matches, fixtures and outcomes", t: "matches", img: tileBattleAsset.url },
-          { l: "CHALLENGES", s: "Create and manage gang challenges", t: "challenges", img: tileChallengesAsset.url },
-          { l: "REFERRALS", s: "Manage referrals and commissions", t: "referrals", img: tileReferrals },
-          { l: "USERS", s: "Manage users, profiles and access", t: "users", img: tileUsersAsset.url },
-          { l: "CLANS", s: "Manage gangs, teams and players", t: "clans", img: tileClansAsset.url },
+          { l: "VIRTUAL STADIUM", s: "Manage virtual matches and events", t: "virtual", img: tileVirtualAsset.url },
+          { l: "BATTLE ARENA", s: "Manage real-time tournaments", t: "matches", img: tileBattleAsset.url },
+          { l: "CHALLENGES", s: "Create and manage challenges", t: "challenges", img: tileChallengesAsset.url },
+          { l: "REFERRALS", s: "Manage referral rewards", t: "referrals", img: tileReferrals },
+          { l: "USER REWARDS", s: "Manage user rewards and points", t: "users", img: tileUsersAsset.url },
+          { l: "CLANS", s: "Manage clans and tournaments", t: "clans", img: tileClansAsset.url },
         ].filter((m) => isAdmin || MOD_SAFE_TABS.has(m.t)).map((m) => (
-          <Card key={m.l} className="border-primary/20 bg-card/60 p-2 sm:p-3 flex flex-col">
-            <button type="button" onClick={() => goTab(m.t)} className="relative aspect-square w-full mb-1 rounded overflow-hidden border border-primary/20 hover:border-primary/60 transition active:scale-95">
+          <Card key={m.l} className="border-primary/25 bg-card/60 p-2 flex flex-col">
+            <button type="button" onClick={() => goTab(m.t)} className="relative aspect-[4/3] w-full mb-1.5 rounded-lg overflow-hidden border border-primary/25 hover:border-primary/60 transition active:scale-95">
               <img src={m.img} alt={m.l} loading="lazy" width={512} height={512} className="w-full h-full object-cover" />
-              <img src={lslLogo} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 m-auto h-1/2 w-1/2 object-contain opacity-15 mix-blend-screen drop-shadow-[0_4px_18px_rgba(0,0,0,0.65)]" />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
             </button>
-            <div className="text-[8px] sm:text-[10px] font-bold text-primary leading-tight">{m.l}</div>
-            <div className="text-[6px] sm:text-[8px] text-muted-foreground leading-tight mt-0.5 line-clamp-2">{m.s}</div>
-            <Button size="sm" variant="outline" className="mt-1 h-5 sm:h-6 text-[7px] sm:text-[9px] border-primary/40 text-primary px-1" onClick={() => goTab(m.t)}>Manage</Button>
+            <div className="text-[7px] sm:text-[9px] font-black uppercase tracking-widest text-primary leading-tight text-center">{m.l}</div>
+            <div className="mt-0.5 text-[6px] sm:text-[8px] text-muted-foreground leading-tight text-center line-clamp-2">{m.s}</div>
+            <Button size="sm" variant="outline" className="mt-1.5 h-6 w-full border-primary/40 text-primary text-[7px] sm:text-[9px] uppercase tracking-widest" onClick={() => goTab(m.t)}>Access</Button>
           </Card>
         ))}
       </div>
 
+      {/* PLATFORM POLICE */}
+      {isAdmin && (
+        <Card className="border-primary/25 bg-card/60 p-3">
+          <div className="mb-2 text-[9px] sm:text-[11px] font-black uppercase tracking-[0.25em] text-primary">Platform Police</div>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            {[
+              { i: Users, v: stats.bannedUsers, l: "Live bans", t: "bannedusers" },
+              { i: Eye, v: counts.pendingAppeals ?? 0, l: "Suspicious", t: "flags" },
+              { i: AlertTriangle, v: 0, l: "Fraud alerts", t: "risk" },
+              { i: LifeBuoy, v: counts.openTickets ?? 0, l: "Complaints", t: "tickets" },
+              { i: Shield, v: 0, l: "Warnings", t: "audit" },
+            ].map((x) => (
+              <button key={x.l} onClick={() => goTab(x.t)} className="flex items-center gap-2 rounded-lg border border-primary/20 bg-background/40 px-2 py-2 hover:border-primary/50 hover:bg-primary/5 transition text-left">
+                <x.i className="h-4 w-4 shrink-0 text-primary/80" />
+                <div className="min-w-0">
+                  <div className="text-xs sm:text-sm font-black leading-none text-foreground">{x.v}</div>
+                  <div className="mt-0.5 text-[6px] sm:text-[8px] uppercase tracking-[0.2em] text-muted-foreground">{x.l}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* SYSTEM STATUS */}
       {isAdmin && (
       <Card className="border-primary/20 bg-card/60 p-3">
-        <div className="text-[10px] sm:text-xs font-bold tracking-widest text-primary mb-2">SYSTEM STATUS <span className="text-muted-foreground font-normal">(COMING SOON)</span></div>
-        <div className="grid grid-cols-5 gap-1 sm:gap-2">
-          {["Platform", "Database", "Payments", "Broadcast", "AI Engine"].map((s) => (
-            <div key={s} className="flex items-center justify-between gap-1 text-[8px] sm:text-[10px] px-1.5 py-1 rounded bg-background/40 border border-primary/10">
+        <div className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.25em] text-primary mb-2">
+          System Status <span className="text-muted-foreground font-normal normal-case tracking-normal">(all systems operational)</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-6 gap-1.5 sm:gap-2">
+          {["Platform", "Database", "Payments", "Broadcast", "AI Engine", "Security"].map((s) => (
+            <div key={s} className="flex items-center gap-1.5 text-[8px] sm:text-[10px] px-2 py-1.5 rounded-lg bg-background/40 border border-primary/10">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
               <span className="text-foreground truncate">{s}</span>
-              <span className="text-emerald-400 font-bold">●</span>
             </div>
           ))}
         </div>
@@ -3836,16 +3886,15 @@ function QuickActionsBar({ onOpen, actions: actionsProp }: { onOpen: (t: string)
   const actions = [...(actionsProp ?? QUICK_ACTIONS)].sort((a, b) => a.l.localeCompare(b.l));
   return (
     <Card className="border-primary/20 bg-card/60 p-3">
-      <div className="text-[10px] sm:text-xs font-bold tracking-widest text-primary mb-2">QUICK ACTIONS</div>
-      <div className="overflow-x-auto pb-2 -mb-2">
-        {/* 4 buttons stacked per column; columns flow horizontally and scroll left/right */}
-        <div className="grid grid-rows-4 grid-flow-col auto-cols-[80px] sm:auto-cols-[96px] gap-2 w-max">
+      <div className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.25em] text-primary mb-2">Quick Actions</div>
+      <div>
+        <div className="grid grid-cols-4 sm:grid-cols-7 lg:grid-cols-10 gap-1.5 sm:gap-2">
           {actions.map((q, idx) => {
             const c = QA_PALETTE[idx % QA_PALETTE.length];
             return (
-              <button key={q.l} onClick={() => onOpen(q.t)} className={`flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-lg border active:scale-95 transition min-h-[62px] ${c.bd}`}>
-                <q.i className={`h-4 w-4 sm:h-[18px] sm:w-[18px] ${c.ic}`} />
-                <span className="text-[8px] sm:text-[10px] text-foreground text-center leading-tight font-semibold">{q.l}</span>
+              <button key={q.l} onClick={() => onOpen(q.t)} className={`flex flex-col items-center justify-center gap-1.5 p-2 rounded-lg border bg-background/40 active:scale-95 transition min-h-[54px] ${c.bd}`}>
+                <q.i className={`h-4 w-4 ${c.ic}`} />
+                <span className="text-[7px] sm:text-[9px] text-foreground text-center leading-tight font-semibold">{q.l}</span>
               </button>
             );
           })}
@@ -3901,23 +3950,30 @@ function MetricSquare({ icon: Icon, value, title, sub, tone, compact, onClick }:
   })();
   const toneColor =
     numeric == null ? "text-foreground" : numeric > 0 ? "text-emerald-400" : numeric < 0 ? "text-red-400" : "text-foreground";
-  const sizeCls = tone === "gold-lg"
-    ? "text-[10px] sm:text-base leading-tight"
-    : compact
-    ? "text-xs sm:text-lg leading-none"
-    : "text-base sm:text-2xl leading-none";
-  const valueClass = `${sizeCls} font-black ${toneColor}`;
-  const content = (
-    <>
-      <Icon className="h-2.5 w-2.5 sm:h-4 sm:w-4 text-primary/70 mb-0.5" />
-      <div className={valueClass}>{value}</div>
-      <div className="mt-0.5">
-        <div className="text-[6px] sm:text-[9px] uppercase tracking-wider text-muted-foreground leading-tight font-semibold">{title}</div>
-        {sub && <div className="text-[5px] sm:text-[8px] uppercase tracking-wider text-muted-foreground/70 leading-tight">{sub}</div>}
+  const highlight = tone === "gold-lg";
+  const content = compact ? (
+    <div className="flex items-center gap-2 w-full">
+      <span className="grid h-6 w-6 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-lg border border-primary/30 bg-primary/10">
+        <Icon className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="text-[6px] sm:text-[9px] uppercase tracking-[0.18em] text-muted-foreground font-semibold leading-tight truncate">{title}</div>
+        <div className={`text-xs sm:text-lg font-black leading-tight ${toneColor}`}>{value}</div>
       </div>
-    </>
+    </div>
+  ) : (
+    <div className="flex items-start gap-2 w-full">
+      <span className={`grid h-8 w-8 sm:h-11 sm:w-11 shrink-0 place-items-center rounded-xl border ${highlight ? "border-primary/50 bg-primary/20" : "border-primary/25 bg-primary/10"}`}>
+        <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${highlight ? "text-primary" : "text-primary/80"}`} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="text-[6px] sm:text-[9px] uppercase tracking-[0.2em] text-muted-foreground font-bold leading-tight truncate">{title}</div>
+        <div className={`mt-0.5 text-base sm:text-2xl font-black leading-none ${toneColor}`}>{value}</div>
+        {sub && <div className="mt-1 text-[5px] sm:text-[8px] uppercase tracking-[0.15em] text-muted-foreground/70 leading-tight truncate">{sub}</div>}
+      </div>
+    </div>
   );
-  const baseCls = "border-primary/20 bg-card/60 p-1.5 sm:p-3 flex flex-col justify-between min-h-[68px] sm:min-h-[100px] hover:border-primary/50 hover:bg-primary/10 active:scale-95 transition cursor-pointer text-left w-full";
+  const baseCls = `rounded-xl bg-card/60 ${compact ? "p-1.5 sm:p-2.5 min-h-[46px] sm:min-h-[58px]" : "p-2 sm:p-3 min-h-[68px] sm:min-h-[92px]"} flex items-center hover:border-primary/50 hover:bg-primary/10 active:scale-[0.98] transition cursor-pointer text-left w-full ${highlight ? "border-primary/60 shadow-[0_0_30px_-14px_rgba(251,191,36,0.8)]" : "border-primary/20"}`;
   if (onClick) {
     return (
       <button type="button" onClick={onClick} className={`rounded-xl border shadow ${baseCls}`}>
@@ -3927,6 +3983,18 @@ function MetricSquare({ icon: Icon, value, title, sub, tone, compact, onClick }:
   }
   return (
     <Card className={baseCls}>{content}</Card>
+  );
+}
+
+function ConsolePill({ icon: Icon, label, onClick }: { icon: any; label: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-background/60 px-2.5 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-primary hover:bg-primary/15 active:scale-95 transition"
+    >
+      <Icon className="h-3 w-3" />{label}
+    </button>
   );
 }
 
