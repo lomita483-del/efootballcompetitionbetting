@@ -3417,7 +3417,7 @@ function AnalyticsPanel() {
         supabase.from("bets").select("status, stake, potential_payout, created_at"),
         supabase.from("token_transactions").select("amount, kind, created_at"),
         supabase.from("token_requests").select("status, amount"),
-        supabase.from("matches").select("id,name,status,created_at,home_team:teams!home_team_id(name,logo_url),away_team:teams!away_team_id(name,logo_url)").eq("is_virtual", false).in("status", ["live", "scheduled"]).limit(5),
+        supabase.from("matches").select("id,name,status,created_at,home_score,away_score,home_team:teams!home_team_id(name,logo_url),away_team:teams!away_team_id(name,logo_url)").eq("is_virtual", false).in("status", ["live", "scheduled"]).limit(5),
         supabase.from("token_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("withdrawal_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("promo_code_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
