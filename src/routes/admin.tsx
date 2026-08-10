@@ -3922,23 +3922,30 @@ function MetricSquare({ icon: Icon, value, title, sub, tone, compact, onClick }:
   })();
   const toneColor =
     numeric == null ? "text-foreground" : numeric > 0 ? "text-emerald-400" : numeric < 0 ? "text-red-400" : "text-foreground";
-  const sizeCls = tone === "gold-lg"
-    ? "text-[10px] sm:text-base leading-tight"
-    : compact
-    ? "text-xs sm:text-lg leading-none"
-    : "text-base sm:text-2xl leading-none";
-  const valueClass = `${sizeCls} font-black ${toneColor}`;
-  const content = (
-    <>
-      <Icon className="h-2.5 w-2.5 sm:h-4 sm:w-4 text-primary/70 mb-0.5" />
-      <div className={valueClass}>{value}</div>
-      <div className="mt-0.5">
-        <div className="text-[6px] sm:text-[9px] uppercase tracking-wider text-muted-foreground leading-tight font-semibold">{title}</div>
-        {sub && <div className="text-[5px] sm:text-[8px] uppercase tracking-wider text-muted-foreground/70 leading-tight">{sub}</div>}
+  const highlight = tone === "gold-lg";
+  const content = compact ? (
+    <div className="flex items-center gap-2 w-full">
+      <span className="grid h-6 w-6 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-lg border border-primary/30 bg-primary/10">
+        <Icon className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="text-[6px] sm:text-[9px] uppercase tracking-[0.18em] text-muted-foreground font-semibold leading-tight truncate">{title}</div>
+        <div className={`text-xs sm:text-lg font-black leading-tight ${toneColor}`}>{value}</div>
       </div>
-    </>
+    </div>
+  ) : (
+    <div className="flex items-start gap-2 w-full">
+      <span className={`grid h-8 w-8 sm:h-11 sm:w-11 shrink-0 place-items-center rounded-xl border ${highlight ? "border-primary/50 bg-primary/20" : "border-primary/25 bg-primary/10"}`}>
+        <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${highlight ? "text-primary" : "text-primary/80"}`} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="text-[6px] sm:text-[9px] uppercase tracking-[0.2em] text-muted-foreground font-bold leading-tight truncate">{title}</div>
+        <div className={`mt-0.5 text-base sm:text-2xl font-black leading-none ${toneColor}`}>{value}</div>
+        {sub && <div className="mt-1 text-[5px] sm:text-[8px] uppercase tracking-[0.15em] text-muted-foreground/70 leading-tight truncate">{sub}</div>}
+      </div>
+    </div>
   );
-  const baseCls = "border-primary/20 bg-card/60 p-1.5 sm:p-3 flex flex-col justify-between min-h-[68px] sm:min-h-[100px] hover:border-primary/50 hover:bg-primary/10 active:scale-95 transition cursor-pointer text-left w-full";
+  const baseCls = `rounded-xl bg-card/60 ${compact ? "p-1.5 sm:p-2.5 min-h-[46px] sm:min-h-[58px]" : "p-2 sm:p-3 min-h-[68px] sm:min-h-[92px]"} flex items-center hover:border-primary/50 hover:bg-primary/10 active:scale-[0.98] transition cursor-pointer text-left w-full ${highlight ? "border-primary/60 shadow-[0_0_30px_-14px_rgba(251,191,36,0.8)]" : "border-primary/20"}`;
   if (onClick) {
     return (
       <button type="button" onClick={onClick} className={`rounded-xl border shadow ${baseCls}`}>
@@ -3948,6 +3955,18 @@ function MetricSquare({ icon: Icon, value, title, sub, tone, compact, onClick }:
   }
   return (
     <Card className={baseCls}>{content}</Card>
+  );
+}
+
+function ConsolePill({ icon: Icon, label, onClick }: { icon: any; label: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-background/60 px-2.5 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-primary hover:bg-primary/15 active:scale-95 transition"
+    >
+      <Icon className="h-3 w-3" />{label}
+    </button>
   );
 }
 
