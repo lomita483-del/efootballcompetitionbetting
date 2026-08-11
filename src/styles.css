@@ -536,10 +536,10 @@ html.light body {
       0 18px 50px -18px oklch(0 0 0 / 0.70);
   }
 
-  .admin-console-page .rounded-xl,
-  .admin-console-page .rounded-2xl,
-  .admin-console-page [class*="bg-card"],
-  .admin-console-page [class*="bg-background"] {
+  .admin-console-page .rounded-xl:not(.admin-hero-frame),
+  .admin-console-page .rounded-2xl:not(.admin-hero-frame),
+  .admin-console-page [class*="bg-card"]:not(.admin-hero-frame),
+  .admin-console-page [class*="bg-background"]:not(.admin-hero-frame) {
     background: linear-gradient(135deg, oklch(0.11 0.035 165), oklch(0.075 0.025 188)) !important;
     border-width: 1.5px !important;
     border-color: oklch(0.78 0.16 88 / 0.55) !important;
