@@ -593,11 +593,10 @@ html.light body {
 
   /* Unblurred mode — strip the frosted-glass blur so admins can verify
      sensitive-data alignment & layout against a clean, solid surface. */
-  .admin-console-page.admin-unblurred .admin-hero-frame,
-  .admin-console-page.admin-unblurred .rounded-xl,
-  .admin-console-page.admin-unblurred .rounded-2xl,
-  .admin-console-page.admin-unblurred [class*="bg-card"],
-  .admin-console-page.admin-unblurred [class*="bg-background"],
+  .admin-console-page.admin-unblurred .rounded-xl:not(.admin-hero-frame),
+  .admin-console-page.admin-unblurred .rounded-2xl:not(.admin-hero-frame),
+  .admin-console-page.admin-unblurred [class*="bg-card"]:not(.admin-hero-frame),
+  .admin-console-page.admin-unblurred [class*="bg-background"]:not(.admin-hero-frame),
   .admin-console-page.admin-unblurred .glass,
   .admin-console-page.admin-unblurred .glass-strong,
   .admin-console-page.admin-unblurred .glass-ice,
@@ -606,6 +605,12 @@ html.light body {
   .admin-console-page.admin-unblurred [role="combobox"] {
     backdrop-filter: none !important;
     background: linear-gradient(135deg, oklch(0.10 0.03 165), oklch(0.07 0.02 190)) !important;
+  }
+
+  /* The welcome banner carries its uploaded image inline — never override it. */
+  .admin-console-page .admin-hero-frame,
+  .admin-console-page.admin-unblurred .admin-hero-frame {
+    backdrop-filter: none !important;
   }
 }
 
