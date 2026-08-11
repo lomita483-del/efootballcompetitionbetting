@@ -4252,14 +4252,14 @@ export type Database = {
             foreignKeyName: "tournament_matches_participant_a_id_fkey"
             columns: ["participant_a_id"]
             isOneToOne: false
-            referencedRelation: "tournament_participants"
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "tournament_matches_participant_b_id_fkey"
             columns: ["participant_b_id"]
             isOneToOne: false
-            referencedRelation: "tournament_participants"
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
           {
