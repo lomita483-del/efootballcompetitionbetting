@@ -37,7 +37,7 @@ function ChatPage() {
         <h1 className="text-3xl font-bold gradient-gold-text flex items-center gap-2"><MessageSquare className="h-6 w-6" />Community Chat</h1>
         <p className="text-muted-foreground text-sm mt-1">Be respectful. Mods can mute or ban abusive accounts.</p>
         <Tabs value={room} onValueChange={(v) => setRoom(v as Room)} className="mt-6">
-          <TabsList>
+          <TabsList className="rounded-full border border-primary/25 bg-background/50 p-1">
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="gang" disabled={!canGang}>{!canGang && <Lock className="h-3 w-3 mr-1" />}Gang</TabsTrigger>
             <TabsTrigger value="moderator" disabled={!isMod}>{!isMod && <Lock className="h-3 w-3 mr-1" />}Moderator</TabsTrigger>
@@ -55,6 +55,9 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
   const [msgs, setMsgs] = useState<any[]>([]);
   const [reactions, setReactions] = useState<Record<string, any[]>>({});
   const [text, setText] = useState("");
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [pendingPreview, setPendingPreview] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
   const [replyTo, setReplyTo] = useState<any>(null);
   const [editing, setEditing] = useState<any>(null);
   const [active, setActive] = useState<any>(null);
@@ -115,29 +118,46 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
-    if (!user || !text.trim()) return;
+    if (!user) return;
+    if (!text.trim() && !pendingFile) return;
     if (editing) {
       const { error } = await supabase.from("chat_messages").update({ content: text.trim(), edited_at: new Date().toISOString() }).eq("id", editing.id);
       if (error) toast.error(error.message); else { setEditing(null); setText(""); }
       return;
     }
-    const { data, error } = await supabase.from("chat_messages").insert({ user_id: user.id, room, content: text.trim(), reply_to_id: replyTo?.id ?? null }).select("id").single();
+    setSending(true);
+    let imageUrl: string | null = null;
+    if (pendingFile) {
+      const path = `${user.id}/${Date.now()}-${pendingFile.name}`;
+      const { error: ue } = await supabase.storage.from("chat-images").upload(path, pendingFile);
+      if (ue) { setSending(false); toast.error(ue.message); return; }
+      imageUrl = supabase.storage.from("chat-images").getPublicUrl(path).data.publicUrl;
+    }
+    const { data, error } = await supabase.from("chat_messages").insert({
+      user_id: user.id,
+      room,
+      content: text.trim() || null,
+      image_url: imageUrl,
+      reply_to_id: replyTo?.id ?? null,
+    }).select("id").single();
+    setSending(false);
     if (error) toast.error(error.message); else {
-      setText(""); setReplyTo(null);
+      setText(""); setReplyTo(null); clearAttachment();
       if (data?.id) sendChatNotification({ data: { messageId: data.id } }).catch(() => {});
     }
   }
 
-  async function pickImage(file: File) {
-    if (!user) return;
-    const path = `${user.id}/${Date.now()}-${file.name}`;
-    const { error: ue } = await supabase.storage.from("chat-images").upload(path, file);
-    if (ue) { toast.error(ue.message); return; }
-    const { data: { publicUrl } } = supabase.storage.from("chat-images").getPublicUrl(path);
-    const { data, error } = await supabase.from("chat_messages").insert({ user_id: user.id, room, image_url: publicUrl, reply_to_id: replyTo?.id ?? null }).select("id").single();
-    if (error) { toast.error(error.message); return; }
-    if (data?.id) sendChatNotification({ data: { messageId: data.id } }).catch(() => {});
-    setReplyTo(null);
+  function attachImage(file: File) {
+    if (!file.type.startsWith("image/")) { toast.error("Only image files can be attached"); return; }
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+    setPendingFile(file);
+    setPendingPreview(URL.createObjectURL(file));
+  }
+  function clearAttachment() {
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+    setPendingFile(null);
+    setPendingPreview(null);
+    if (fileRef.current) fileRef.current.value = "";
   }
 
   async function del(m: any) {
@@ -165,7 +185,7 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
   function chooseMention(name: string) { setText((v) => v.replace(/@[\w\s.-]{0,24}$/, `@${name} `)); }
 
   return (
-    <Card className="glass-strong flex flex-col h-[70vh] overflow-hidden">
+    <Card className="glass-strong flex flex-col h-[70vh] overflow-hidden border-primary/25 rounded-2xl">
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {msgs.length === 0 && <p className="text-muted-foreground text-sm text-center">Be the first to say something.</p>}
         {msgs.map((m: any) => {
@@ -175,8 +195,8 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
           const deleted = !!m.deleted_at;
           return (
             <div key={m.id} onPointerDown={() => startHold(m)} onPointerUp={stopHold} onPointerLeave={stopHold} onContextMenu={(e) => { e.preventDefault(); setActive(m); }} className="flex gap-3 group select-none">
-              <div className="h-9 w-9 rounded-full bg-gradient-gold grid place-items-center text-primary-foreground font-bold text-xs shrink-0">{(p?.name ?? "?").slice(0, 2).toUpperCase()}</div>
-              <div className="flex-1 min-w-0 rounded-2xl border border-border/40 bg-background/25 px-3 py-2">
+              <div className="h-9 w-9 rounded-full bg-gradient-gold grid place-items-center text-primary-foreground font-bold text-xs shrink-0 shadow-[0_0_16px_-4px_hsl(var(--primary)/0.8)]">{(p?.name ?? "?").slice(0, 2).toUpperCase()}</div>
+              <div className={`flex-1 min-w-0 rounded-2xl border px-3 py-2 transition-colors ${m.user_id === user?.id ? "border-primary/35 bg-primary/5" : "border-border/40 bg-background/30"} group-hover:border-primary/40`}>
                 <div className="text-xs"><UserBadge userId={m.user_id} name={p?.name ?? "Shooter"} /><span className="text-muted-foreground ml-1">· {p?.gang ?? "Independent"} · {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}{m.edited_at ? " · edited" : ""}</span></div>
                 {reply && <button onClick={() => document.getElementById(`msg-${reply.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" })} className="mt-1 w-full text-left rounded-lg border-l-2 border-primary bg-primary/5 px-2 py-1 text-[11px] text-muted-foreground truncate">↪ {profilesById[reply.user_id]?.name ?? "Shooter"}: {reply.content ?? "Attachment"}</button>}
                 <div id={`msg-${m.id}`}>
@@ -200,11 +220,29 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
         <form onSubmit={send} className="relative p-3 border-t border-border space-y-2">
           {(replyTo || editing) && <div className="flex items-center justify-between rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-xs"><span>{editing ? "Editing" : "Replying to"} <b>{profilesById[(editing ?? replyTo).user_id]?.name ?? "Shooter"}</b></span><button type="button" onClick={() => { setReplyTo(null); setEditing(null); setText(""); }}><X className="h-3.5 w-3.5" /></button></div>}
           {mentionMatches.length > 0 && <div className="absolute bottom-16 left-14 right-16 z-10 rounded-xl border border-primary/30 bg-popover p-1 shadow-luxury">{mentionMatches.map((m) => <button type="button" key={m.id} onClick={() => chooseMention(m.full_name)} className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm hover:bg-primary/10"><AtSign className="h-3 w-3 text-primary" />{m.full_name}<span className="ml-auto text-[10px] text-muted-foreground">{m.gang_name ?? "Independent"}</span></button>)}</div>}
-          <div className="flex gap-2">
-            <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && pickImage(e.target.files[0])} />
-            <Button type="button" variant="outline" size="icon" onClick={() => fileRef.current?.click()}><ImageIcon className="h-4 w-4" /></Button>
-             <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="Message, @tag a member or @all…" />
-            <Button type="submit" className="btn-luxury"><Send className="h-4 w-4" /></Button>
+          {pendingPreview && (
+            <div className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-2">
+              <img src={pendingPreview} alt="Attachment preview" className="h-16 w-16 rounded-lg object-cover border border-primary/40" />
+              <div className="text-xs text-muted-foreground flex-1 min-w-0">
+                <div className="font-bold text-foreground truncate">{pendingFile?.name}</div>
+                Add a caption below — it will be sent together with this image.
+              </div>
+              <button type="button" onClick={clearAttachment} className="rounded-full border border-border p-1 hover:bg-destructive/10"><X className="h-3.5 w-3.5" /></button>
+            </div>
+          )}
+          <div className="flex items-end gap-2 rounded-2xl border border-primary/25 bg-background/50 p-2 focus-within:border-primary/60 transition-colors">
+            <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && attachImage(e.target.files[0])} />
+            <Button type="button" variant="ghost" size="icon" className="shrink-0 rounded-full border border-primary/30 text-primary hover:bg-primary/10" onClick={() => fileRef.current?.click()}><ImageIcon className="h-4 w-4" /></Button>
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onPaste={(e) => { const f = Array.from(e.clipboardData.files)[0]; if (f) { e.preventDefault(); attachImage(f); } }}
+              onKeyDown={(e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send(e as any); } }}
+              rows={1}
+              placeholder="Message, @tag a member or @all… (Enter for a new line, Ctrl+Enter to send)"
+              className="flex-1 resize-none bg-transparent px-1 py-2 text-sm outline-none max-h-40 min-h-[2.5rem]"
+            />
+            <Button type="submit" disabled={sending || (!text.trim() && !pendingFile)} className="btn-luxury shrink-0 rounded-full h-10 w-10 p-0"><Send className="h-4 w-4" /></Button>
           </div>
         </form>
       )}

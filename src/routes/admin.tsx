@@ -1491,16 +1491,12 @@ function MatchesPanel() {
   return (
     <div className="space-y-4">
       <ArenaImageSettings />
-      <div className="flex flex-wrap items-center gap-2">
-        <Button className="btn-luxury" onClick={() => setWizard(true)}><Plus className="h-4 w-4 mr-1" />New Match (Wizard)</Button>
-        <Button className="btn-luxury" onClick={() => setShooterWizard(true)}><Crosshair className="h-4 w-4 mr-1" />New Shooter Match</Button>
-        <Button className="btn-luxury" onClick={() => window.dispatchEvent(new CustomEvent("admin:set-tab", { detail: "futures" }))}><Target className="h-4 w-4 mr-1" />New Tournament Futures</Button>
-        <Button variant="outline" onClick={() => clearEnded("admin")}>
-          <Trash2 className="h-4 w-4 mr-1" />Wipe from admin only
-        </Button>
-        <Button variant="destructive" onClick={() => clearEnded("everywhere")}>
-          <Trash2 className="h-4 w-4 mr-1" />Wipe EVERYWHERE (incl. Leaderboard)
-        </Button>
+      <div className="match-toolbar">
+        <button type="button" className="match-tool-btn" onClick={() => setWizard(true)}><Plus className="h-4 w-4" />New Match (Wizard)</button>
+        <button type="button" className="match-tool-btn match-tool-btn--emerald" onClick={() => setShooterWizard(true)}><Crosshair className="h-4 w-4" />New Shooter Match</button>
+        <button type="button" className="match-tool-btn" onClick={() => window.dispatchEvent(new CustomEvent("admin:set-tab", { detail: "futures" }))}><Target className="h-4 w-4" />New Tournament Fixtures</button>
+        <button type="button" className="match-tool-btn match-tool-btn--danger" onClick={() => clearEnded("admin")}><Trash2 className="h-4 w-4" />Wipe from admin only</button>
+        <button type="button" className="match-tool-btn match-tool-btn--danger" onClick={() => clearEnded("everywhere")}><Trash2 className="h-4 w-4" />Wipe EVERYWHERE (incl. Leaderboard)</button>
       </div>
       {wizard && <MatchWizard onClose={() => { setWizard(false); load(); }} />}
       {shooterWizard && <ShooterMatchWizard onClose={() => { setShooterWizard(false); load(); }} />}
@@ -1554,11 +1550,18 @@ function MatchesPanel() {
           <div className="text-sm text-muted-foreground text-center py-6">No matches match this filter.</div>
         )}
         {activeList.map((m: any) => (
-          <Card key={m.id} className="glass p-3 flex items-center justify-between gap-3 flex-wrap">
-            <div className="min-w-0 flex items-center gap-2">
-              {m.home_team?.logo_url && <img src={m.home_team.logo_url} alt="" className="h-8 w-8 rounded-full object-cover" />}
+          <Card key={m.id} data-state={m.status} className="match-row p-3 pl-5 flex items-center justify-between gap-3 flex-wrap">
+            <div className="min-w-0 flex items-center gap-3">
+              {m.home_team?.logo_url
+                ? <img src={m.home_team.logo_url} alt="" className="match-row-logo" />
+                : <div className="match-row-logo grid place-items-center text-[10px] font-black text-primary">⚽</div>}
               <div>
-                <div className="font-bold truncate">{m.match_kind === "shooter" ? m.home_player?.name : m.home_team?.name} vs {m.match_kind === "shooter" ? m.away_player?.name : m.away_team?.name} {m.status === "ended" && <span className="text-xs text-muted-foreground">({m.home_score}–{m.away_score})</span>}</div>
+                <div className="match-row-title truncate">
+                  <span className="text-foreground">{m.match_kind === "shooter" ? m.home_player?.name : m.home_team?.name}</span>
+                  <span className="mx-1 text-[10px] text-muted-foreground lowercase">vs</span>
+                  <span className="gradient-gold-text">{m.match_kind === "shooter" ? m.away_player?.name : m.away_team?.name}</span>
+                  {m.status === "ended" && <span className="ml-2 text-xs font-mono text-muted-foreground">({m.home_score}–{m.away_score})</span>}
+                </div>
                 <div className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap">
                   {m.public_id && <Badge variant="outline" className="text-[10px] font-mono border-primary/40 text-primary bg-primary/5">{m.public_id}</Badge>}
                   <span className="truncate">{m.name}</span>
