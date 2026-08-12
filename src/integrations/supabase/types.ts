@@ -6037,6 +6037,7 @@ export type Database = {
       claim_challenge: { Args: { _progress_id: string }; Returns: Json }
       claim_daily_login: { Args: never; Returns: Json }
       claim_gift: { Args: { _gift_id: string }; Returns: Json }
+      claim_virtual_payout: { Args: { _id: string }; Returns: Json }
       create_withdrawal_request: {
         Args: {
           _amount: number
@@ -6526,9 +6527,39 @@ export type Database = {
       user_cashout_bet: { Args: { _bet_id: string }; Returns: Json }
       user_claim_or_settle_virtual: { Args: { _bet_id: string }; Returns: Json }
       verify_xp_consistency: { Args: { _user_id?: string }; Returns: Json }
+      virtual_score_for_match: {
+        Args: { _match_id: string }
+        Returns: {
+          away_score: number
+          first_blood_team_id: string
+          home_score: number
+        }[]
+      }
       virtual_tick: { Args: never; Returns: Json }
       virtual_wallet_admin_adjust: {
         Args: { _amount: number; _reason: string }
+        Returns: undefined
+      }
+      virtual_wallet_credit: {
+        Args: {
+          _amount: number
+          _bet_id: string
+          _kind: string
+          _match_id: string
+          _reason: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      virtual_wallet_debit: {
+        Args: {
+          _amount: number
+          _bet_id: string
+          _kind: string
+          _match_id: string
+          _reason: string
+          _user_id: string
+        }
         Returns: undefined
       }
       wipe_all_tokens: { Args: never; Returns: undefined }
