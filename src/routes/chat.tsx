@@ -37,7 +37,7 @@ function ChatPage() {
         <h1 className="text-3xl font-bold gradient-gold-text flex items-center gap-2"><MessageSquare className="h-6 w-6" />Community Chat</h1>
         <p className="text-muted-foreground text-sm mt-1">Be respectful. Mods can mute or ban abusive accounts.</p>
         <Tabs value={room} onValueChange={(v) => setRoom(v as Room)} className="mt-6">
-          <TabsList>
+          <TabsList className="rounded-full border border-primary/25 bg-background/50 p-1">
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="gang" disabled={!canGang}>{!canGang && <Lock className="h-3 w-3 mr-1" />}Gang</TabsTrigger>
             <TabsTrigger value="moderator" disabled={!isMod}>{!isMod && <Lock className="h-3 w-3 mr-1" />}Moderator</TabsTrigger>
