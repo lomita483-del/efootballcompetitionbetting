@@ -220,11 +220,29 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
         <form onSubmit={send} className="relative p-3 border-t border-border space-y-2">
           {(replyTo || editing) && <div className="flex items-center justify-between rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-xs"><span>{editing ? "Editing" : "Replying to"} <b>{profilesById[(editing ?? replyTo).user_id]?.name ?? "Shooter"}</b></span><button type="button" onClick={() => { setReplyTo(null); setEditing(null); setText(""); }}><X className="h-3.5 w-3.5" /></button></div>}
           {mentionMatches.length > 0 && <div className="absolute bottom-16 left-14 right-16 z-10 rounded-xl border border-primary/30 bg-popover p-1 shadow-luxury">{mentionMatches.map((m) => <button type="button" key={m.id} onClick={() => chooseMention(m.full_name)} className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm hover:bg-primary/10"><AtSign className="h-3 w-3 text-primary" />{m.full_name}<span className="ml-auto text-[10px] text-muted-foreground">{m.gang_name ?? "Independent"}</span></button>)}</div>}
-          <div className="flex gap-2">
-            <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && pickImage(e.target.files[0])} />
-            <Button type="button" variant="outline" size="icon" onClick={() => fileRef.current?.click()}><ImageIcon className="h-4 w-4" /></Button>
-             <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="Message, @tag a member or @all…" />
-            <Button type="submit" className="btn-luxury"><Send className="h-4 w-4" /></Button>
+          {pendingPreview && (
+            <div className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-2">
+              <img src={pendingPreview} alt="Attachment preview" className="h-16 w-16 rounded-lg object-cover border border-primary/40" />
+              <div className="text-xs text-muted-foreground flex-1 min-w-0">
+                <div className="font-bold text-foreground truncate">{pendingFile?.name}</div>
+                Add a caption below — it will be sent together with this image.
+              </div>
+              <button type="button" onClick={clearAttachment} className="rounded-full border border-border p-1 hover:bg-destructive/10"><X className="h-3.5 w-3.5" /></button>
+            </div>
+          )}
+          <div className="flex items-end gap-2 rounded-2xl border border-primary/25 bg-background/50 p-2 focus-within:border-primary/60 transition-colors">
+            <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && attachImage(e.target.files[0])} />
+            <Button type="button" variant="ghost" size="icon" className="shrink-0 rounded-full border border-primary/30 text-primary hover:bg-primary/10" onClick={() => fileRef.current?.click()}><ImageIcon className="h-4 w-4" /></Button>
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onPaste={(e) => { const f = Array.from(e.clipboardData.files)[0]; if (f) { e.preventDefault(); attachImage(f); } }}
+              onKeyDown={(e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send(e as any); } }}
+              rows={1}
+              placeholder="Message, @tag a member or @all… (Enter for a new line, Ctrl+Enter to send)"
+              className="flex-1 resize-none bg-transparent px-1 py-2 text-sm outline-none max-h-40 min-h-[2.5rem]"
+            />
+            <Button type="submit" disabled={sending || (!text.trim() && !pendingFile)} className="btn-luxury shrink-0 rounded-full h-10 w-10 p-0"><Send className="h-4 w-4" /></Button>
           </div>
         </form>
       )}
