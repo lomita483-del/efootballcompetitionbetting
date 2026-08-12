@@ -185,7 +185,7 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
   function chooseMention(name: string) { setText((v) => v.replace(/@[\w\s.-]{0,24}$/, `@${name} `)); }
 
   return (
-    <Card className="glass-strong flex flex-col h-[70vh] overflow-hidden">
+    <Card className="glass-strong flex flex-col h-[70vh] overflow-hidden border-primary/25 rounded-2xl">
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {msgs.length === 0 && <p className="text-muted-foreground text-sm text-center">Be the first to say something.</p>}
         {msgs.map((m: any) => {
@@ -195,8 +195,8 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
           const deleted = !!m.deleted_at;
           return (
             <div key={m.id} onPointerDown={() => startHold(m)} onPointerUp={stopHold} onPointerLeave={stopHold} onContextMenu={(e) => { e.preventDefault(); setActive(m); }} className="flex gap-3 group select-none">
-              <div className="h-9 w-9 rounded-full bg-gradient-gold grid place-items-center text-primary-foreground font-bold text-xs shrink-0">{(p?.name ?? "?").slice(0, 2).toUpperCase()}</div>
-              <div className="flex-1 min-w-0 rounded-2xl border border-border/40 bg-background/25 px-3 py-2">
+              <div className="h-9 w-9 rounded-full bg-gradient-gold grid place-items-center text-primary-foreground font-bold text-xs shrink-0 shadow-[0_0_16px_-4px_hsl(var(--primary)/0.8)]">{(p?.name ?? "?").slice(0, 2).toUpperCase()}</div>
+              <div className={`flex-1 min-w-0 rounded-2xl border px-3 py-2 transition-colors ${m.user_id === user?.id ? "border-primary/35 bg-primary/5" : "border-border/40 bg-background/30"} group-hover:border-primary/40`}>
                 <div className="text-xs"><UserBadge userId={m.user_id} name={p?.name ?? "Shooter"} /><span className="text-muted-foreground ml-1">· {p?.gang ?? "Independent"} · {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}{m.edited_at ? " · edited" : ""}</span></div>
                 {reply && <button onClick={() => document.getElementById(`msg-${reply.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" })} className="mt-1 w-full text-left rounded-lg border-l-2 border-primary bg-primary/5 px-2 py-1 text-[11px] text-muted-foreground truncate">↪ {profilesById[reply.user_id]?.name ?? "Shooter"}: {reply.content ?? "Attachment"}</button>}
                 <div id={`msg-${m.id}`}>
