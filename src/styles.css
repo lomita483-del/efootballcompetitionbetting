@@ -1201,3 +1201,80 @@ html.light body {
 @keyframes popup-float-b { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(6px) rotate(-10deg); } }
 .popup-float { animation: popup-float-a 4s ease-in-out infinite; }
 .popup-float-slow { animation: popup-float-b 6s ease-in-out infinite; }
+
+/* ===== Match seeding console (admin » Matches) ===== */
+.match-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.6rem;
+  border-radius: 18px;
+  border: 1px solid oklch(0.42 0.05 168 / 0.55);
+  background: linear-gradient(135deg, oklch(0.12 0.035 165 / 0.9), oklch(0.08 0.025 190 / 0.9));
+}
+.match-tool-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.95rem;
+  border-radius: 14px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: oklch(0.9 0.09 92);
+  border: 1px solid oklch(0.78 0.16 88 / 0.35);
+  background: linear-gradient(135deg, oklch(0.16 0.05 120 / 0.9), oklch(0.10 0.03 170 / 0.9));
+  transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.match-tool-btn:hover {
+  transform: translateY(-2px);
+  border-color: oklch(0.82 0.19 90 / 0.8);
+  box-shadow: 0 12px 30px -14px oklch(0.82 0.19 90 / 0.9);
+}
+.match-tool-btn--emerald { color: oklch(0.86 0.16 160); border-color: oklch(0.6 0.16 160 / 0.4); }
+.match-tool-btn--danger  { color: oklch(0.82 0.18 25);  border-color: oklch(0.6 0.2 25 / 0.45); }
+
+.match-row {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px !important;
+  border: 1px solid oklch(0.42 0.05 168 / 0.5) !important;
+  background: linear-gradient(100deg, oklch(0.13 0.05 160 / 0.95), oklch(0.08 0.02 200 / 0.95)) !important;
+  transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.match-row::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, oklch(0.78 0.19 155), oklch(0.5 0.14 165));
+}
+.match-row[data-state="scheduled"]::before { background: linear-gradient(180deg, oklch(0.84 0.18 85), oklch(0.6 0.15 70)); }
+.match-row[data-state="ended"]::before,
+.match-row[data-state="cancelled"]::before { background: linear-gradient(180deg, oklch(0.66 0.21 25), oklch(0.42 0.16 20)); }
+.match-row:hover {
+  transform: translateY(-2px);
+  border-color: oklch(0.78 0.16 88 / 0.45) !important;
+  box-shadow: 0 18px 44px -22px oklch(0 0 0 / 0.9);
+}
+.match-row-title {
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.match-row-logo {
+  height: 2.4rem; width: 2.4rem;
+  border-radius: 9999px;
+  object-fit: cover;
+  border: 2px solid oklch(0.78 0.16 88 / 0.55);
+  box-shadow: 0 0 14px -4px oklch(0.82 0.19 90 / 0.8);
+}
+.match-status-chip {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.62rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+  border: 1px solid currentColor;
+}
