@@ -55,6 +55,9 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
   const [msgs, setMsgs] = useState<any[]>([]);
   const [reactions, setReactions] = useState<Record<string, any[]>>({});
   const [text, setText] = useState("");
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [pendingPreview, setPendingPreview] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
   const [replyTo, setReplyTo] = useState<any>(null);
   const [editing, setEditing] = useState<any>(null);
   const [active, setActive] = useState<any>(null);
@@ -115,29 +118,46 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
-    if (!user || !text.trim()) return;
+    if (!user) return;
+    if (!text.trim() && !pendingFile) return;
     if (editing) {
       const { error } = await supabase.from("chat_messages").update({ content: text.trim(), edited_at: new Date().toISOString() }).eq("id", editing.id);
       if (error) toast.error(error.message); else { setEditing(null); setText(""); }
       return;
     }
-    const { data, error } = await supabase.from("chat_messages").insert({ user_id: user.id, room, content: text.trim(), reply_to_id: replyTo?.id ?? null }).select("id").single();
+    setSending(true);
+    let imageUrl: string | null = null;
+    if (pendingFile) {
+      const path = `${user.id}/${Date.now()}-${pendingFile.name}`;
+      const { error: ue } = await supabase.storage.from("chat-images").upload(path, pendingFile);
+      if (ue) { setSending(false); toast.error(ue.message); return; }
+      imageUrl = supabase.storage.from("chat-images").getPublicUrl(path).data.publicUrl;
+    }
+    const { data, error } = await supabase.from("chat_messages").insert({
+      user_id: user.id,
+      room,
+      content: text.trim() || null,
+      image_url: imageUrl,
+      reply_to_id: replyTo?.id ?? null,
+    }).select("id").single();
+    setSending(false);
     if (error) toast.error(error.message); else {
-      setText(""); setReplyTo(null);
+      setText(""); setReplyTo(null); clearAttachment();
       if (data?.id) sendChatNotification({ data: { messageId: data.id } }).catch(() => {});
     }
   }
 
-  async function pickImage(file: File) {
-    if (!user) return;
-    const path = `${user.id}/${Date.now()}-${file.name}`;
-    const { error: ue } = await supabase.storage.from("chat-images").upload(path, file);
-    if (ue) { toast.error(ue.message); return; }
-    const { data: { publicUrl } } = supabase.storage.from("chat-images").getPublicUrl(path);
-    const { data, error } = await supabase.from("chat_messages").insert({ user_id: user.id, room, image_url: publicUrl, reply_to_id: replyTo?.id ?? null }).select("id").single();
-    if (error) { toast.error(error.message); return; }
-    if (data?.id) sendChatNotification({ data: { messageId: data.id } }).catch(() => {});
-    setReplyTo(null);
+  function attachImage(file: File) {
+    if (!file.type.startsWith("image/")) { toast.error("Only image files can be attached"); return; }
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+    setPendingFile(file);
+    setPendingPreview(URL.createObjectURL(file));
+  }
+  function clearAttachment() {
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+    setPendingFile(null);
+    setPendingPreview(null);
+    if (fileRef.current) fileRef.current.value = "";
   }
 
   async function del(m: any) {
