@@ -184,10 +184,10 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
   }
 
   function attachFiles(files: File[]) {
-    const room = MAX_ATTACHMENTS - pending.length;
-    if (room <= 0) { toast.error(`You can attach up to ${MAX_ATTACHMENTS} files`); return; }
-    if (files.length > room) toast.error(`Only ${room} more file${room === 1 ? "" : "s"} allowed — extras ignored`);
-    const next = files.slice(0, room).map((f) => ({ file: f, preview: URL.createObjectURL(f), type: attachmentTypeFor(f) }));
+    const slots = MAX_ATTACHMENTS - pending.length;
+    if (slots <= 0) { toast.error(`You can attach up to ${MAX_ATTACHMENTS} files`); return; }
+    if (files.length > slots) toast.error(`Only ${slots} more file${slots === 1 ? "" : "s"} allowed — extras ignored`);
+    const next = files.slice(0, slots).map((f) => ({ file: f, preview: URL.createObjectURL(f), type: attachmentTypeFor(f) }));
     setPending((p) => [...p, ...next]);
   }
   function removePending(i: number) {
