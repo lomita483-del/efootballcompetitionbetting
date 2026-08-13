@@ -428,6 +428,7 @@ function ChatMonitorPanel() {
   return (
     <div className="space-y-3">
       {isAdmin && <FlaggedChatQueue />}
+      {isAdmin && <ChatToolsPanel />}
       <Card className="glass-strong p-4 flex items-center gap-3">
         <MessageSquare className="h-5 w-5 text-primary" />
         <div><div className="font-bold">Live Chat Monitor</div><div className="text-xs text-muted-foreground">Newest messages across all rooms with quick moderation access.</div></div>
