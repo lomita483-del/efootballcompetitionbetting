@@ -6474,6 +6474,13 @@ export type Database = {
       play_scratch: { Args: never; Returns: Json }
       play_wheel: { Args: { _stake: number }; Returns: Json }
       prune_dead_push_subscriptions: { Args: never; Returns: number }
+      public_display_roles: {
+        Args: { _ids: string[] }
+        Returns: {
+          roles: string[]
+          user_id: string
+        }[]
+      }
       public_profiles: {
         Args: { _ids?: string[] }
         Returns: {
