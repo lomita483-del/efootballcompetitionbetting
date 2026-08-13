@@ -58,6 +58,7 @@ import { Route as TicketIdRouteImport } from './routes/ticket.$id'
 import { Route as MatchesMatchIdRouteImport } from './routes/matches.$matchId'
 import { Route as GuidesHowItWorksRouteImport } from './routes/guides.how-it-works'
 import { Route as AdminMcpAuditRouteImport } from './routes/admin_.mcp-audit'
+import { Route as AdminChatHistoryRouteImport } from './routes/admin_.chat-history'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as ApiPublicVirtualTickRouteImport } from './routes/api/public/virtual-tick'
@@ -316,6 +317,11 @@ const AdminMcpAuditRoute = AdminMcpAuditRouteImport.update({
   path: '/admin/mcp-audit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminChatHistoryRoute = AdminChatHistoryRouteImport.update({
+  id: '/admin_/chat-history',
+  path: '/admin/chat-history',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
   Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
     id: '/.well-known/oauth-protected-resource',
@@ -419,6 +425,7 @@ export interface FileRoutesByFullPath {
   '/withdraw': typeof WithdrawRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/chat-history': typeof AdminChatHistoryRoute
   '/admin/mcp-audit': typeof AdminMcpAuditRoute
   '/guides/how-it-works': typeof GuidesHowItWorksRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
@@ -481,6 +488,7 @@ export interface FileRoutesByTo {
   '/withdraw': typeof WithdrawRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/chat-history': typeof AdminChatHistoryRoute
   '/admin/mcp-audit': typeof AdminMcpAuditRoute
   '/guides/how-it-works': typeof GuidesHowItWorksRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
@@ -544,6 +552,7 @@ export interface FileRoutesById {
   '/withdraw': typeof WithdrawRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin_/chat-history': typeof AdminChatHistoryRoute
   '/admin_/mcp-audit': typeof AdminMcpAuditRoute
   '/guides/how-it-works': typeof GuidesHowItWorksRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
@@ -608,6 +617,7 @@ export interface FileRouteTypes {
     | '/withdraw'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/chat-history'
     | '/admin/mcp-audit'
     | '/guides/how-it-works'
     | '/matches/$matchId'
@@ -670,6 +680,7 @@ export interface FileRouteTypes {
     | '/withdraw'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/chat-history'
     | '/admin/mcp-audit'
     | '/guides/how-it-works'
     | '/matches/$matchId'
@@ -732,6 +743,7 @@ export interface FileRouteTypes {
     | '/withdraw'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin_/chat-history'
     | '/admin_/mcp-audit'
     | '/guides/how-it-works'
     | '/matches/$matchId'
@@ -795,6 +807,7 @@ export interface RootRouteChildren {
   WithdrawRoute: typeof WithdrawRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  AdminChatHistoryRoute: typeof AdminChatHistoryRoute
   AdminMcpAuditRoute: typeof AdminMcpAuditRoute
   GuidesHowItWorksRoute: typeof GuidesHowItWorksRoute
   TicketIdRoute: typeof TicketIdRoute
@@ -1162,6 +1175,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMcpAuditRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin_/chat-history': {
+      id: '/admin_/chat-history'
+      path: '/admin/chat-history'
+      fullPath: '/admin/chat-history'
+      preLoaderRoute: typeof AdminChatHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.well-known/oauth-protected-resource': {
       id: '/.well-known/oauth-protected-resource'
       path: '/.well-known/oauth-protected-resource'
@@ -1294,6 +1314,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  AdminChatHistoryRoute: AdminChatHistoryRoute,
   AdminMcpAuditRoute: AdminMcpAuditRoute,
   GuidesHowItWorksRoute: GuidesHowItWorksRoute,
   TicketIdRoute: TicketIdRoute,
