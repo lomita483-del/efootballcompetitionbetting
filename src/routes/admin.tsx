@@ -1497,6 +1497,7 @@ function MatchesPanel() {
         <button type="button" className="match-tool-btn" onClick={() => setWizard(true)}><Plus className="h-4 w-4" />New Match (Wizard)</button>
         <button type="button" className="match-tool-btn match-tool-btn--emerald" onClick={() => setShooterWizard(true)}><Crosshair className="h-4 w-4" />New Shooter Match</button>
         <button type="button" className="match-tool-btn" onClick={() => window.dispatchEvent(new CustomEvent("admin:set-tab", { detail: "futures" }))}><Target className="h-4 w-4" />New Tournament Fixtures</button>
+        <button type="button" className="match-tool-btn match-tool-btn--emerald" onClick={() => exportMatchesCsv(filteredAll)}><Download className="h-4 w-4" />Export CSV</button>
         <button type="button" className="match-tool-btn match-tool-btn--danger" onClick={() => clearEnded("admin")}><Trash2 className="h-4 w-4" />Wipe from admin only</button>
         <button type="button" className="match-tool-btn match-tool-btn--danger" onClick={() => clearEnded("everywhere")}><Trash2 className="h-4 w-4" />Wipe EVERYWHERE (incl. Leaderboard)</button>
       </div>
