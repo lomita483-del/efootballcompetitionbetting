@@ -1,5 +1,6 @@
 import { SuspiciousActivityPanel } from "@/components/admin/SuspiciousActivityPanel";
 import { FlaggedChatQueue } from "@/components/admin/FlaggedChatQueue";
+import { ChatToolsPanel } from "@/components/admin/ChatToolsPanel";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
