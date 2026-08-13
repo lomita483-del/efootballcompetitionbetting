@@ -1264,6 +1264,39 @@ export type Database = {
           },
         ]
       }
+      chat_assets: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          kind: string
+          name: string
+          sort_order: number
+          url: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          name: string
+          sort_order?: number
+          url: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          name?: string
+          sort_order?: number
+          url?: string
+        }
+        Relationships: []
+      }
       chat_message_flags: {
         Row: {
           created_at: string
@@ -1345,6 +1378,7 @@ export type Database = {
       }
       chat_messages: {
         Row: {
+          attachments: Json
           content: string | null
           created_at: string
           deleted_at: string | null
@@ -1352,11 +1386,17 @@ export type Database = {
           edited_at: string | null
           id: string
           image_url: string | null
+          is_pinned: boolean
+          kind: string
+          meta: Json
+          pinned_at: string | null
+          pinned_by: string | null
           reply_to_id: string | null
           room: Database["public"]["Enums"]["chat_room"]
           user_id: string
         }
         Insert: {
+          attachments?: Json
           content?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -1364,11 +1404,17 @@ export type Database = {
           edited_at?: string | null
           id?: string
           image_url?: string | null
+          is_pinned?: boolean
+          kind?: string
+          meta?: Json
+          pinned_at?: string | null
+          pinned_by?: string | null
           reply_to_id?: string | null
           room: Database["public"]["Enums"]["chat_room"]
           user_id: string
         }
         Update: {
+          attachments?: Json
           content?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -1376,6 +1422,11 @@ export type Database = {
           edited_at?: string | null
           id?: string
           image_url?: string | null
+          is_pinned?: boolean
+          kind?: string
+          meta?: Json
+          pinned_at?: string | null
+          pinned_by?: string | null
           reply_to_id?: string | null
           room?: Database["public"]["Enums"]["chat_room"]
           user_id?: string
