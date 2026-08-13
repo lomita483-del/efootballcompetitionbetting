@@ -1,5 +1,28 @@
 import { SuspiciousActivityPanel } from "@/components/admin/SuspiciousActivityPanel";
 import { FlaggedChatQueue } from "@/components/admin/FlaggedChatQueue";
+import { ChatToolsPanel } from "@/components/admin/ChatToolsPanel";
+import { Download } from "lucide-react";
+
+function exportMatchesCsv(list: any[]) {
+  const head = ["Match ID", "Title", "Home", "Away", "Kick-off", "Status", "Home score", "Away score"];
+  const rows = list.map((m: any) => [
+    m.public_id ?? m.id,
+    m.name ?? "",
+    m.home_team?.name ?? m.home_player?.name ?? "",
+    m.away_team?.name ?? m.away_player?.name ?? "",
+    m.start_time ? new Date(m.start_time).toLocaleString() : "TBD",
+    m.status ?? "",
+    m.home_score ?? "",
+    m.away_score ?? "",
+  ]);
+  const csv = [head, ...rows].map((r) => r.map((c) => `"${String(c ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `seeded-matches-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -428,6 +451,7 @@ function ChatMonitorPanel() {
   return (
     <div className="space-y-3">
       {isAdmin && <FlaggedChatQueue />}
+      {isAdmin && <ChatToolsPanel />}
       <Card className="glass-strong p-4 flex items-center gap-3">
         <MessageSquare className="h-5 w-5 text-primary" />
         <div><div className="font-bold">Live Chat Monitor</div><div className="text-xs text-muted-foreground">Newest messages across all rooms with quick moderation access.</div></div>
@@ -1495,6 +1519,7 @@ function MatchesPanel() {
         <button type="button" className="match-tool-btn" onClick={() => setWizard(true)}><Plus className="h-4 w-4" />New Match (Wizard)</button>
         <button type="button" className="match-tool-btn match-tool-btn--emerald" onClick={() => setShooterWizard(true)}><Crosshair className="h-4 w-4" />New Shooter Match</button>
         <button type="button" className="match-tool-btn" onClick={() => window.dispatchEvent(new CustomEvent("admin:set-tab", { detail: "futures" }))}><Target className="h-4 w-4" />New Tournament Fixtures</button>
+        <button type="button" className="match-tool-btn match-tool-btn--emerald" onClick={() => exportMatchesCsv(filteredAll)}><Download className="h-4 w-4" />Export CSV</button>
         <button type="button" className="match-tool-btn match-tool-btn--danger" onClick={() => clearEnded("admin")}><Trash2 className="h-4 w-4" />Wipe from admin only</button>
         <button type="button" className="match-tool-btn match-tool-btn--danger" onClick={() => clearEnded("everywhere")}><Trash2 className="h-4 w-4" />Wipe EVERYWHERE (incl. Leaderboard)</button>
       </div>

@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { MessageSquare, Send, Image as ImageIcon, Lock, Reply, Pencil, Smile, Trash2, X, AtSign, Flag } from "lucide-react";
+import { MessageSquare, Send, Paperclip, Lock, Reply, Pencil, Trash2, X, AtSign, Flag, Mic, Square, Search, ChevronsDown, Pin, PinOff, Smile, FileText, Megaphone, CalendarClock, Filter } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ import { useAuth, ROLE_LABELS, type AppRole } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { notifyChatMessage } from "@/lib/chat-notifications.functions";
+import { MAX_ATTACHMENTS, attachmentTypeFor, bubbleStyle, dayLabel, formatDuration, normalizeAttachments, rankFor, uploadChatFile, type ChatAttachment } from "@/lib/chat-ui";
 
 export const Route = createFileRoute("/chat")({
   head: () => ({ meta: [{ title: "Community Chat — ECB" }, { name: "description", content: "Live chat with shooters, your gang, and moderators." }] }),
@@ -49,23 +50,34 @@ function ChatPage() {
   );
 }
 
+type MediaFilter = "all" | "image" | "video" | "audio" | "file" | "sticker";
+
 function Room({ room, muted }: { room: Room; muted: boolean }) {
   const { user, isMod } = useAuth();
   const sendChatNotification = useServerFn(notifyChatMessage);
   const [msgs, setMsgs] = useState<any[]>([]);
   const [reactions, setReactions] = useState<Record<string, any[]>>({});
   const [text, setText] = useState("");
-  const [pendingFile, setPendingFile] = useState<File | null>(null);
-  const [pendingPreview, setPendingPreview] = useState<string | null>(null);
+  const [pending, setPending] = useState<{ file: File; preview: string; type: string }[]>([]);
   const [sending, setSending] = useState(false);
   const [replyTo, setReplyTo] = useState<any>(null);
   const [editing, setEditing] = useState<any>(null);
   const [active, setActive] = useState<any>(null);
-  const [profilesById, setProfilesById] = useState<Record<string, { name: string; gang: string | null }>>({});
+  const [profilesById, setProfilesById] = useState<Record<string, any>>({});
+  const [rolesById, setRolesById] = useState<Record<string, string[]>>({});
   const [members, setMembers] = useState<any[]>([]);
+  const [assets, setAssets] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+  const [mediaFilter, setMediaFilter] = useState<MediaFilter>("all");
+  const [recording, setRecording] = useState(false);
+  const [recSeconds, setRecSeconds] = useState(0);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const recTimer = useRef<number | null>(null);
   const holdRef = useRef<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const mentionTerm = useMemo(() => {
     const m = text.match(/@([\w\s.-]{0,24})$/);
@@ -79,7 +91,7 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
   useEffect(() => {
     let mounted = true;
     const load = async () => {
-      const { data, error } = await supabase.from("chat_messages").select("*").eq("room", room).order("created_at", { ascending: true }).limit(100);
+      const { data, error } = await supabase.from("chat_messages").select("*").eq("room", room).order("created_at", { ascending: true }).limit(200);
       if (!mounted) return;
       if (error) { toast.error(error.message); return; }
       setMsgs(data ?? []);
@@ -88,6 +100,7 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
     };
     load();
     supabase.rpc("public_profiles").then(({ data }) => setMembers((data ?? []).slice(0, 200).map((p: any) => ({ id: p.id, full_name: p.full_name, gang_name: p.gang_name }))));
+    (supabase as any).from("chat_assets").select("*").eq("is_active", true).order("sort_order").then(({ data }: any) => setAssets(data ?? []));
     const ch = supabase.channel(`chat-${room}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages", filter: `room=eq.${room}` }, load)
       .on("postgres_changes", { event: "*", schema: "public", table: "chat_message_reactions" }, load)
@@ -100,10 +113,18 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
   async function loadProfiles(ids: string[]) {
     const need = Array.from(new Set(ids)).filter((id) => id && !profilesById[id]);
     if (need.length === 0) return;
-    const { data } = await supabase.rpc("public_profiles", { _ids: need });
+    const [{ data }, { data: r }] = await Promise.all([
+      supabase.rpc("public_profiles", { _ids: need }),
+      (supabase as any).rpc("public_display_roles", { _ids: need }),
+    ]);
     setProfilesById((prev) => {
       const next = { ...prev };
-      (data ?? []).forEach((p: any) => { next[p.id] = { name: p.full_name, gang: p.gang_name }; });
+      (data ?? []).forEach((p: any) => { next[p.id] = p; });
+      return next;
+    });
+    setRolesById((prev) => {
+      const next = { ...prev };
+      (r ?? []).forEach((row: any) => { next[row.user_id] = row.roles ?? []; });
       return next;
     });
   }
@@ -116,54 +137,111 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
     setReactions(grouped);
   }
 
+  async function insertMessage(payload: any) {
+    const { data, error } = await (supabase as any).from("chat_messages").insert(payload).select("id").single();
+    if (error) { toast.error(error.message); return null; }
+    if (data?.id) sendChatNotification({ data: { messageId: data.id } }).catch(() => {});
+    return data;
+  }
+
   async function send(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
-    if (!text.trim() && !pendingFile) return;
+    if (!text.trim() && pending.length === 0) return;
     if (editing) {
       const { error } = await supabase.from("chat_messages").update({ content: text.trim(), edited_at: new Date().toISOString() }).eq("id", editing.id);
       if (error) toast.error(error.message); else { setEditing(null); setText(""); }
       return;
     }
     setSending(true);
-    let imageUrl: string | null = null;
-    if (pendingFile) {
-      const path = `${user.id}/${Date.now()}-${pendingFile.name}`;
-      const { error: ue } = await supabase.storage.from("chat-images").upload(path, pendingFile);
-      if (ue) { setSending(false); toast.error(ue.message); return; }
-      imageUrl = supabase.storage.from("chat-images").getPublicUrl(path).data.publicUrl;
-    }
-    const { data, error } = await supabase.from("chat_messages").insert({
+    const attachments: ChatAttachment[] = [];
+    try {
+      for (const p of pending) {
+        const { url } = await uploadChatFile(user.id, p.file, p.file.name);
+        attachments.push({ url, type: attachmentTypeFor(p.file), name: p.file.name, mime: p.file.type, size: p.file.size });
+      }
+    } catch (err: any) { setSending(false); toast.error(err?.message ?? "Upload failed"); return; }
+    await insertMessage({
       user_id: user.id,
       room,
       content: text.trim() || null,
-      image_url: imageUrl,
+      image_url: attachments.find((a) => a.type === "image")?.url ?? null,
+      attachments,
       reply_to_id: replyTo?.id ?? null,
-    }).select("id").single();
+    });
     setSending(false);
-    if (error) toast.error(error.message); else {
-      setText(""); setReplyTo(null); clearAttachment();
-      if (data?.id) sendChatNotification({ data: { messageId: data.id } }).catch(() => {});
-    }
+    setText(""); setReplyTo(null); clearAttachments();
   }
 
-  function attachImage(file: File) {
-    if (!file.type.startsWith("image/")) { toast.error("Only image files can be attached"); return; }
-    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
-    setPendingFile(file);
-    setPendingPreview(URL.createObjectURL(file));
+  async function sendAsset(asset: any) {
+    if (!user) return;
+    await insertMessage({
+      user_id: user.id, room, content: null,
+      attachments: [{ url: asset.url, type: asset.kind === "gif" ? "gif" : "sticker", name: asset.name }],
+      reply_to_id: replyTo?.id ?? null,
+    });
+    setReplyTo(null);
   }
-  function clearAttachment() {
-    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
-    setPendingFile(null);
-    setPendingPreview(null);
+
+  function attachFiles(files: File[]) {
+    const slots = MAX_ATTACHMENTS - pending.length;
+    if (slots <= 0) { toast.error(`You can attach up to ${MAX_ATTACHMENTS} files`); return; }
+    if (files.length > slots) toast.error(`Only ${slots} more file${slots === 1 ? "" : "s"} allowed — extras ignored`);
+    const next = files.slice(0, slots).map((f) => ({ file: f, preview: URL.createObjectURL(f), type: attachmentTypeFor(f) }));
+    setPending((p) => [...p, ...next]);
+  }
+  function removePending(i: number) {
+    setPending((p) => { URL.revokeObjectURL(p[i].preview); return p.filter((_, idx) => idx !== i); });
+  }
+  function clearAttachments() {
+    pending.forEach((p) => URL.revokeObjectURL(p.preview));
+    setPending([]);
     if (fileRef.current) fileRef.current.value = "";
   }
 
+  async function startRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const rec = new MediaRecorder(stream);
+      chunksRef.current = [];
+      rec.ondataavailable = (ev) => { if (ev.data.size > 0) chunksRef.current.push(ev.data); };
+      rec.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(chunksRef.current, { type: rec.mimeType || "audio/webm" });
+        if (blob.size < 1200 || !user) { toast.error("That voice note was empty — try again"); return; }
+        try {
+          const ext = (rec.mimeType || "audio/webm").includes("mp4") ? "m4a" : "webm";
+          const { url } = await uploadChatFile(user.id, blob, `voice-note.${ext}`);
+          await insertMessage({ user_id: user.id, room, content: null, attachments: [{ url, type: "audio", name: "Voice note", mime: blob.type }], reply_to_id: replyTo?.id ?? null });
+          setReplyTo(null);
+        } catch (err: any) { toast.error(err?.message ?? "Could not send the voice note"); }
+      };
+      rec.start();
+      recorderRef.current = rec;
+      setRecording(true); setRecSeconds(0);
+      recTimer.current = window.setInterval(() => setRecSeconds((s) => s + 1), 1000);
+    } catch { toast.error("Microphone access is needed to record a voice note"); }
+  }
+  function stopRecording(cancel = false) {
+    if (recTimer.current) window.clearInterval(recTimer.current);
+    const rec = recorderRef.current;
+    if (rec && rec.state !== "inactive") { if (cancel) rec.onstop = () => rec.stream.getTracks().forEach((t) => t.stop()); rec.stop(); }
+    recorderRef.current = null;
+    setRecording(false); setRecSeconds(0);
+  }
+
   async function del(m: any) {
-    const patch = { content: null, image_url: null, deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null };
-    const { error } = await supabase.from("chat_messages").update(patch).eq("id", m.id);
+    const patch = { content: null, image_url: null, attachments: [], deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null };
+    const { error } = await (supabase as any).from("chat_messages").update(patch).eq("id", m.id);
     if (error) toast.error(error.message);
+    setActive(null);
+  }
+
+  async function togglePin(m: any) {
+    const { error } = await (supabase as any).from("chat_messages")
+      .update({ is_pinned: !m.is_pinned, pinned_at: m.is_pinned ? null : new Date().toISOString(), pinned_by: m.is_pinned ? null : user?.id ?? null })
+      .eq("id", m.id);
+    if (error) toast.error(error.message); else toast.success(m.is_pinned ? "Unpinned" : "Pinned to this channel");
     setActive(null);
   }
 
@@ -183,66 +261,137 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
   }
   function stopHold() { if (holdRef.current) window.clearTimeout(holdRef.current); }
   function chooseMention(name: string) { setText((v) => v.replace(/@[\w\s.-]{0,24}$/, `@${name} `)); }
+  function jumpToLatest() { endRef.current?.scrollIntoView({ behavior: "smooth" }); }
+
+  const pinned = msgs.filter((m) => m.is_pinned && !m.deleted_at);
+  const q = search.trim().toLowerCase();
+  const visible = msgs.filter((m) => {
+    const atts = normalizeAttachments(m);
+    if (mediaFilter !== "all") {
+      const has = mediaFilter === "sticker"
+        ? atts.some((a) => a.type === "sticker" || a.type === "gif")
+        : atts.some((a) => a.type === mediaFilter);
+      if (!has) return false;
+    }
+    if (!q) return true;
+    const name = String(profilesById[m.user_id]?.full_name ?? "").toLowerCase();
+    return String(m.content ?? "").toLowerCase().includes(q) || name.includes(q);
+  });
+
+  const filters: { id: MediaFilter; label: string }[] = [
+    { id: "all", label: "All" }, { id: "image", label: "Photos" }, { id: "video", label: "Videos" },
+    { id: "audio", label: "Voice" }, { id: "file", label: "Files" }, { id: "sticker", label: "Stickers" },
+  ];
 
   return (
-    <Card className="glass-strong flex flex-col h-[70vh] overflow-hidden border-primary/25 rounded-2xl">
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {msgs.length === 0 && <p className="text-muted-foreground text-sm text-center">Be the first to say something.</p>}
-        {msgs.map((m: any) => {
-          const p = profilesById[m.user_id];
-          const reply = msgs.find((x) => x.id === m.reply_to_id);
-          const grouped = Object.entries((reactions[m.id] ?? []).reduce((a: any, r: any) => { a[r.emoji] = (a[r.emoji] ?? 0) + 1; return a; }, {}));
-          const deleted = !!m.deleted_at;
+    <Card className="glass-strong flex flex-col h-[74vh] overflow-hidden border-primary/25 rounded-2xl">
+      <div className="border-b border-border/50 p-2 space-y-2 bg-background/40 backdrop-blur-xl">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search this channel…" className="h-9 pl-8 text-sm rounded-full bg-background/60" />
+          </div>
+          <Button type="button" size="icon" variant="outline" className="h-9 w-9 rounded-full shrink-0" title="Jump to latest" onClick={jumpToLatest}><ChevronsDown className="h-4 w-4" /></Button>
+        </div>
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+          <Filter className="h-3 w-3 text-muted-foreground shrink-0" />
+          {filters.map((f) => (
+            <button key={f.id} type="button" onClick={() => setMediaFilter(f.id)}
+              className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors ${mediaFilter === f.id ? "border-primary/60 bg-primary/15 text-primary" : "border-border/50 text-muted-foreground hover:border-primary/40"}`}>{f.label}</button>
+          ))}
+        </div>
+        {pinned.length > 0 && (
+          <div className="flex items-start gap-2 rounded-xl border border-primary/35 bg-primary/10 px-3 py-2 text-[11px]">
+            <Pin className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+            <div className="min-w-0 flex-1 space-y-0.5">
+              {pinned.slice(-2).map((p) => (
+                <button key={p.id} onClick={() => document.getElementById(`msg-${p.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" })} className="block w-full truncate text-left">
+                  <b className="text-primary">{profilesById[p.user_id]?.full_name ?? "Pinned"}:</b> {p.content ?? "Attachment"}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3">
+        {visible.length === 0 && <p className="text-muted-foreground text-sm text-center py-6">{msgs.length === 0 ? "Be the first to say something." : "No messages match your search."}</p>}
+        {visible.map((m: any, i: number) => {
+          const prev = visible[i - 1];
+          const showDay = !prev || dayLabel(prev.created_at) !== dayLabel(m.created_at);
           return (
-            <div key={m.id} onPointerDown={() => startHold(m)} onPointerUp={stopHold} onPointerLeave={stopHold} onContextMenu={(e) => { e.preventDefault(); setActive(m); }} className="flex gap-3 group select-none">
-              <div className="h-9 w-9 rounded-full bg-gradient-gold grid place-items-center text-primary-foreground font-bold text-xs shrink-0 shadow-[0_0_16px_-4px_hsl(var(--primary)/0.8)]">{(p?.name ?? "?").slice(0, 2).toUpperCase()}</div>
-              <div className={`flex-1 min-w-0 rounded-2xl border px-3 py-2 transition-colors ${m.user_id === user?.id ? "border-primary/35 bg-primary/5" : "border-border/40 bg-background/30"} group-hover:border-primary/40`}>
-                <div className="text-xs"><UserBadge userId={m.user_id} name={p?.name ?? "Shooter"} /><span className="text-muted-foreground ml-1">· {p?.gang ?? "Independent"} · {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}{m.edited_at ? " · edited" : ""}</span></div>
-                {reply && <button onClick={() => document.getElementById(`msg-${reply.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" })} className="mt-1 w-full text-left rounded-lg border-l-2 border-primary bg-primary/5 px-2 py-1 text-[11px] text-muted-foreground truncate">↪ {profilesById[reply.user_id]?.name ?? "Shooter"}: {reply.content ?? "Attachment"}</button>}
-                <div id={`msg-${m.id}`}>
-                  {deleted ? <div className="text-sm italic text-muted-foreground">Message deleted</div> : m.content && <div className="text-sm break-words whitespace-pre-wrap">{highlightMentions(m.content)}</div>}
-                  {!deleted && m.image_url && <img src={m.image_url} alt="Chat attachment" className="mt-1 rounded max-h-64 border border-border" />}
-                </div>
-                {grouped.length > 0 && <div className="mt-1 flex flex-wrap gap-1">{grouped.map(([emoji, count]) => <button key={emoji} onClick={() => react(m.id, emoji)} className="rounded-full border border-border bg-muted/40 px-2 py-0.5 text-xs">{emoji} {count as number}</button>)}</div>}
-              </div>
+            <div key={m.id}>
+              {showDay && <div className="my-3 flex justify-center"><span className="rounded-full border border-border/50 bg-background/60 px-3 py-0.5 text-[10px] uppercase tracking-widest text-muted-foreground backdrop-blur">{dayLabel(m.created_at)}</span></div>}
+              <MessageRow
+                m={m}
+                mine={m.user_id === user?.id}
+                profile={profilesById[m.user_id]}
+                roles={rolesById[m.user_id] ?? []}
+                replyMsg={msgs.find((x) => x.id === m.reply_to_id)}
+                replyName={profilesById[msgs.find((x) => x.id === m.reply_to_id)?.user_id]?.full_name}
+                reactions={reactions[m.id] ?? []}
+                onReact={react}
+                onHoldStart={() => startHold(m)}
+                onHoldEnd={stopHold}
+                onOpen={() => setActive(m)}
+              />
             </div>
           );
         })}
         <div ref={endRef} />
       </div>
-      {active && <MessageActions message={active} mine={active.user_id === user?.id} isMod={isMod} onClose={() => setActive(null)} onReply={() => { setReplyTo(active); setActive(null); }} onEdit={() => { setEditing(active); setText(active.content ?? ""); setActive(null); }} onDelete={() => del(active)} onReport={async () => {
+
+      {active && <MessageActions message={active} mine={active.user_id === user?.id} isMod={isMod} onClose={() => setActive(null)} onReply={() => { setReplyTo(active); setActive(null); }} onEdit={() => { setEditing(active); setText(active.content ?? ""); setActive(null); }} onDelete={() => del(active)} onPin={() => togglePin(active)} onReport={async () => {
         if (!user) return;
         const { error } = await (supabase as any).from("chat_message_flags").insert({ message_id: active.id, reporter_id: user.id, reason: "inappropriate" });
         if (error) toast.error(error.code === "23505" ? "You already reported this message" : error.message); else toast.success("Message sent to moderation");
         setActive(null);
       }} onReact={(e: string) => react(active.id, e)} />}
+
       {muted ? <div className="p-3 border-t border-border text-sm text-destructive text-center">You are muted and cannot send messages.</div> : (
         <form onSubmit={send} className="relative p-3 border-t border-border space-y-2">
-          {(replyTo || editing) && <div className="flex items-center justify-between rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-xs"><span>{editing ? "Editing" : "Replying to"} <b>{profilesById[(editing ?? replyTo).user_id]?.name ?? "Shooter"}</b></span><button type="button" onClick={() => { setReplyTo(null); setEditing(null); setText(""); }}><X className="h-3.5 w-3.5" /></button></div>}
+          {(replyTo || editing) && <div className="flex items-center justify-between rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-xs"><span>{editing ? "Editing" : "Replying to"} <b>{profilesById[(editing ?? replyTo).user_id]?.full_name ?? "Shooter"}</b></span><button type="button" onClick={() => { setReplyTo(null); setEditing(null); setText(""); }}><X className="h-3.5 w-3.5" /></button></div>}
           {mentionMatches.length > 0 && <div className="absolute bottom-16 left-14 right-16 z-10 rounded-xl border border-primary/30 bg-popover p-1 shadow-luxury">{mentionMatches.map((m) => <button type="button" key={m.id} onClick={() => chooseMention(m.full_name)} className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm hover:bg-primary/10"><AtSign className="h-3 w-3 text-primary" />{m.full_name}<span className="ml-auto text-[10px] text-muted-foreground">{m.gang_name ?? "Independent"}</span></button>)}</div>}
-          {pendingPreview && (
-            <div className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-2">
-              <img src={pendingPreview} alt="Attachment preview" className="h-16 w-16 rounded-lg object-cover border border-primary/40" />
-              <div className="text-xs text-muted-foreground flex-1 min-w-0">
-                <div className="font-bold text-foreground truncate">{pendingFile?.name}</div>
-                Add a caption below — it will be sent together with this image.
-              </div>
-              <button type="button" onClick={clearAttachment} className="rounded-full border border-border p-1 hover:bg-destructive/10"><X className="h-3.5 w-3.5" /></button>
+          {pending.length > 0 && (
+            <div className="flex flex-wrap gap-2 rounded-xl border border-primary/30 bg-primary/5 p-2">
+              {pending.map((p, i) => (
+                <div key={i} className="relative h-16 w-16 overflow-hidden rounded-lg border border-primary/40 bg-background/60">
+                  {p.type === "image" || p.type === "gif" ? <img src={p.preview} alt={p.file.name} className="h-full w-full object-cover" />
+                    : p.type === "video" ? <video src={p.preview} className="h-full w-full object-cover" muted />
+                    : <div className="grid h-full w-full place-items-center text-[9px] text-muted-foreground px-1 text-center"><FileText className="h-4 w-4" /></div>}
+                  <button type="button" onClick={() => removePending(i)} className="absolute right-0 top-0 rounded-bl-lg bg-background/80 p-0.5"><X className="h-3 w-3" /></button>
+                </div>
+              ))}
+              <div className="self-center text-[11px] text-muted-foreground">{pending.length}/{MAX_ATTACHMENTS} attached — add a caption below.</div>
             </div>
           )}
           <div className="flex items-end gap-2 rounded-2xl border border-primary/25 bg-background/50 p-2 focus-within:border-primary/60 transition-colors">
-            <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && attachImage(e.target.files[0])} />
-            <Button type="button" variant="ghost" size="icon" className="shrink-0 rounded-full border border-primary/30 text-primary hover:bg-primary/10" onClick={() => fileRef.current?.click()}><ImageIcon className="h-4 w-4" /></Button>
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onPaste={(e) => { const f = Array.from(e.clipboardData.files)[0]; if (f) { e.preventDefault(); attachImage(f); } }}
-              onKeyDown={(e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send(e as any); } }}
-              rows={1}
-              placeholder="Message, @tag a member or @all… (Enter for a new line, Ctrl+Enter to send)"
-              className="flex-1 resize-none bg-transparent px-1 py-2 text-sm outline-none max-h-40 min-h-[2.5rem]"
-            />
-            <Button type="submit" disabled={sending || (!text.trim() && !pendingFile)} className="btn-luxury shrink-0 rounded-full h-10 w-10 p-0"><Send className="h-4 w-4" /></Button>
+            <input ref={fileRef} type="file" multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip" hidden onChange={(e) => { if (e.target.files) attachFiles(Array.from(e.target.files)); e.target.value = ""; }} />
+            <Button type="button" variant="ghost" size="icon" className="shrink-0 rounded-full border border-primary/30 text-primary hover:bg-primary/10" onClick={() => fileRef.current?.click()}><Paperclip className="h-4 w-4" /></Button>
+            <StickerPicker assets={assets} onPick={sendAsset} />
+            {recording ? (
+              <div className="flex flex-1 items-center gap-2 px-2 text-sm">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-destructive" />
+                <span className="font-mono">{formatDuration(recSeconds)}</span>
+                <span className="text-xs text-muted-foreground">Recording voice note…</span>
+                <Button type="button" size="sm" variant="ghost" className="ml-auto text-destructive" onClick={() => stopRecording(true)}>Cancel</Button>
+                <Button type="button" size="icon" className="btn-luxury h-9 w-9 rounded-full" onClick={() => stopRecording(false)}><Square className="h-4 w-4" /></Button>
+              </div>
+            ) : (
+              <>
+                <textarea
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  onPaste={(e) => { const f = Array.from(e.clipboardData.files); if (f.length) { e.preventDefault(); attachFiles(f); } }}
+                  onKeyDown={(e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send(e as any); } }}
+                  rows={1}
+                  placeholder="Message, @tag a member or @all… (Enter for a new line, Ctrl+Enter to send)"
+                  className="flex-1 resize-none bg-transparent px-1 py-2 text-sm outline-none max-h-40 min-h-[2.5rem]"
+                />
+                <Button type="button" variant="ghost" size="icon" className="shrink-0 rounded-full border border-primary/30 text-primary hover:bg-primary/10" onClick={startRecording} title="Record a voice note"><Mic className="h-4 w-4" /></Button>
+                <Button type="submit" disabled={sending || (!text.trim() && pending.length === 0)} className="btn-luxury shrink-0 rounded-full h-10 w-10 p-0"><Send className="h-4 w-4" /></Button>
+              </>
+            )}
           </div>
         </form>
       )}
@@ -250,7 +399,114 @@ function Room({ room, muted }: { room: Room; muted: boolean }) {
   );
 }
 
-function MessageActions({ message, mine, isMod, onClose, onReply, onEdit, onDelete, onReport, onReact }: any) {
+function StickerPicker({ assets, onPick }: { assets: any[]; onPick: (a: any) => void }) {
+  const [open, setOpen] = useState(false);
+  const stickers = assets.filter((a) => a.kind !== "gif");
+  const gifs = assets.filter((a) => a.kind === "gif");
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button type="button" variant="ghost" size="icon" className="shrink-0 rounded-full border border-primary/30 text-primary hover:bg-primary/10"><Smile className="h-4 w-4" /></Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-72 border-primary/30 bg-card/95 backdrop-blur-xl p-3 space-y-3">
+        {assets.length === 0 && <div className="text-xs text-muted-foreground">No stickers or GIFs yet — an admin can add them from the chat moderation panel.</div>}
+        {[["Stickers", stickers], ["GIFs", gifs]].map(([label, list]: any) => list.length > 0 && (
+          <div key={label}>
+            <div className="mb-1 text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
+            <div className="grid grid-cols-4 gap-2">
+              {list.map((a: any) => (
+                <button key={a.id} type="button" onClick={() => { onPick(a); setOpen(false); }} className="aspect-square overflow-hidden rounded-lg border border-border/60 hover:border-primary/60">
+                  <img src={a.url} alt={a.name} className="h-full w-full object-cover" />
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function MessageRow({ m, mine, profile, roles, replyMsg, replyName, reactions, onReact, onHoldStart, onHoldEnd, onOpen }: any) {
+  const atts: ChatAttachment[] = normalizeAttachments(m);
+  const deleted = !!m.deleted_at;
+  const rank = rankFor(profile?.xp);
+  const grouped = Object.entries((reactions ?? []).reduce((a: any, r: any) => { a[r.emoji] = (a[r.emoji] ?? 0) + 1; return a; }, {}));
+  const isSponsor = roles.includes("sponsor");
+  const isVip = ["gold", "platinum", "legend"].includes(String(profile?.vip_tier ?? "").toLowerCase());
+  const name = profile?.ingame_name || profile?.full_name || "Shooter";
+
+  if (m.kind === "announcement" || m.kind === "match_reminder") {
+    const isReminder = m.kind === "match_reminder";
+    return (
+      <div id={`msg-${m.id}`} className="mx-auto max-w-lg rounded-2xl border border-primary/40 bg-primary/10 p-3 backdrop-blur-xl shadow-[0_10px_40px_-20px_hsl(var(--primary)/0.9)]">
+        <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-primary font-black">
+          {isReminder ? <CalendarClock className="h-3.5 w-3.5" /> : <Megaphone className="h-3.5 w-3.5" />}
+          {isReminder ? "Match reminder" : "Announcement"}
+          <span className="ml-auto text-muted-foreground normal-case tracking-normal">{new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+        </div>
+        {m.meta?.title && <div className="mt-1 font-bold">{m.meta.title}</div>}
+        {m.content && <div className="mt-1 whitespace-pre-wrap text-sm">{m.content}</div>}
+        {m.meta?.kickoff && <div className="mt-1 text-xs text-muted-foreground">Kick-off · {new Date(m.meta.kickoff).toLocaleString()}</div>}
+      </div>
+    );
+  }
+
+  return (
+    <div className={`flex gap-2 ${mine ? "flex-row-reverse" : ""}`} onPointerDown={onHoldStart} onPointerUp={onHoldEnd} onPointerLeave={onHoldEnd} onContextMenu={(e) => { e.preventDefault(); onOpen(); }}>
+      <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-gradient-gold grid place-items-center text-primary-foreground font-bold text-xs shadow-[0_0_16px_-4px_hsl(var(--primary)/0.8)]" style={{ boxShadow: `0 0 0 2px ${rank.style.ring}` }}>
+        {profile?.avatar_url ? <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" /> : name.slice(0, 2).toUpperCase()}
+      </div>
+      <div className={`max-w-[78%] min-w-0 ${mine ? "items-end" : "items-start"} flex flex-col`}>
+        <div
+          id={`msg-${m.id}`}
+          style={bubbleStyle(profile?.xp, mine)}
+          className={`relative rounded-2xl border px-3 py-2 backdrop-blur-xl backdrop-saturate-150 ${mine ? "rounded-br-sm" : "rounded-bl-sm"} ${isSponsor ? "ring-1 ring-amber-300/60" : isVip ? "ring-1 ring-fuchsia-300/40" : ""}`}
+        >
+          <div className="flex flex-wrap items-center gap-1 text-[11px]">
+            <UserBadge userId={m.user_id} name={name} />
+            <span className="rounded-full border px-1.5 py-[1px] text-[9px] font-black uppercase tracking-wide" style={{ borderColor: rank.style.ring, color: rank.style.text }}>{rank.title}</span>
+            {isSponsor && <span className="rounded-full bg-amber-400/20 px-1.5 py-[1px] text-[9px] font-black uppercase text-amber-200">Sponsor</span>}
+            {!isSponsor && isVip && <span className="rounded-full bg-fuchsia-400/20 px-1.5 py-[1px] text-[9px] font-black uppercase text-fuchsia-200">VIP {profile?.vip_tier}</span>}
+            {roles.includes("admin") && <span className="rounded-full bg-primary/25 px-1.5 py-[1px] text-[9px] font-black uppercase text-primary">Admin</span>}
+            {roles.includes("moderator") && !roles.includes("admin") && <span className="rounded-full bg-emerald-400/20 px-1.5 py-[1px] text-[9px] font-black uppercase text-emerald-200">Mod</span>}
+            {m.is_pinned && <Pin className="h-3 w-3 text-primary" />}
+            <span className="text-muted-foreground">· {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}{m.edited_at ? " · edited" : ""}</span>
+          </div>
+          {replyMsg && <button onClick={() => document.getElementById(`msg-${replyMsg.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" })} className="mt-1 w-full text-left rounded-lg border-l-2 border-primary bg-background/30 px-2 py-1 text-[11px] text-muted-foreground truncate">↪ {replyName ?? "Shooter"}: {replyMsg.content ?? "Attachment"}</button>}
+          {deleted ? <div className="text-sm italic text-muted-foreground">Message deleted</div> : (
+            <>
+              {m.content && <div className="mt-0.5 text-sm break-words whitespace-pre-wrap">{highlightMentions(m.content)}</div>}
+              {atts.length > 0 && <Attachments items={atts} />}
+            </>
+          )}
+          {grouped.length > 0 && <div className="mt-1 flex flex-wrap gap-1">{grouped.map(([emoji, count]) => <button key={emoji} onClick={() => onReact(m.id, emoji)} className="rounded-full border border-border/60 bg-background/40 px-2 py-0.5 text-xs">{emoji} {count as number}</button>)}</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Attachments({ items }: { items: ChatAttachment[] }) {
+  const media = items.filter((a) => a.type === "image" || a.type === "video" || a.type === "gif" || a.type === "sticker");
+  const others = items.filter((a) => !media.includes(a));
+  return (
+    <div className="mt-1 space-y-1">
+      {media.length > 0 && (
+        <div className={`grid gap-1 ${media.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+          {media.map((a, i) => a.type === "video"
+            ? <video key={i} src={a.url} controls playsInline className="max-h-64 w-full rounded-lg border border-border/60 object-cover" />
+            : <img key={i} src={a.url} alt={a.name ?? "Attachment"} className={`rounded-lg border border-border/60 object-cover ${a.type === "sticker" ? "max-h-28 w-28 border-none" : "max-h-64 w-full"}`} />)}
+        </div>
+      )}
+      {others.map((a, i) => a.type === "audio"
+        ? <audio key={i} src={a.url} controls className="w-56 max-w-full" />
+        : <a key={i} href={a.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg border border-border/60 bg-background/40 px-2 py-1.5 text-xs hover:border-primary/50"><FileText className="h-3.5 w-3.5 text-primary" /><span className="truncate">{a.name ?? "File"}</span></a>)}
+    </div>
+  );
+}
+
+function MessageActions({ message, mine, isMod, onClose, onReply, onEdit, onDelete, onReport, onReact, onPin }: any) {
   const emojis = ["🔥", "💀", "👑", "✅", "😂", "🎯"];
   return <div className="border-t border-border bg-card/95 p-3 backdrop-blur-xl animate-fade-in">
     <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground"><span>Message actions</span><button onClick={onClose}><X className="h-4 w-4" /></button></div>
@@ -258,6 +514,7 @@ function MessageActions({ message, mine, isMod, onClose, onReply, onEdit, onDele
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
       <Button type="button" variant="outline" size="sm" onClick={onReply}><Reply className="h-3.5 w-3.5 mr-1" />Reply</Button>
       {mine && !message.deleted_at && <Button type="button" variant="outline" size="sm" onClick={onEdit}><Pencil className="h-3.5 w-3.5 mr-1" />Edit</Button>}
+      {isMod && <Button type="button" variant="outline" size="sm" onClick={onPin}>{message.is_pinned ? <><PinOff className="h-3.5 w-3.5 mr-1" />Unpin</> : <><Pin className="h-3.5 w-3.5 mr-1" />Pin</>}</Button>}
       {(mine || isMod) && <Button type="button" variant="outline" size="sm" onClick={onDelete} className="text-destructive"><Trash2 className="h-3.5 w-3.5 mr-1" />Delete</Button>}
       {!mine && <Button type="button" variant="outline" size="sm" onClick={onReport} className="text-destructive"><Flag className="h-3.5 w-3.5 mr-1" />Report</Button>}
     </div>
@@ -311,7 +568,7 @@ function UserBadge({ userId, name }: { userId: string; name: string }) {
 
           <div className="flex flex-wrap gap-1 mt-3">
             <Badge variant="outline" className="text-[10px] uppercase border-primary/40 text-primary capitalize">{tier} VIP</Badge>
-            {roles.length === 0 && <Badge variant="outline" className="text-[10px]">Viewer</Badge>}
+            <Badge variant="outline" className="text-[10px]" style={{ borderColor: rankFor(profile?.xp).style.ring, color: rankFor(profile?.xp).style.text }}>{rankFor(profile?.xp).title}</Badge>
             {roles.map((r) => <Badge key={r} variant="outline" className="text-[10px]">{ROLE_LABELS[r as AppRole] ?? r}</Badge>)}
           </div>
 
