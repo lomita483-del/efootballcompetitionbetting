@@ -1,6 +1,28 @@
 import { SuspiciousActivityPanel } from "@/components/admin/SuspiciousActivityPanel";
 import { FlaggedChatQueue } from "@/components/admin/FlaggedChatQueue";
 import { ChatToolsPanel } from "@/components/admin/ChatToolsPanel";
+import { Download } from "lucide-react";
+
+function exportMatchesCsv(list: any[]) {
+  const head = ["Match ID", "Title", "Home", "Away", "Kick-off", "Status", "Home score", "Away score"];
+  const rows = list.map((m: any) => [
+    m.public_id ?? m.id,
+    m.name ?? "",
+    m.home_team?.name ?? m.home_player?.name ?? "",
+    m.away_team?.name ?? m.away_player?.name ?? "",
+    m.start_time ? new Date(m.start_time).toLocaleString() : "TBD",
+    m.status ?? "",
+    m.home_score ?? "",
+    m.away_score ?? "",
+  ]);
+  const csv = [head, ...rows].map((r) => r.map((c) => `"${String(c ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `seeded-matches-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
