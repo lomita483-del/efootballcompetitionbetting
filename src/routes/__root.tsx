@@ -239,9 +239,11 @@ function AdaptiveViewport() {
     apply();
     window.addEventListener("resize", apply);
     window.addEventListener("orientationchange", apply);
+    window.visualViewport?.addEventListener("resize", apply);
     return () => {
       window.removeEventListener("resize", apply);
       window.removeEventListener("orientationchange", apply);
+      window.visualViewport?.removeEventListener("resize", apply);
     };
   }, [isAdmin]);
 
