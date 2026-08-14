@@ -142,6 +142,7 @@ function useInstallPrompt() {
 
 export const Layout = ({ children }: { children: ReactNode }) => {
   const { user, profile, roles, isAdmin, isMod, signOut } = useAuth();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const nav = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === "/";
