@@ -40,7 +40,7 @@ import { PageTour } from "@/components/PageTour";
 import { LuckyWheelPopout } from "@/components/LuckyWheelPopout";
 import { AdvertisementRow } from "@/components/AdvertisementRow";
 import { VideoAd } from "@/components/VideoAd";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation } from "@tanstack/react-router";
 import lslPlatformBg from "@/assets/ecb-nebula-bg.jpg.asset.json";
