@@ -137,17 +137,8 @@ export function AdminPage() {
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
-  // Force this console to always render at desktop width/layout, even on
-  // mobile browsers — matches the reference design 1:1 instead of switching
-  // to a stacked mobile layout. Restores the normal viewport on unmount.
-  useEffect(() => {
-    const viewport = document.querySelector('meta[name="viewport"]');
-    const original = viewport?.getAttribute("content") ?? null;
-    if (viewport) viewport.setAttribute("content", "width=1280, initial-scale=0.28, maximum-scale=3, user-scalable=yes");
-    return () => {
-      if (viewport) viewport.setAttribute("content", original ?? "width=device-width, initial-scale=1");
-    };
-  }, []);
+  // Desktop-canvas scaling is handled by <DesktopCanvas> below (CSS transform),
+  // which is reliable everywhere — no viewport-meta hacks needed here.
   // Toggle the frosted-glass blur on the whole console so admins can verify
   // sensitive data alignment/layout against a clean, unblurred surface.
   const [unblurred, setUnblurred] = useState(false);
@@ -203,7 +194,8 @@ export function AdminPage() {
     <Layout>
       <main className={`admin-console-page${unblurred ? " admin-unblurred" : ""} w-full overflow-x-hidden`}>
         <div className="admin-shell-logo" style={{ backgroundImage: `url(${lslLogo})` }} aria-hidden="true" />
-        <div className="w-full max-w-[1280px] ml-0 mr-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4">
+        <DesktopCanvas>
+        <div className="w-[1280px] max-w-[1280px] ml-0 mr-auto px-4 py-6 space-y-4">
 
           <div
             data-tour="admin-hero"
@@ -339,9 +331,48 @@ export function AdminPage() {
             <TabsContent value="wagers" className="mt-4"><WagersAdminPanel /></TabsContent>
           </Tabs>
         </div>
+        </DesktopCanvas>
         <ActionConfirmDialog />
       </main>
     </Layout>
+  );
+}
+
+/**
+ * Renders children on a fixed 1280px desktop canvas and scales it down with a
+ * CSS transform so phones get the exact desktop layout (League Arena stays in
+ * the right column) instead of the stacked mobile reflow.
+ */
+function DesktopCanvas({ children }: { children: React.ReactNode }) {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const [height, setHeight] = useState(0);
+  useEffect(() => {
+    const measure = () => {
+      const w = hostRef.current?.clientWidth || window.innerWidth;
+      const s = Math.min(1, w / 1280);
+      setScale(s);
+      setHeight((innerRef.current?.scrollHeight || 0) * s);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (innerRef.current) ro.observe(innerRef.current);
+    if (hostRef.current) ro.observe(hostRef.current);
+    window.addEventListener("resize", measure);
+    window.addEventListener("orientationchange", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("orientationchange", measure);
+    };
+  }, []);
+  return (
+    <div ref={hostRef} className="w-full overflow-x-hidden" style={{ height: height || undefined }}>
+      <div ref={innerRef} style={{ width: 1280, transform: `scale(${scale})`, transformOrigin: "top left" }}>
+        {children}
+      </div>
+    </div>
   );
 }
 
