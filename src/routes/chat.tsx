@@ -655,7 +655,7 @@ function StickerPicker({ assets, onPick }: { assets: any[]; onPick: (a: any) => 
   );
 }
 
-function MessageRow({ m, mine, profile, roles, replyMsg, replyName, reactions, onReact, onHoldStart, onHoldEnd, onOpen }: any) {
+function MessageRow({ m, mine, profile, roles, replyMsg, replyName, reactions, onReact, onHoldStart, onHoldEnd, onOpen, mentionNames = [], myNames = [] }: any) {
   const atts: ChatAttachment[] = normalizeAttachments(m);
   const deleted = !!m.deleted_at;
   const rank = rankFor(profile?.xp);
@@ -674,7 +674,7 @@ function MessageRow({ m, mine, profile, roles, replyMsg, replyName, reactions, o
           <span className="ml-auto text-muted-foreground normal-case tracking-normal">{new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
         </div>
         {m.meta?.title && <div className="mt-1.5 text-base font-bold">{m.meta.title}</div>}
-        {m.content && <div className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{m.content}</div>}
+        {m.content && <div className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{highlightMentions(m.content, mentionNames, myNames)}</div>}
         {m.meta?.kickoff && (
           <div className="mt-1.5 text-xs font-semibold text-primary">
             Starts {formatCountdown(m.meta.kickoff)} · {new Date(m.meta.kickoff).toLocaleString()}
@@ -714,7 +714,7 @@ function MessageRow({ m, mine, profile, roles, replyMsg, replyName, reactions, o
           {replyMsg && <button onClick={() => document.getElementById(`msg-${replyMsg.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" })} className="mt-1 w-full text-left rounded-lg border-l-2 border-primary bg-background/30 px-2 py-1 text-[11px] text-muted-foreground truncate">↪ {replyName ?? "Shooter"}: {replyMsg.content ?? "Attachment"}</button>}
           {deleted ? <div className="text-sm italic text-muted-foreground">Message deleted</div> : (
             <>
-              {m.content && <div className="mt-0.5 text-sm break-words whitespace-pre-wrap">{highlightMentions(m.content)}</div>}
+              {m.content && <div className="mt-0.5 text-sm break-words whitespace-pre-wrap">{highlightMentions(m.content, mentionNames, myNames)}</div>}
               {atts.length > 0 && <Attachments items={atts} />}
             </>
           )}
@@ -784,8 +784,36 @@ function MessageActions({ message, mine, isMod, onClose, onReply, onEdit, onDele
   </div>;
 }
 
-function highlightMentions(content: string) {
-  return content.split(/(@[\w .-]+)/g).map((part, i) => part.startsWith("@") ? <span key={i} className="font-bold text-primary">{part}</span> : part);
+function highlightMentions(content: string, mentionNames: string[] = [], myNames: string[] = []) {
+  const known = [...mentionNames, "all", "everyone"].filter(Boolean);
+  const mine = new Set(myNames.map((n) => n.toLowerCase()));
+  const nodes: React.ReactNode[] = [];
+  let rest = content;
+  let key = 0;
+  while (rest.length > 0) {
+    const at = rest.indexOf("@");
+    if (at === -1) { nodes.push(rest); break; }
+    if (at > 0) nodes.push(rest.slice(0, at));
+    const after = rest.slice(at + 1);
+    // longest known name that this mention starts with (names can contain spaces)
+    const match = known
+      .filter((n) => after.toLowerCase().startsWith(n.toLowerCase()))
+      .sort((a, b) => b.length - a.length)[0];
+    if (!match) { nodes.push("@"); rest = after; continue; }
+    const label = `@${after.slice(0, match.length)}`;
+    const isEveryone = match.toLowerCase() === "all" || match.toLowerCase() === "everyone";
+    const isMe = mine.has(match.toLowerCase()) || isEveryone;
+    nodes.push(
+      <span
+        key={`m-${key++}`}
+        className={`rounded px-1 font-bold ${isMe ? "bg-primary/25 text-primary ring-1 ring-primary/40" : "bg-primary/10 text-primary"}`}
+      >
+        {label}
+      </span>,
+    );
+    rest = after.slice(match.length);
+  }
+  return nodes;
 }
 
 function UserBadge({ userId, name }: { userId: string; name: string }) {
