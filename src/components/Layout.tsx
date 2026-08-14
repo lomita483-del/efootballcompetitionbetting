@@ -145,6 +145,9 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   const nav = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === "/";
+  // The admin console renders on a fixed desktop canvas; keep the site header on
+  // the same canvas so the top bar never reflows into the stacked mobile rows.
+  const isAdminRoute = location.pathname.startsWith("/admin");
   useVirtualHeartbeat();
   useForceReloadBroadcast();
   const { canInstall, promptInstall } = useInstallPrompt();
