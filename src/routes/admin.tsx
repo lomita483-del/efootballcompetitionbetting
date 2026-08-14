@@ -420,7 +420,7 @@ function AdminSectionRail({ alerts, onOpen }: { alerts: Record<string, number>; 
   ];
   const items = isAdmin ? all : all.filter((i) => i.mod);
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
+    <div className="grid grid-cols-6 gap-3">
       {items.map((item) => (
         <button key={item.tab} onClick={() => onOpen(item.tab)} className="group relative overflow-hidden rounded-xl border border-primary/20 bg-card/70 p-3 text-left shadow-luxury transition hover:-translate-y-0.5 hover:border-primary/50">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-gold" />
@@ -3616,12 +3616,12 @@ function AnalyticsPanel() {
   return (
     <div className="space-y-3">
       {/* ROW 1 — 5 metric squares */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
+      <div className="grid grid-cols-5 gap-3">
         {row1.map((x) => <MetricSquare key={x.title} {...x} />)}
       </div>
 
       {/* ROW 2 — 5 metric squares */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
+      <div className="grid grid-cols-5 gap-3">
         {row2.map((x) => <MetricSquare key={x.title} {...x} />)}
       </div>
 
@@ -3660,17 +3660,17 @@ function AnalyticsPanel() {
       </div>
 
       {/* ROW 4 — 5 metric squares */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
+      <div className="grid grid-cols-5 gap-3">
         {row4.map((x) => <MetricSquare key={x.title} {...x} compact />)}
       </div>
 
       {/* ROW 5 — 5 metric squares */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
+      <div className="grid grid-cols-5 gap-3">
         {row5.map((x) => <MetricSquare key={x.title} {...x} compact />)}
       </div>
 
       {/* ROW 6 — 3 wider squares + system logs cell */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+      <div className="grid grid-cols-4 gap-3">
         {row6.map((x) => <MetricSquare key={x.title} {...x} compact />)}
         <button type="button" onClick={() => goTab("audit")} className="relative overflow-hidden rounded-xl border border-primary/30 bg-card/60 min-h-[46px] sm:min-h-[58px] group">
           <img src={leagueSkullFire} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-[3000ms]" />
@@ -3685,10 +3685,10 @@ function AnalyticsPanel() {
           the League Arena banner, stretched to match the left column's full
           height. On mobile this reflows to a single column: Broadcast, Live
           Stats, League Arena, then the tiles as a readable 6-across grid. */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         {/* LEFT COLUMN — Broadcast + Live Stats row, then tiles */}
-        <div className="lg:col-span-2 flex flex-col gap-3 order-1">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="col-span-2 flex flex-col gap-3 order-1">
+          <div className="grid grid-cols-2 gap-3">
             {/* Broadcast Center */}
             <Card className="border-primary/25 bg-card/70 p-2.5 flex flex-col">
               <div className="mb-1.5 flex items-center gap-2">
