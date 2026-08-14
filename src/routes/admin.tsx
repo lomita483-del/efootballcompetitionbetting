@@ -3616,12 +3616,12 @@ function AnalyticsPanel() {
   return (
     <div className="space-y-3">
       {/* ROW 1 — 5 metric squares */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
+      <div className="grid grid-cols-5 gap-3">
         {row1.map((x) => <MetricSquare key={x.title} {...x} />)}
       </div>
 
       {/* ROW 2 — 5 metric squares */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
+      <div className="grid grid-cols-5 gap-3">
         {row2.map((x) => <MetricSquare key={x.title} {...x} />)}
       </div>
 
@@ -3660,12 +3660,12 @@ function AnalyticsPanel() {
       </div>
 
       {/* ROW 4 — 5 metric squares */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
+      <div className="grid grid-cols-5 gap-3">
         {row4.map((x) => <MetricSquare key={x.title} {...x} compact />)}
       </div>
 
       {/* ROW 5 — 5 metric squares */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
+      <div className="grid grid-cols-5 gap-3">
         {row5.map((x) => <MetricSquare key={x.title} {...x} compact />)}
       </div>
 
