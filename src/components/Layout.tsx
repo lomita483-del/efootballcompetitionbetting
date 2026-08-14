@@ -140,6 +140,46 @@ function useInstallPrompt() {
   return { canInstall: !!deferred, promptInstall };
 }
 
+/**
+ * Renders the header on a fixed 1280px desktop canvas and scales it down to the
+ * device width, so /admin keeps the exact one-row desktop top bar on phones.
+ */
+function HeaderCanvas({ active, children }: { active: boolean; children: ReactNode }) {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const [height, setHeight] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    if (!active) return;
+    const host = hostRef.current;
+    const inner = innerRef.current;
+    if (!host || !inner) return;
+    const recompute = () => {
+      const w = host.clientWidth;
+      if (w <= 0) return;
+      const s = Math.min(w / 1280, 1);
+      setScale(s);
+      setHeight(inner.offsetHeight * s);
+    };
+    recompute();
+    const ro = new ResizeObserver(recompute);
+    ro.observe(host);
+    ro.observe(inner);
+    return () => ro.disconnect();
+  }, [active]);
+
+  if (!active) return <>{children}</>;
+
+  return (
+    <div ref={hostRef} className="w-full overflow-hidden" style={{ height }}>
+      <div ref={innerRef} style={{ width: 1280, transform: `scale(${scale})`, transformOrigin: "top left" }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export const Layout = ({ children }: { children: ReactNode }) => {
   const { user, profile, roles, isAdmin, isMod, signOut } = useAuth();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
