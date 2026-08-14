@@ -40,7 +40,7 @@ import { PageTour } from "@/components/PageTour";
 import { LuckyWheelPopout } from "@/components/LuckyWheelPopout";
 import { AdvertisementRow } from "@/components/AdvertisementRow";
 import { VideoAd } from "@/components/VideoAd";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation } from "@tanstack/react-router";
 import lslPlatformBg from "@/assets/ecb-nebula-bg.jpg.asset.json";
@@ -140,11 +140,55 @@ function useInstallPrompt() {
   return { canInstall: !!deferred, promptInstall };
 }
 
+/**
+ * Renders the header on a fixed 1280px desktop canvas and scales it down to the
+ * device width, so /admin keeps the exact one-row desktop top bar on phones.
+ */
+function HeaderCanvas({ active, children }: { active: boolean; children: ReactNode }) {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const [height, setHeight] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    if (!active) return;
+    const host = hostRef.current;
+    const inner = innerRef.current;
+    if (!host || !inner) return;
+    const recompute = () => {
+      const w = host.clientWidth;
+      if (w <= 0) return;
+      const s = Math.min(w / 1280, 1);
+      setScale(s);
+      setHeight(inner.offsetHeight * s);
+    };
+    recompute();
+    const ro = new ResizeObserver(recompute);
+    ro.observe(host);
+    ro.observe(inner);
+    return () => ro.disconnect();
+  }, [active]);
+
+  if (!active) return <>{children}</>;
+
+  return (
+    <div ref={hostRef} className="w-full overflow-hidden" style={{ height }}>
+      <div ref={innerRef} style={{ width: 1280, transform: `scale(${scale})`, transformOrigin: "top left" }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export const Layout = ({ children }: { children: ReactNode }) => {
   const { user, profile, roles, isAdmin, isMod, signOut } = useAuth();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const nav = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === "/";
+  // The admin console renders on a fixed desktop canvas; keep the site header on
+  // the same canvas so the top bar never reflows into the stacked mobile rows.
+  const isAdminRoute = location.pathname.startsWith("/admin");
   useVirtualHeartbeat();
   useForceReloadBroadcast();
   const { canInstall, promptInstall } = useInstallPrompt();
@@ -208,6 +252,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
             <div className="absolute inset-0 bg-gradient-to-b from-background/55 via-background/45 to-background/65" />
           </div>
         )}
+        <HeaderCanvas active={isAdminRoute}>
         <div className="container mx-auto px-4 flex h-16 items-center gap-3 lg:gap-4 relative">
           <Link to="/" className="flex items-center gap-2 group shrink-0">
             {branding.logoUrl ? (
@@ -381,6 +426,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
             )}
           </div>
         ) : null}
+        </HeaderCanvas>
       </header>
       <main className="relative overflow-x-hidden">{children}</main>
       <div className="container pb-4" data-tour="page-ads">
