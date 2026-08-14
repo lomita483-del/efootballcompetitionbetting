@@ -225,9 +225,8 @@ function AdaptiveViewport() {
       if (isAdmin) {
         // Lock the admin console to the 1280 canvas, pre-scaled so the whole
         // width fits the screen, and freeze the scale so pinch-zoom is a no-op.
-        const sw = window.screen?.width ?? window.innerWidth;
-        const sh = window.screen?.height ?? window.innerHeight;
-        const avail = Math.min(sw, sh) > 0 ? Math.min(sw, sh) : sw; // portrait width
+        const vv = window.visualViewport;
+        const avail = vv ? vv.width * (vv.scale || 1) : window.outerWidth || window.screen?.width || window.innerWidth;
         const s = Math.min(1, Math.max(0.2, Math.round((avail / 1280) * 1000) / 1000));
         const locked = `width=1280, initial-scale=${s}, minimum-scale=${s}, maximum-scale=${s}, user-scalable=no, viewport-fit=cover`;
         if (meta.getAttribute("content") !== locked) meta.setAttribute("content", locked);
