@@ -2903,7 +2903,7 @@ function HighlightsPanel() {
     if (error) { toast.error(error.message); return; }
     const url = supabase.storage.from("highlights").getPublicUrl(path).data.publicUrl;
     const media_type = draft.file.type.startsWith("video") ? "video" : "image";
-    await supabase.from("highlights").insert({ title: draft.title, media_url: url, media_type });
+    await supabase.from("highlights").insert({ title: draft.title, media_url: url, media_type, is_active: true });
     setDraft({ title: "", file: null }); load();
   }
   async function del(id: string) { await supabase.from("highlights").delete().eq("id", id); load(); }

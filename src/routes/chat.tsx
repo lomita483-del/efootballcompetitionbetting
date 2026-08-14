@@ -60,9 +60,28 @@ function ChatPage() {
   const nav = useNavigate();
   const [room, setRoom] = useState<Room>("general");
   const [matches, setMatches] = useState<MatchRow[]>([]);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
   const [sections, setSections] = useState({ channels: true, announcements: true, reminders: true });
 
   useEffect(() => { if (!user) nav({ to: "/login" }); }, [user, nav]);
+
+  useEffect(() => {
+    const load = () => {
+      (supabase as any)
+        .from("chat_messages")
+        .select("id,room,kind,content,meta,created_at")
+        .in("kind", ["announcement", "match_reminder"])
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false })
+        .limit(10)
+        .then(({ data }: any) => setAnnouncements(data ?? []));
+    };
+    load();
+    const ch = supabase.channel("chat-announcements")
+      .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages" }, load)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, []);
 
   useEffect(() => {
     fetchMatches()
@@ -84,7 +103,7 @@ function ChatPage() {
     <Layout>
       <div className="container py-6 md:py-10">
         <div className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
-          <Sidebar room={room} setRoom={setRoom} canGang={canGang} isMod={isMod} matches={matches} sections={sections} setSections={setSections} />
+          <Sidebar room={room} setRoom={setRoom} canGang={canGang} isMod={isMod} matches={matches} announcements={announcements} sections={sections} setSections={setSections} />
           <div className="min-w-0">
             <Room room={room} muted={profile.is_muted} title={ROOM_META[room].label} subtitle={ROOM_META[room].subtitle} />
           </div>
@@ -94,11 +113,14 @@ function ChatPage() {
   );
 }
 
-function Sidebar({ room, setRoom, canGang, isMod, matches, sections, setSections }: {
-  room: Room; setRoom: (r: Room) => void; canGang: boolean; isMod: boolean; matches: MatchRow[];
+function Sidebar({ room, setRoom, canGang, isMod, matches, announcements, sections, setSections }: {
+  room: Room; setRoom: (r: Room) => void; canGang: boolean; isMod: boolean; matches: MatchRow[]; announcements: any[];
   sections: { channels: boolean; announcements: boolean; reminders: boolean };
   setSections: React.Dispatch<React.SetStateAction<{ channels: boolean; announcements: boolean; reminders: boolean }>>;
 }) {
+  const visibleAnnouncements = announcements.filter((a) =>
+    a.room === "general" || (a.room === "gang" && canGang) || (a.room === "moderator" && isMod),
+  );
   const channels: { id: Room; label: string; locked: boolean }[] = [
     { id: "general", label: "General Chat", locked: false },
     { id: "gang", label: "Gang Chats", locked: !canGang },
@@ -147,14 +169,28 @@ function Sidebar({ room, setRoom, canGang, isMod, matches, sections, setSections
           open={sections.announcements}
           onToggle={() => setSections((s) => ({ ...s, announcements: !s.announcements }))}
         >
-          <div className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-sm text-muted-foreground">
-            <Megaphone className="h-3.5 w-3.5 shrink-0 text-primary" />
-            <span>Announcements</span>
-          </div>
-          <div className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-sm text-muted-foreground">
-            <ClipboardList className="h-3.5 w-3.5 shrink-0 text-primary" />
-            <span>System Updates</span>
-          </div>
+          {visibleAnnouncements.length === 0 && (
+            <p className="px-2 py-1 text-xs text-muted-foreground">No announcements yet.</p>
+          )}
+          {visibleAnnouncements.map((a) => (
+            <button
+              key={a.id}
+              type="button"
+              onClick={() => {
+                setRoom(a.room as Room);
+                setTimeout(() => document.getElementById(`msg-${a.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 350);
+              }}
+              className="flex w-full items-start gap-2 rounded-xl border border-transparent px-2.5 py-2 text-left text-sm text-muted-foreground hover:border-primary/40 hover:text-foreground"
+            >
+              {a.kind === "match_reminder"
+                ? <ClipboardList className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                : <Megaphone className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />}
+              <span className="min-w-0">
+                <span className="block truncate font-semibold text-foreground">{a.meta?.title ?? (a.kind === "match_reminder" ? "Match reminder" : "Announcement")}</span>
+                <span className="block truncate text-[11px]">{a.content ?? ""}</span>
+              </span>
+            </button>
+          ))}
         </SidebarSection>
 
         <SidebarSection
@@ -202,7 +238,7 @@ function SidebarSection({ title, open, onToggle, children }: { title: string; op
 type MediaFilter = "all" | "image" | "video" | "audio" | "file" | "sticker";
 
 function Room({ room, muted, title, subtitle }: { room: Room; muted: boolean; title: string; subtitle: string }) {
-  const { user, isMod } = useAuth();
+  const { user, isMod, profile: myProfile } = useAuth();
   const sendChatNotification = useServerFn(notifyChatMessage);
   const [msgs, setMsgs] = useState<any[]>([]);
   const [reactions, setReactions] = useState<Record<string, any[]>>({});
@@ -238,6 +274,15 @@ function Room({ room, muted, title, subtitle }: { room: Room; muted: boolean; ti
     { id: "all", full_name: "all", gang_name: "Notify everyone" },
     ...members.filter((m) => String(m.full_name ?? "").toLowerCase().includes(mentionTerm)).slice(0, 5),
   ].filter((m) => String(m.full_name).toLowerCase().includes(mentionTerm)), [members, mentionTerm]);
+
+  const mentionNames = useMemo(
+    () => members.map((m) => String(m.full_name ?? "").trim()).filter(Boolean),
+    [members],
+  );
+  const myNames = useMemo(
+    () => [myProfile?.full_name, (myProfile as any)?.ingame_name].filter(Boolean).map((n: any) => String(n)),
+    [myProfile],
+  );
 
   useEffect(() => { setBannerDismissed(false); }, [room]);
 
@@ -515,6 +560,8 @@ function Room({ room, muted, title, subtitle }: { room: Room; muted: boolean; ti
                 onHoldStart={() => startHold(m)}
                 onHoldEnd={stopHold}
                 onOpen={() => setActive(m)}
+                mentionNames={mentionNames}
+                myNames={myNames}
               />
             </div>
           );
@@ -608,7 +655,7 @@ function StickerPicker({ assets, onPick }: { assets: any[]; onPick: (a: any) => 
   );
 }
 
-function MessageRow({ m, mine, profile, roles, replyMsg, replyName, reactions, onReact, onHoldStart, onHoldEnd, onOpen }: any) {
+function MessageRow({ m, mine, profile, roles, replyMsg, replyName, reactions, onReact, onHoldStart, onHoldEnd, onOpen, mentionNames = [], myNames = [] }: any) {
   const atts: ChatAttachment[] = normalizeAttachments(m);
   const deleted = !!m.deleted_at;
   const rank = rankFor(profile?.xp);
@@ -627,7 +674,7 @@ function MessageRow({ m, mine, profile, roles, replyMsg, replyName, reactions, o
           <span className="ml-auto text-muted-foreground normal-case tracking-normal">{new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
         </div>
         {m.meta?.title && <div className="mt-1.5 text-base font-bold">{m.meta.title}</div>}
-        {m.content && <div className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{m.content}</div>}
+        {m.content && <div className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{highlightMentions(m.content, mentionNames, myNames)}</div>}
         {m.meta?.kickoff && (
           <div className="mt-1.5 text-xs font-semibold text-primary">
             Starts {formatCountdown(m.meta.kickoff)} · {new Date(m.meta.kickoff).toLocaleString()}
@@ -667,7 +714,7 @@ function MessageRow({ m, mine, profile, roles, replyMsg, replyName, reactions, o
           {replyMsg && <button onClick={() => document.getElementById(`msg-${replyMsg.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" })} className="mt-1 w-full text-left rounded-lg border-l-2 border-primary bg-background/30 px-2 py-1 text-[11px] text-muted-foreground truncate">↪ {replyName ?? "Shooter"}: {replyMsg.content ?? "Attachment"}</button>}
           {deleted ? <div className="text-sm italic text-muted-foreground">Message deleted</div> : (
             <>
-              {m.content && <div className="mt-0.5 text-sm break-words whitespace-pre-wrap">{highlightMentions(m.content)}</div>}
+              {m.content && <div className="mt-0.5 text-sm break-words whitespace-pre-wrap">{highlightMentions(m.content, mentionNames, myNames)}</div>}
               {atts.length > 0 && <Attachments items={atts} />}
             </>
           )}
@@ -679,6 +726,7 @@ function MessageRow({ m, mine, profile, roles, replyMsg, replyName, reactions, o
 }
 
 function Attachments({ items }: { items: ChatAttachment[] }) {
+  const [viewer, setViewer] = useState<ChatAttachment | null>(null);
   const media = items.filter((a) => a.type === "image" || a.type === "video" || a.type === "gif" || a.type === "sticker");
   const others = items.filter((a) => !media.includes(a));
   return (
@@ -687,12 +735,36 @@ function Attachments({ items }: { items: ChatAttachment[] }) {
         <div className={`grid gap-1 ${media.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
           {media.map((a, i) => a.type === "video"
             ? <video key={i} src={a.url} controls playsInline className="max-h-64 w-full rounded-lg border border-border/60 object-cover" />
-            : <img key={i} src={a.url} alt={a.name ?? "Attachment"} className={`rounded-lg border border-border/60 object-cover ${a.type === "sticker" ? "max-h-28 w-28 border-none" : "max-h-64 w-full"}`} />)}
+            : (
+              <button
+                key={i}
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setViewer(a); }}
+                onPointerDown={(e) => e.stopPropagation()}
+                className="block"
+                title="Tap to view"
+              >
+                <img src={a.url} alt={a.name ?? "Attachment"} className={`cursor-zoom-in rounded-lg border border-border/60 object-cover ${a.type === "sticker" ? "max-h-28 w-28 border-none" : "max-h-64 w-full"}`} />
+              </button>
+            ))}
         </div>
       )}
       {others.map((a, i) => a.type === "audio"
         ? <audio key={i} src={a.url} controls className="w-56 max-w-full" />
         : <a key={i} href={a.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg border border-border/60 bg-background/40 px-2 py-1.5 text-xs hover:border-primary/50"><FileText className="h-3.5 w-3.5 text-primary" /><span className="truncate">{a.name ?? "File"}</span></a>)}
+      {viewer && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm animate-fade-in"
+          onClick={(e) => { e.stopPropagation(); setViewer(null); }}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <img src={viewer.url} alt={viewer.name ?? "Attachment"} className="max-h-[85vh] max-w-full rounded-xl object-contain" onClick={(e) => e.stopPropagation()} />
+          <div className="absolute right-4 top-4 flex gap-2">
+            <a href={viewer.url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="rounded-full border border-white/30 bg-black/60 px-3 py-1.5 text-xs text-white">Open</a>
+            <button type="button" onClick={() => setViewer(null)} className="rounded-full border border-white/30 bg-black/60 p-1.5 text-white"><X className="h-4 w-4" /></button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -712,8 +784,36 @@ function MessageActions({ message, mine, isMod, onClose, onReply, onEdit, onDele
   </div>;
 }
 
-function highlightMentions(content: string) {
-  return content.split(/(@[\w .-]+)/g).map((part, i) => part.startsWith("@") ? <span key={i} className="font-bold text-primary">{part}</span> : part);
+function highlightMentions(content: string, mentionNames: string[] = [], myNames: string[] = []) {
+  const known = [...mentionNames, "all", "everyone"].filter(Boolean);
+  const mine = new Set(myNames.map((n) => n.toLowerCase()));
+  const nodes: React.ReactNode[] = [];
+  let rest = content;
+  let key = 0;
+  while (rest.length > 0) {
+    const at = rest.indexOf("@");
+    if (at === -1) { nodes.push(rest); break; }
+    if (at > 0) nodes.push(rest.slice(0, at));
+    const after = rest.slice(at + 1);
+    // longest known name that this mention starts with (names can contain spaces)
+    const match = known
+      .filter((n) => after.toLowerCase().startsWith(n.toLowerCase()))
+      .sort((a, b) => b.length - a.length)[0];
+    if (!match) { nodes.push("@"); rest = after; continue; }
+    const label = `@${after.slice(0, match.length)}`;
+    const isEveryone = match.toLowerCase() === "all" || match.toLowerCase() === "everyone";
+    const isMe = mine.has(match.toLowerCase()) || isEveryone;
+    nodes.push(
+      <span
+        key={`m-${key++}`}
+        className={`rounded px-1 font-bold ${isMe ? "bg-primary/25 text-primary ring-1 ring-primary/40" : "bg-primary/10 text-primary"}`}
+      >
+        {label}
+      </span>,
+    );
+    rest = after.slice(match.length);
+  }
+  return nodes;
 }
 
 function UserBadge({ userId, name }: { userId: string; name: string }) {

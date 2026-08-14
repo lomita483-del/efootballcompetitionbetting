@@ -33,8 +33,38 @@ export async function deliverChatNotification({ messageId, senderId }: ChatNotif
 
   const senderName = sender?.ingame_name || sender?.full_name || "A player";
   const content = message.content?.trim() || (message.image_url ? "Sent an image" : "Sent a message");
-  const title = `${senderName} in ${message.room} chat`;
+  let title = `${senderName} in ${message.room} chat`;
   const body = content.slice(0, 240);
+
+  // Parse @mentions so tagged members are actually targeted.
+  const rawMentions = Array.from(
+    (message.content ?? "").matchAll(/@([A-Za-z0-9_][A-Za-z0-9_ .'-]{0,40})/g),
+  ).map((m) => m[1].trim()).filter(Boolean);
+  const mentionsEveryone = rawMentions.some((m) => /^(all|everyone)\b/i.test(m));
+  let mentionedIds: string[] = [];
+  if (!mentionsEveryone && rawMentions.length > 0) {
+    const firstWords = Array.from(new Set(rawMentions.map((m) => m.split(/\s+/)[0]).filter((w) => w.length >= 2)));
+    if (firstWords.length > 0) {
+      const orFilter = firstWords
+        .map((w) => `full_name.ilike.${w}%,ingame_name.ilike.${w}%`)
+        .join(",");
+      const { data: candidates } = await supabaseAdmin
+        .from("profiles")
+        .select("id,full_name,ingame_name")
+        .or(orFilter)
+        .limit(200);
+      mentionedIds = (candidates ?? [])
+        .filter((p: any) =>
+          [p.full_name, p.ingame_name]
+            .filter(Boolean)
+            .some((name: string) =>
+              rawMentions.some((m) => m.toLowerCase().startsWith(String(name).toLowerCase())),
+            ),
+        )
+        .map((p: any) => p.id)
+        .filter((id: string) => id !== senderId);
+    }
+  }
 
   const { data: subscriptions, error: subscriptionsError } = await supabaseAdmin
     .from("push_subscriptions")
@@ -45,6 +75,13 @@ export async function deliverChatNotification({ messageId, senderId }: ChatNotif
   if (subscriptionsError) throw subscriptionsError;
 
   let recipients = Array.from(new Set((subscriptions ?? []).map((subscription) => subscription.user_id).filter(Boolean)));
+  if (mentionedIds.length > 0) {
+    const mentionSet = new Set(mentionedIds);
+    recipients = recipients.filter((id) => mentionSet.has(id as string));
+    title = `${senderName} mentioned you in ${message.room} chat`;
+  } else if (mentionsEveryone) {
+    title = `${senderName} tagged everyone in ${message.room} chat`;
+  }
   if (message.room === "moderator" && recipients.length > 0) {
     const { data: roleRows } = await supabaseAdmin
       .from("user_roles")
