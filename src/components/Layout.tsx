@@ -211,6 +211,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
             <div className="absolute inset-0 bg-gradient-to-b from-background/55 via-background/45 to-background/65" />
           </div>
         )}
+        <HeaderCanvas active={isAdminRoute}>
         <div className="container mx-auto px-4 flex h-16 items-center gap-3 lg:gap-4 relative">
           <Link to="/" className="flex items-center gap-2 group shrink-0">
             {branding.logoUrl ? (
