@@ -238,7 +238,7 @@ function SidebarSection({ title, open, onToggle, children }: { title: string; op
 type MediaFilter = "all" | "image" | "video" | "audio" | "file" | "sticker";
 
 function Room({ room, muted, title, subtitle }: { room: Room; muted: boolean; title: string; subtitle: string }) {
-  const { user, isMod } = useAuth();
+  const { user, isMod, profile: myProfile } = useAuth();
   const sendChatNotification = useServerFn(notifyChatMessage);
   const [msgs, setMsgs] = useState<any[]>([]);
   const [reactions, setReactions] = useState<Record<string, any[]>>({});
@@ -274,6 +274,15 @@ function Room({ room, muted, title, subtitle }: { room: Room; muted: boolean; ti
     { id: "all", full_name: "all", gang_name: "Notify everyone" },
     ...members.filter((m) => String(m.full_name ?? "").toLowerCase().includes(mentionTerm)).slice(0, 5),
   ].filter((m) => String(m.full_name).toLowerCase().includes(mentionTerm)), [members, mentionTerm]);
+
+  const mentionNames = useMemo(
+    () => members.map((m) => String(m.full_name ?? "").trim()).filter(Boolean),
+    [members],
+  );
+  const myNames = useMemo(
+    () => [myProfile?.full_name, (myProfile as any)?.ingame_name].filter(Boolean).map((n: any) => String(n)),
+    [myProfile],
+  );
 
   useEffect(() => { setBannerDismissed(false); }, [room]);
 
@@ -551,6 +560,8 @@ function Room({ room, muted, title, subtitle }: { room: Room; muted: boolean; ti
                 onHoldStart={() => startHold(m)}
                 onHoldEnd={stopHold}
                 onOpen={() => setActive(m)}
+                mentionNames={mentionNames}
+                myNames={myNames}
               />
             </div>
           );
