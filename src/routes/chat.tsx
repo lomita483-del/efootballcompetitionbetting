@@ -60,9 +60,28 @@ function ChatPage() {
   const nav = useNavigate();
   const [room, setRoom] = useState<Room>("general");
   const [matches, setMatches] = useState<MatchRow[]>([]);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
   const [sections, setSections] = useState({ channels: true, announcements: true, reminders: true });
 
   useEffect(() => { if (!user) nav({ to: "/login" }); }, [user, nav]);
+
+  useEffect(() => {
+    const load = () => {
+      (supabase as any)
+        .from("chat_messages")
+        .select("id,room,kind,content,meta,created_at")
+        .in("kind", ["announcement", "match_reminder"])
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false })
+        .limit(10)
+        .then(({ data }: any) => setAnnouncements(data ?? []));
+    };
+    load();
+    const ch = supabase.channel("chat-announcements")
+      .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages" }, load)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, []);
 
   useEffect(() => {
     fetchMatches()
@@ -84,7 +103,7 @@ function ChatPage() {
     <Layout>
       <div className="container py-6 md:py-10">
         <div className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
-          <Sidebar room={room} setRoom={setRoom} canGang={canGang} isMod={isMod} matches={matches} sections={sections} setSections={setSections} />
+          <Sidebar room={room} setRoom={setRoom} canGang={canGang} isMod={isMod} matches={matches} announcements={announcements} sections={sections} setSections={setSections} />
           <div className="min-w-0">
             <Room room={room} muted={profile.is_muted} title={ROOM_META[room].label} subtitle={ROOM_META[room].subtitle} />
           </div>
@@ -94,11 +113,14 @@ function ChatPage() {
   );
 }
 
-function Sidebar({ room, setRoom, canGang, isMod, matches, sections, setSections }: {
-  room: Room; setRoom: (r: Room) => void; canGang: boolean; isMod: boolean; matches: MatchRow[];
+function Sidebar({ room, setRoom, canGang, isMod, matches, announcements, sections, setSections }: {
+  room: Room; setRoom: (r: Room) => void; canGang: boolean; isMod: boolean; matches: MatchRow[]; announcements: any[];
   sections: { channels: boolean; announcements: boolean; reminders: boolean };
   setSections: React.Dispatch<React.SetStateAction<{ channels: boolean; announcements: boolean; reminders: boolean }>>;
 }) {
+  const visibleAnnouncements = announcements.filter((a) =>
+    a.room === "general" || (a.room === "gang" && canGang) || (a.room === "moderator" && isMod),
+  );
   const channels: { id: Room; label: string; locked: boolean }[] = [
     { id: "general", label: "General Chat", locked: false },
     { id: "gang", label: "Gang Chats", locked: !canGang },
@@ -147,14 +169,28 @@ function Sidebar({ room, setRoom, canGang, isMod, matches, sections, setSections
           open={sections.announcements}
           onToggle={() => setSections((s) => ({ ...s, announcements: !s.announcements }))}
         >
-          <div className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-sm text-muted-foreground">
-            <Megaphone className="h-3.5 w-3.5 shrink-0 text-primary" />
-            <span>Announcements</span>
-          </div>
-          <div className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-sm text-muted-foreground">
-            <ClipboardList className="h-3.5 w-3.5 shrink-0 text-primary" />
-            <span>System Updates</span>
-          </div>
+          {visibleAnnouncements.length === 0 && (
+            <p className="px-2 py-1 text-xs text-muted-foreground">No announcements yet.</p>
+          )}
+          {visibleAnnouncements.map((a) => (
+            <button
+              key={a.id}
+              type="button"
+              onClick={() => {
+                setRoom(a.room as Room);
+                setTimeout(() => document.getElementById(`msg-${a.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 350);
+              }}
+              className="flex w-full items-start gap-2 rounded-xl border border-transparent px-2.5 py-2 text-left text-sm text-muted-foreground hover:border-primary/40 hover:text-foreground"
+            >
+              {a.kind === "match_reminder"
+                ? <ClipboardList className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                : <Megaphone className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />}
+              <span className="min-w-0">
+                <span className="block truncate font-semibold text-foreground">{a.meta?.title ?? (a.kind === "match_reminder" ? "Match reminder" : "Announcement")}</span>
+                <span className="block truncate text-[11px]">{a.content ?? ""}</span>
+              </span>
+            </button>
+          ))}
         </SidebarSection>
 
         <SidebarSection
