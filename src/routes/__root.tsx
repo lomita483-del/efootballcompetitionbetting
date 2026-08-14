@@ -213,13 +213,20 @@ function AuthGate() {
 }
 
 function AdaptiveViewport() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isAdmin = pathname === "/admin" || pathname.startsWith("/admin");
   useEffect(() => {
     if (typeof window === "undefined") return;
     const meta = document.querySelector('meta[name="viewport"]') as HTMLMetaElement | null;
     if (!meta) return;
     const canvas = "width=1280, viewport-fit=cover";
     const wide = "width=device-width, initial-scale=1, viewport-fit=cover";
+    const locked = "width=1280, viewport-fit=cover, maximum-scale=1, minimum-scale=1, user-scalable=no";
     const apply = () => {
+      if (isAdmin) {
+        if (meta.getAttribute("content") !== locked) meta.setAttribute("content", locked);
+        return;
+      }
       const w = window.screen?.width ?? window.innerWidth;
       const target = w >= 1400 ? wide : canvas;
       if (meta.getAttribute("content") !== target) meta.setAttribute("content", target);
@@ -231,7 +238,30 @@ function AdaptiveViewport() {
       window.removeEventListener("resize", apply);
       window.removeEventListener("orientationchange", apply);
     };
-  }, []);
+  }, [isAdmin]);
+
+  // Block pinch-zoom gestures on the admin console (iOS Safari ignores user-scalable=no)
+  useEffect(() => {
+    if (typeof window === "undefined" || !isAdmin) return;
+    const stop = (e: Event) => e.preventDefault();
+    const onTouch = (e: TouchEvent) => { if (e.touches.length > 1) e.preventDefault(); };
+    const onWheel = (e: WheelEvent) => { if (e.ctrlKey) e.preventDefault(); };
+    const onDblClick = (e: Event) => e.preventDefault();
+    document.addEventListener("gesturestart", stop as EventListener, { passive: false });
+    document.addEventListener("gesturechange", stop as EventListener, { passive: false });
+    document.addEventListener("gestureend", stop as EventListener, { passive: false });
+    document.addEventListener("touchmove", onTouch, { passive: false });
+    document.addEventListener("wheel", onWheel, { passive: false });
+    document.addEventListener("dblclick", onDblClick, { passive: false });
+    return () => {
+      document.removeEventListener("gesturestart", stop as EventListener);
+      document.removeEventListener("gesturechange", stop as EventListener);
+      document.removeEventListener("gestureend", stop as EventListener);
+      document.removeEventListener("touchmove", onTouch);
+      document.removeEventListener("wheel", onWheel);
+      document.removeEventListener("dblclick", onDblClick);
+    };
+  }, [isAdmin]);
   return null;
 }
 
