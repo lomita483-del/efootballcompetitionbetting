@@ -385,6 +385,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
             )}
           </div>
         ) : null}
+        </HeaderCanvas>
       </header>
       <main className="relative overflow-x-hidden">{children}</main>
       <div className="container pb-4" data-tour="page-ads">
