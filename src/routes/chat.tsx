@@ -715,6 +715,7 @@ function MessageRow({ m, mine, profile, roles, replyMsg, replyName, reactions, o
 }
 
 function Attachments({ items }: { items: ChatAttachment[] }) {
+  const [viewer, setViewer] = useState<ChatAttachment | null>(null);
   const media = items.filter((a) => a.type === "image" || a.type === "video" || a.type === "gif" || a.type === "sticker");
   const others = items.filter((a) => !media.includes(a));
   return (
@@ -723,12 +724,36 @@ function Attachments({ items }: { items: ChatAttachment[] }) {
         <div className={`grid gap-1 ${media.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
           {media.map((a, i) => a.type === "video"
             ? <video key={i} src={a.url} controls playsInline className="max-h-64 w-full rounded-lg border border-border/60 object-cover" />
-            : <img key={i} src={a.url} alt={a.name ?? "Attachment"} className={`rounded-lg border border-border/60 object-cover ${a.type === "sticker" ? "max-h-28 w-28 border-none" : "max-h-64 w-full"}`} />)}
+            : (
+              <button
+                key={i}
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setViewer(a); }}
+                onPointerDown={(e) => e.stopPropagation()}
+                className="block"
+                title="Tap to view"
+              >
+                <img src={a.url} alt={a.name ?? "Attachment"} className={`cursor-zoom-in rounded-lg border border-border/60 object-cover ${a.type === "sticker" ? "max-h-28 w-28 border-none" : "max-h-64 w-full"}`} />
+              </button>
+            ))}
         </div>
       )}
       {others.map((a, i) => a.type === "audio"
         ? <audio key={i} src={a.url} controls className="w-56 max-w-full" />
         : <a key={i} href={a.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg border border-border/60 bg-background/40 px-2 py-1.5 text-xs hover:border-primary/50"><FileText className="h-3.5 w-3.5 text-primary" /><span className="truncate">{a.name ?? "File"}</span></a>)}
+      {viewer && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm animate-fade-in"
+          onClick={(e) => { e.stopPropagation(); setViewer(null); }}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <img src={viewer.url} alt={viewer.name ?? "Attachment"} className="max-h-[85vh] max-w-full rounded-xl object-contain" onClick={(e) => e.stopPropagation()} />
+          <div className="absolute right-4 top-4 flex gap-2">
+            <a href={viewer.url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="rounded-full border border-white/30 bg-black/60 px-3 py-1.5 text-xs text-white">Open</a>
+            <button type="button" onClick={() => setViewer(null)} className="rounded-full border border-white/30 bg-black/60 p-1.5 text-white"><X className="h-4 w-4" /></button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
