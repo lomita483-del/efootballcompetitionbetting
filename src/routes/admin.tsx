@@ -137,17 +137,8 @@ export function AdminPage() {
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
-  // Force this console to always render at desktop width/layout, even on
-  // mobile browsers — matches the reference design 1:1 instead of switching
-  // to a stacked mobile layout. Restores the normal viewport on unmount.
-  useEffect(() => {
-    const viewport = document.querySelector('meta[name="viewport"]');
-    const original = viewport?.getAttribute("content") ?? null;
-    if (viewport) viewport.setAttribute("content", "width=1280, initial-scale=0.28, maximum-scale=3, user-scalable=yes");
-    return () => {
-      if (viewport) viewport.setAttribute("content", original ?? "width=device-width, initial-scale=1");
-    };
-  }, []);
+  // Desktop-canvas scaling is handled by <DesktopCanvas> below (CSS transform),
+  // which is reliable everywhere — no viewport-meta hacks needed here.
   // Toggle the frosted-glass blur on the whole console so admins can verify
   // sensitive data alignment/layout against a clean, unblurred surface.
   const [unblurred, setUnblurred] = useState(false);
