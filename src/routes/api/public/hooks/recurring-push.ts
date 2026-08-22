@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import webpush from 'web-push'
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
+import { verifyPushSecret } from '@/lib/push-auth.server'
 import { configureWebPush, getAudienceSubscriptions, sendToSubscriptions } from '@/lib/push-send.server'
 
 // Called by pg_cron every 15 minutes. Evaluates all enabled recurring push
@@ -8,7 +9,9 @@ import { configureWebPush, getAudienceSubscriptions, sendToSubscriptions } from 
 export const Route = createFileRoute('/api/public/hooks/recurring-push')({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
+        const denied = verifyPushSecret(request)
+        if (denied) return denied
         try {
           const { data: rows } = await supabaseAdmin
             .from('recurring_push_settings')

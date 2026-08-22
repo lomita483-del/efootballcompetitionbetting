@@ -1,13 +1,16 @@
 import { createFileRoute } from '@tanstack/react-router'
 import webpush from 'web-push'
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
+import { verifyPushSecret } from '@/lib/push-auth.server'
 import { getAudienceSubscriptions, configureWebPush, sendToSubscriptions } from '@/lib/push-send.server'
 
 // Called by pg_cron every minute to deliver any scheduled push blasts that are due.
 export const Route = createFileRoute('/api/public/hooks/process-scheduled-push')({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
+        const denied = verifyPushSecret(request)
+        if (denied) return denied
         try {
           const nowIso = new Date().toISOString()
           const { data: due } = await supabaseAdmin

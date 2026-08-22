@@ -1,22 +1,22 @@
 import { createFileRoute } from '@tanstack/react-router'
 import webpush from 'web-push'
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
+import { verifyPushSecret } from '@/lib/push-auth.server'
 
 export const Route = createFileRoute('/api/public/hooks/send-push')({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const denied = verifyPushSecret(request)
+        if (denied) return denied
         try {
           const body = (await request.json()) as { user_id?: string; title?: string; body?: string; link?: string; image?: string; notification_id?: string }
-          const secret = request.headers.get('x-push-secret')
           let msg = { user_id: body.user_id, title: body.title, body: body.body || '', link: body.link || '/', image: body.image || '', notification_id: body.notification_id }
 
           if (body.notification_id && (!body.user_id || !body.title)) {
             const { data: n } = await supabaseAdmin.from('notifications').select('id,user_id,title,body,link,image_url').eq('id', body.notification_id).maybeSingle()
             if (!n) return new Response('notification_not_found', { status: 404 })
             msg = { user_id: (n as any).user_id, title: (n as any).title, body: (n as any).body || '', link: (n as any).link || '/', image: (n as any).image_url || '', notification_id: (n as any).id }
-          } else if (!secret || !process.env.PUSH_WEBHOOK_SECRET || secret !== process.env.PUSH_WEBHOOK_SECRET) {
-            return new Response('Forbidden', { status: 403 })
           }
 
           if (!msg.user_id || !msg.title) return new Response('bad', { status: 400 })
