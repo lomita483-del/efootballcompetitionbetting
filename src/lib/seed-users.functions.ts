@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { LEGACY_PROFILES, LEGACY_ROLES } from "./legacy-seed-data";
+import { LEGACY_PROFILES, LEGACY_ROLES } from "./legacy-seed-data.server";
 
 /**
  * Admin-only: recreates legacy user login accounts (email confirmed) and restores
