@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { LEGACY_PROFILES, LEGACY_ROLES } from "./legacy-seed-data";
 
 /**
  * Admin-only: recreates legacy user login accounts (email confirmed) and restores
@@ -14,6 +13,7 @@ export const seedLegacyUsers = createServerFn({ method: "POST" })
     if (!isAdmin) throw new Response("Admin only", { status: 403 });
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { LEGACY_PROFILES, LEGACY_ROLES } = await import("./legacy-seed-data.server");
 
     let created = 0, restored = 0, skipped = 0, rolesSet = 0;
     const errors: string[] = [];

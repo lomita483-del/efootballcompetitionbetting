@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import webpush from 'web-push'
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
+import { verifyPushSecret } from '@/lib/push-auth.server'
 import { getAudienceSubscriptions, configureWebPush, sendToSubscriptions } from '@/lib/push-send.server'
 
 // Called by DB triggers (net.http_post) to blast a global device push to all
@@ -11,6 +12,8 @@ export const Route = createFileRoute('/api/public/hooks/broadcast-push')({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const denied = verifyPushSecret(request)
+        if (denied) return denied
         try {
           const { kind, id } = (await request.json()) as { kind?: string; id?: string }
           if (!kind || !id) return new Response('bad', { status: 400 })
