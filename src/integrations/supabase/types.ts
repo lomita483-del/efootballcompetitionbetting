@@ -747,6 +747,7 @@ export type Database = {
           house_low_balance: number
           id: number
           push_endpoint_url: string | null
+          push_webhook_secret: string | null
           updated_at: string
           vapid_subject: string | null
         }
@@ -758,6 +759,7 @@ export type Database = {
           house_low_balance?: number
           id?: number
           push_endpoint_url?: string | null
+          push_webhook_secret?: string | null
           updated_at?: string
           vapid_subject?: string | null
         }
@@ -769,6 +771,7 @@ export type Database = {
           house_low_balance?: number
           id?: number
           push_endpoint_url?: string | null
+          push_webhook_secret?: string | null
           updated_at?: string
           vapid_subject?: string | null
         }
