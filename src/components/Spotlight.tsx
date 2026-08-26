@@ -47,10 +47,7 @@ export function Spotlight() {
       const rows = (data ?? []) as SpotlightRow[];
       if (rows.length === 0) { setItems([]); return; }
       const ids = Array.from(new Set(rows.map(r => r.user_id)));
-      const { data: profs } = await supabase
-        .from("profiles")
-        .select("id, full_name, ingame_name, avatar_url, vip_tier, gang_name")
-        .in("id", ids);
+      const { data: profs } = await supabase.rpc("public_profiles", { _ids: ids as any });
       const map = new Map((profs ?? []).map((p: any) => [p.id, p]));
       setItems(rows.map(r => ({ ...r, profile: (map.get(r.user_id) as ProfileLite) ?? null })));
     };
@@ -205,10 +202,7 @@ export function SpotlightsAdminPanel() {
     const ids = Array.from(new Set(rows.map(r => r.user_id)));
     let map = new Map<string, ProfileLite>();
     if (ids.length) {
-      const { data: profs } = await supabase
-        .from("profiles")
-        .select("id, full_name, ingame_name, avatar_url, vip_tier, gang_name")
-        .in("id", ids);
+      const { data: profs } = await supabase.rpc("public_profiles", { _ids: ids as any });
       map = new Map((profs ?? []).map((p: any) => [p.id, p]));
     }
     setItems(rows.map(r => ({ ...r, profile: map.get(r.user_id) ?? null })));
@@ -218,13 +212,12 @@ export function SpotlightsAdminPanel() {
   useEffect(() => {
     const t = setTimeout(async () => {
       if (search.trim().length < 2) { setUsers([]); return; }
-      const q = `%${search.trim()}%`;
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, full_name, ingame_name, avatar_url, vip_tier, gang_name")
-        .or(`full_name.ilike.${q},ingame_name.ilike.${q},gang_name.ilike.${q}`)
-        .limit(8);
-      setUsers((data ?? []) as ProfileLite[]);
+      const needle = search.trim().toLowerCase();
+      const { data } = await supabase.rpc("public_profiles");
+      const matched = ((data ?? []) as any[]).filter((p) =>
+        [p.full_name, p.ingame_name, p.gang_name].some((v: string | null) => (v ?? "").toLowerCase().includes(needle)),
+      );
+      setUsers(matched.slice(0, 8) as ProfileLite[]);
     }, 250);
     return () => clearTimeout(t);
   }, [search]);
