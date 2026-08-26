@@ -98,8 +98,8 @@ function TicketPage() {
       return;
     }
     if (!data) return;
-    const { data: prof } = await supabase.from("profiles").select("full_name").eq("id", data.user_id).maybeSingle();
-    setBet({ ...data, profiles: prof });
+    const { data: profRows } = await supabase.rpc("public_profiles", { _ids: [data.user_id] as any });
+    setBet({ ...data, profiles: (profRows ?? [])[0] ?? null });
   }
 
   if (!user)
