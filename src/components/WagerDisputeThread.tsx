@@ -50,7 +50,7 @@ export function WagerDisputeThread({
         .order("created_at", { ascending: true });
       setMessages((m as any) ?? []);
       const ids = Array.from(new Set([...(m ?? []).map((x: any) => x.sender_id), challengerId, opponentId]));
-      const { data: profs } = await supabase.from("profiles").select("id, full_name, ingame_name, avatar_url").in("id", ids);
+      const { data: profs } = await supabase.rpc("public_profiles", { _ids: ids as any });
       const map: Record<string, any> = {};
       (profs ?? []).forEach((p: any) => (map[p.id] = p));
       setProfiles(map);

@@ -52,10 +52,7 @@ export function GrandPrizeWinners() {
       setLoading(false);
       return;
     }
-    const { data: profs } = await supabase
-      .from("profiles")
-      .select("id, full_name, ingame_name, gang_name, gang_type, avatar_url")
-      .in("id", ids);
+    const { data: profs } = await supabase.rpc("public_profiles", { _ids: ids as any });
     const profMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
     const out: WinnerRow[] = ids
       .map((id) => ({

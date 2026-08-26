@@ -72,7 +72,7 @@ function Page() {
     const { data: ev } = await supabase.from("wager_live_events").select("*").eq("wager_id", id).order("created_at", { ascending: false }).limit(50);
     setEvents((ev as any) ?? []);
     if (data) {
-      const { data: profs } = await supabase.from("profiles").select("id, full_name, ingame_name, avatar_url, special_id").in("id", [data.challenger_id, data.opponent_id]);
+      const { data: profs } = await supabase.rpc("public_profiles", { _ids: [data.challenger_id, data.opponent_id] as any });
       const map: any = {}; (profs ?? []).forEach((r: any) => map[r.id] = r);
       setProfiles(map);
     }

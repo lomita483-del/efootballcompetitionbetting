@@ -10,7 +10,7 @@ export function BigWinTicker() {
   useEffect(() => {
     supabase
       .from("big_wins")
-      .select("id, amount, source, created_at, profiles:user_id(full_name, ingame_name)")
+      .select("id, amount, source, created_at, user_id")
       .order("created_at", { ascending: false })
       .limit(15)
       .then(({ data }) => setWins((data as any) ?? []));
@@ -20,12 +20,9 @@ export function BigWinTicker() {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "big_wins" }, (payload) => {
         const row: any = payload.new;
         supabase
-          .from("profiles")
-          .select("full_name, ingame_name")
-          .eq("id", row.user_id)
-          .maybeSingle()
+          .rpc("public_profiles", { _ids: [row.user_id] as any })
           .then(({ data: profile }) => {
-            setWins((prev) => [{ ...row, profiles: profile }, ...prev].slice(0, 15));
+            setWins((prev) => [{ ...row, profiles: ((profile ?? []) as any[])[0] ?? null }, ...prev].slice(0, 15));
           });
       })
       .subscribe();
