@@ -4097,6 +4097,20 @@ function SettingsPanel() {
         )}
       </SettingsSection>
 
+      <SettingsSection icon={Lock} title="Registration" subtitle="Turn new account sign-ups on or off. Existing members can always log in.">
+        <div className="flex items-center justify-between">
+          <div className="text-sm">Allow new sign-ups</div>
+          <Switch checked={s.signups_enabled !== false} onCheckedChange={(v) => setS({ ...s, signups_enabled: v })} />
+        </div>
+        <Textarea
+          placeholder="Message shown when sign-ups are closed"
+          value={s.signups_disabled_message ?? ""}
+          onChange={(e) => setS({ ...s, signups_disabled_message: e.target.value })}
+        />
+      </SettingsSection>
+
+
+
       <SettingsSection icon={Lock} title="Website Closed" subtitle="Fully close the site to non-admin visitors and post a notice.">
         <div className="flex items-center justify-between">
           <div className="text-sm">Close website</div>
