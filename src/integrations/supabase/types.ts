@@ -364,6 +364,8 @@ export type Database = {
           scratch_enabled: boolean | null
           scratch_price: number | null
           shop_enabled: boolean | null
+          signups_disabled_message: string | null
+          signups_enabled: boolean
           site_bg_fit: string | null
           site_bg_position: string | null
           site_bg_url: string | null
@@ -523,6 +525,8 @@ export type Database = {
           scratch_enabled?: boolean | null
           scratch_price?: number | null
           shop_enabled?: boolean | null
+          signups_disabled_message?: string | null
+          signups_enabled?: boolean
           site_bg_fit?: string | null
           site_bg_position?: string | null
           site_bg_url?: string | null
@@ -682,6 +686,8 @@ export type Database = {
           scratch_enabled?: boolean | null
           scratch_price?: number | null
           shop_enabled?: boolean | null
+          signups_disabled_message?: string | null
+          signups_enabled?: boolean
           site_bg_fit?: string | null
           site_bg_position?: string | null
           site_bg_url?: string | null
