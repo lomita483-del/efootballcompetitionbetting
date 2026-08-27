@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -62,11 +62,29 @@ function RegisterPage() {
   });
   const [accepted, setAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [signupsOpen, setSignupsOpen] = useState<boolean | null>(null);
+  const [closedMsg, setClosedMsg] = useState<string>("");
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { data } = await (supabase as any)
+        .from("app_settings")
+        .select("signups_enabled, signups_disabled_message")
+        .eq("id", 1)
+        .maybeSingle();
+      if (!active) return;
+      setSignupsOpen(data?.signups_enabled !== false);
+      setClosedMsg(data?.signups_disabled_message || "");
+    })();
+    return () => { active = false; };
+  }, []);
 
   const set = (k: string, v: string) => setF((p) => ({ ...p, [k]: v }));
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (signupsOpen === false) return toast.error(closedMsg || "New account registration is currently closed.");
     if (!accepted) return toast.error("You must accept the terms");
     if (!f.ingame_name.trim()) return toast.error("In-game full name is required");
     if (!f.discord_full_name.trim()) return toast.error("Discord full name is required");
@@ -130,6 +148,15 @@ function RegisterPage() {
             <h1 className="font-display text-4xl font-black gradient-gold-text">Open an account</h1>
             <p className="text-sm text-muted-foreground mt-1">Pick your gang. Earn your tokens.</p>
           </div>
+          {signupsOpen === false ? (
+            <div className="rounded-xl border border-primary/30 bg-card/60 p-6 text-center space-y-3">
+              <h2 className="font-display text-xl font-black">Registration is closed</h2>
+              <p className="text-sm text-muted-foreground">
+                {closedMsg || "New account sign-ups are currently disabled. Existing members can still sign in."}
+              </p>
+              <Button asChild className="w-full"><Link to="/login">Sign in to your account</Link></Button>
+            </div>
+          ) : (
           <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2"><Label>In-game full name *</Label><Input required maxLength={80} value={f.ingame_name} onChange={(e) => set("ingame_name", e.target.value)} /></div>
             <div className="md:col-span-2"><Label>Discord full name *</Label><Input required maxLength={80} value={f.discord_full_name} onChange={(e) => set("discord_full_name", e.target.value)} /></div>
@@ -187,8 +214,9 @@ function RegisterPage() {
               <Checkbox id="terms" checked={accepted} onCheckedChange={(v) => setAccepted(!!v)} />
               <label htmlFor="terms" className="text-muted-foreground">I accept the platform terms. Virtual tokens only — not real money.</label>
             </div>
-            <Button type="submit" disabled={loading} className="md:col-span-2 w-full">{loading ? "Creating..." : "Create Account"}</Button>
+            <Button type="submit" disabled={loading || signupsOpen === null} className="md:col-span-2 w-full">{loading ? "Creating..." : "Create Account"}</Button>
           </form>
+          )}
           <p className="mt-4 text-sm text-center">Already a member? <Link to="/login" className="text-primary hover:underline">Sign in</Link></p>
         </div>
         </div>
