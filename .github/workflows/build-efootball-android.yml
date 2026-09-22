@@ -63,7 +63,7 @@ jobs:
         run: npm install
 
       - name: Build bundled web app
-        run: npm run build
+        run: CAPACITOR_BUILD=1 npm run build
 
       - name: Verify bundled web app
         run: test -f .output/public/index.html
