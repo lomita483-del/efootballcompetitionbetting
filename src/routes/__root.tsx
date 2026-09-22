@@ -74,7 +74,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       // Fixed 1280-wide design canvas: phones render the desktop layout scaled to fit
       // (no pinch, no side-scroll). A runtime effect swaps this for `width=device-width`
       // on real desktops / "Desktop Site" so those get an even wider layout.
-      { name: "viewport", content: "width=1280, viewport-fit=cover" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { name: "google-site-verification", content: "VmJKgEfwpQsNav2Nc0ItKNySizECxM7nnKuyxh-A5gM" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
@@ -231,8 +231,9 @@ function AdaptiveViewport() {
         if (meta.getAttribute("content") !== locked) meta.setAttribute("content", locked);
         return;
       }
-      const w = window.screen?.width ?? window.innerWidth;
-      const target = w >= 1400 ? wide : canvas;
+      // Keep the public site genuinely responsive on phones and tablets.
+      // The fixed 1280 canvas was making the mobile WebView render oversized.
+      const target = wide;
       if (meta.getAttribute("content") !== target) meta.setAttribute("content", target);
     };
     apply();
