@@ -3,6 +3,8 @@ plugins { id 'com.android.application' }
 android {
     namespace 'com.ecb.efootballcompetitionbet'
     compileSdk 35
+    buildFeatures { buildConfig true }
+
     defaultConfig {
         applicationId 'com.ecb.efootballcompetitionbet'
         minSdk 24
