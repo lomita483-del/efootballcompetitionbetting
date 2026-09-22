@@ -170,6 +170,7 @@ import { BetSlipFab } from "@/components/BetSlip";
 import { RouteProgress } from "@/components/RouteProgress";
 import { PushPermissionPrompt } from "@/components/PushPermissionPrompt";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { AppUpdateGate } from "@/components/AppUpdateGate";
 import { useBranding } from "@/lib/branding";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -332,6 +333,7 @@ function RootComponent() {
             <CookieConsent />
             <PushPermissionPrompt />
             <PWAInstallPrompt />
+            <AppUpdateGate />
             <Toaster />
           </ConfirmProvider>
         </BetSlipProvider>
