@@ -30,6 +30,14 @@ jobs:
       - name: Build APK
         working-directory: android-shell
         run: gradle :app:assembleDebug --no-daemon --stacktrace
+      - name: Read app version
+        id: app_version
+        working-directory: android-shell
+        run: |
+          VERSION=$(grep -o "versionName '[^']*'" app/build.gradle | head -1 | cut -d"'" -f2)
+          BUILD=$(grep -o "versionCode [0-9]*" app/build.gradle | head -1 | awk '{print $2}')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "build=$BUILD" >> "$GITHUB_OUTPUT"
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
@@ -42,25 +50,25 @@ jobs:
         run: |
           cp android-shell/app/build/outputs/apk/debug/app-debug.apk efootball-competition-bet-test.apk
           gh release delete test-latest --yes --cleanup-tag || true
-          gh release create test-latest efootball-competition-bet-test.apk --title "E-Football Competition Bet — Test APK" --notes "Test build 1.0.1 (2). App-local WebView storage is separate from Chrome. Update checking is built in."
+          gh release create test-latest efootball-competition-bet-test.apk --title "E-Football Competition Bet — Test APK v${{ steps.app_version.outputs.version }}" --notes "Test build ${{ steps.app_version.outputs.version }} (${{ steps.app_version.outputs.build }}). Desktop-mode WebView, app-local storage and built-in update checking."
       - name: Publish update manifest
         run: |
           cat > public/app-release.json <<'EOF'
           {
             "app": "E-Football Competition Bet",
             "platform": "android",
-            "latestVersion": "1.0.1",
-            "latestBuild": 2,
+            "latestVersion": "${{ steps.app_version.outputs.version }}",
+            "latestBuild": ${{ steps.app_version.outputs.build }},
             "minimumSupportedVersion": "1.0.0",
             "minimumSupportedBuild": 1,
             "forceUpdate": false,
             "downloadUrl": "https://github.com/lomita483-del/efootballcompetitionbetting/releases/download/test-latest/efootball-competition-bet-test.apk",
-            "releaseNotes": ["Android app update: app-local storage and built-in update checking are enabled."],
+            "releaseNotes": ["Desktop-mode Android app update. App-local storage is preserved and Chrome data is separate."],
             "publishedAt": "2026-09-22T22:00:00Z"
           }
           EOF
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/app-release.json
-          git commit -m "chore: publish E-Football Android test update 1.0.1" || true
+          git commit -m "chore: publish E-Football Android test update ${{ steps.app_version.outputs.version }}" || true
           git push
