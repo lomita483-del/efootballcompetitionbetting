@@ -62,12 +62,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build bundled web app
-        run: CAPACITOR_BUILD=1 npm run build
-
-      - name: Verify bundled web app
-        run: test -f .output/public/index.html
-
       - name: Add Android platform
         run: npx cap add android
 
@@ -129,9 +123,6 @@ jobs:
           s = s.replace("buildTypes {", "buildTypes {\n        release { signingConfig signingConfigs.release }", 1)
           p.write_text(s)
           PY
-
-      - name: Sync Capacitor
-        run: npx cap sync android
 
       - name: Build debug APK
         if: \${{ inputs.distribution == 'debug' }}
