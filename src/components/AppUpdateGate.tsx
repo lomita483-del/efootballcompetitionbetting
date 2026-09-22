@@ -4,8 +4,10 @@ import { App } from "@capacitor/app";
 import { Download, ShieldCheck, RefreshCw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const RELEASE_MANIFEST =
-  "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/app-release.json";
+const RELEASE_MANIFESTS = [
+  "/app-release.json",
+  "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/app-release.json",
+];
 
 type ReleaseManifest = {
   latestVersion: string;
@@ -17,56 +19,105 @@ type ReleaseManifest = {
   releaseNotes?: string[];
 };
 
+function isEcbAndroidWebView() {
+  return /ECBAndroidApp\/[0-9.]+/i.test(navigator.userAgent);
+}
+
+function versionToNumber(version: string) {
+  return version
+    .split(".")
+    .slice(0, 3)
+    .map((part) => Number.parseInt(part, 10) || 0)
+    .reduce((value, part, index) => value + part * 10 ** (4 - index * 2), 0);
+}
+
 export function AppUpdateGate() {
   const [release, setRelease] = useState<ReleaseManifest | null>(null);
   const [currentVersion, setCurrentVersion] = useState("");
   const [currentBuild, setCurrentBuild] = useState(0);
-  const [checking, setChecking] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
   const checkForUpdate = async () => {
-    if (!Capacitor.isNativePlatform()) return;
-    setChecking(true);
+    const webViewNative = typeof navigator !== "undefined" && isEcbAndroidWebView();
+    const capacitorNative = Capacitor.isNativePlatform();
+    if (!webViewNative && !capacitorNative) return;
+
     try {
-      const info = await App.getInfo();
-      const build = Number(info.build) || 0;
-      const url = `${RELEASE_MANIFEST}?t=${Date.now()}`;
-      const res = await fetch(url, {
-        cache: "no-store",
-        headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
-      });
-      if (!res.ok) return;
-      const next = (await res.json()) as ReleaseManifest;
-      setCurrentVersion(info.version);
+      let version = "";
+      let build = 0;
+
+      if (capacitorNative) {
+        const info = await App.getInfo();
+        version = info.version || "";
+        build = Number(info.build) || 0;
+      } else {
+        const match = navigator.userAgent.match(/ECBAndroidApp\/([0-9.]+)/i);
+        version = match?.[1] || "";
+        build = versionToNumber(version);
+      }
+
+      let next: ReleaseManifest | null = null;
+      for (const manifestUrl of RELEASE_MANIFESTS) {
+        try {
+          const separator = manifestUrl.includes("?") ? "&" : "?";
+          const url = manifestUrl + separator + "t=" + Date.now();
+          const res = await fetch(url, {
+            cache: "no-store",
+            headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+          });
+          if (!res.ok) continue;
+          next = (await res.json()) as ReleaseManifest;
+          break;
+        } catch {
+          // Try the next manifest source.
+        }
+      }
+
+      if (!next) return;
+
+      setCurrentVersion(version);
       setCurrentBuild(build);
-      if (Number(next.latestBuild) > build) setRelease(next);
+
+      const newerBuild = Number(next.latestBuild) > build;
+      const newerVersion = versionToNumber(next.latestVersion) > versionToNumber(version);
+      if (newerBuild || newerVersion) setRelease(next);
       else setRelease(null);
     } catch {
       // An unavailable update server must never log the user out or destroy data.
-    } finally {
-      setChecking(false);
     }
   };
 
   useEffect(() => {
     checkForUpdate();
-    const listener = App.addListener("appStateChange", ({ isActive }) => {
-      if (isActive) checkForUpdate();
-    });
-    return () => {
-      listener.then((handle) => handle.remove());
-    };
+
+    let removeListener: (() => void) | undefined;
+    if (Capacitor.isNativePlatform()) {
+      App.addListener("appStateChange", ({ isActive }) => {
+        if (isActive) checkForUpdate();
+      }).then((handle) => {
+        removeListener = () => handle.remove();
+      });
+    } else if (isEcbAndroidWebView()) {
+      const onVisible = () => {
+        if (document.visibilityState === "visible") checkForUpdate();
+      };
+      document.addEventListener("visibilitychange", onVisible);
+      removeListener = () => document.removeEventListener("visibilitychange", onVisible);
+    }
+
+    return () => removeListener?.();
   }, []);
 
   if (!release || dismissed) return null;
 
   const minimumBuild = Number(release.minimumSupportedBuild ?? 0);
-  const mandatory = Boolean(release.forceUpdate) || (minimumBuild > 0 && currentBuild < minimumBuild);
+  const mandatory = Boolean(release.forceUpdate) ||
+    (minimumBuild > 0 && currentBuild > 0 && currentBuild < minimumBuild);
   const notes = release.releaseNotes ?? [];
   const download = release.downloadUrl?.trim();
 
   const install = () => {
-    if (download) window.open(download, "_system");
+    if (download) window.open(download, "_blank");
   };
 
   return (
@@ -82,7 +133,7 @@ export function AppUpdateGate() {
               {mandatory ? "Update required" : "New app update available"}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Version {release.latestVersion} is ready. You are on {currentVersion}.
+              Version {release.latestVersion} is ready. You are on {currentVersion || "your current version"}.
             </p>
           </div>
           {!mandatory && (
@@ -116,7 +167,7 @@ export function AppUpdateGate() {
         )}
 
         {download ? (
-          <Button className="h-12 w-full font-black" onClick={install} disabled={checking}>
+          <Button className="h-12 w-full font-black" onClick={install}>
             <Download className="mr-2 h-4 w-4" />
             Download latest update
           </Button>
