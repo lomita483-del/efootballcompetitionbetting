@@ -1,0 +1,41 @@
+name: Build E-Football Android Test APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "android-shell/**"
+      - ".github/workflows/build-efootball-android-test.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+      - name: Build APK
+        working-directory: android-shell
+        run: gradle :app:assembleDebug --no-daemon
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: efootball-competition-bet-android-test
+          path: android-shell/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+      - name: Publish test APK to GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android-shell/app/build/outputs/apk/debug/app-debug.apk efootball-competition-bet-test.apk
+          gh release delete test-latest --yes || true
+          gh release create test-latest efootball-competition-bet-test.apk --title "E-Football Competition Bet — Test APK" --notes "Private test build. App-local WebView storage is separate from Chrome. Update checking is built in."
