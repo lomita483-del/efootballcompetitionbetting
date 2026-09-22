@@ -1,8 +1,8 @@
 {
   "app": "E-Football Competition Bet",
   "platform": "android",
-  "latestVersion": "1.0.3",
-  "latestBuild": 4,
+  "latestVersion": "1.0.4",
+  "latestBuild": 5,
   "minimumSupportedVersion": "1.0.0",
   "minimumSupportedBuild": 1,
   "forceUpdate": false,
