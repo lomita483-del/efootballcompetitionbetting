@@ -7,11 +7,19 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
 
+const capacitorBuild = process.env.CAPACITOR_BUILD === "1";
+
 export default defineConfig({
   plugins: [mcpPlugin()],
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
     server: { entry: "server" },
+    ...(capacitorBuild ? {
+      spa: {
+        enabled: true,
+        prerender: { outputPath: "index.html" },
+      },
+    } : {}),
   },
 });
