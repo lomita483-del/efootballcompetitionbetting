@@ -27,6 +27,11 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.7"
+      - name: Prepare Android launcher icon
+        run: |
+          mkdir -p android-shell/app/src/main/res/mipmap-xxxhdpi
+          curl -fsSL "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/icon-512.png" -o /tmp/ecb-icon.png
+          cp /tmp/ecb-icon.png android-shell/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
       - name: Build APK
         working-directory: android-shell
         run: gradle :app:assembleDebug --no-daemon --stacktrace
