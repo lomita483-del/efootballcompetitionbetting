@@ -74,7 +74,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       // Fixed 1280-wide design canvas: phones render the desktop layout scaled to fit
       // (no pinch, no side-scroll). A runtime effect swaps this for `width=device-width`
       // on real desktops / "Desktop Site" so those get an even wider layout.
-      { name: "viewport", content: "width=1280, viewport-fit=cover" },
+      { name: "viewport", content: "width=1120, viewport-fit=cover" },
       { name: "google-site-verification", content: "VmJKgEfwpQsNav2Nc0ItKNySizECxM7nnKuyxh-A5gM" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
@@ -220,7 +220,7 @@ function AdaptiveViewport() {
     if (typeof window === "undefined") return;
     const meta = document.querySelector('meta[name="viewport"]') as HTMLMetaElement | null;
     if (!meta) return;
-    const canvas = "width=1280, viewport-fit=cover";
+    const canvas = "width=1120, viewport-fit=cover";
     const apply = () => {
       // The whole application uses the same desktop canvas as the admin console.
       const target = canvas;
