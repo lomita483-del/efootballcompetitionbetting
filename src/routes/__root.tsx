@@ -221,18 +221,9 @@ function AdaptiveViewport() {
     const meta = document.querySelector('meta[name="viewport"]') as HTMLMetaElement | null;
     if (!meta) return;
     const canvas = "width=1280, viewport-fit=cover";
-    const wide = "width=device-width, initial-scale=1, viewport-fit=cover";
     const apply = () => {
-      if (isAdmin) {
-        // The console renders on a fixed 1280 canvas scaled with CSS (see
-        // DesktopCanvas), so the viewport stays 1:1 with the device and zoom
-        // is frozen.
-        const locked = "width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover";
-        if (meta.getAttribute("content") !== locked) meta.setAttribute("content", locked);
-        return;
-      }
-      const w = window.screen?.width ?? window.innerWidth;
-      const target = w >= 1400 ? wide : canvas;
+      // The whole application uses the same desktop canvas as the admin console.
+      const target = canvas;
       if (meta.getAttribute("content") !== target) meta.setAttribute("content", target);
     };
     apply();
