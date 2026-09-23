@@ -1,12 +1,12 @@
 {
   "app": "E-Football Competition Bet",
   "platform": "android",
-  "latestVersion": "1.0.9",
-  "latestBuild": 10,
+  "latestVersion": "1.0.10",
+  "latestBuild": 11,
   "minimumSupportedVersion": "1.0.0",
   "minimumSupportedBuild": 1,
   "forceUpdate": false,
   "downloadUrl": "https://github.com/lomita483-del/efootballcompetitionbetting/releases/download/test-latest/efootball-competition-bet-test.apk",
   "releaseNotes": ["Desktop-mode Android app update. App-local storage is preserved and Chrome data is separate."],
-  "publishedAt": "2026-09-23T01:58:06+01:00"
+  "publishedAt": "2026-09-23T02:07:56+01:00"
 }
