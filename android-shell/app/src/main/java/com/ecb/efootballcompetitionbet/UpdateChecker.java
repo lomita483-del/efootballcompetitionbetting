@@ -18,9 +18,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public final class UpdateChecker { // release rebuild includes the latest Android UI and launcher fixes
+public final class UpdateChecker {
     private static final String TAG = "ECBUpdateChecker";
     private static final String[] MANIFESTS = {
+        "https://lslonlinebetting.lovable.app/app-release.json",
         "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/app-release.json",
         "https://cdn.jsdelivr.net/gh/lomita483-del/efootballcompetitionbetting@main/public/app-release.json"
     };
@@ -40,12 +41,11 @@ public final class UpdateChecker { // release rebuild includes the latest Androi
         new Thread(() -> {
             try {
                 Exception lastError = null;
-
                 for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-                    for (String manifest : MANIFESTS) {
+                    for (String manifestUrl : MANIFESTS) {
                         HttpURLConnection connection = null;
                         try {
-                            URL url = new URL(manifest + "?t=" + System.currentTimeMillis());
+                            URL url = new URL(manifestUrl + "?t=" + System.currentTimeMillis());
                             connection = (HttpURLConnection) url.openConnection();
                             connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
                             connection.setReadTimeout(READ_TIMEOUT_MS);
@@ -54,8 +54,7 @@ public final class UpdateChecker { // release rebuild includes the latest Androi
                             connection.setRequestProperty("Cache-Control", "no-cache, no-store, max-age=0");
                             connection.setRequestProperty("Pragma", "no-cache");
                             connection.setRequestProperty("Accept", "application/json");
-                            connection.setRequestProperty("User-Agent",
-                                "EFootballCompetitionBet/" + BuildConfig.VERSION_NAME);
+                            connection.setRequestProperty("User-Agent", "EFootballCompetitionBet/" + BuildConfig.VERSION_NAME);
 
                             int status = connection.getResponseCode();
                             if (status != HttpURLConnection.HTTP_OK) {
@@ -69,30 +68,25 @@ public final class UpdateChecker { // release rebuild includes the latest Androi
                                 while ((line = reader.readLine()) != null) body.append(line);
                             }
 
-                            JSONObject manifestJson = new JSONObject(body.toString());
-                            int latestBuild = manifestJson.optInt("latestBuild", 0);
-                            int minimumBuild = manifestJson.optInt("minimumSupportedBuild", 0);
+                            JSONObject manifest = new JSONObject(body.toString());
+                            int latestBuild = manifest.optInt("latestBuild", 0);
+                            int minimumBuild = manifest.optInt("minimumSupportedBuild", 0);
 
-                            Log.d(TAG, "Manifest check: installed build=" + BuildConfig.VERSION_CODE
-                                + ", latest build=" + latestBuild);
+                            Log.d(TAG, "installed build=" + BuildConfig.VERSION_CODE + ", latest build=" + latestBuild);
 
-                            if (latestBuild <= BuildConfig.VERSION_CODE) {
-                                // This is important: a successful no-update check must NOT
-                                // leave the global 'checking' flag stuck forever.
-                                return;
-                            }
+                            if (latestBuild <= BuildConfig.VERSION_CODE) return;
 
-                            String latestVersion = manifestJson.optString("latestVersion", "new version");
-                            String downloadUrl = manifestJson.optString("downloadUrl", "");
-                            boolean mandatory = manifestJson.optBoolean("forceUpdate", false)
+                            String latestVersion = manifest.optString("latestVersion", "new version");
+                            String downloadUrl = manifest.optString("downloadUrl", "");
+                            boolean mandatory = manifest.optBoolean("forceUpdate", false)
                                 || (minimumBuild > 0 && BuildConfig.VERSION_CODE < minimumBuild);
+                            String notes = formatReleaseNotes(manifest.opt("releaseNotes"));
 
-                            String notes = formatReleaseNotes(manifestJson.opt("releaseNotes"));
                             showUpdateDialog(activity, latestVersion, latestBuild, notes, downloadUrl, mandatory);
                             return;
                         } catch (Exception error) {
                             lastError = error;
-                            Log.w(TAG, "Update manifest failed from " + manifest + " (attempt " + attempt + ")", error);
+                            Log.w(TAG, "Update check failed from " + manifestUrl + " (attempt " + attempt + ")", error);
                         } finally {
                             if (connection != null) connection.disconnect();
                         }
@@ -107,12 +101,9 @@ public final class UpdateChecker { // release rebuild includes the latest Androi
                         }
                     }
                 }
-
-                if (lastError != null) {
-                    Log.w(TAG, "Update check failed after all attempts", lastError);
-                }
+                if (lastError != null) Log.w(TAG, "Update check failed after all attempts", lastError);
             } finally {
-                // Always unlock future checks, including no-update and failure paths.
+                // Always unlock future checks, including successful no-update checks.
                 checking.set(false);
             }
         }, "ECB-UpdateChecker").start();
@@ -133,21 +124,10 @@ public final class UpdateChecker { // release rebuild includes the latest Androi
         return value == null ? "" : String.valueOf(value);
     }
 
-    private static void showUpdateDialog(
-        Activity activity,
-        String version,
-        int build,
-        String notes,
-        String downloadUrl,
-        boolean mandatory
-    ) {
+    private static void showUpdateDialog(Activity activity, String version, int build, String notes,
+                                         String downloadUrl, boolean mandatory) {
         new Handler(Looper.getMainLooper()).post(() -> {
-            if (activity.isFinishing() || showing) return;
-            if (downloadUrl.isEmpty()) {
-                Log.w(TAG, "Update detected but manifest has no downloadUrl");
-                return;
-            }
-
+            if (activity.isFinishing() || showing || downloadUrl.isEmpty()) return;
             showing = true;
 
             String message = "Version " + version + " (build " + build + ") is available.";
@@ -159,9 +139,7 @@ public final class UpdateChecker { // release rebuild includes the latest Androi
                 .setMessage(message)
                 .setPositiveButton("Download update", (ignored, which) -> {
                     try {
-                        activity.startActivity(
-                            new Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
-                        );
+                        activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl)));
                     } catch (Exception error) {
                         Log.e(TAG, "Unable to open update URL", error);
                     }
