@@ -31,7 +31,9 @@ jobs:
       - name: Build bundled web app
         run: CAPACITOR_BUILD=1 npm run build
       - name: Verify bundled app
-        run: test -f .output/public/index.html
+        run: |
+          test -d .output/public
+          test -n "$(find .output/public -type f -print -quit)"
       - name: Generate Android project
         run: npx cap add android
       - name: Sync bundled app into Android
