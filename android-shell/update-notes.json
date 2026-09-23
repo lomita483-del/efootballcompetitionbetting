@@ -1,12 +1,10 @@
 {
   "whatsNew": [
-    "Android pinch-to-zoom has been rebuilt to work inside the WebView, including the admin console, with zooming enabled from 50% to 500% and an 85% starting scale.",
-    "The pull-to-refresh container no longer intercepts two-finger gestures, preventing pinch attempts from accidentally reloading the page.",
-    "The bottom-center Home control is now smaller, cleaner and more premium, with a transparent logo surface so the previous black square behind the logo is removed.",
-    "The Android startup experience now uses a large 250dp branded E-Football logo overlay while the website loads, replacing the tiny/limited launch-logo presentation.",
-    "The homepage Menu control has been redesigned with a stronger gold outline, dark cinematic surface, glow, larger icon treatment and a higher-contrast drawer so it remains visible over the background.",
-    "The Admin App Updater Refresh version control now reads the Android version/build and What's New directly from the release files and stages them without enabling the update.",
-    "Version information is synchronized for Android v1.0.48 build 49 and the website footer fallback.",
-    "These changes are staged only; the user update prompt remains disabled until you choose to trigger it."
+    "Pinch-to-zoom is now enabled in the Android app, with the app starting at a compact 85% zoom by default.",
+    "The bottom-center home control is smaller and redesigned with a premium gold finish, halo, depth and stronger visibility.",
+    "The Android launch screen now uses the full E-Football logo on a branded dark background instead of a blank white startup screen.",
+    "The homepage Menu control and drawer now use a higher-contrast cinematic glass treatment so they remain clearly visible over the background.",
+    "Admin App Updater now has Refresh version, which reads the latest Android version, build and What's New notes from the release files and stages them without triggering the update.",
+    "Android release metadata and the website footer are prepared for v1.0.47, build 48."
   ]
 }
