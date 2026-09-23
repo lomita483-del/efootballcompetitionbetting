@@ -4324,7 +4324,7 @@ function SettingsPanel({ focusRelease = false }: { focusRelease?: boolean }) {
       </SettingsSection>
 
       <div className="lg:col-span-2">
-        <div id="android-app-updates" className="scroll-mt-6"><SettingsSection icon={Download} title="Android App Updates" subtitle="Stage a tested APK, edit exactly what users see under “What's new”, then trigger the release. Nothing is shown to users until you enable it.">
+        <div id="android-app-updates" className="scroll-mt-6"><SettingsSection icon={Download} title="Android App Updates" subtitle="Prepare the release details, save them, and trigger the update only when you are ready. Nothing is shown to users until you trigger it.">
           <div className="grid gap-3 md:grid-cols-2">
             <FieldLuxe label="Version">
               <Input value={releaseControl.latest_version ?? ""} onChange={(e) => setReleaseControl({ ...releaseControl, latest_version: e.target.value })} placeholder="1.0.24" />
@@ -4357,16 +4357,9 @@ function SettingsPanel({ focusRelease = false }: { focusRelease?: boolean }) {
             <div className="font-bold text-foreground mb-1">{releaseControl.enabled ? "UPDATE IS LIVE" : "UPDATE IS STAGED / HIDDEN"}</div>
             {releaseControl.enabled
               ? "Users below this build will keep receiving the update prompt. If Force update is enabled, the app cannot dismiss it."
-              : "Edit and save the release first. Then use Trigger update when you have finished testing. This prevents unfinished builds from being announced automatically."}
+              : "Edit and save the release first. When you are ready, use Trigger update to announce it to app users. The admin account is not shown the update prompt."}
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              disabled={!String(releaseControl.download_url || "").trim()}
-              onClick={() => window.open(String(releaseControl.download_url).trim(), "_blank", "noopener,noreferrer")}
-            >
-              <Download className="h-4 w-4 mr-1" />Download APK to test
-            </Button>
             <Button variant="outline" onClick={async () => {
               const payload = {
                 id: 1,
