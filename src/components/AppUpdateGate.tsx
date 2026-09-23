@@ -5,10 +5,8 @@ import { Download, ShieldCheck, RefreshCw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const RELEASE_MANIFESTS = [
-  "/app-release.json",
-  "https://ecb001.lovable.app/app-release.json",
-  "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/app-release.json",
-  "https://cdn.jsdelivr.net/gh/lomita483-del/efootballcompetitionbetting@main/public/app-release.json",
+  "/api/public/app-release",
+  "https://lslonlinebetting.lovable.app/api/public/app-release",
 ];
 
 type ReleaseManifest = {
@@ -19,6 +17,8 @@ type ReleaseManifest = {
   forceUpdate?: boolean;
   downloadUrl?: string;
   releaseNotes?: string[];
+  whatsNew?: string[];
+  enabled?: boolean;
 };
 
 function isEcbAndroidWebView() {
@@ -73,7 +73,7 @@ export function AppUpdateGate() {
         }
       }
 
-      if (!next) return;
+      if (!next || next.enabled === false) return;
 
       setCurrentVersion(version);
       setCurrentBuild(build);
@@ -113,7 +113,8 @@ export function AppUpdateGate() {
   const minimumBuild = Number(release.minimumSupportedBuild ?? 0);
   const mandatory = Boolean(release.forceUpdate) ||
     (minimumBuild > 0 && currentBuild > 0 && currentBuild < minimumBuild);
-  const notes = release.releaseNotes ?? [];
+  // The admin-controlled What's New list is the only release note source.
+  const notes = release.whatsNew ?? [];
   const download = release.downloadUrl?.trim();
 
   const install = () => {
