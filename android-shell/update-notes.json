@@ -1,9 +1,9 @@
 {
   "whatsNew": [
-    "The home logo button is now a circular button centered at the bottom of the app.",
-    "Update pop-ups check for newly triggered releases every 3 seconds while the app is open.",
-    "Normal website pages stay at 80% scale; only the Admin Console stays at 85%.",
+    "The home logo button is now smaller while remaining clearly visible and clickable.",
+    "All app pages now use a desktop-style WebView layout like the Admin Console.",
+    "The wide desktop layout is applied consistently across normal pages instead of switching to the narrow mobile layout.",
     "Pinch-to-zoom remains enabled for accessibility.",
-    "Forced updates keep the Later/Cancel option hidden."
+    "Update checks continue to detect newly triggered releases while the app is open."
   ]
 }
