@@ -164,18 +164,18 @@ export function AppUpdateGate() {
   };
 
   return (
-    <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 p-2 backdrop-blur-md">
-      <div className="flex max-h-[90vh] w-[94vw] max-w-none flex-col overflow-y-auto rounded-3xl border border-primary/30 bg-background/95 p-6 shadow-2xl sm:p-10">
-        <div className="mb-5 flex items-start gap-4">
-          <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-primary/15 text-primary">
-            {mandatory ? <RefreshCw className="h-7 w-7" /> : <Download className="h-7 w-7" />}
+    <div className="fixed inset-0 z-[99999] flex h-screen w-screen items-stretch justify-stretch bg-black/85 p-0 backdrop-blur-md">
+      <div className="flex h-screen w-screen max-h-none max-w-none flex-col overflow-y-auto rounded-none border-0 border-primary/30 bg-background/95 p-7 shadow-2xl sm:p-10">
+        <div className="mb-7 flex items-start gap-5">
+          <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-primary/15 text-primary sm:h-20 sm:w-20">
+            {mandatory ? <RefreshCw className="h-8 w-8 sm:h-10 sm:w-10" /> : <Download className="h-7 w-7" />}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-black uppercase tracking-[0.25em] text-primary">E-Football Competition Bet</p>
-            <h2 className="mt-1 text-2xl font-black">
+            <p className="text-sm font-black uppercase tracking-[0.25em] text-primary sm:text-base">E-Football Competition Bet</p>
+            <h2 className="mt-2 text-3xl font-black sm:text-4xl">
               {mandatory ? "Update required" : "New app update available"}
             </h2>
-            <p className="mt-2 text-base text-muted-foreground">
+            <p className="mt-3 text-lg text-muted-foreground sm:text-xl">
               Version {release.latestVersion} is ready. You are on {currentVersion || "your current version"}.
             </p>
           </div>
@@ -190,10 +190,10 @@ export function AppUpdateGate() {
           )}
         </div>
 
-        <div className="mb-5 rounded-2xl border border-border/60 bg-muted/20 p-4">
+        <div className="mb-7 rounded-2xl border border-border/60 bg-muted/20 p-6">
           <div className="flex items-start gap-3">
-            <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
-            <p className="text-xs leading-5 text-muted-foreground">
+            <ShieldCheck className="mt-1 h-6 w-6 shrink-0 text-emerald-400" />
+            <p className="text-base leading-7 text-muted-foreground sm:text-lg">
               Your account, balances, tickets, matches and other server data stay on your account.
               Installing an update does not require clearing the app or signing in again.
             </p>
@@ -201,16 +201,16 @@ export function AppUpdateGate() {
         </div>
 
         {notes.length > 0 && (
-          <div className="mb-5">
-            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">What's new</p>
-            <ul className="space-y-2 text-base leading-6 text-muted-foreground">
+          <div className="mb-7">
+            <p className="mb-4 text-sm font-bold uppercase tracking-wider text-muted-foreground sm:text-base">What's new</p>
+            <ul className="space-y-4 text-lg leading-8 text-muted-foreground sm:text-xl">
               {notes.slice(0, 6).map((note) => <li key={note}>• {note}</li>)}
             </ul>
           </div>
         )}
 
         {download ? (
-          <Button className="h-14 w-full text-base font-black" onClick={install}>
+          <Button className="mt-auto h-16 w-full text-lg font-black sm:h-20 sm:text-xl" onClick={install}>
             <Download className="mr-2 h-4 w-4" />
             Download latest update
           </Button>
