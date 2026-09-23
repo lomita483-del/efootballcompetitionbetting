@@ -99,7 +99,14 @@ jobs:
 
           # Upload explicitly after creating the release so the APK asset is
           # present before the update manifest is published.
-          gh release upload "$TAG" efootball-competition-bet-test.apk --clobber
+          # Upload through GitHub's release-asset endpoint directly.
+          # This avoids silently completing a release without its APK asset.
+          RELEASE_ID=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" --jq '.id')
+          gh api --method POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/vnd.android.package-archive" \
+            --input efootball-competition-bet-test.apk \
+            "https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?name=efootball-competition-bet-test.apk"
 
           # Never publish the update manifest until GitHub confirms that the actual APK asset exists.
           ASSET_COUNT=$(gh release view "$TAG" --json assets --jq '.assets | map(select(.name == "efootball-competition-bet-test.apk")) | length')
