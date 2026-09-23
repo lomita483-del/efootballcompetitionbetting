@@ -1,5 +1,5 @@
 name: Build E-Football Android Test APK
-# Release build trigger: mobile WebView scale and native APK-link handling (75% scale)
+# Release build trigger: mobile WebView scale, updater cache-busting, and build 49 release
 
 on:
   workflow_dispatch:
