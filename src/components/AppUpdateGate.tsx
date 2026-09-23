@@ -147,10 +147,20 @@ export function AppUpdateGate() {
 
   const install = () => {
     if (!download) return;
-    // In the Android WebView, navigating to the APK URL lets Android/WebView
-    // hand the package to the system download/install flow. Native Capacitor
-    // builds keep the existing external-download behavior.
-    window.open(download, "_blank");
+
+    // New Android shells expose the native installer through ECBAndroid.
+    // Use it first so the APK is downloaded, signature-checked, and handed
+    // to Android's package installer without leaving the app.
+    const bridge = typeof window !== "undefined" ? (window as any).ECBAndroid : null;
+    if (typeof bridge?.downloadUpdate === "function") {
+      bridge.downloadUpdate(download);
+      return;
+    }
+
+    // Older WebViews do not have the native bridge. Avoid window.open():
+    // Android WebView ignores new-window requests unless a WebChromeClient
+    // explicitly handles them. Same-window navigation is the safe fallback.
+    window.location.href = download;
   };
 
   return (
