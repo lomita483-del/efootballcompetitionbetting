@@ -99,40 +99,10 @@ jobs:
 
           # Upload explicitly after creating the release so the APK asset is
           # present before the update manifest is published.
-          # Upload the raw APK through GitHub's documented release-asset endpoint.
-          RELEASE_ID=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" --jq '.id')
-          APK_UPLOAD_OK=0
-          for ATTEMPT in 1 2 3 4 5; do
-            echo "Uploading APK release asset (attempt $ATTEMPT/5)..."
-            if curl --fail-with-body --silent --show-error --location --retry 2 \
-              -X POST \
-              -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer $GH_TOKEN" \
-              -H "X-GitHub-Api-Version: 2026-03-10" \
-              -H "Content-Type: application/octet-stream" \
-              --data-binary "@efootball-competition-bet-test.apk" \
-              "https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?name=efootball-competition-bet-test.apk" >/tmp/release-asset-response.json; then
-              ASSET_COUNT=$(gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets" --jq '[.[] | select(.name == "efootball-competition-bet-test.apk" and .state == "uploaded")] | length')
-              if [ "$ASSET_COUNT" -eq 1 ]; then
-                APK_UPLOAD_OK=1
-                echo "APK asset uploaded successfully."
-                break
-              fi
-            else
-              cat /tmp/release-asset-response.json 2>/dev/null || true
-            fi
-
-            for ASSET_ID in $(gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets" --jq '.[] | select(.name == "efootball-competition-bet-test.apk") | .id'); do
-              gh api --method DELETE "repos/$GITHUB_REPOSITORY/releases/assets/$ASSET_ID" || true
-            done
-            sleep 8
-          done
-
-          if [ "$APK_UPLOAD_OK" -ne 1 ]; then
-            echo "::error::Failed to upload the APK asset after 5 attempts."
-            gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets" || true
-            exit 1
-          fi
+          # Release assets are currently unreliable in this CI environment.
+          # The update manifest below serves the APK from the repository raw-file endpoint.
+          echo "Release created: $TAG"
+          echo "APK will be published through raw.githubusercontent.com."
 
           # Never publish the update manifest until GitHub confirms that the actual APK asset exists.
           ASSET_COUNT=$(gh release view "$TAG" --json assets --jq '.assets | map(select(.name == "efootball-competition-bet-test.apk")) | length')
@@ -148,6 +118,17 @@ jobs:
           VERSION="${{ steps.app_version.outputs.version }}"
           BUILD="${{ steps.app_version.outputs.build }}"
           TAG="android-v${VERSION}-build${BUILD}"
+          APK_PATH="public/downloads/efootball-competition-bet-latest.apk"
+          mkdir -p public/downloads
+          cp android-shell/app/build/outputs/apk/release/app-release.apk "$APK_PATH"
+
+          APK_BYTES=$(stat -c%s "$APK_PATH")
+          if [ "$APK_BYTES" -ge 94371840 ]; then
+            echo "::error::APK is too large for the repository raw-file delivery path: $APK_BYTES bytes"
+            exit 1
+          fi
+
+          APK_URL="https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk"
 
           cat > public/app-release.json <<EOF
           {
@@ -158,7 +139,7 @@ jobs:
             "minimumSupportedVersion": "1.0.0",
             "minimumSupportedBuild": 1,
             "forceUpdate": false,
-            "downloadUrl": "https://github.com/lomita483-del/efootballcompetitionbetting/releases/download/${TAG}/efootball-competition-bet-test.apk",
+            "downloadUrl": "${APK_URL}",
             "whatsNew": ${{ steps.app_version.outputs.notes }},
             "releaseNotes": ${{ steps.app_version.outputs.notes }},
             "publishedAt": "${{ github.event.head_commit.timestamp }}"
@@ -167,7 +148,7 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/app-release.json
+          git add public/app-release.json "$APK_PATH"
           git commit -m "chore: publish E-Football Android test update ${VERSION}" || true
           git fetch origin main
           git rebase origin/main
