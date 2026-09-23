@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.Gravity;
 import android.view.View;
+import android.graphics.drawable.GradientDrawable;
 import android.widget.ImageView;
 
 import androidx.core.graphics.Insets;
@@ -129,18 +130,36 @@ public class MainActivity extends Activity {
             FrameLayout.LayoutParams.MATCH_PARENT
         ));
 
+        // Fixed circular home button: centered at the very bottom like the website reference.
         ImageView homeLogo = new ImageView(this);
         homeLogo.setImageResource(R.drawable.site_logo);
-        homeLogo.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        homeLogo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         homeLogo.setContentDescription("Go to E-Football home");
         homeLogo.setClickable(true);
         homeLogo.setFocusable(true);
         homeLogo.setOnClickListener(v -> webView.loadUrl(APP_URL));
-        int logoSize = (int) (160 * getResources().getDisplayMetrics().density);
+
+        int logoSize = (int) (96 * getResources().getDisplayMetrics().density);
+        GradientDrawable logoCircle = new GradientDrawable();
+        logoCircle.setShape(GradientDrawable.OVAL);
+        logoCircle.setColor(0xEE080808);
+        logoCircle.setStroke(
+            (int) (2 * getResources().getDisplayMetrics().density),
+            0xFFFFC400
+        );
+        homeLogo.setBackground(logoCircle);
+        homeLogo.setPadding(
+            (int) (8 * getResources().getDisplayMetrics().density),
+            (int) (8 * getResources().getDisplayMetrics().density),
+            (int) (8 * getResources().getDisplayMetrics().density),
+            (int) (8 * getResources().getDisplayMetrics().density)
+        );
+        homeLogo.setClipToOutline(true);
+
         FrameLayout.LayoutParams logoParams = new FrameLayout.LayoutParams(
             logoSize, logoSize, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM
         );
-        logoParams.bottomMargin = (int) (120 * getResources().getDisplayMetrics().density);
+        logoParams.bottomMargin = (int) (18 * getResources().getDisplayMetrics().density);
         root.addView(homeLogo, logoParams);
 
         setContentView(root);
