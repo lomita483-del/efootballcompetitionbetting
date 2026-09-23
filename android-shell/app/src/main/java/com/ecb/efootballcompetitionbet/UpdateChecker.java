@@ -184,6 +184,11 @@ public final class UpdateChecker {
         });
     }
 
+    public static void downloadAndInstallFromUrl(Activity activity, String downloadUrl) {
+        if (activity == null || activity.isFinishing() || downloadUrl == null || downloadUrl.trim().isEmpty()) return;
+        downloadAndInstall(activity, "latest", downloadUrl.trim(), false);
+    }
+
     private static void downloadAndInstall(Activity activity, String version,
                                            String downloadUrl, boolean mandatory) {
         new Thread(() -> {
