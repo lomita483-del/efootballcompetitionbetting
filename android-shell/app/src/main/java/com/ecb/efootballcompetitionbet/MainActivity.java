@@ -70,9 +70,9 @@ public class MainActivity extends Activity {
         s.setLoadWithOverviewMode(true);
         s.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
 
-        // Render the website at 80% of the previous WebView scale.
+        // Use the website in desktop mode everywhere. Do not apply a native page scale;
+        // the website controls its own desktop sizing/layout.
         s.setTextZoom(100);
-        webView.setInitialScale(85);
         s.setSupportZoom(true);
         s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
@@ -92,8 +92,8 @@ public class MainActivity extends Activity {
 
         webView.setWebViewClient(new WebViewClient() {
             private void applyPageScale(String url) {
-                // Keep every route on the same desktop-style scale/layout.
-                webView.setInitialScale(85);
+                // Keep every route on the same desktop-style WebView layout.
+                // No native scale is applied; the desktop viewport controls the layout.
                 webView.evaluateJavascript(
                     "(function(){"
                     + "var m=document.querySelector('meta[name=viewport]');"
