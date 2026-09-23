@@ -50,6 +50,13 @@ jobs:
         with:
           gradle-version: "8.7"
 
+      - name: Prepare website launcher icon
+        run: |
+          mkdir -p android-shell/app/src/main/res/drawable
+          curl -fsSL https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/icon-512.png \
+            -o android-shell/app/src/main/res/drawable/site_logo.png
+          test -s android-shell/app/src/main/res/drawable/site_logo.png
+
       - name: Build standalone Android shell
         working-directory: android-shell
         run: gradle :app:assembleDebug --no-daemon --stacktrace
