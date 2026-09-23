@@ -18,7 +18,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-public class MainActivity {
+public class MainActivity extends Activity {
     private static final String APP_URL = "https://lslonlinebetting.lovable.app/";
     private static final int NOTIFICATION_PERMISSION_REQUEST = 2001;
     private static final String NOTIFICATION_CHANNEL_ID = "ecb_updates";
@@ -43,8 +43,6 @@ public class MainActivity {
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
-
-        // Keep the desktop console layout, with a slightly larger fixed phone canvas.
         s.setUseWideViewPort(true);
         s.setLoadWithOverviewMode(true);
         s.setAllowFileAccess(false);
@@ -66,28 +64,20 @@ public class MainActivity {
         ));
 
         root.setOnApplyWindowInsetsListener((View v, WindowInsets insets) -> {
-            int top;
-            int bottom;
-            int left;
-            int right;
-
+            int top, bottom, left, right;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 Insets bars = insets.getInsets(
                     WindowInsets.Type.statusBars()
                         | WindowInsets.Type.navigationBars()
                         | WindowInsets.Type.displayCutout()
                 );
-                top = bars.top;
-                bottom = bars.bottom;
-                left = bars.left;
-                right = bars.right;
+                top = bars.top; bottom = bars.bottom; left = bars.left; right = bars.right;
             } else {
                 top = insets.getSystemWindowInsetTop();
                 bottom = insets.getSystemWindowInsetBottom();
                 left = insets.getSystemWindowInsetLeft();
                 right = insets.getSystemWindowInsetRight();
             }
-
             v.setPadding(left, top, right, bottom);
             return insets;
         });
@@ -105,7 +95,6 @@ public class MainActivity {
 
         createNotificationChannel();
         requestNotificationPermissionIfNeeded();
-
         UpdateChecker.check(this);
         root.postDelayed(() -> UpdateChecker.check(this), 5000L);
     }
@@ -126,10 +115,7 @@ public class MainActivity {
     private void requestNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return;
         if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) return;
-        requestPermissions(
-            new String[]{Manifest.permission.POST_NOTIFICATIONS},
-            NOTIFICATION_PERMISSION_REQUEST
-        );
+        requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_REQUEST);
     }
 
     @Override protected void onResume() {
