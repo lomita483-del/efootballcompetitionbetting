@@ -1,9 +1,10 @@
 {
   "whatsNew": [
-    "The Android app now uses the website's normal mobile responsive layout.",
-    "The WebView presentation is set to 85% for a better fit on mobile screens.",
-    "Typing in login, betting and other input fields no longer triggers automatic zoom.",
-    "The app update screen is now full-screen with much larger, easier-to-read text.",
-    "The update button uses the native Android installer and validates the APK before installation."
+    "v1.0.43 updates the Android WebView to the normal mobile-responsive website layout at 85% scale.",
+    "Input fields no longer trigger automatic WebView zoom while typing or logging in.",
+    "The Android update screen has been redesigned as a full-screen update page with much larger text.",
+    "The update flow now uses the native Android installer instead of opening the APK in the browser.",
+    "Downloaded APKs are checked before installation to make sure the package is valid and is a newer signed build.",
+    "The app release footer now displays the current app version after the Contact section."
   ]
 }
