@@ -68,10 +68,11 @@ public class MainActivity extends Activity {
         // narrow mobile layout on phone-sized screens.
         s.setUseWideViewPort(true);
         s.setLoadWithOverviewMode(true);
+        s.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
 
         // Render the website at 80% of the previous WebView scale.
         s.setTextZoom(100);
-        webView.setInitialScale(80);
+        webView.setInitialScale(85);
         s.setSupportZoom(true);
         s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
@@ -97,7 +98,7 @@ public class MainActivity extends Activity {
                     "(function(){"
                     + "var m=document.querySelector('meta[name=viewport]');"
                     + "if(!m){m=document.createElement('meta');m.name='viewport';document.head.appendChild(m);}"
-                    + "m.setAttribute('content','width=1200,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes');"
+                    + "m.setAttribute('content','width=1280,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes');"
                     + "document.documentElement.style.zoom='100%';"
                     + "document.body.style.zoom='100%';"
                     + "})();",
@@ -142,7 +143,7 @@ public class MainActivity extends Activity {
         homeLogo.setFocusable(true);
         homeLogo.setOnClickListener(v -> webView.loadUrl(APP_URL));
 
-        int logoSize = (int) (72 * getResources().getDisplayMetrics().density);
+        int logoSize = (int) (56 * getResources().getDisplayMetrics().density);
         GradientDrawable logoCircle = new GradientDrawable();
         logoCircle.setShape(GradientDrawable.OVAL);
         logoCircle.setColor(0xEE080808);
@@ -152,10 +153,10 @@ public class MainActivity extends Activity {
         );
         homeLogo.setBackground(logoCircle);
         homeLogo.setPadding(
-            (int) (8 * getResources().getDisplayMetrics().density),
-            (int) (8 * getResources().getDisplayMetrics().density),
-            (int) (8 * getResources().getDisplayMetrics().density),
-            (int) (8 * getResources().getDisplayMetrics().density)
+            (int) (5 * getResources().getDisplayMetrics().density),
+            (int) (5 * getResources().getDisplayMetrics().density),
+            (int) (5 * getResources().getDisplayMetrics().density),
+            (int) (5 * getResources().getDisplayMetrics().density)
         );
         homeLogo.setClipToOutline(true);
 
