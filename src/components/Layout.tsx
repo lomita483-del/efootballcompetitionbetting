@@ -455,7 +455,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 
 function SiteFooter({ isHome = false }: { isHome?: boolean }) {
   const [s, setS] = useState<any>(null);
-  const [appVersion, setAppVersion] = useState("1.0.43");
+  const [appVersion, setAppVersion] = useState("1.0.44");
   const [open, setOpen] = useState<"terms" | "about" | null>(null);
   useEffect(() => {
     supabase

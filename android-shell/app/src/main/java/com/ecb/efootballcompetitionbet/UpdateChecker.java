@@ -174,8 +174,9 @@ public final class UpdateChecker {
                 if (window != null) {
                     window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                     WindowManager.LayoutParams params = window.getAttributes();
-                    params.width = (int) (activity.getResources().getDisplayMetrics().widthPixels * 0.92f);
-                    params.dimAmount = 0.68f;
+                    params.width = WindowManager.LayoutParams.MATCH_PARENT;
+                    params.height = WindowManager.LayoutParams.MATCH_PARENT;
+                    params.dimAmount = 0.78f;
                     window.setAttributes(params);
                     window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 }

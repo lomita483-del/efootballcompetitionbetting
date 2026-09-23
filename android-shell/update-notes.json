@@ -1,6 +1,9 @@
 {
   "whatsNew": [
-    "Typing into input fields no longer automatically zooms the WebView.",
-    "The update popup has been redesigned to open full-screen with much larger, easier-to-read text."
+    "The Android update popup now uses a full-screen layout with much larger text and buttons for easier reading.",
+    "The What's New list is now written specifically for the release being installed instead of reusing older release notes.",
+    "The app footer now shows the current app version and follows the active release version automatically.",
+    "The Android app and website now use the same release version and build information for update prompts.",
+    "Release metadata is kept synchronized so the update dialog shows the actual changes included in the new build."
   ]
 }
