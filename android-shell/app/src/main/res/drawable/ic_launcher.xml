@@ -4,8 +4,11 @@
     android:height="108dp"
     android:viewportWidth="512"
     android:viewportHeight="512">
-    <path android:fillColor="#0B0A14" android:pathData="M96,0 L416,0 Q512,0 512,96 L512,416 Q512,512 416,512 L96,512 Q0,512 0,416 L0,96 Q0,0 96,0 Z" />
-    <path android:fillColor="#F5C542" android:pathData="M70,350 L70,162 L110,162 L110,310 L208,310 L208,350 Z" />
-    <path android:fillColor="#D4AF37" android:pathData="M238,350 L238,162 L278,162 L278,350 Z" />
-    <path android:fillColor="#F5C542" android:pathData="M306,162 L442,162 L442,200 L346,200 L346,236 L430,236 L430,274 L346,274 L346,312 L442,312 L442,350 L306,350 Z" />
+    <path
+        android:fillColor="#0B0A14"
+        android:pathData="M96,0 L416,0 Q512,0 512,96 L512,416 Q512,512 416,512 L96,512 Q0,512 0,416 L0,96 Q0,0 96,0 Z" />
+    <!-- ECB mark matching the website's gold ECB logo -->
+    <path android:fillColor="#F5C542" android:pathData="M72,146 L218,146 L218,190 L122,190 L122,230 L205,230 L205,274 L122,274 L122,322 L218,322 L218,366 L72,366 Z" />
+    <path android:fillColor="#D4AF37" android:pathData="M282,146 C238,146 228,177 228,256 C228,335 238,366 282,366 L362,366 L362,322 L294,322 C282,322 276,310 276,256 C276,202 282,190 294,190 L362,190 L362,146 Z" />
+    <path android:fillColor="#F5C542" android:pathData="M382,146 L430,146 C468,146 486,166 486,202 C486,225 478,241 462,250 C482,258 492,276 492,302 C492,344 470,366 430,366 L382,366 Z M430,190 L430,234 L440,234 C451,234 458,226 458,212 C458,198 451,190 440,190 Z M430,278 L430,322 L442,322 C456,322 464,313 464,300 C464,286 456,278 442,278 Z" />
 </vector>
