@@ -3,21 +3,11 @@
   "platform": "android",
   "latestVersion": "1.0.46",
   "latestBuild": 47,
-  "minimumSupportedVersion": "1.0.46",
-  "minimumSupportedBuild": 47,
-  "forceUpdate": true,
+  "minimumSupportedVersion": "1.0.0",
+  "minimumSupportedBuild": 1,
+  "forceUpdate": false,
   "downloadUrl": "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
-  "whatsNew": [
-    "The homepage has been tightened so stacked sections and cards sit closer together with less unused vertical space.",
-    "The latest Ahoy Bot-inspired background atmosphere is now included in the Android WebView release so the app receives the same updated visual theme as the website.",
-    "Website and Android release version indicators are synchronized to v1.0.46, build 47.",
-    "Android build 47 includes the tightened homepage layout, latest background theme, and updated release metadata."
-  ],
-  "releaseNotes": [
-    "The homepage has been tightened so stacked sections and cards sit closer together with less unused vertical space.",
-    "The latest Ahoy Bot-inspired background atmosphere is now included in the Android WebView release so the app receives the same updated visual theme as the website.",
-    "Website and Android release version indicators are synchronized to v1.0.46, build 47.",
-    "Android build 47 includes the tightened homepage layout, latest background theme, and updated release metadata."
-  ],
-  "publishedAt": "2026-09-23T22:17:29.366Z"
+  "whatsNew": ["The app footer now displays the current release version and reads the live release metadata so the version stays synchronized with the latest app release.","The Android package version/build was incremented for this release.","Release What's New is generated from the files changed since the previous Android release instead of copying unrelated older release notes."],
+  "releaseNotes": ["The app footer now displays the current release version and reads the live release metadata so the version stays synchronized with the latest app release.","The Android package version/build was incremented for this release.","Release What's New is generated from the files changed since the previous Android release instead of copying unrelated older release notes."],
+  "publishedAt": "2026-09-23T23:17:33+01:00"
 }
