@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const DISMISS_KEY = "ecb-app-download-reminder";
 const REMIND_DAYS = 7;
@@ -12,14 +13,10 @@ function isEcbAndroidWebView() {
 
 export function AppDownloadReminder() {
   const [show, setShow] = useState(false);
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
-    if (typeof window === "undefined" || isEcbAndroidWebView()) return;
-    // Admins already manage the standalone app and release flow from the console.
-    try {
-      const roles = JSON.parse(localStorage.getItem("ecb_roles") || "[]");
-      if (Array.isArray(roles) && roles.includes("admin")) return;
-    } catch {}
+    if (typeof window === "undefined" || isEcbAndroidWebView() || isAdmin) return;
     if (window.matchMedia?.("(display-mode: standalone)").matches) return;
 
     const last = Number(localStorage.getItem(DISMISS_KEY) || 0);
@@ -27,7 +24,7 @@ export function AppDownloadReminder() {
 
     const timer = window.setTimeout(() => setShow(true), 12000);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [isAdmin]);
 
   if (!show) return null;
 
