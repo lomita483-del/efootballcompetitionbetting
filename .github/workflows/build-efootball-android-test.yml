@@ -8,6 +8,9 @@ on:
     paths:
       - "android-shell/**"
       - "src/routes/dashboard.tsx"
+      - "src/routes/index.tsx"
+      - "src/styles.css"
+      - "src/components/Layout.tsx"
       - "src/styles/user-dashboard-premium.css"
       - ".github/workflows/build-efootball-android-test.yml"
 
