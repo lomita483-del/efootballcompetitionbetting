@@ -226,7 +226,8 @@ function AdaptiveViewport() {
       // Phones keep the desktop-style canvas, but real desktop browsers use their
       // normal viewport so the browser version remains fully usable.
       const isPhoneSized = window.innerWidth < 900;
-      const target = isPhoneSized ? mobileDesktopCanvas : normalBrowserViewport;
+      const isAndroidApp = navigator.userAgent.includes("ECBAndroidApp/");
+      const target = isAndroidApp ? "width=device-width,initial-scale=0.85,minimum-scale=0.5,maximum-scale=5,user-scalable=yes,viewport-fit=cover" : (isPhoneSized ? mobileDesktopCanvas : normalBrowserViewport);
       if (meta.getAttribute("content") !== target) meta.setAttribute("content", target);
     };
     apply();
@@ -242,7 +243,7 @@ function AdaptiveViewport() {
 
   // Block pinch-zoom gestures on the admin console (iOS Safari ignores user-scalable=no)
   useEffect(() => {
-    if (typeof window === "undefined" || !isAdmin) return;
+    if (typeof window === "undefined" || !isAdmin || navigator.userAgent.includes("ECBAndroidApp/")) return;
     const stop = (e: Event) => e.preventDefault();
     const onTouch = (e: TouchEvent) => { if (e.touches.length > 1) e.preventDefault(); };
     const onWheel = (e: WheelEvent) => { if (e.ctrlKey) e.preventDefault(); };
