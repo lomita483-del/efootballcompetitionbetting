@@ -464,14 +464,16 @@ function SiteFooter({ isHome = false }: { isHome?: boolean }) {
       .eq("id", 1)
       .maybeSingle()
       .then(({ data }) => setS(data));
-    supabase
-      .from("app_release_control")
-      .select("latest_version")
-      .eq("id", 1)
-      .eq("enabled", true)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data?.latest_version) setAppVersion(data.latest_version);
+    fetch("/api/public/app-release?t=" + Date.now(), {
+      cache: "no-store",
+      headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.latestVersion) setAppVersion(String(data.latestVersion));
+      })
+      .catch(() => {
+        // Keep the bundled fallback version visible if the release endpoint is unavailable.
       });
   }, []);
   return (
@@ -522,10 +524,16 @@ function SiteFooter({ isHome = false }: { isHome?: boolean }) {
           </ul>
         </div>
       </div>
-      <div className="container mx-auto px-4 pb-5 flex justify-end">
-        <span className="text-[10px] font-semibold tracking-widest text-muted-foreground/70 uppercase">
-          Version {appVersion}
-        </span>
+      <div className="container mx-auto px-4 pb-6 flex justify-end">
+        <div
+          data-app-version={appVersion}
+          className="rounded-full border border-primary/25 bg-background/60 px-3 py-1.5 text-right shadow-[0_0_12px_-6px_rgba(212,175,55,0.6)]"
+          title="Current app release"
+        >
+          <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            App version {appVersion}
+          </span>
+        </div>
       </div>
       <Dialog open={!!open} onOpenChange={(v) => !v && setOpen(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
