@@ -77,32 +77,47 @@ jobs:
       - name: Publish test APK
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.app_version.outputs.version }}
+          BUILD: ${{ steps.app_version.outputs.build }}
         run: |
+          TAG="android-v${VERSION}-build${BUILD}"
           cp android-shell/app/build/outputs/apk/debug/app-debug.apk efootball-competition-bet-test.apk
-          gh release delete test-latest --yes --cleanup-tag || true
-          gh release create test-latest efootball-competition-bet-test.apk --title "E-Football Competition Bet — Test APK v${{ steps.app_version.outputs.version }}" --notes "Test build ${{ steps.app_version.outputs.version }} (${{ steps.app_version.outputs.build }}). What's New: ${{ steps.app_version.outputs.notes }}"
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release delete "$TAG" --yes --cleanup-tag
+          fi
+
+          jq -r '.whatsNew | join("\n")' android-shell/update-notes.json > release-notes.txt
+          gh release create "$TAG" efootball-competition-bet-test.apk             --title "E-Football Competition Bet — Test APK v${VERSION}"             --notes-file release-notes.txt
+
+          echo "Published release: $TAG"
 
       - name: Publish update manifest
         run: |
+          VERSION="${{ steps.app_version.outputs.version }}"
+          BUILD="${{ steps.app_version.outputs.build }}"
+          TAG="android-v${VERSION}-build${BUILD}"
+
           cat > public/app-release.json <<EOF
           {
             "app": "E-Football Competition Bet",
             "platform": "android",
-            "latestVersion": "${{ steps.app_version.outputs.version }}",
-            "latestBuild": ${{ steps.app_version.outputs.build }},
+            "latestVersion": "${VERSION}",
+            "latestBuild": ${BUILD},
             "minimumSupportedVersion": "1.0.0",
             "minimumSupportedBuild": 1,
             "forceUpdate": false,
-            "downloadUrl": "https://github.com/lomita483-del/efootballcompetitionbetting/releases/download/test-latest/efootball-competition-bet-test.apk",
+            "downloadUrl": "https://github.com/lomita483-del/efootballcompetitionbetting/releases/download/${TAG}/efootball-competition-bet-test.apk",
             "whatsNew": ${{ steps.app_version.outputs.notes }},
             "releaseNotes": ${{ steps.app_version.outputs.notes }},
             "publishedAt": "${{ github.event.head_commit.timestamp }}"
           }
           EOF
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/app-release.json
-          git commit -m "chore: publish E-Football Android test update ${{ steps.app_version.outputs.version }}" || true
+          git commit -m "chore: publish E-Football Android test update ${VERSION}" || true
           git fetch origin main
           git rebase origin/main
           git push origin HEAD:main
