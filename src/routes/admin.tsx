@@ -3869,6 +3869,7 @@ const QUICK_ACTIONS: { i: any; l: string; t: string }[] = [
   { i: AlertTriangle, l: "Risk", t: "risk" },
   { i: Trophy, l: "Seasons", t: "seasons" },
   { i: Trophy, l: "Tournaments", t: "tournaments" },
+  { i: Download, l: "App Updates", t: "appupdates" },
   { i: SettingsIcon, l: "Settings", t: "settings" },
   { i: Sparkles, l: "Spotlights", t: "spotlights" },
   { i: Sparkles, l: "Streak/Push", t: "streakpush" },
@@ -4057,8 +4058,8 @@ function SettingsPanel({ focusRelease = false }: { focusRelease?: boolean }) {
   const [s, setS] = useState<any>(null);
   const [releaseControl, setReleaseControl] = useState<any>({
     enabled: false,
-    latest_version: "1.0.26",
-    latest_build: 27,
+    latest_version: "1.0.27",
+    latest_build: 28,
     download_url: "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
     whats_new: [
       "Admin console now uses 85% native WebView scaling so the floating bet checkout control scales with the console.",
