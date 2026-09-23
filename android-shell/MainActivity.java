@@ -6,6 +6,12 @@ import android.webkit.CookieManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.graphics.Color;
+import android.view.Gravity;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class MainActivity extends Activity {
     private static final String APP_URL = "https://lslonlinebetting.lovable.app/";
@@ -29,10 +35,10 @@ public class MainActivity extends Activity {
         // phone-width responsive scaling and do not zoom the whole page.
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(false);
-        webView.setInitialScale(100);
+        webView.setInitialScale(80);
 
         // Keep the website at its normal CSS scale. No pinch/accidental zoom.
-        settings.setSupportZoom(false);
+        settings.setSupportZoom(true);
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
         settings.setTextZoom(100);
@@ -55,7 +61,7 @@ public class MainActivity extends Activity {
                 String script =
                     "(function(){"
                     + "var m=document.querySelector('meta[name=viewport]');"
-                    + "if(m){m.setAttribute('content','width=1024,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no');}"
+                    + "if(m){m.setAttribute('content','width=1024,initial-scale=1.0,minimum-scale=1.0,maximum-scale=5.0,user-scalable=yes');}"
                     + "var s=document.getElementById('ecb-admin-scale');"
                     + "if(!s){s=document.createElement('style');s.id='ecb-admin-scale';"
                     + "s.textContent='body{-webkit-text-size-adjust:100%;overscroll-behavior-x:none}';"
@@ -68,7 +74,41 @@ public class MainActivity extends Activity {
         webView.setHorizontalScrollBarEnabled(false);
         webView.setVerticalScrollBarEnabled(true);
         webView.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
-        setContentView(webView);
+
+        // Pull-to-refresh only activates when the WebView is already at the top.
+        SwipeRefreshLayout refresher = new SwipeRefreshLayout(this);
+        refresher.setOnRefreshListener(() -> webView.reload());
+
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                refresher.setRefreshing(false);
+                super.onPageFinished(view, url);
+            }
+        });
+        refresher.addView(webView, new ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
+        ));
+
+        FrameLayout root = new FrameLayout(this);
+        root.addView(refresher);
+
+        // Fixed, non-draggable website logo. Clicking it always returns home.
+        ImageView homeLogo = new ImageView(this);
+        homeLogo.setImageResource(R.drawable.site_logo);
+        homeLogo.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        homeLogo.setContentDescription("Go to E-Football home");
+        homeLogo.setClickable(true);
+        homeLogo.setFocusable(true);
+        homeLogo.setOnClickListener(v -> webView.loadUrl(APP_URL));
+        int logoSize = (int) (220 * getResources().getDisplayMetrics().density);
+        FrameLayout.LayoutParams logoParams = new FrameLayout.LayoutParams(
+            logoSize, logoSize, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM
+        );
+        logoParams.bottomMargin = (int) (120 * getResources().getDisplayMetrics().density);
+        root.addView(homeLogo, logoParams);
+
+        setContentView(root);
         webView.loadUrl(APP_URL);
 
         UpdateChecker.check(this, false);
