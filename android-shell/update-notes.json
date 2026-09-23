@@ -1,9 +1,9 @@
 {
   "whatsNew": [
     "The entire app now uses the website's normal mobile responsive layout.",
-    "The previous desktop-only 50% presentation has been removed from every page.",
-    "The update popup can hand the APK download directly to the native Android installer.",
-    "The live website update button now works with the native updater in this build.",
+    "The previous desktop-only 50% desktop presentation has been removed from every page.",
+    "The update popup can now hand APK downloads directly to the native Android installer.",
+    "APK update links opened by the website are handled inside the app instead of being ignored as a new window.",
     "Update checks still run every 3 seconds while the app is open."
   ]
 }
