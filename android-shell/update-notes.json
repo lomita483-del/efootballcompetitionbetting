@@ -1,9 +1,9 @@
 {
   "whatsNew": [
-    "The home logo button is now smaller while remaining clearly visible and clickable.",
-    "All app pages now use a desktop-style WebView layout like the Admin Console.",
-    "The wide desktop layout is applied consistently across normal pages instead of switching to the narrow mobile layout.",
-    "Pinch-to-zoom remains enabled for accessibility.",
-    "Update checks continue to detect newly triggered releases while the app is open."
+    "Update releases are now based on the installed app version, not the signed-in user account.",
+    "Every older app build checks the same triggered release and can receive the update prompt as soon as it is detected.",
+    "The entire app now uses the website's desktop WebView layout instead of switching to a mobile layout.",
+    "Native page scaling has been removed so the website controls its desktop presentation consistently.",
+    "Pinch-to-zoom remains available for accessibility."
   ]
 }
