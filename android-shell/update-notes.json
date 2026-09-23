@@ -4,7 +4,7 @@
     "Adjusted the desktop-mode scale and text size so the admin console is easier to read and tap without becoming oversized.",
     "Strengthened automatic update checking with multiple manifest sources and retries.",
     "The updater validates the downloaded package before handing it to Android.",
-    "Future releases are prepared for seamless in-place updating.",
+    "Future releases use the persistent Android signing key so updates can replace the installed app without clearing app data.",
     "The app keeps its own WebView/account storage separate from Chrome browser data.",
     "Corrected the launcher icon resource so the app uses the ECB launcher artwork instead of the wrong placeholder."
   ]
