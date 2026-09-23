@@ -17,6 +17,7 @@ import {
 import { ChallengesPanel } from "@/components/ChallengesPanel";
 import { ReferralCard } from "@/components/UserHubSections";
 import { getTierProgress } from "@/lib/tiers";
+import "@/styles/user-dashboard-premium.css";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -66,7 +67,7 @@ function Dashboard() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8 space-y-6">
+      <div className="user-dashboard-shell container mx-auto px-3 sm:px-4 py-5 md:py-8 space-y-6">
         {/* ============ WELCOME HERO ============ */}
         <Card data-tour="dashboard-welcome"
           className="relative overflow-hidden bg-gradient-to-br from-card/80 via-card/70 to-background p-0"
@@ -133,7 +134,7 @@ function Dashboard() {
         </Card>
 
         {/* ============ QUICK ACCESS ============ */}
-        <section data-tour="dashboard-quick">
+        <section data-tour="dashboard-quick" className="dashboard-section">
           <h2 className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground"><Sparkles className="h-3.5 w-3.5 text-primary" /> Quick Access</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             <PanelCard to="/bet-history" icon={TicketIcon} title="Bet Slips" subtitle={`${bets.length} total`} />
@@ -152,7 +153,7 @@ function Dashboard() {
         </section>
 
         {/* ============ ACTIVITY OVERVIEW ============ */}
-        <Card data-tour="dashboard-activity" className="border-primary/20 bg-card/60 p-5 backdrop-blur-xl">
+        <Card data-tour="dashboard-activity" className="dashboard-glass-card border-primary/20 bg-card/60 p-5 backdrop-blur-xl">
           <h2 className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">Activity Overview</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             <ActivityStat icon={Activity} label="Active" value={String(active)} tone="text-emerald-300" />
@@ -165,18 +166,18 @@ function Dashboard() {
         </Card>
 
         {/* ============ CHALLENGES ============ */}
-        <div data-tour="dashboard-challenges" className="grid gap-4 items-start">
+        <div data-tour="dashboard-challenges" className="dashboard-section grid gap-4 items-start">
           <ChallengesPanel />
         </div>
 
         {/* ============ WALLET · TRANSACTIONS · REFERRALS ============ */}
-        <div className="grid gap-4 lg:grid-cols-3 items-start">
+        <div className="dashboard-section grid gap-4 lg:grid-cols-3 items-start">
           <div data-tour="dashboard-wallet"><WalletOverview balance={profile?.token_balance ?? 0} /></div>
           <div data-tour="dashboard-recent"><RecentTransactions userId={user.id} /></div>
           <ReferralCard />
         </div>
 
-        {/* ============ GIFTS · SPIN ============ */}
+        {/* ============ NOTIFICATIONS ============ */}\n        <div className="dashboard-section">\n          <RecentNotifications userId={user.id} />\n        </div>\n\n        {/* ============ GIFTS · SPIN ============ */}
         <div className="grid gap-4 items-start">
           <GiftsAndSpin onClaimed={refresh} />
         </div>
