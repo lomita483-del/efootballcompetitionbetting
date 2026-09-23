@@ -1,13 +1,13 @@
 {
   "app": "E-Football Competition Bet",
   "platform": "android",
-  "latestVersion": "1.0.35",
-  "latestBuild": 36,
+  "latestVersion": "1.0.36",
+  "latestBuild": 37,
   "minimumSupportedVersion": "1.0.0",
   "minimumSupportedBuild": 1,
   "forceUpdate": false,
   "downloadUrl": "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
-  "whatsNew": ["The entire app now uses the website's normal mobile responsive layout.","The previous desktop-only 50% presentation has been removed from every page.","The update popup can hand the APK download directly to the native Android installer.","The live website update button now works with the native updater in this build.","Update checks still run every 3 seconds while the app is open."],
-  "releaseNotes": ["The entire app now uses the website's normal mobile responsive layout.","The previous desktop-only 50% presentation has been removed from every page.","The update popup can hand the APK download directly to the native Android installer.","The live website update button now works with the native updater in this build.","Update checks still run every 3 seconds while the app is open."],
-  "publishedAt": "2026-09-23T18:13:39+01:00"
+  "whatsNew": ["The entire app now uses the website's normal mobile responsive layout.","The previous desktop-only 50% desktop presentation has been removed from every page.","The update popup can now hand APK downloads directly to the native Android installer.","APK update links opened by the website are handled inside the app instead of being ignored as a new window.","Update checks still run every 3 seconds while the app is open."],
+  "releaseNotes": ["The entire app now uses the website's normal mobile responsive layout.","The previous desktop-only 50% desktop presentation has been removed from every page.","The update popup can now hand APK downloads directly to the native Android installer.","APK update links opened by the website are handled inside the app instead of being ignored as a new window.","Update checks still run every 3 seconds while the app is open."],
+  "publishedAt": "2026-09-23T18:15:32+01:00"
 }
