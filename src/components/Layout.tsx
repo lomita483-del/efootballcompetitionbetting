@@ -196,13 +196,6 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   const [railOpen, setRailOpen] = useState(false);
   const branding = useBranding();
 
-  // Tell the standalone Android shell whether the signed-in account is an admin.
-  // Admins manage releases from this console and should not receive the same
-  // end-user update popup when a release is triggered.
-  useEffect(() => {
-    const bridge = typeof window !== "undefined" ? (window as any).ECBAndroid : null;
-    if (bridge?.setAdminUser) bridge.setAdminUser(!!isAdmin);
-  }, [isAdmin]);
   // Admin-configurable site-wide background + branding (fall back to bundled art).
   const [siteBg, setSiteBg] = useState<string | null>(null);
   const [bgFit, setBgFit] = useState<string>("cover");
