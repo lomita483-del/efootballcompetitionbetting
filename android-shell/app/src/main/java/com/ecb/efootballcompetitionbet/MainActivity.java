@@ -96,7 +96,7 @@ public class MainActivity extends Activity {
 
         // Start slightly zoomed out, while allowing native pinch-to-zoom.
         // Users can pinch in/out freely; the initial presentation remains compact.
-        webView.setInitialScale(85);
+        webView.setInitialScale(80);
         s.setSupportZoom(true);
         s.setSupportMultipleWindows(false);
         s.setBuiltInZoomControls(true);
@@ -156,7 +156,7 @@ public class MainActivity extends Activity {
                     splash.animate().alpha(0f).setDuration(260L).withEndAction(() -> splash.setVisibility(View.GONE)).start();
                 }
                 view.evaluateJavascript(
-                    "(function(){var m=document.querySelector('meta[name=viewport]');if(m)m.setAttribute('content','width=device-width,initial-scale=0.85,minimum-scale=0.5,maximum-scale=4,user-scalable=yes,viewport-fit=cover');})();",
+                    "(function(){var m=document.querySelector('meta[name=viewport]');if(m)m.setAttribute('content','width=device-width,initial-scale=0.8,minimum-scale=0.5,maximum-scale=4,user-scalable=yes,viewport-fit=cover');})();",
                     null
                 );
             }
