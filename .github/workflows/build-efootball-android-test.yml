@@ -99,14 +99,43 @@ jobs:
 
           # Upload explicitly after creating the release so the APK asset is
           # present before the update manifest is published.
-          # Upload through GitHub's release-asset endpoint directly.
-          # This avoids silently completing a release without its APK asset.
+          # Upload through GitHub's release-asset endpoint with retries.
+          # GitHub can occasionally return an upstream 502 while creating a
+          # temporary "starter" asset; remove that temporary asset and retry.
           RELEASE_ID=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" --jq '.id')
-          gh api --method POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Content-Type: application/vnd.android.package-archive" \
-            --input efootball-competition-bet-test.apk \
-            "https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?name=efootball-competition-bet-test.apk"
+          APK_UPLOAD_OK=0
+          for ATTEMPT in 1 2 3 4 5; do
+            echo "Uploading APK release asset (attempt $ATTEMPT/5)..."
+            set +e
+            UPLOAD_RESPONSE=$(gh api --method POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "Content-Type: application/vnd.android.package-archive" \
+              --input efootball-competition-bet-test.apk \
+              "https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?name=efootball-competition-bet-test.apk" 2>&1)
+            UPLOAD_STATUS=$?
+            set -e
+
+            if [ "$UPLOAD_STATUS" -eq 0 ]; then
+              ASSET_COUNT=$(gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets" --jq '[.[] | select(.name == "efootball-competition-bet-test.apk" and .state == "uploaded")] | length')
+              if [ "$ASSET_COUNT" -eq 1 ]; then
+                APK_UPLOAD_OK=1
+                echo "APK asset uploaded successfully."
+                break
+              fi
+            fi
+
+            echo "$UPLOAD_RESPONSE"
+            for ASSET_ID in $(gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets" --jq '.[] | select(.name == "efootball-competition-bet-test.apk") | .id'); do
+              gh api --method DELETE "repos/$GITHUB_REPOSITORY/releases/assets/$ASSET_ID" || true
+            done
+            sleep 8
+          done
+
+          if [ "$APK_UPLOAD_OK" -ne 1 ]; then
+            echo "::error::Failed to upload the APK asset after 5 attempts."
+            gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets" || true
+            exit 1
+          fi
 
           # Never publish the update manifest until GitHub confirms that the actual APK asset exists.
           ASSET_COUNT=$(gh release view "$TAG" --json assets --jq '.assets | map(select(.name == "efootball-competition-bet-test.apk")) | length')
