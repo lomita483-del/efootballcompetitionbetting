@@ -50,7 +50,7 @@ public final class UpdateChecker {
         + "?id=eq.1&select=enabled,latest_version,latest_build,download_url,"
         + "whats_new,force_update,minimum_supported_build,updated_at";
     private static final String SUPABASE_PUBLISHABLE_KEY =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1dHdzxqdegrtaqlbwnrqgIiwicmVmIjoidWR3c3hxZGVncnRhcWxid25ycWdqIiwicm9sIjoiYW5vbiIsImlhdCI6MTc4NjE5NjQxNywiZXhwIjoyMTAxNzcyNDE3fQ.T2Y-mkeXqJvksELFt2TZ3YZmMldH8rk0fpnsaL_32tE";
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkd3N4cWRlZ3J0YXFsYnducnFnIiwicm9sIjoiYW5vbiIsImlhdCI6MTc4NjE5NjQxNywiZXhwIjoyMTAxNzcyNDE3fQ.T2Y-mkeXqJvksELFt2TZ3YZmMldH8rk0fpnsaL_32tE";
 
     private static final int MAX_ATTEMPTS = 3;
     private static final int CONNECT_TIMEOUT_MS = 8000;
