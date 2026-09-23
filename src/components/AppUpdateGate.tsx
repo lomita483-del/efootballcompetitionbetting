@@ -45,16 +45,27 @@ export function AppUpdateGate() {
     const webViewNative = typeof navigator !== "undefined" && isEcbAndroidWebView();
     const capacitorNative = Capacitor.isNativePlatform();
 
-    // The standalone ECB Android shell has its own native updater. Do not
-    // show a second web popup or send APK downloads to the browser from it.
-    if (webViewNative || !capacitorNative) return;
+    // The standalone ECB Android shell can be an older installed build whose
+    // native updater has already been compiled. Because the website itself is
+    // live inside that old WebView, the web gate must also be able to announce
+    // a newer app release. This makes the release app-version based rather
+    // than dependent on the account or the old native updater implementation.
+    if (!webViewNative && !capacitorNative) return;
 
     checkingRef.current = true;
 
     try {
-      const info = await App.getInfo();
-      const version = info.version || "";
-      const build = Number(info.build) || 0;
+      let version = "";
+      let build = 0;
+
+      if (webViewNative) {
+        const match = navigator.userAgent.match(/ECBAndroidApp\/([0-9]+(?:\.[0-9]+){1,3})/i);
+        version = match?.[1] || "";
+      } else {
+        const info = await App.getInfo();
+        version = info.version || "";
+        build = Number(info.build) || 0;
+      }
 
       let next: ReleaseManifest | null = null;
       for (const manifestUrl of RELEASE_MANIFESTS) {
@@ -95,7 +106,7 @@ export function AppUpdateGate() {
       setCurrentVersion(version);
       setCurrentBuild(build);
 
-      const newerBuild = Number(next.latestBuild) > build;
+      const newerBuild = !webViewNative && Number(next.latestBuild) > build;
       const newerVersion = versionToNumber(next.latestVersion) > versionToNumber(version);
       if (newerBuild || newerVersion) setRelease(next);
       else setRelease(null);
@@ -108,7 +119,7 @@ export function AppUpdateGate() {
 
   useEffect(() => {
     checkForUpdate();
-    const timer = window.setInterval(checkForUpdate, 60_000);
+    const timer = window.setInterval(checkForUpdate, 3_000);
 
     let removeListener: (() => void) | undefined;
     if (Capacitor.isNativePlatform()) {
@@ -135,7 +146,11 @@ export function AppUpdateGate() {
   const download = release.downloadUrl?.trim();
 
   const install = () => {
-    if (download) window.open(download, "_blank");
+    if (!download) return;
+    // In the Android WebView, navigating to the APK URL lets Android/WebView
+    // hand the package to the system download/install flow. Native Capacitor
+    // builds keep the existing external-download behavior.
+    window.open(download, "_blank");
   };
 
   return (
