@@ -15,7 +15,7 @@ import {
   BarChart3, Users, Sparkles, AlertTriangle, History, ClipboardList, Send,
   MessageSquare, Megaphone, Trophy, Calendar, Wallet, ListOrdered, Tag,
   Settings as SettingsIcon, Ticket, Coins, Dice5, Shield, Flame, Target,
-  Gift, Palette, Disc3,
+  Gift, Palette, Disc3, Smartphone,
 } from "lucide-react";
 import _ecbLogo from "@/assets/ecb-logo.png.asset.json";
 const lslLogo = _ecbLogo.url;
@@ -92,6 +92,7 @@ const NAV: AdminNavItem[] = [
   // Configuration
   { group: "Configuration", key: "branding",    label: "Branding",             icon: Palette,         admin: true },
   { group: "Configuration", key: "floating",    label: "Floating Icons",       icon: Sparkles,        admin: true },
+  { group: "Configuration", key: "appupdates",  label: "Android App Updates", icon: Smartphone,      admin: true },
   { group: "Configuration", key: "settings",    label: "Settings",             icon: SettingsIcon,    admin: true },
 ];
 
