@@ -25,17 +25,20 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class UpdateChecker {
     private static final String MANIFEST =
         "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbet/main/public/app-release.json";
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
     private static boolean dialogShowing = false;
+    private static final AtomicBoolean checking = new AtomicBoolean(false);
 
     private UpdateChecker() {}
 
     public static void check(Activity activity, boolean forceNetwork) {
-        if (activity == null || activity.isFinishing()) return;
+        if (activity == null || activity.isFinishing() || dialogShowing) return;
+        if (!checking.compareAndSet(false, true)) return;
 
         new Thread(() -> {
             HttpURLConnection conn = null;
@@ -75,6 +78,7 @@ public final class UpdateChecker {
             } catch (Exception ignored) {
             } finally {
                 if (conn != null) conn.disconnect();
+                checking.set(false);
             }
         }).start();
     }
