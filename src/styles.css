@@ -160,7 +160,7 @@ html.light body {
     width: 100%;
     overflow-x: hidden;
   }
-  body {
+  html, body { overscroll-behavior-y: none; }\n  body {
     background: #07080a;
     color: var(--foreground);
     font-family: var(--font-sans);
@@ -1277,4 +1277,11 @@ html.light body {
   border-radius: 9999px;
   font-size: 0.62rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
   border: 1px solid currentColor;
+}
+
+
+/* Keep the admin console from rubber-banding past its real content height on phones. */
+.admin-console-page {
+  overscroll-behavior-y: none;
+  scroll-padding-top: 0;
 }
