@@ -77,6 +77,12 @@ jobs:
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose android-shell/app/build/outputs/apk/release/app-release.apk
           rm -f android-shell/release-key.jks
 
+      - name: Sync main before generating release metadata
+        run: |
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+
       - name: Generate What's New from actual release changes
         run: |
           chmod +x scripts/generate-release-notes.sh
@@ -152,15 +158,6 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Sync with the latest main before creating the generated release commit.
-          # This avoids rebasing after generated APK/manifest files are already staged.
-          git fetch origin main
-          git checkout main
-          git reset --hard origin/main
-
-          # Recreate the generated release files after the sync.
-          cp android-shell/app/build/outputs/apk/release/app-release.apk "$APK_PATH"
-
           git add public/app-release.json "$APK_PATH"
           git commit -m "chore: publish E-Football Android test update ${VERSION}" || true
           git push origin HEAD:main
