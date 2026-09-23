@@ -5,8 +5,8 @@ import { Download, ShieldCheck, RefreshCw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const RELEASE_MANIFESTS = [
+  "https://udwsxqdegrtaqlbwnrqg.supabase.co/rest/v1/app_release_control?id=eq.1&select=enabled,latest_version,latest_build,download_url,whats_new,force_update,minimum_supported_build,updated_at",
   "/api/public/app-release",
-  "https://lslonlinebetting.lovable.app/api/public/app-release",
 ];
 
 type ReleaseManifest = {
@@ -66,7 +66,24 @@ export function AppUpdateGate() {
             headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
           });
           if (!res.ok) continue;
-          next = (await res.json()) as ReleaseManifest;
+          const payload = await res.json();
+          // Supabase REST returns a one-row array with snake_case columns.
+          // Normalize it here so this native-capable updater uses the same
+          // admin-controlled release record as the Android shell.
+          const row = Array.isArray(payload) ? payload[0] : payload;
+          if (row && typeof row === "object" && "latest_version" in row) {
+            next = {
+              enabled: Boolean(row.enabled),
+              latestVersion: String(row.latest_version ?? ""),
+              latestBuild: Number(row.latest_build ?? 0),
+              minimumSupportedBuild: Number(row.minimum_supported_build ?? 0),
+              forceUpdate: Boolean(row.force_update),
+              downloadUrl: String(row.download_url ?? ""),
+              whatsNew: Array.isArray(row.whats_new) ? row.whats_new.filter((x: unknown) => typeof x === "string" && x.trim()) : [],
+            };
+          } else {
+            next = payload as ReleaseManifest;
+          }
           break;
         } catch {
           // Try the next manifest source.
