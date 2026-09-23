@@ -54,17 +54,20 @@ export function HomeQuickMenu() {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-label="Open menu"
-        className="group relative h-full w-[76px] sm:w-[92px] md:w-[108px] flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent text-primary shadow-[0_0_30px_-10px_rgba(212,175,55,0.6)] transition-all hover:from-primary/30 active:scale-95"
+        className="group relative h-full w-[76px] sm:w-[92px] md:w-[108px] flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-white/45 bg-[linear-gradient(145deg,rgba(10,20,36,0.96),rgba(16,36,57,0.92))] text-primary shadow-[0_10px_30px_-12px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.16)] transition-all hover:border-primary/80 hover:shadow-[0_14px_36px_-12px_rgba(212,175,55,0.55)] active:scale-95"
       >
-        {!open && <span className="pointer-events-none absolute inset-0 rounded-2xl ring-2 ring-primary/40 animate-pulse" />}
-        <MenuIcon className="h-6 w-6 sm:h-7 sm:w-7" />
+        <span className="pointer-events-none absolute inset-[1px] rounded-[15px] border border-primary/20 bg-[radial-gradient(circle_at_50%_0%,rgba(255,220,120,0.18),transparent_55%)]" />
+        {!open && <span className="pointer-events-none absolute -inset-1 rounded-2xl ring-2 ring-primary/35 animate-pulse" />}
+        <span className="relative grid place-items-center h-9 w-9 sm:h-10 sm:w-10 rounded-xl border border-primary/55 bg-primary/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_0_18px_-7px_rgba(212,175,55,0.9)]">
+          <MenuIcon className="h-5 w-5 sm:h-5.5 sm:w-5.5 drop-shadow-[0_0_8px_rgba(255,220,120,0.55)]" />
+        </span>
         <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.18em] flex items-center gap-0.5">
           Menu <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} />
         </span>
       </button>
 
       {open && (
-        <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-56 max-h-[60vh] overflow-y-auto glass rounded-2xl border border-primary/30 shadow-2xl animate-in fade-in slide-in-from-top-2">
+        <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-60 max-h-[60vh] overflow-y-auto rounded-2xl border border-primary/45 bg-[linear-gradient(160deg,rgba(7,18,32,0.98),rgba(10,27,43,0.97))] shadow-[0_24px_70px_-18px_rgba(0,0,0,0.95),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-2xl animate-in fade-in slide-in-from-top-2">
           <div className="sticky top-0 flex items-center gap-1.5 px-3 py-2 border-b border-border/60 bg-gradient-to-r from-primary/15 via-primary/5 to-transparent backdrop-blur">
             <MenuIcon className="h-3.5 w-3.5 text-primary" />
             <span className="text-[10px] font-black uppercase tracking-[0.22em] gradient-gold-text">Quick Menu</span>
