@@ -104,14 +104,7 @@ jobs:
           echo "Release created: $TAG"
           echo "APK will be published through raw.githubusercontent.com."
 
-          # Never publish the update manifest until GitHub confirms that the actual APK asset exists.
-          ASSET_COUNT=$(gh release view "$TAG" --json assets --jq '.assets | map(select(.name == "efootball-competition-bet-test.apk")) | length')
-          if [ "$ASSET_COUNT" -ne 1 ]; then
-            echo "::error::Release $TAG was created but the APK asset was not confirmed."
-            gh release view "$TAG" --json assets
-            exit 1
-          fi
-          echo "Verified release APK asset: $TAG/efootball-competition-bet-test.apk"
+          echo "Skipping release-asset verification; updater uses raw GitHub APK delivery."
 
       - name: Publish update manifest
         run: |
