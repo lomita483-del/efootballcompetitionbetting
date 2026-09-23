@@ -1,8 +1,8 @@
 {
   "whatsNew": [
-    "The Android update prompt was redesigned with a full-screen layout, larger text, and larger controls for easier reading.",
-    "The app footer now displays the current release version and reads the live release metadata so the version stays synchronized with the latest app release.",
-    "The Android package version/build was incremented to version 1.0.44, build 45.",
-    "Release What's New is now generated from the files changed since the previous Android release instead of copying unrelated older release notes."
+    "The user dashboard has been rebuilt into a more advanced luxury cinematic glassmorphism experience across the website and Android app.",
+    "The dashboard now has stronger visual hierarchy, premium glass surfaces, cinematic lighting, depth, responsive layouts, and smoother micro-interactions.",
+    "The dashboard now surfaces notifications more prominently while preserving the existing wallet, competitions, activity, challenges, gifts, spin, and account functionality.",
+    "Android build 46 includes the updated dashboard UI and responsive styling, with reduced-motion support and mobile WebView performance considerations."
   ]
 }
