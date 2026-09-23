@@ -1,8 +1,9 @@
 {
   "whatsNew": [
-    "Fixed mobile WebView scaling so the site uses the phone screen correctly instead of appearing zoomed out.",
-    "Update downloads now happen inside the app and launch the Android installer directly instead of opening the browser.",
-    "Improved update download progress and failure handling.",
+    "Fixed the Android shell status-bar overlap so the website starts below the phone system bar.",
+    "Adjusted the desktop WebView scale to make buttons and text easier to read without making the layout too large.",
+    "Strengthened the in-app updater and validates the downloaded APK before handing it to Android.",
+    "Future APK releases continue using the persistent signing key so in-place updates can preserve app data.",
     "App-local account and WebView storage remain separate from Chrome browser data."
   ]
 }
