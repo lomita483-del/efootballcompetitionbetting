@@ -1,9 +1,11 @@
 {
   "whatsNew": [
-    "Fixed the Android shell status-bar overlap so the website starts below the phone system bar.",
-    "Adjusted the desktop WebView scale to make buttons and text easier to read without making the layout too large.",
-    "Strengthened the in-app updater and validates the downloaded APK before handing it to Android.",
-    "Future APK releases continue using the persistent signing key so in-place updates can preserve app data.",
-    "App-local account and WebView storage remain separate from Chrome browser data."
+    "Fixed the Android WebView so the desktop website starts below the phone status bar and stays clear of the navigation bar.",
+    "Adjusted the desktop-mode scale and text size so the admin console is easier to read and tap without becoming oversized.",
+    "Strengthened automatic update checking with multiple manifest sources and retries.",
+    "The updater validates the downloaded package before handing it to Android.",
+    "Future releases are prepared for seamless in-place updating.",
+    "The app keeps its own WebView/account storage separate from Chrome browser data.",
+    "Corrected the launcher icon resource so the app uses the ECB launcher artwork instead of the wrong placeholder."
   ]
 }
