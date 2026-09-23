@@ -26,8 +26,8 @@ public final class UpdateChecker {
         "https://cdn.jsdelivr.net/gh/lomita483-del/efootballcompetitionbetting@main/public/app-release.json"
     };
     private static final int MAX_ATTEMPTS = 3;
-    private static final int CONNECT_TIMEOUT_MS = 10000;
-    private static final int READ_TIMEOUT_MS = 10000;
+    private static final int CONNECT_TIMEOUT_MS = 8000;
+    private static final int READ_TIMEOUT_MS = 8000;
 
     private static final AtomicBoolean checking = new AtomicBoolean(false);
     private static boolean showing;
@@ -41,7 +41,16 @@ public final class UpdateChecker {
         new Thread(() -> {
             try {
                 Exception lastError = null;
+
                 for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+                    int bestBuild = -1;
+                    int bestMinimumBuild = 0;
+                    String bestVersion = "";
+                    String bestDownloadUrl = "";
+                    String bestNotes = "";
+                    boolean bestForceUpdate = false;
+                    boolean receivedManifest = false;
+
                     for (String manifestUrl : MANIFESTS) {
                         HttpURLConnection connection = null;
                         try {
@@ -54,7 +63,10 @@ public final class UpdateChecker {
                             connection.setRequestProperty("Cache-Control", "no-cache, no-store, max-age=0");
                             connection.setRequestProperty("Pragma", "no-cache");
                             connection.setRequestProperty("Accept", "application/json");
-                            connection.setRequestProperty("User-Agent", "EFootballCompetitionBet/" + BuildConfig.VERSION_NAME);
+                            connection.setRequestProperty(
+                                "User-Agent",
+                                "EFootballCompetitionBet/" + BuildConfig.VERSION_NAME
+                            );
 
                             int status = connection.getResponseCode();
                             if (status != HttpURLConnection.HTTP_OK) {
@@ -71,25 +83,51 @@ public final class UpdateChecker {
                             JSONObject manifest = new JSONObject(body.toString());
                             int latestBuild = manifest.optInt("latestBuild", 0);
                             int minimumBuild = manifest.optInt("minimumSupportedBuild", 0);
+                            receivedManifest = true;
 
-                            Log.d(TAG, "installed build=" + BuildConfig.VERSION_CODE + ", latest build=" + latestBuild);
+                            Log.d(TAG, "source=" + manifestUrl
+                                + ", installed build=" + BuildConfig.VERSION_CODE
+                                + ", latest build=" + latestBuild);
 
-                            if (latestBuild <= BuildConfig.VERSION_CODE) return;
-
-                            String latestVersion = manifest.optString("latestVersion", "new version");
-                            String downloadUrl = manifest.optString("downloadUrl", "");
-                            boolean mandatory = manifest.optBoolean("forceUpdate", false)
-                                || (minimumBuild > 0 && BuildConfig.VERSION_CODE < minimumBuild);
-                            String notes = formatReleaseNotes(manifest.opt("releaseNotes"));
-
-                            showUpdateDialog(activity, latestVersion, latestBuild, notes, downloadUrl, mandatory);
-                            return;
+                            // IMPORTANT: never stop at a stale "no update" manifest.
+                            // Another source may already have the newer release.
+                            if (latestBuild > bestBuild) {
+                                bestBuild = latestBuild;
+                                bestMinimumBuild = minimumBuild;
+                                bestVersion = manifest.optString("latestVersion", "new version");
+                                bestDownloadUrl = manifest.optString("downloadUrl", "");
+                                bestNotes = formatReleaseNotes(manifest.opt("releaseNotes"));
+                                bestForceUpdate = manifest.optBoolean("forceUpdate", false);
+                            }
                         } catch (Exception error) {
                             lastError = error;
-                            Log.w(TAG, "Update check failed from " + manifestUrl + " (attempt " + attempt + ")", error);
+                            Log.w(TAG, "Update manifest failed from " + manifestUrl
+                                + " (attempt " + attempt + ")", error);
                         } finally {
                             if (connection != null) connection.disconnect();
                         }
+                    }
+
+                    if (receivedManifest && bestBuild > BuildConfig.VERSION_CODE) {
+                        final int updateBuild = bestBuild;
+                        final int minimumBuild = bestMinimumBuild;
+                        final String version = bestVersion;
+                        final String downloadUrl = bestDownloadUrl;
+                        final String notes = bestNotes;
+                        final boolean mandatory = bestForceUpdate
+                            || (minimumBuild > 0 && BuildConfig.VERSION_CODE < minimumBuild);
+
+                        showUpdateDialog(
+                            activity, version, updateBuild, notes, downloadUrl, mandatory
+                        );
+                        return;
+                    }
+
+                    if (receivedManifest && bestBuild >= 0) {
+                        Log.d(TAG, "No update available after checking all manifest sources. "
+                            + "installed build=" + BuildConfig.VERSION_CODE
+                            + ", highest remote build=" + bestBuild);
+                        return;
                     }
 
                     if (attempt < MAX_ATTEMPTS) {
@@ -101,9 +139,11 @@ public final class UpdateChecker {
                         }
                     }
                 }
-                if (lastError != null) Log.w(TAG, "Update check failed after all attempts", lastError);
+
+                if (lastError != null) {
+                    Log.w(TAG, "Update check failed after all attempts", lastError);
+                }
             } finally {
-                // Always unlock future checks, including successful no-update checks.
                 checking.set(false);
             }
         }, "ECB-UpdateChecker").start();
@@ -124,10 +164,17 @@ public final class UpdateChecker {
         return value == null ? "" : String.valueOf(value);
     }
 
-    private static void showUpdateDialog(Activity activity, String version, int build, String notes,
-                                         String downloadUrl, boolean mandatory) {
+    private static void showUpdateDialog(
+        Activity activity,
+        String version,
+        int build,
+        String notes,
+        String downloadUrl,
+        boolean mandatory
+    ) {
         new Handler(Looper.getMainLooper()).post(() -> {
             if (activity.isFinishing() || showing || downloadUrl.isEmpty()) return;
+
             showing = true;
 
             String message = "Version " + version + " (build " + build + ") is available.";
@@ -139,7 +186,9 @@ public final class UpdateChecker {
                 .setMessage(message)
                 .setPositiveButton("Download update", (ignored, which) -> {
                     try {
-                        activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl)));
+                        activity.startActivity(
+                            new Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
+                        );
                     } catch (Exception error) {
                         Log.e(TAG, "Unable to open update URL", error);
                     }
