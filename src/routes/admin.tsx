@@ -304,6 +304,7 @@ export function AdminPage() {
             <TabsContent value="analytics" className="mt-4"><AnalyticsPanel /></TabsContent>
             <TabsContent value="ads" className="mt-4 space-y-6"><PopupAdsAdminPanel /><div className="border-t border-border pt-6"><VideoAdsAdminPanel /></div></TabsContent>
             <TabsContent value="settings" className="mt-4"><SettingsPanel /></TabsContent>
+            <TabsContent value="appupdates" className="mt-4"><SettingsPanel focusRelease /></TabsContent>
             <TabsContent value="adminai" className="mt-4"><AdminAILivePanel /></TabsContent>
             <TabsContent value="risk" className="mt-4"><RiskPanel /></TabsContent>
             <TabsContent value="pnl" className="mt-4"><PnLPanel /></TabsContent>
@@ -4052,7 +4053,7 @@ function PanelBlock({ title, onView, children, accent, compact, count, hideWhenE
 }
 
 /* ============================ SETTINGS ============================ */
-function SettingsPanel() {
+function SettingsPanel({ focusRelease = false }: { focusRelease?: boolean }) {
   const [s, setS] = useState<any>(null);
   const [releaseControl, setReleaseControl] = useState<any>({
     enabled: false,
@@ -4071,6 +4072,11 @@ function SettingsPanel() {
     minimum_supported_build: 0,
   });
   const confirm = useConfirm();
+  useEffect(() => {
+    if (!focusRelease) return;
+    const timer = window.setTimeout(() => document.getElementById("android-app-updates")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+    return () => window.clearTimeout(timer);
+  }, [focusRelease]);
   useEffect(() => {
     supabase.from("app_settings").select("*").eq("id", 1).maybeSingle().then(({ data }) => setS(data ?? { id: 1 }));
     (supabase as any).from("app_release_control").select("*").eq("id", 1).maybeSingle().then(({ data }: any) => {
@@ -4318,7 +4324,7 @@ function SettingsPanel() {
       </SettingsSection>
 
       <div className="lg:col-span-2">
-        <SettingsSection icon={Download} title="Android App Updates" subtitle="Stage a tested APK, edit exactly what users see under “What's new”, then trigger the release. Nothing is shown to users until you enable it.">
+        <div id="android-app-updates" className="scroll-mt-6"><SettingsSection icon={Download} title="Android App Updates" subtitle="Stage a tested APK, edit exactly what users see under “What's new”, then trigger the release. Nothing is shown to users until you enable it.">
           <div className="grid gap-3 md:grid-cols-2">
             <FieldLuxe label="Version">
               <Input value={releaseControl.latest_version ?? ""} onChange={(e) => setReleaseControl({ ...releaseControl, latest_version: e.target.value })} placeholder="1.0.24" />
