@@ -5,11 +5,13 @@ import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.pm.PackageManager;
+import android.graphics.Insets;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.widget.FrameLayout;
 import android.webkit.CookieManager;
 import android.webkit.WebSettings;
@@ -28,9 +30,13 @@ public class MainActivity extends Activity {
         Window window = getWindow();
         window.setStatusBarColor(0xFF080808);
         window.setNavigationBarColor(0xFF080808);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.setNavigationBarContrastEnforced(false);
+        }
 
         FrameLayout root = new FrameLayout(this);
         root.setBackgroundColor(0xFF080808);
+        root.setFitsSystemWindows(false);
 
         webView = new WebView(this);
         WebSettings s = webView.getSettings();
@@ -38,14 +44,17 @@ public class MainActivity extends Activity {
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
 
-        // Keep the desktop-style layout, but use a slightly narrower fixed canvas
-        // on phones so the controls are readable without becoming oversized.
+        // Keep the desktop console layout, but make the fixed phone canvas readable.
+        // 760px is intentionally between the old tiny 900px canvas and mobile mode.
         s.setUseWideViewPort(true);
         s.setLoadWithOverviewMode(true);
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
-        String desktopChromeUa = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 ECBAndroidApp/" + BuildConfig.VERSION_NAME;
+        String desktopChromeUa =
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+            + "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 ECBAndroidApp/"
+            + BuildConfig.VERSION_NAME;
         s.setUserAgentString(desktopChromeUa);
 
         CookieManager.getInstance().setAcceptCookie(true);
@@ -57,17 +66,18 @@ public class MainActivity extends Activity {
             FrameLayout.LayoutParams.MATCH_PARENT
         ));
 
-        // Android 15 enforces edge-to-edge for apps targeting API 35. Handle the
-        // system-bar insets on the native container, not on WebView itself. This
-        // prevents the website navbar from being placed underneath the phone's
-        // status/time bar or gesture/navigation bar.
         root.setOnApplyWindowInsetsListener((View v, WindowInsets insets) -> {
             int top;
             int bottom;
             int left;
             int right;
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                android.graphics.Insets bars = insets.getInsets(WindowInsets.Type.systemBars());
+                Insets bars = insets.getInsets(
+                    WindowInsets.Type.statusBars()
+                        | WindowInsets.Type.navigationBars()
+                        | WindowInsets.Type.displayCutout()
+                );
                 top = bars.top;
                 bottom = bars.bottom;
                 left = bars.left;
@@ -78,17 +88,27 @@ public class MainActivity extends Activity {
                 left = insets.getSystemWindowInsetLeft();
                 right = insets.getSystemWindowInsetRight();
             }
+
             v.setPadding(left, top, right, bottom);
             return insets;
         });
 
         setContentView(root);
-        root.requestApplyInsets();
+        root.post(root::requestApplyInsets);
         webView.loadUrl(APP_URL);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsetsController controller = window.getInsetsController();
+            if (controller != null) {
+                controller.setSystemBarsAppearance(0, WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS);
+            }
+        }
 
         createNotificationChannel();
         requestNotificationPermissionIfNeeded();
+
         UpdateChecker.check(this);
+        root.postDelayed(() -> UpdateChecker.check(this), 5000L);
     }
 
     private void createNotificationChannel() {
