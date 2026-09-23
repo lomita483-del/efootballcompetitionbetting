@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
-PREV_TAG="$(git tag --list 'android-v*-build*' --sort=-version:refname | head -1 || true)"
+VERSION="$(grep -o "versionName '[^']*'" android-shell/app/build.gradle | head -1 | cut -d"'" -f2)"
+PREV_TAG="$(git tag --list 'android-v*-build*' --sort=-version:refname | grep -v "^android-v${VERSION}-" | head -1 || true)"
 if [ -n "$PREV_TAG" ]; then CHANGED="$(git diff --name-only "$PREV_TAG"..HEAD)"; else CHANGED="$(git diff --name-only HEAD~1..HEAD 2>/dev/null || git diff --name-only HEAD)"; fi
 notes=()
 add_note(){ local n="$1"; for e in "${notes[@]:-}"; do [ "$e" = "$n" ] && return; done; notes+=("$n"); }
