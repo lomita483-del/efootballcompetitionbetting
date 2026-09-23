@@ -53,6 +53,7 @@ public class MainActivity extends Activity {
         });
 
         webView = new WebView(this);
+        webView.addJavascriptInterface(new NativeNotificationBridge(this), "ECBAndroid");
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
@@ -140,6 +141,13 @@ public class MainActivity extends Activity {
         );
         channel.setDescription("Important E-Football Competition Bet updates.");
         manager.createNotificationChannel(channel);
+        NotificationChannel realtime = new NotificationChannel(
+            "ecb_realtime",
+            "Realtime notifications",
+            NotificationManager.IMPORTANCE_DEFAULT
+        );
+        realtime.setDescription("Realtime E-Football Competition Bet notifications.");
+        manager.createNotificationChannel(realtime);
     }
 
     private void requestNotificationPermissionIfNeeded() {
