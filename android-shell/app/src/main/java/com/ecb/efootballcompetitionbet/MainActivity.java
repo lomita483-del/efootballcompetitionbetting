@@ -67,14 +67,14 @@ public class MainActivity extends Activity {
         // Use the website's normal responsive mobile layout across the entire app.
         // Do not force a desktop CSS viewport or a fixed native zoom.
         s.setUseWideViewPort(false);
-        s.setLoadWithOverviewMode(true);
+        s.setLoadWithOverviewMode(false);
         s.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         s.setTextZoom(100);
 
         // Keep the responsive mobile website, but restore the requested
         // 85% WebView presentation across the entire app.
         webView.setInitialScale(85);
-        s.setSupportZoom(true);
+        s.setSupportZoom(false);
         s.setSupportMultipleWindows(false);
         s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
