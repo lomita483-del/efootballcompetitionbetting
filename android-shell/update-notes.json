@@ -1,9 +1,9 @@
 {
   "whatsNew": [
-    "The entire app now uses the website's normal mobile responsive layout.",
-    "The whole WebView is restored to a consistent 35% presentation.",
-    "The update popup can hand APK downloads directly to the native Android installer.",
-    "APK links from the update popup are intercepted inside the app instead of being ignored as a new window.",
-    "Update checks still run every 3 seconds while the app is open."
+    "The entire app uses the website's normal mobile responsive layout.",
+    "The whole WebView presentation is restored to 35% scale.",
+    "The update button is handled by the native Android updater instead of an ignored WebView new-window request.",
+    "APK downloads are validated before Android is asked to install the update.",
+    "Update checks continue every 3 seconds while the app is open."
   ]
 }
