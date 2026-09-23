@@ -527,10 +527,10 @@ function SiteFooter({ isHome = false }: { isHome?: boolean }) {
       <div className="container mx-auto px-4 pb-6 flex justify-end">
         <div
           data-app-version={appVersion}
-          className="rounded-full border border-primary/25 bg-background/60 px-3 py-1.5 text-right shadow-[0_0_12px_-6px_rgba(212,175,55,0.6)]"
+          className="min-w-max rounded-full border border-primary/35 bg-background/70 px-3.5 py-1.5 text-right shadow-[0_0_14px_-6px_rgba(212,175,55,0.7)]"
           title="Current app release"
         >
-          <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          <span className="text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">
             App version {appVersion}
           </span>
         </div>
