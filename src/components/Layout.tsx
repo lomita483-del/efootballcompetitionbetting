@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth, ROLE_COLORS, ROLE_LABELS } from "@/contexts/AuthContext";
 import { NotificationBell } from "@/components/NotificationBell";
+import { AppDownloadReminder } from "@/components/AppDownloadReminder";
 import { LevelUpModal } from "@/components/Spotlight";
 import { GlobalWinAnimation } from "@/components/GlobalWinAnimation";
 import { GlobalLossAnimation } from "@/components/GlobalLossAnimation";
@@ -443,6 +444,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       <LuckyWheelPopout />
       <PageTour />
       <VideoAd />
+      <AppDownloadReminder />
       <SiteFooter isHome={isHome} />
     </div>
   );
