@@ -9,5 +9,5 @@
   "downloadUrl": "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
   "whatsNew": ["Update pop-ups now check for a newly triggered release every 3 seconds while the app is open.","Normal website pages are restored to 80% scale; only the Admin Console stays at 85%.","Pinch-to-zoom remains enabled so users can enlarge text and icons when needed.","Update checks avoid duplicate network requests and duplicate pop-ups.","Forced updates keep the Later/Cancel option hidden."],
   "releaseNotes": ["Update pop-ups now check for a newly triggered release every 3 seconds while the app is open.","Normal website pages are restored to 80% scale; only the Admin Console stays at 85%.","Pinch-to-zoom remains enabled so users can enlarge text and icons when needed.","Update checks avoid duplicate network requests and duplicate pop-ups.","Forced updates keep the Later/Cancel option hidden."],
-  "publishedAt": "2026-09-23T15:24:27+01:00"
+  "publishedAt": "2026-09-23T16:03:59+01:00"
 }
