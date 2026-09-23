@@ -1,13 +1,13 @@
 {
   "app": "E-Football Competition Bet",
   "platform": "android",
-  "latestVersion": "1.0.33",
-  "latestBuild": 34,
+  "latestVersion": "1.0.34",
+  "latestBuild": 35,
   "minimumSupportedVersion": "1.0.0",
   "minimumSupportedBuild": 1,
   "forceUpdate": false,
   "downloadUrl": "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
-  "whatsNew": ["All app pages now use the same wide desktop website layout instead of the mobile layout.","The WebView uses a consistent 50% desktop presentation so the full desktop navigation and page structure fit phone screens.","The desktop layout is applied consistently across home, matches, betting, dashboards, Admin Console, and other pages.","The update release is based on the installed app version, not the signed-in user account.","Triggered releases are checked every 3 seconds while the app is open."],
-  "releaseNotes": ["All app pages now use the same wide desktop website layout instead of the mobile layout.","The WebView uses a consistent 50% desktop presentation so the full desktop navigation and page structure fit phone screens.","The desktop layout is applied consistently across home, matches, betting, dashboards, Admin Console, and other pages.","The update release is based on the installed app version, not the signed-in user account.","Triggered releases are checked every 3 seconds while the app is open."],
-  "publishedAt": "2026-09-23T17:22:21+01:00"
+  "whatsNew": ["Old installed Android app versions can now receive the update announcement from the live website, even before installing this release.","Update detection is based on the installed app version, not the signed-in user account.","The entire app uses the website's desktop layout instead of the mobile responsive layout.","The WebView uses a consistent 50% presentation so the desktop page structure fits the phone screen.","Update checks run every 3 seconds while the app is open."],
+  "releaseNotes": ["Old installed Android app versions can now receive the update announcement from the live website, even before installing this release.","Update detection is based on the installed app version, not the signed-in user account.","The entire app uses the website's desktop layout instead of the mobile responsive layout.","The WebView uses a consistent 50% presentation so the desktop page structure fits the phone screen.","Update checks run every 3 seconds while the app is open."],
+  "publishedAt": "2026-09-23T17:52:34+01:00"
 }
