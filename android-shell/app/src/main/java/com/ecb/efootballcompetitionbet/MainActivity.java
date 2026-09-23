@@ -92,6 +92,14 @@ public class MainActivity extends Activity {
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
         webView.setWebViewClient(new WebViewClient() {
+            @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (url != null && url.matches("(?i).*\\.apk(?:[?#].*)?$")) {
+                    UpdateChecker.downloadAndInstallFromUrl(MainActivity.this, url);
+                    return true;
+                }
+                return false;
+            }
+
             @Override public void onPageFinished(WebView view, String url) {
                 // The currently deployed web updater uses window.open() for the
                 // APK URL. Force APK opens into the same WebView navigation so
