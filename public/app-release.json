@@ -4,24 +4,10 @@
   "latestVersion": "1.0.47",
   "latestBuild": 48,
   "minimumSupportedVersion": "1.0.0",
-  "minimumSupportedBuild": 48,
+  "minimumSupportedBuild": 1,
   "forceUpdate": false,
   "downloadUrl": "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
-  "whatsNew": [
-    "Pinch-to-zoom is now enabled in the Android app, with the app starting at a compact 85% zoom by default.",
-    "The bottom-center home control is smaller and redesigned with a premium gold finish, halo, depth and stronger visibility.",
-    "The Android launch screen now uses the full E-Football logo on a branded dark background instead of a blank white startup screen.",
-    "The homepage Menu control and drawer now use a higher-contrast cinematic glass treatment so they remain clearly visible over the background.",
-    "Admin App Updater now has Refresh version, which reads the latest Android version, build and What's New notes from the release files and stages them without triggering the update.",
-    "Android release metadata and the website footer are prepared for v1.0.47, build 48."
-  ],
-  "releaseNotes": [
-    "Pinch-to-zoom is now enabled in the Android app, with the app starting at a compact 85% zoom by default.",
-    "The bottom-center home control is smaller and redesigned with a premium gold finish, halo, depth and stronger visibility.",
-    "The Android launch screen now uses the full E-Football logo on a branded dark background instead of a blank white startup screen.",
-    "The homepage Menu control and drawer now use a higher-contrast cinematic glass treatment so they remain clearly visible over the background.",
-    "Admin App Updater now has Refresh version, which reads the latest Android version, build and What's New notes from the release files and stages them without triggering the update.",
-    "Android release metadata and the website footer are prepared for v1.0.47, build 48."
-  ],
-  "publishedAt": "2026-09-23T22:38:08.946Z"
+  "whatsNew": ["The app footer now displays the current release version and reads the live release metadata so the version stays synchronized with the latest app release.","The Android package version/build was incremented for this release.","Release What's New is generated from the files changed since the previous Android release instead of copying unrelated older release notes."],
+  "releaseNotes": ["The app footer now displays the current release version and reads the live release metadata so the version stays synchronized with the latest app release.","The Android package version/build was incremented for this release.","Release What's New is generated from the files changed since the previous Android release instead of copying unrelated older release notes."],
+  "publishedAt": "2026-09-23T23:38:39+01:00"
 }
