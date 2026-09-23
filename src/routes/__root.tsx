@@ -220,7 +220,7 @@ function AdaptiveViewport() {
     if (typeof window === "undefined") return;
     const meta = document.querySelector('meta[name="viewport"]') as HTMLMetaElement | null;
     if (!meta) return;
-    const mobileDesktopCanvas = "width=900, viewport-fit=cover";
+    const mobileDesktopCanvas = "width=760, viewport-fit=cover";
     const normalBrowserViewport = "width=device-width, initial-scale=1, viewport-fit=cover";
     const apply = () => {
       // Phones keep the desktop-style canvas, but real desktop browsers use their
