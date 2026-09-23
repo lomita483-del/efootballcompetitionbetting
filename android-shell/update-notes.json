@@ -1,9 +1,8 @@
 {
   "whatsNew": [
-    "The app footer now displays the current release version and reads the live release metadata so the version stays synchronized with the latest app release.",
+    "The Android app now starts at an 80% WebView scale for a more compact layout while keeping pinch-to-zoom available.",
     "The Android package version/build was incremented for this release.",
-    "Admin App Updater now includes Refresh version, which reads the Android version, build number, and What's New directly from the release files and stages them without enabling the update.",
-    "The release metadata and What's New list are synchronized to the staged Android release and include the complete user-facing changes in this version.",
-    "Release What's New is generated from the files changed since the previous Android release instead of copying unrelated older release notes."
+    "The app footer continues to read the current release version from live release metadata.",
+    "Admin App Updater continues to support Refresh version so the Android version, build number, and What's New stay synchronized with the release files."
   ]
 }
