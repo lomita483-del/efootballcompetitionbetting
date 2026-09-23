@@ -64,6 +64,9 @@ public class MainActivity extends Activity {
         // Render the website at 80% of the previous WebView scale.
         s.setTextZoom(100);
         webView.setInitialScale(80);
+        s.setSupportZoom(false);
+        s.setBuiltInZoomControls(false);
+        s.setDisplayZoomControls(false);
 
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
@@ -83,13 +86,13 @@ public class MainActivity extends Activity {
                 boolean isAdminConsole = url != null && (
                     url.contains("/admin") || url.contains("/admin/")
                 );
-                // SPA navigation does not always cause WebView's initial scale to
-                // re-layout the already-rendered document. Keep the base scale at
-                // 100% on admin routes and apply the requested 85% to the actual
-                // document so floating checkout widgets scale with the console.
-                webView.setInitialScale(isAdminConsole ? 100 : 80);
+                // The admin console is intentionally rendered at 85% at the
+                // WebView level so fixed/floating controls (including the bet
+                // checkout button) are scaled with the rest of the console.
+                // Normal pages remain at 80%.
+                webView.setInitialScale(isAdminConsole ? 85 : 80);
                 webView.evaluateJavascript(
-                    "(function(){document.documentElement.style.zoom='" + (isAdminConsole ? "85%" : "100%") + "';document.body.style.zoom='" + (isAdminConsole ? "85%" : "100%") + "';})();",
+                    "(function(){document.documentElement.style.zoom='100%';document.body.style.zoom='100%';})();",
                     null
                 );
             }
