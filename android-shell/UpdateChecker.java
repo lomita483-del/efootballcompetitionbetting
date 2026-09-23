@@ -154,7 +154,8 @@ public final class UpdateChecker {
                 File apk = new File(updatesDir, "efootball-competition-bet-update.apk");
                 if (apk.exists()) apk.delete();
 
-                URL url = new URL(downloadUrl);
+                String cacheBustedDownloadUrl = downloadUrl + (downloadUrl.contains("?") ? "&" : "?") + "t=" + System.currentTimeMillis();
+                URL url = new URL(cacheBustedDownloadUrl);
                 conn = (HttpURLConnection) url.openConnection();
                 conn.setConnectTimeout(15000);
                 conn.setReadTimeout(30000);
