@@ -1,13 +1,13 @@
 {
   "app": "E-Football Competition Bet",
   "platform": "android",
-  "latestVersion": "1.0.12",
-  "latestBuild": 13,
+  "latestVersion": "1.0.13",
+  "latestBuild": 14,
   "minimumSupportedVersion": "1.0.0",
   "minimumSupportedBuild": 1,
   "forceUpdate": false,
-  "downloadUrl": "https://github.com/lomita483-del/efootballcompetitionbetting/releases/download/android-v1.0.12-build13/efootball-competition-bet-test.apk",
+  "downloadUrl": "https://github.com/lomita483-del/efootballcompetitionbetting/releases/download/android-v1.0.13-build14/efootball-competition-bet-test.apk",
   "whatsNew": ["Glassmorphism update popup with a premium E-Football visual style.","Added a dedicated What's New section showing the changes in this release.","Improved update checking with multiple manifest sources and automatic retries.","Update download and installation flow is handled directly by the app.","App-local account/storage remains separate from Chrome browser data."],
   "releaseNotes": ["Glassmorphism update popup with a premium E-Football visual style.","Added a dedicated What's New section showing the changes in this release.","Improved update checking with multiple manifest sources and automatic retries.","Update download and installation flow is handled directly by the app.","App-local account/storage remains separate from Chrome browser data."],
-  "publishedAt": "2026-09-23T02:26:12+01:00"
+  "publishedAt": "2026-09-23T08:48:16+01:00"
 }
