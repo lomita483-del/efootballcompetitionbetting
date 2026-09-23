@@ -9,8 +9,8 @@ android {
         applicationId 'com.ecb.efootballcompetitionbet'
         minSdk 24
         targetSdk 34
-        versionCode 48
-        versionName '1.0.47'
+        versionCode 50
+        versionName '1.0.49'
     }
 
     signingConfigs {
