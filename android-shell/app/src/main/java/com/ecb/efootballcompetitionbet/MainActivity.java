@@ -18,10 +18,13 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 public class MainActivity extends Activity {
     private static final String APP_URL = "https://lslonlinebetting.lovable.app/";
     private static final int NOTIFICATION_PERMISSION_REQUEST = 2001;
     private static final String NOTIFICATION_CHANNEL_ID = "ecb_updates";
+    private SwipeRefreshLayout swipeRefresh;
     private WebView webView;
 
     @Override public void onCreate(Bundle state) {
@@ -37,6 +40,10 @@ public class MainActivity extends Activity {
         FrameLayout root = new FrameLayout(this);
         root.setBackgroundColor(0xFF080808);
         root.setFitsSystemWindows(false);
+
+        swipeRefresh = new SwipeRefreshLayout(this);
+        swipeRefresh.setColorSchemeColors(0xFFFFC400);
+        swipeRefresh.setEnabled(true);
 
         webView = new WebView(this);
         WebSettings s = webView.getSettings();
@@ -56,9 +63,20 @@ public class MainActivity extends Activity {
 
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
-        webView.setWebViewClient(new WebViewClient());
 
-        root.addView(webView, new FrameLayout.LayoutParams(
+        webView.setWebViewClient(new WebViewClient() {
+            @Override public void onPageFinished(WebView view, String url) {
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+            }
+        });
+
+        swipeRefresh.addView(webView, new FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        ));
+        swipeRefresh.setOnRefreshListener(() -> webView.reload());
+
+        root.addView(swipeRefresh, new FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT
         ));
