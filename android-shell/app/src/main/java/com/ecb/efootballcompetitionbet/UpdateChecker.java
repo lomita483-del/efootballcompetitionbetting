@@ -40,9 +40,10 @@ import org.json.JSONObject;
 
 public final class UpdateChecker {
     private static final String TAG = "ECBUpdateChecker";
+    // Admin-controlled release endpoint. A build is invisible until an admin
+    // explicitly triggers it after testing.
     private static final String[] MANIFESTS = {
-        "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/app-release.json",
-        "https://cdn.jsdelivr.net/gh/lomita483-del/efootballcompetitionbetting@main/public/app-release.json"
+        "https://lslonlinebetting.lovable.app/api/public/app-release"
     };
     private static final int MAX_ATTEMPTS = 3;
     private static final int CONNECT_TIMEOUT_MS = 8000;
@@ -88,6 +89,10 @@ public final class UpdateChecker {
                             }
 
                             JSONObject manifest = new JSONObject(body.toString());
+                            if (!manifest.optBoolean("enabled", false)) {
+                                receivedManifest = true;
+                                continue;
+                            }
                             int latestBuild = manifest.optInt("latestBuild", 0);
                             receivedManifest = true;
 
@@ -96,9 +101,9 @@ public final class UpdateChecker {
                                 bestMinimumBuild = manifest.optInt("minimumSupportedBuild", 0);
                                 bestVersion = manifest.optString("latestVersion", "new version");
                                 bestDownloadUrl = manifest.optString("downloadUrl", "");
-                                Object notes = manifest.has("whatsNew")
-                                    ? manifest.opt("whatsNew")
-                                    : manifest.opt("releaseNotes");
+                                // Only the explicitly edited What's New list is shown.
+                                // Never fall back to historical releaseNotes.
+                                Object notes = manifest.opt("whatsNew");
                                 bestNotes = formatReleaseNotes(notes);
                                 bestForceUpdate = manifest.optBoolean("forceUpdate", false);
                             }
