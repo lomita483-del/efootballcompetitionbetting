@@ -34,7 +34,24 @@ export function NotificationBell() {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
-        load,
+        (payload: any) => {
+          if (payload.eventType === "INSERT" && payload.new) {
+            try {
+              const native = (window as any).ECBAndroid;
+              if (native?.notifyNotification) {
+                native.notifyNotification(JSON.stringify({
+                  title: payload.new.title ?? "E-Football Competition Bet",
+                  body: payload.new.body ?? "",
+                  link: payload.new.link ?? "/notifications",
+                  notification_id: payload.new.id,
+                }));
+              }
+            } catch {
+              // Native notification bridge is optional; web realtime remains unaffected.
+            }
+          }
+          load();
+        },
       )
       .subscribe();
     return () => { supabase.removeChannel(ch); };
