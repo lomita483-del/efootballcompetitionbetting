@@ -8,16 +8,13 @@ android {
     defaultConfig {
         applicationId 'com.ecb.efootballcompetitionbet'
         minSdk 24
-        // Keep targetSdk below 35 so Android 15/16 does not force this WebView shell edge-to-edge.
-        // The shell itself handles a safe status/navigation area for the desktop website.
         targetSdk 34
-        versionCode 18
-        versionName '1.0.17'
+        versionCode 19
+        versionName '1.0.18'
     }
 
     signingConfigs {
         release {
-            // release-key.jks is written by CI at the android-shell root.
             storeFile rootProject.file("release-key.jks")
             storePassword System.getenv("ECB_ANDROID_KEYSTORE_PASSWORD")
             keyAlias System.getenv("ECB_ANDROID_KEY_ALIAS")
