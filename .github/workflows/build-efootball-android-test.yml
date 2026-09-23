@@ -1,5 +1,5 @@
 name: Build E-Football Android Test APK
-# Release build trigger: mobile WebView scale, updater cache-busting, and build 49 release
+# Release build trigger: force rebuild after startup overlay fix
 
 on:
   workflow_dispatch:
