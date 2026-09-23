@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
 
         // Do not enlarge the page. Render at the site's native desktop scale.
         s.setTextZoom(100);
-        webView.setInitialScale(100);
+        webView.setInitialScale(90);
 
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
