@@ -46,16 +46,12 @@ jobs:
             echo "::error::Persistent Android signing secrets are required. Refusing to publish an APK signed with a temporary CI debug key."
             exit 1
           fi
+          echo "$ECB_ANDROID_KEYSTORE_BASE64" | base64 --decode > android-shell/release-key.jks
+          test -s android-shell/release-key.jks
 
-      - name: Build APK
+      - name: Build signed release APK
         working-directory: android-shell
         run: gradle :app:assembleRelease --no-daemon --stacktrace
-
-      - name: Decode persistent signing key
-        env:
-          ECB_ANDROID_KEYSTORE_BASE64: ${{ secrets.ECB_ANDROID_KEYSTORE_BASE64 }}
-        run: |
-          echo "$ECB_ANDROID_KEYSTORE_BASE64" | base64 --decode > android-shell/release-key.jks
 
       - name: Verify APK signature
         run: |
