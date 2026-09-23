@@ -2,18 +2,20 @@ package com.ecb.efootballcompetitionbet;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.pm.PackageInfo;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class MainActivity extends Activity {
@@ -31,11 +33,16 @@ public class MainActivity extends Activity {
 
         FrameLayout root = new FrameLayout(this);
         root.setBackgroundColor(0xFF080808);
-        root.setFitsSystemWindows(true);
 
         swipeRefresh = new SwipeRefreshLayout(this);
         swipeRefresh.setColorSchemeColors(0xFFFFC400);
         swipeRefresh.setEnabled(true);
+
+        ViewCompat.setOnApplyWindowInsetsListener(swipeRefresh, (view, insets) -> {
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            view.setPadding(0, bars.top, 0, bars.bottom);
+            return insets;
+        });
 
         webView = new WebView(this);
         WebSettings s = webView.getSettings();
@@ -45,14 +52,14 @@ public class MainActivity extends Activity {
         s.setUseWideViewPort(true);
         s.setLoadWithOverviewMode(true);
 
-        // The desktop website is intentionally kept as a fixed canvas, but the
-        // previous scale was too small on phones. 110% makes controls noticeably
-        // easier to read/tap without making the desktop layout oversized.
-        webView.setInitialScale(110);
+        // Keep the fixed desktop canvas, but make its controls easier to read/tap.
+        s.setTextZoom(110);
+        webView.setInitialScale(125);
 
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
+
         String desktopChromeUa =
             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
             + "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 ECBAndroidApp/"
@@ -90,14 +97,14 @@ public class MainActivity extends Activity {
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
-        android.app.NotificationManager manager = getSystemService(android.app.NotificationManager.class);
+        NotificationManager manager = getSystemService(NotificationManager.class);
         if (manager == null) return;
-        android.app.NotificationChannel channel = new android.app.NotificationChannel(
+        NotificationChannel channel = new NotificationChannel(
             NOTIFICATION_CHANNEL_ID,
             "E-Football Competition Bet notifications",
-            android.app.NotificationManager.IMPORTANCE_DEFAULT
+            NotificationManager.IMPORTANCE_DEFAULT
         );
-        channel.setDescription("Match results, account alerts and important E-Football Competition Bet updates.");
+        channel.setDescription("Important E-Football Competition Bet updates.");
         manager.createNotificationChannel(channel);
     }
 
@@ -109,9 +116,7 @@ public class MainActivity extends Activity {
 
     @Override protected void onResume() {
         super.onResume();
-        if (webView != null) {
-            webView.onResume();
-        }
+        if (webView != null) webView.onResume();
         UpdateChecker.check(this);
     }
 
