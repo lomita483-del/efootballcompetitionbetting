@@ -6,11 +6,11 @@ on:
       version:
         description: "App version"
         required: true
-        default: "1.0.26"
+        default: "1.0.27"
       build:
         description: "Android build number"
         required: true
-        default: "27"
+        default: "28"
       minimum_build:
         description: "Minimum supported build"
         required: true
