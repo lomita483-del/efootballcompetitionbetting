@@ -11,8 +11,8 @@ android {
         // Keep targetSdk below 35 so Android 15/16 does not force this WebView shell edge-to-edge.
         // The shell itself handles a safe status/navigation area for the desktop website.
         targetSdk 34
-        versionCode 17
-        versionName '1.0.16'
+        versionCode 18
+        versionName '1.0.17'
     }
 
     signingConfigs {
