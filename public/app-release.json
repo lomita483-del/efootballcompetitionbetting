@@ -1,13 +1,13 @@
 {
   "app": "E-Football Competition Bet",
   "platform": "android",
-  "latestVersion": "1.0.39",
-  "latestBuild": 40,
+  "latestVersion": "1.0.40",
+  "latestBuild": 41,
   "minimumSupportedVersion": "1.0.0",
   "minimumSupportedBuild": 1,
   "forceUpdate": false,
   "downloadUrl": "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
-  "whatsNew": ["The entire app uses the website's normal mobile responsive layout.","The whole WebView presentation is restored to 75% scale.","The update button is handled by the native Android updater instead of an ignored WebView new-window request.","APK downloads are validated before Android is asked to install the update.","Update checks continue every 3 seconds while the app is open."],
-  "releaseNotes": ["The entire app uses the website's normal mobile responsive layout.","The whole WebView presentation is restored to 75% scale.","The update button is handled by the native Android updater instead of an ignored WebView new-window request.","APK downloads are validated before Android is asked to install the update.","Update checks continue every 3 seconds while the app is open."],
-  "publishedAt": "2026-09-23T18:41:11+01:00"
+  "whatsNew": ["The entire app uses the website's normal mobile responsive layout.","The whole WebView presentation is restored to 70% scale.","The update button is handled by the native Android updater instead of an ignored WebView new-window request.","APK downloads are validated before Android is asked to install the update.","Update checks continue every 3 seconds while the app is open."],
+  "releaseNotes": ["The entire app uses the website's normal mobile responsive layout.","The whole WebView presentation is restored to 70% scale.","The update button is handled by the native Android updater instead of an ignored WebView new-window request.","APK downloads are validated before Android is asked to install the update.","Update checks continue every 3 seconds while the app is open."],
+  "publishedAt": "2026-09-23T18:49:12+01:00"
 }
