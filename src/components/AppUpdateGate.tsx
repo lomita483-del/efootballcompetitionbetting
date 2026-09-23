@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { App } from "@capacitor/app";
 import { Download, ShieldCheck, RefreshCw, X } from "lucide-react";
@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 
 const RELEASE_MANIFESTS = [
   "/app-release.json",
+  "https://lslonlinebetting.lovable.app/app-release.json",
   "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/app-release.json",
+  "https://cdn.jsdelivr.net/gh/lomita483-del/efootballcompetitionbetting@main/public/app-release.json",
 ];
 
 type ReleaseManifest = {
@@ -36,8 +38,11 @@ export function AppUpdateGate() {
   const [currentVersion, setCurrentVersion] = useState("");
   const [currentBuild, setCurrentBuild] = useState(0);
   const [dismissed, setDismissed] = useState(false);
+  const checkingRef = useRef(false);
 
   const checkForUpdate = async () => {
+    if (checkingRef.current) return;
+    checkingRef.current = true;
     const webViewNative = typeof navigator !== "undefined" && isEcbAndroidWebView();
     const capacitorNative = Capacitor.isNativePlatform();
     if (!webViewNative && !capacitorNative) return;
@@ -84,11 +89,14 @@ export function AppUpdateGate() {
       else setRelease(null);
     } catch {
       // An unavailable update server must never log the user out or destroy data.
+    } finally {
+      checkingRef.current = false;
     }
   };
 
   useEffect(() => {
     checkForUpdate();
+    const timer = window.setInterval(checkForUpdate, 60_000);
 
     let removeListener: (() => void) | undefined;
     if (Capacitor.isNativePlatform()) {
@@ -105,7 +113,10 @@ export function AppUpdateGate() {
       removeListener = () => document.removeEventListener("visibilitychange", onVisible);
     }
 
-    return () => removeListener?.();
+    return () => {
+      window.clearInterval(timer);
+      removeListener?.();
+    };
   }, []);
 
   if (!release || dismissed) return null;
