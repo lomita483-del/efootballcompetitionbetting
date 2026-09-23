@@ -155,7 +155,9 @@ public final class UpdateChecker {
                 .setCancelable(!mandatory)
                 .create();
 
-            view.findViewById(R.id.update_later).setOnClickListener(v -> {
+            View later = view.findViewById(R.id.update_later);
+            later.setVisibility(mandatory ? View.GONE : View.VISIBLE);
+            later.setOnClickListener(v -> {
                 if (!mandatory) dialog.dismiss();
             });
             view.findViewById(R.id.update_install).setOnClickListener(v -> {
