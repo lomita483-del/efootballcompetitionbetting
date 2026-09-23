@@ -5,7 +5,7 @@
   "latestBuild": 44,
   "minimumSupportedVersion": "1.0.0",
   "minimumSupportedBuild": 1,
-  "forceUpdate": false,
+  "forceUpdate": true,
   "downloadUrl": "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
   "whatsNew": ["The entire app uses the website's normal mobile responsive layout.","The WebView is set to 85% scale for the correct mobile presentation.","Typing into input fields no longer automatically zooms the WebView.","The update popup now opens full-screen for much better readability on mobile screens.","The update button is handled by the native Android updater.","APK downloads are validated before Android is asked to install the update.","Update checks continue every 3 seconds while the app is open."],
   "releaseNotes": ["The entire app uses the website's normal mobile responsive layout.","The WebView is set to 85% scale for the correct mobile presentation.","Typing into input fields no longer automatically zooms the WebView.","The update popup now opens full-screen for much better readability on mobile screens.","The update button is handled by the native Android updater.","APK downloads are validated before Android is asked to install the update.","Update checks continue every 3 seconds while the app is open."],
