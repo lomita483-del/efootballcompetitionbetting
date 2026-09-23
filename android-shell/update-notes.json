@@ -1,9 +1,9 @@
 {
   "whatsNew": [
-    "Update releases are now based on the installed app version, not the signed-in user account.",
-    "Every older app build checks the same triggered release and can receive the update prompt as soon as it is detected.",
-    "The entire app now uses the website's desktop WebView layout instead of switching to a mobile layout.",
-    "Native page scaling has been removed so the website controls its desktop presentation consistently.",
-    "Pinch-to-zoom remains available for accessibility."
+    "All app pages now use the same wide desktop website layout instead of the mobile layout.",
+    "The WebView uses a consistent 50% desktop presentation so the full desktop navigation and page structure fit phone screens.",
+    "The desktop layout is applied consistently across home, matches, betting, dashboards, Admin Console, and other pages.",
+    "The update release is based on the installed app version, not the signed-in user account.",
+    "Triggered releases are checked every 3 seconds while the app is open."
   ]
 }
