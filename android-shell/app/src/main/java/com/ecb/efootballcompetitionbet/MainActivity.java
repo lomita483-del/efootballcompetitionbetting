@@ -72,7 +72,7 @@ public class MainActivity extends Activity {
 
         // Use the same wide desktop presentation as the website. A 50% native
         // scale gives phone screens enough horizontal room for the desktop layout.
-        s.setInitialScale(50);
+        webView.setInitialScale(50);
         s.setTextZoom(100);
         s.setSupportZoom(true);
         s.setBuiltInZoomControls(false);
