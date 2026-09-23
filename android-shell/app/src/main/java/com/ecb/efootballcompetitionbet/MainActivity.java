@@ -71,6 +71,7 @@ public class MainActivity extends Activity {
         s.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         s.setTextZoom(100);
         s.setSupportZoom(true);
+        s.setSupportMultipleWindows(false);
         s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
 
@@ -88,6 +89,22 @@ public class MainActivity extends Activity {
 
         webView.setWebViewClient(new WebViewClient() {
             @Override public void onPageFinished(WebView view, String url) {
+                // The currently deployed web updater uses window.open() for the
+                // APK URL. Force APK opens into the same WebView navigation so
+                // the DownloadListener below can hand the file to the native
+                // installer, without changing normal website links.
+                view.evaluateJavascript(
+                    "(function(){"
+                    + "if(window.__ecbApkOpenPatched)return;"
+                    + "var original=window.open;"
+                    + "window.open=function(url){"
+                    + "if(typeof url==='string' && /\\.apk(?:[?#]|$)/i.test(url)){window.location.href=url;return null;}"
+                    + "return original.apply(window,arguments);"
+                    + "};"
+                    + "window.__ecbApkOpenPatched=true;"
+                    + "})();",
+                    null
+                );
                 if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
             }
         });
