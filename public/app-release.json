@@ -8,30 +8,12 @@
   "forceUpdate": true,
   "downloadUrl": "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
   "whatsNew": [
-    "The Android app now uses the website's normal mobile responsive layout instead of the previous fixed/desktop-style WebView presentation.",
-    "The Android WebView is set to 85% scale so the website fits the phone screen correctly.",
-    "Typing in login, betting and other input fields no longer automatically zooms the WebView.",
-    "The update popup now fills the screen instead of appearing as a small centered card.",
-    "The update popup text and buttons are enlarged for much better readability on mobile screens.",
-    "The What's New section now lists the actual changes included in the released version.",
-    "The Download Latest Update button is handled by the native Android updater rather than relying on the browser/WebView.",
-    "The downloaded APK is validated before Android is asked to install it, including checking that it is a valid newer E-Football Competition Bet build.",
-    "The app checks for available updates repeatedly while the app is open so a triggered release can be detected without waiting for a manual refresh.",
-    "The current app version is shown at the bottom-right of the website footer after the Contact section and is read from the current release version.",
-    "The footer version updates automatically for future releases instead of requiring the version text to be changed manually on every page."
+    "Typing into input fields no longer automatically zooms the WebView.",
+    "The update popup has been redesigned to open full-screen with much larger, easier-to-read text."
   ],
   "releaseNotes": [
-    "The Android app now uses the website's normal mobile responsive layout instead of the previous fixed/desktop-style WebView presentation.",
-    "The Android WebView is set to 85% scale so the website fits the phone screen correctly.",
-    "Typing in login, betting and other input fields no longer automatically zooms the WebView.",
-    "The update popup now fills the screen instead of appearing as a small centered card.",
-    "The update popup text and buttons are enlarged for much better readability on mobile screens.",
-    "The What's New section now lists the actual changes included in the released version.",
-    "The Download Latest Update button is handled by the native Android updater rather than relying on the browser/WebView.",
-    "The downloaded APK is validated before Android is asked to install it, including checking that it is a valid newer E-Football Competition Bet build.",
-    "The app checks for available updates repeatedly while the app is open so a triggered release can be detected without waiting for a manual refresh.",
-    "The current app version is shown at the bottom-right of the website footer after the Contact section and is read from the current release version.",
-    "The footer version updates automatically for future releases instead of requiring the version text to be changed manually on every page."
+    "Typing into input fields no longer automatically zooms the WebView.",
+    "The update popup has been redesigned to open full-screen with much larger, easier-to-read text."
   ],
   "publishedAt": "2026-09-23T19:32:46+01:00"
 }
