@@ -4098,9 +4098,9 @@ function PanelBlock({ title, onView, children, accent, compact, count, hideWhenE
 /* ============================ SETTINGS ============================ */
 function AndroidAppUpdatesPanel() {
   const [releaseControl, setReleaseControl] = useState<any>({
-    enabled: true,
-    latest_version: "1.0.46",
-    latest_build: 47,
+    enabled: false,
+    latest_version: "1.0.47",
+    latest_build: 48,
     download_url: "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
     whats_new: [
       "The homepage spacing has been tightened so stacked UI sections sit closer together with less unused vertical space.",
@@ -4180,19 +4180,19 @@ function AndroidAppUpdatesPanel() {
           </div>
           <div className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/20 bg-background/20 p-3 text-[10px] text-muted-foreground">
             <span className="font-bold text-foreground">Current production release:</span>
-            <span>v1.0.46 • build 47</span>
+            <span>staged release v1.0.47 • build 48</span>
             <span>•</span>
-            <span>minimum supported build 47</span>
+            <span>minimum supported build 48</span>
             <span>•</span>
             <span>force update {releaseControl.force_update ? "ON" : "OFF"}</span>
-            <Button variant="ghost" size="sm" className="ml-auto h-7 px-2 text-[10px]" onClick={async () => {
+            <Button variant="outline" size="sm" className="ml-auto h-8 px-3 text-[10px] border-primary/40 bg-primary/10 hover:bg-primary/20" onClick={async () => {
               const { data, error } = await (supabase as any).from("app_release_control").select("*").eq("id", 1).maybeSingle();
               if (error) toast.error(error.message);
               else if (data) {
                 setReleaseControl({ ...data, whats_new: Array.isArray(data.whats_new) ? data.whats_new : [] });
                 toast.success("Updater refreshed from live release control.");
               }
-            }}><RotateCw className="h-3 w-3 mr-1" />Refresh live release</Button>
+            }}><RotateCw className="h-3.5 w-3.5 mr-1.5" />Refresh version</Button>
           </div>
           <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground">
             <div className="font-bold text-foreground mb-1">{releaseControl.enabled ? "UPDATE IS LIVE" : "UPDATE IS STAGED / HIDDEN"}</div>
