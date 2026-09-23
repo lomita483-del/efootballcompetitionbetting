@@ -149,8 +149,15 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Sync with the latest main before creating the generated release commit.
+          # This avoids rebasing after generated APK/manifest files are already staged.
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+
+          # Recreate the generated release files after the sync.
+          cp android-shell/app/build/outputs/apk/release/app-release.apk "$APK_PATH"
+
           git add public/app-release.json "$APK_PATH"
           git commit -m "chore: publish E-Football Android test update ${VERSION}" || true
-          git fetch origin main
-          git rebase origin/main
           git push origin HEAD:main
