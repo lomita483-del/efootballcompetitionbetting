@@ -4056,9 +4056,9 @@ function PanelBlock({ title, onView, children, accent, compact, count, hideWhenE
 /* ============================ SETTINGS ============================ */
 function AndroidAppUpdatesPanel() {
   const [releaseControl, setReleaseControl] = useState<any>({
-    enabled: false,
-    latest_version: "1.0.34",
-    latest_build: 35,
+    enabled: true,
+    latest_version: "1.0.45",
+    latest_build: 46,
     download_url: "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
     whats_new: [
       "Old installed Android app versions can now receive the update announcement from the live website, even before installing this release.",
@@ -4067,8 +4067,8 @@ function AndroidAppUpdatesPanel() {
       "The WebView uses a consistent 50% presentation so the desktop page structure fits the phone screen.",
       "Update checks run every 3 seconds while the app is open."
     ],
-    force_update: false,
-    minimum_supported_build: 0,
+    force_update: true,
+    minimum_supported_build: 46,
   });
 
   useEffect(() => {
@@ -4123,6 +4123,36 @@ function AndroidAppUpdatesPanel() {
               <span><span className="block text-sm font-bold">Force update</span><span className="block text-[10px] text-muted-foreground">Block the app until this build is installed.</span></span>
               <Switch checked={!!releaseControl.force_update} onCheckedChange={(v) => setReleaseControl({ ...releaseControl, force_update: v })} />
             </label>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <div className="rounded-lg border border-primary/20 bg-background/30 p-3">
+              <div className="text-[9px] uppercase tracking-widest text-muted-foreground">Live version</div>
+              <div className="mt-1 text-lg font-black text-foreground">v{releaseControl.latest_version}</div>
+            </div>
+            <div className="rounded-lg border border-primary/20 bg-background/30 p-3">
+              <div className="text-[9px] uppercase tracking-widest text-muted-foreground">Build</div>
+              <div className="mt-1 text-lg font-black text-foreground">{releaseControl.latest_build}</div>
+            </div>
+            <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/5 p-3">
+              <div className="text-[9px] uppercase tracking-widest text-muted-foreground">Updater state</div>
+              <div className="mt-1 text-sm font-black text-emerald-300">{releaseControl.enabled ? "LIVE" : "STAGED"}</div>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/20 bg-background/20 p-3 text-[10px] text-muted-foreground">
+            <span className="font-bold text-foreground">Current production release:</span>
+            <span>v1.0.45 • build 46</span>
+            <span>•</span>
+            <span>minimum supported build 46</span>
+            <span>•</span>
+            <span>force update {releaseControl.force_update ? "ON" : "OFF"}</span>
+            <Button variant="ghost" size="sm" className="ml-auto h-7 px-2 text-[10px]" onClick={async () => {
+              const { data, error } = await (supabase as any).from("app_release_control").select("*").eq("id", 1).maybeSingle();
+              if (error) toast.error(error.message);
+              else if (data) {
+                setReleaseControl({ ...data, whats_new: Array.isArray(data.whats_new) ? data.whats_new : [] });
+                toast.success("Updater refreshed from live release control.");
+              }
+            }}><RotateCw className="h-3 w-3 mr-1" />Refresh live release</Button>
           </div>
           <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground">
             <div className="font-bold text-foreground mb-1">{releaseControl.enabled ? "UPDATE IS LIVE" : "UPDATE IS STAGED / HIDDEN"}</div>
@@ -4185,8 +4215,8 @@ function SettingsPanel() {
   const [s, setS] = useState<any>(null);
   const [releaseControl, setReleaseControl] = useState<any>({
     enabled: false,
-    latest_version: "1.0.27",
-    latest_build: 28,
+    latest_version: "1.0.45",
+    latest_build: 46,
     download_url: "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
     whats_new: [
       "Admin console now uses 85% native WebView scaling so the floating bet checkout control scales with the console.",
@@ -4196,8 +4226,8 @@ function SettingsPanel() {
       "Kept the optional web reminder for users to download the standalone Android app.",
       "Admin can edit What's New, stage a release, trigger it for users, stop the prompt, or force the update."
     ],
-    force_update: false,
-    minimum_supported_build: 0,
+    force_update: true,
+    minimum_supported_build: 46,
   });
   const confirm = useConfirm();
 
