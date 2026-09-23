@@ -23,7 +23,7 @@ on:
       release_notes:
         description: "What's new — one item per line"
         required: false
-        default: "Fixed admin console scaling and floating checkout sizing\nFixed staged release What's New so only the current release notes are shown\nImproved realtime notifications in the Android app\nKept the optional web-to-app download reminder\nAdded admin-controlled staged, triggerable and force-update releases"
+        default: "Admin console scaling; staged release What's New; realtime notifications; optional app download reminder; admin-triggered and force-update releases"
       distribution:
         description: "Build type"
         required: true
