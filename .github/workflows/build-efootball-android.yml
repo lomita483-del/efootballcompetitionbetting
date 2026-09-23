@@ -54,6 +54,10 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+
       - name: Prepare launcher icon
         run: |
           mkdir -p android-shell/app/src/main/res/drawable
@@ -68,7 +72,7 @@ jobs:
           import os, re
           p = Path("android-shell/app/build.gradle")
           s = p.read_text()
-          s = re.sub(r"versionCode \\d+", f"versionCode {os.environ['APP_BUILD']}", s, count=1)
+          s = re.sub(r"versionCode \d+", f"versionCode {os.environ['APP_BUILD']}", s, count=1)
           s = re.sub(r"versionName ['\"][^'\"]+['\"]", f"versionName '{os.environ['APP_VERSION']}'", s, count=1)
           p.write_text(s)
           PY
