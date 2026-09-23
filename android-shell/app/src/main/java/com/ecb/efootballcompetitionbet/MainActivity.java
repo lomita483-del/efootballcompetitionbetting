@@ -50,11 +50,11 @@ public class MainActivity extends Activity {
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
         s.setUseWideViewPort(true);
-        s.setLoadWithOverviewMode(true);
+        s.setLoadWithOverviewMode(false);
 
-        // Keep the fixed desktop canvas, but make its controls easier to read/tap.
-        s.setTextZoom(110);
-        webView.setInitialScale(125);
+        // Do not enlarge the page. Render at the site's native desktop scale.
+        s.setTextZoom(100);
+        webView.setInitialScale(100);
 
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
