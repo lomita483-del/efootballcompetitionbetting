@@ -4,28 +4,10 @@
   "latestVersion": "1.0.48",
   "latestBuild": 49,
   "minimumSupportedVersion": "1.0.0",
-  "minimumSupportedBuild": 49,
+  "minimumSupportedBuild": 1,
   "forceUpdate": false,
   "downloadUrl": "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
-  "whatsNew": [
-    "Android pinch-to-zoom has been rebuilt to work inside the WebView, including the admin console, with zooming enabled from 50% to 500% and an 85% starting scale.",
-    "The pull-to-refresh container no longer intercepts two-finger gestures, preventing pinch attempts from accidentally reloading the page.",
-    "The bottom-center Home control is now smaller, cleaner and more premium, with a transparent logo surface so the previous black square behind the logo is removed.",
-    "The Android startup experience now uses a large 250dp branded E-Football logo overlay while the website loads, replacing the tiny/limited launch-logo presentation.",
-    "The homepage Menu control has been redesigned with a stronger gold outline, dark cinematic surface, glow, larger icon treatment and a higher-contrast drawer so it remains visible over the background.",
-    "The Admin App Updater Refresh version control now reads the Android version/build and What's New directly from the release files and stages them without enabling the update.",
-    "Version information is synchronized for Android v1.0.48 build 49 and the website footer fallback.",
-    "These changes are staged only; the user update prompt remains disabled until you choose to trigger it."
-  ],
-  "releaseNotes": [
-    "Android pinch-to-zoom has been rebuilt to work inside the WebView, including the admin console, with zooming enabled from 50% to 500% and an 85% starting scale.",
-    "The pull-to-refresh container no longer intercepts two-finger gestures, preventing pinch attempts from accidentally reloading the page.",
-    "The bottom-center Home control is now smaller, cleaner and more premium, with a transparent logo surface so the previous black square behind the logo is removed.",
-    "The Android startup experience now uses a large 250dp branded E-Football logo overlay while the website loads, replacing the tiny/limited launch-logo presentation.",
-    "The homepage Menu control has been redesigned with a stronger gold outline, dark cinematic surface, glow, larger icon treatment and a higher-contrast drawer so it remains visible over the background.",
-    "The Admin App Updater Refresh version control now reads the Android version/build and What's New directly from the release files and stages them without enabling the update.",
-    "Version information is synchronized for Android v1.0.48 build 49 and the website footer fallback.",
-    "These changes are staged only; the user update prompt remains disabled until you choose to trigger it."
-  ],
-  "publishedAt": "2026-09-23T23:01:12.396Z"
+  "whatsNew": ["The app footer now displays the current release version and reads the live release metadata so the version stays synchronized with the latest app release.","The Android package version/build was incremented for this release.","Android pinch-to-zoom is enabled with an 85% starting scale, and multi-touch no longer triggers the app's pull-to-refresh reload.","The bottom-center Home control is smaller and more refined, with a premium gold finish, illuminated edge, depth, halo, and circular logo clipping.","The Android startup experience now shows a larger full E-Football logo on a branded dark splash while the WebView loads.","The homepage Menu control and drawer were upgraded with stronger contrast, cinematic glass surfaces, gold detailing, depth, glow, active states, and clearer icon treatment.","The release metadata and What's New list are synchronized to the staged Android release and include the complete user-facing changes in this version.","Release What's New is generated from the files changed since the previous Android release instead of copying unrelated older release notes."],
+  "releaseNotes": ["The app footer now displays the current release version and reads the live release metadata so the version stays synchronized with the latest app release.","The Android package version/build was incremented for this release.","Android pinch-to-zoom is enabled with an 85% starting scale, and multi-touch no longer triggers the app's pull-to-refresh reload.","The bottom-center Home control is smaller and more refined, with a premium gold finish, illuminated edge, depth, halo, and circular logo clipping.","The Android startup experience now shows a larger full E-Football logo on a branded dark splash while the WebView loads.","The homepage Menu control and drawer were upgraded with stronger contrast, cinematic glass surfaces, gold detailing, depth, glow, active states, and clearer icon treatment.","The release metadata and What's New list are synchronized to the staged Android release and include the complete user-facing changes in this version.","Release What's New is generated from the files changed since the previous Android release instead of copying unrelated older release notes."],
+  "publishedAt": "2026-09-24T00:13:15+01:00"
 }
