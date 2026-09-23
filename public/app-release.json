@@ -1,13 +1,13 @@
 {
   "app": "E-Football Competition Bet",
   "platform": "android",
-  "latestVersion": "1.0.16",
-  "latestBuild": 17,
+  "latestVersion": "1.0.17",
+  "latestBuild": 18,
   "minimumSupportedVersion": "1.0.0",
   "minimumSupportedBuild": 1,
   "forceUpdate": false,
-  "downloadUrl": "https://github.com/lomita483-del/efootballcompetitionbetting/releases/download/android-v1.0.16-build17/efootball-competition-bet-test.apk",
+  "downloadUrl": "https://github.com/lomita483-del/efootballcompetitionbetting/releases/download/android-v1.0.17-build18/efootball-competition-bet-test.apk",
   "whatsNew": ["Fixed the Android WebView so the desktop website starts below the phone status bar and stays clear of the navigation bar.","Adjusted the desktop-mode scale and text size so the admin console is easier to read and tap without becoming oversized.","Strengthened automatic update checking with multiple manifest sources and retries.","The updater validates the downloaded package before handing it to Android.","Future releases use the persistent Android signing key so updates can replace the installed app without clearing app data.","The app keeps its own WebView/account storage separate from Chrome browser data.","Corrected the launcher icon resource so the app uses the ECB launcher artwork instead of the wrong placeholder."],
   "releaseNotes": ["Fixed the Android WebView so the desktop website starts below the phone status bar and stays clear of the navigation bar.","Adjusted the desktop-mode scale and text size so the admin console is easier to read and tap without becoming oversized.","Strengthened automatic update checking with multiple manifest sources and retries.","The updater validates the downloaded package before handing it to Android.","Future releases use the persistent Android signing key so updates can replace the installed app without clearing app data.","The app keeps its own WebView/account storage separate from Chrome browser data.","Corrected the launcher icon resource so the app uses the ECB launcher artwork instead of the wrong placeholder."],
-  "publishedAt": "2026-09-23T09:46:48+01:00"
+  "publishedAt": "2026-09-23T09:54:57+01:00"
 }
