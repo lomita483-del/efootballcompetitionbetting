@@ -34,7 +34,7 @@ public class MainActivity extends Activity {
     private static final String NOTIFICATION_CHANNEL_ID = "ecb_updates";
     private SwipeRefreshLayout swipeRefresh;
     private WebView webView;
-    private View startupOverlay;
+    private FrameLayout startupOverlay;
     private final Handler updateHandler = new Handler(Looper.getMainLooper());
     private final Runnable updatePoll = new Runnable() {
         @Override public void run() {
