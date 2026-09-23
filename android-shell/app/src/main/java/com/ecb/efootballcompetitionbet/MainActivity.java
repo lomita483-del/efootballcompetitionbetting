@@ -67,11 +67,12 @@ public class MainActivity extends Activity {
         // wide layout as the Admin Console instead of switching to the
         // narrow mobile layout on phone-sized screens.
         s.setUseWideViewPort(true);
-        s.setLoadWithOverviewMode(true);
+        s.setLoadWithOverviewMode(false);
         s.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
 
-        // Use the website in desktop mode everywhere. Do not apply a native page scale;
-        // the website controls its own desktop sizing/layout.
+        // Use the same wide desktop presentation as the website. A 50% native
+        // scale gives phone screens enough horizontal room for the desktop layout.
+        s.setInitialScale(50);
         s.setTextZoom(100);
         s.setSupportZoom(true);
         s.setBuiltInZoomControls(false);
@@ -93,7 +94,7 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient() {
             private void applyPageScale(String url) {
                 // Keep every route on the same desktop-style WebView layout.
-                // No native scale is applied; the desktop viewport controls the layout.
+                // The WebView stays at the same 50% desktop presentation on every route.
                 webView.evaluateJavascript(
                     "(function(){"
                     + "var m=document.querySelector('meta[name=viewport]');"
