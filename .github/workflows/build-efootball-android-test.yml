@@ -101,7 +101,14 @@ jobs:
           # present before the update manifest is published.
           gh release upload "$TAG" efootball-competition-bet-test.apk --clobber
 
-          echo "Published release with APK asset: $TAG"
+          # Never publish the update manifest until GitHub confirms that the actual APK asset exists.
+          ASSET_COUNT=$(gh release view "$TAG" --json assets --jq '.assets | map(select(.name == "efootball-competition-bet-test.apk")) | length')
+          if [ "$ASSET_COUNT" -ne 1 ]; then
+            echo "::error::Release $TAG was created but the APK asset was not confirmed."
+            gh release view "$TAG" --json assets
+            exit 1
+          fi
+          echo "Verified release APK asset: $TAG/efootball-competition-bet-test.apk"
 
       - name: Publish update manifest
         run: |
