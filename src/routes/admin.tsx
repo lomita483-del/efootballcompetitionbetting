@@ -4360,6 +4360,13 @@ function SettingsPanel({ focusRelease = false }: { focusRelease?: boolean }) {
               : "Edit and save the release first. Then use Trigger update when you have finished testing. This prevents unfinished builds from being announced automatically."}
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              disabled={!String(releaseControl.download_url || "").trim()}
+              onClick={() => window.open(String(releaseControl.download_url).trim(), "_blank", "noopener,noreferrer")}
+            >
+              <Download className="h-4 w-4 mr-1" />Download APK to test
+            </Button>
             <Button variant="outline" onClick={async () => {
               const payload = {
                 id: 1,
