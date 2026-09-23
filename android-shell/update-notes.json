@@ -1,16 +1,12 @@
 {
   "whatsNew": [
-    "Admin App Updater now includes Refresh version, which automatically reads the latest Android versionName, versionCode and What's New from the release files and fills the updater fields for you.",
-    "Refresh version only stages the release details; it does not enable or trigger an update for users.",
-    "This release is staged as v1.0.47 • build 48 and is ready to be triggered manually from Admin when you choose.",
-    "Pinch-to-zoom in and out is now enabled in the Android app, starting at the compact 85% zoom level.",
-    "Pinching with two fingers no longer conflicts with the app's pull-to-refresh gesture, preventing an accidental page reload while zooming.",
-    "The bottom-center Home button is smaller and redesigned with a premium gold finish, illuminated edge, depth, halo and a properly clipped circular logo.",
-    "The Android startup screen now shows a larger, fully branded E-Football logo on a dark cinematic background instead of a blank white page.",
-    "The Android 12+ launch experience has also been branded so the system splash and in-app splash transition use the E-Football identity.",
-    "The homepage Menu control has been upgraded with stronger contrast, a darker cinematic glass surface, gold detailing, glow, depth and clearer icon treatment.",
-    "The Menu drawer has been upgraded into a higher-contrast glass panel with clearer sections, active states and improved visibility over the pirate background.",
-    "The website footer and Android release metadata are synchronized to v1.0.47 / build 48.",
-    "Release What's New is now designed to describe the actual changes in the current release instead of carrying unrelated older release notes."
+    "Android pinch-to-zoom has been rebuilt to work inside the WebView, including the admin console, with zooming enabled from 50% to 500% and an 85% starting scale.",
+    "The pull-to-refresh container no longer intercepts two-finger gestures, preventing pinch attempts from accidentally reloading the page.",
+    "The bottom-center Home control is now smaller, cleaner and more premium, with a transparent logo surface so the previous black square behind the logo is removed.",
+    "The Android startup experience now uses a large 250dp branded E-Football logo overlay while the website loads, replacing the tiny/limited launch-logo presentation.",
+    "The homepage Menu control has been redesigned with a stronger gold outline, dark cinematic surface, glow, larger icon treatment and a higher-contrast drawer so it remains visible over the background.",
+    "The Admin App Updater Refresh version control now reads the Android version/build and What's New directly from the release files and stages them without enabling the update.",
+    "Version information is synchronized for Android v1.0.48 build 49 and the website footer fallback.",
+    "These changes are staged only; the user update prompt remains disabled until you choose to trigger it."
   ]
 }
