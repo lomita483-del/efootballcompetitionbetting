@@ -4057,16 +4057,15 @@ function PanelBlock({ title, onView, children, accent, compact, count, hideWhenE
 function AndroidAppUpdatesPanel() {
   const [releaseControl, setReleaseControl] = useState<any>({
     enabled: false,
-    latest_version: "1.0.27",
-    latest_build: 28,
+    latest_version: "1.0.31",
+    latest_build: 32,
     download_url: "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
     whats_new: [
-      "Admin console now uses 85% native WebView scaling so the floating bet checkout control scales with the console.",
-      "Android release checks now use the admin-controlled Supabase release record as the single source of truth.",
-      "What's New is taken only from the current staged release; old release notes are never reused.",
-      "Improved realtime notification delivery from the web app into Android notifications while the app is running.",
-      "Kept the optional web reminder for users to download the standalone Android app.",
-      "Admin can edit What's New, stage a release, trigger it for users, stop the prompt, or force the update."
+      "The home logo button is now smaller while remaining clearly visible and clickable.",
+      "All app pages now use a desktop-style WebView layout like the Admin Console.",
+      "The wide desktop layout is applied consistently across normal pages instead of switching to the narrow mobile layout.",
+      "Pinch-to-zoom remains enabled for accessibility.",
+      "Update checks continue to detect newly triggered releases while the app is open."
     ],
     force_update: false,
     minimum_supported_build: 0,
