@@ -52,6 +52,10 @@ public class MainActivity extends Activity {
         s.setDatabaseEnabled(true);
         s.setUseWideViewPort(true);
         s.setLoadWithOverviewMode(true);
+        // The fixed desktop canvas was too small on phone screens. A modest
+        // initial scale keeps the desktop layout intact while making controls
+        // easier to read and tap.
+        webView.setInitialScale(94);
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
@@ -81,6 +85,9 @@ public class MainActivity extends Activity {
             FrameLayout.LayoutParams.MATCH_PARENT
         ));
 
+        // Android 15+ targets are edge-to-edge by default. Put the actual
+        // WebView container inside the safe area so the website's navbar and
+        // controls cannot sit underneath the phone status/navigation bars.
         root.setOnApplyWindowInsetsListener((View v, WindowInsets insets) -> {
             int top, bottom, left, right;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -89,14 +96,19 @@ public class MainActivity extends Activity {
                         | WindowInsets.Type.navigationBars()
                         | WindowInsets.Type.displayCutout()
                 );
-                top = bars.top; bottom = bars.bottom; left = bars.left; right = bars.right;
+                top = bars.top;
+                bottom = bars.bottom;
+                left = bars.left;
+                right = bars.right;
             } else {
                 top = insets.getSystemWindowInsetTop();
                 bottom = insets.getSystemWindowInsetBottom();
                 left = insets.getSystemWindowInsetLeft();
                 right = insets.getSystemWindowInsetRight();
             }
-            v.setPadding(left, top, right, bottom);
+            // Apply insets to the WebView container itself rather than the
+            // outer root; this reliably prevents touch targets being hidden.
+            swipeRefresh.setPadding(left, top, right, bottom);
             return insets;
         });
 
