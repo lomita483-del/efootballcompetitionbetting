@@ -7,7 +7,19 @@
   "minimumSupportedBuild": 1,
   "forceUpdate": true,
   "downloadUrl": "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
-  "whatsNew": ["The entire app uses the website's normal mobile responsive layout.","The WebView is set to 85% scale for the correct mobile presentation.","Typing into input fields no longer automatically zooms the WebView.","The update popup now opens full-screen for much better readability on mobile screens.","The update button is handled by the native Android updater.","APK downloads are validated before Android is asked to install the update.","Update checks continue every 3 seconds while the app is open."],
-  "releaseNotes": ["The entire app uses the website's normal mobile responsive layout.","The WebView is set to 85% scale for the correct mobile presentation.","Typing into input fields no longer automatically zooms the WebView.","The update popup now opens full-screen for much better readability on mobile screens.","The update button is handled by the native Android updater.","APK downloads are validated before Android is asked to install the update.","Update checks continue every 3 seconds while the app is open."],
+  "whatsNew": [
+    "The Android app now uses the website's normal mobile responsive layout.",
+    "The WebView presentation is set to 85% for a better fit on mobile screens.",
+    "Typing in login, betting and other input fields no longer triggers automatic zoom.",
+    "The app update screen is now full-screen with much larger, easier-to-read text.",
+    "The update button uses the native Android installer and validates the APK before installation."
+  ],
+  "releaseNotes": [
+    "The Android app now uses the website's normal mobile responsive layout.",
+    "The WebView presentation is set to 85% for a better fit on mobile screens.",
+    "Typing in login, betting and other input fields no longer triggers automatic zoom.",
+    "The app update screen is now full-screen with much larger, easier-to-read text.",
+    "The update button uses the native Android installer and validates the APK before installation."
+  ],
   "publishedAt": "2026-09-23T19:32:46+01:00"
 }
