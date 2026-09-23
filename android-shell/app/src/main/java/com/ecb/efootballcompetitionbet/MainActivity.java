@@ -1,11 +1,16 @@
 package com.ecb.efootballcompetitionbet;
 
+import android.Manifest;
 import android.app.Activity;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowInsets;
+import android.widget.FrameLayout;
 import android.webkit.CookieManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -13,6 +18,8 @@ import android.webkit.WebViewClient;
 
 public class MainActivity extends Activity {
     private static final String APP_URL = "https://lslonlinebetting.lovable.app/";
+    private static final int NOTIFICATION_PERMISSION_REQUEST = 2001;
+    private static final String NOTIFICATION_CHANNEL_ID = "ecb_updates";
     private WebView webView;
 
     @Override public void onCreate(Bundle state) {
@@ -22,14 +29,17 @@ public class MainActivity extends Activity {
         window.setStatusBarColor(0xFF080808);
         window.setNavigationBarColor(0xFF080808);
 
+        FrameLayout root = new FrameLayout(this);
+        root.setBackgroundColor(0xFF080808);
+
         webView = new WebView(this);
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
 
-        // Keep the same desktop-style layout, but use a slightly smaller fixed canvas
-        // so controls are easier to read on a phone without becoming oversized.
+        // Keep the desktop-style layout, but use a slightly narrower fixed canvas
+        // on phones so the controls are readable without becoming oversized.
         s.setUseWideViewPort(true);
         s.setLoadWithOverviewMode(true);
         s.setAllowFileAccess(false);
@@ -42,28 +52,65 @@ public class MainActivity extends Activity {
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         webView.setWebViewClient(new WebViewClient());
 
-        // Android 15 enforces edge-to-edge for apps targeting API 35. Apply the
-        // system-bar insets as WebView padding so the site's navbar never sits
-        // underneath the phone status/time bar or navigation bar.
-        webView.setOnApplyWindowInsetsListener((View v, WindowInsets insets) -> {
+        root.addView(webView, new FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        ));
+
+        // Android 15 enforces edge-to-edge for apps targeting API 35. Handle the
+        // system-bar insets on the native container, not on WebView itself. This
+        // prevents the website navbar from being placed underneath the phone's
+        // status/time bar or gesture/navigation bar.
+        root.setOnApplyWindowInsetsListener((View v, WindowInsets insets) -> {
             int top;
             int bottom;
+            int left;
+            int right;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 android.graphics.Insets bars = insets.getInsets(WindowInsets.Type.systemBars());
                 top = bars.top;
                 bottom = bars.bottom;
+                left = bars.left;
+                right = bars.right;
             } else {
                 top = insets.getSystemWindowInsetTop();
                 bottom = insets.getSystemWindowInsetBottom();
+                left = insets.getSystemWindowInsetLeft();
+                right = insets.getSystemWindowInsetRight();
             }
-            v.setPadding(0, top, 0, bottom);
+            v.setPadding(left, top, right, bottom);
             return insets;
         });
 
-        setContentView(webView);
-        webView.requestApplyInsets();
+        setContentView(root);
+        root.requestApplyInsets();
         webView.loadUrl(APP_URL);
+
+        createNotificationChannel();
+        requestNotificationPermissionIfNeeded();
         UpdateChecker.check(this);
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
+        NotificationManager manager = getSystemService(NotificationManager.class);
+        if (manager == null) return;
+        NotificationChannel channel = new NotificationChannel(
+            NOTIFICATION_CHANNEL_ID,
+            "E-Football Competition Bet notifications",
+            NotificationManager.IMPORTANCE_DEFAULT
+        );
+        channel.setDescription("Match results, account alerts and important E-Football Competition Bet updates.");
+        manager.createNotificationChannel(channel);
+    }
+
+    private void requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return;
+        if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) return;
+        requestPermissions(
+            new String[]{Manifest.permission.POST_NOTIFICATIONS},
+            NOTIFICATION_PERMISSION_REQUEST
+        );
     }
 
     @Override protected void onResume() {
