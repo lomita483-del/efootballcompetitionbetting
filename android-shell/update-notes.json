@@ -1,10 +1,9 @@
 {
   "whatsNew": [
-    "Admin console now uses 85% native WebView scaling so the floating bet checkout control scales with the console.",
-    "Android release checks now use the admin-controlled Supabase release record as the single source of truth.",
-    "What's New is taken only from the current staged release; old release notes are never reused.",
-    "Improved realtime notification delivery from the web app into Android notifications while the app is running.",
-    "Kept the optional web reminder for users to download the standalone Android app.",
-    "Admin can edit What's New, stage a release, trigger it for users, stop the prompt, or force the update."
+    "Admin can now open App Updates directly from the Admin Console Quick Actions.",
+    "The admin controls exactly when the Android update popup is sent to users.",
+    "Admin accounts do not receive the release update popup.",
+    "The web release endpoint uses no-cache responses so newly triggered releases are picked up immediately.",
+    "Staged releases stay hidden until the admin manually triggers the update."
   ]
 }
