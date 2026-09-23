@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.webkit.CookieManager;
+import android.webkit.DownloadListener;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -63,16 +64,11 @@ public class MainActivity extends Activity {
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
-        // Force a desktop-style CSS viewport so every page uses the same
-        // wide layout as the Admin Console instead of switching to the
-        // narrow mobile layout on phone-sized screens.
-        s.setUseWideViewPort(true);
-        s.setLoadWithOverviewMode(false);
+        // Use the website's normal responsive mobile layout across the entire app.
+        // Do not force a desktop CSS viewport or a fixed native zoom.
+        s.setUseWideViewPort(false);
+        s.setLoadWithOverviewMode(true);
         s.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
-
-        // Use the same wide desktop presentation as the website. A 50% native
-        // scale gives phone screens enough horizontal room for the desktop layout.
-        webView.setInitialScale(50);
         s.setTextZoom(100);
         s.setSupportZoom(true);
         s.setBuiltInZoomControls(false);
@@ -82,45 +78,24 @@ public class MainActivity extends Activity {
         s.setAllowContentAccess(false);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
 
-        String desktopChromeUa =
-            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-            + "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 ECBAndroidApp/"
-            + BuildConfig.VERSION_NAME;
-        s.setUserAgentString(desktopChromeUa);
+        // Keep the normal Android WebView/mobile user agent so the website
+        // serves its responsive mobile layout, while retaining the app marker
+        // used by the live update gate.
+        s.setUserAgentString(s.getUserAgentString() + " ECBAndroidApp/" + BuildConfig.VERSION_NAME);
 
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
         webView.setWebViewClient(new WebViewClient() {
-            private void applyPageScale(String url) {
-                // Keep every route on the same desktop-style WebView layout.
-                // The WebView stays at the same 50% desktop presentation on every route.
-                webView.evaluateJavascript(
-                    "(function(){"
-                    + "var m=document.querySelector('meta[name=viewport]');"
-                    + "if(!m){m=document.createElement('meta');m.name='viewport';document.head.appendChild(m);}"
-                    + "m.setAttribute('content','width=1280,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes');"
-                    + "document.documentElement.style.zoom='100%';"
-                    + "document.body.style.zoom='100%';"
-                    + "})();",
-                    null
-                );
-            }
-
-            @Override public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
-                applyPageScale(url);
-            }
-
             @Override public void onPageFinished(WebView view, String url) {
-                applyPageScale(url);
                 if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
             }
-
-            @Override public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
-                applyPageScale(url);
-                super.doUpdateVisitedHistory(view, url, isReload);
-            }
         });
+
+        // New builds can receive the website update popup and route its APK
+        // download directly into the native Android downloader/installer.
+        webView.setDownloadListener((url, userAgent, contentDisposition, mimeType, contentLength) ->
+            UpdateChecker.downloadAndInstallFromUrl(MainActivity.this, url));
 
         swipeRefresh.setOnChildScrollUpCallback((parent, child) -> webView != null && webView.canScrollVertically(-1));
 
