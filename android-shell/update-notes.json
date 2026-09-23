@@ -1,10 +1,16 @@
 {
   "whatsNew": [
-    "Pinch-to-zoom is now enabled in the Android app, with the app starting at a compact 85% zoom by default.",
-    "The bottom-center home control is smaller and redesigned with a premium gold finish, halo, depth and stronger visibility.",
-    "The Android launch screen now uses the full E-Football logo on a branded dark background instead of a blank white startup screen.",
-    "The homepage Menu control and drawer now use a higher-contrast cinematic glass treatment so they remain clearly visible over the background.",
-    "Admin App Updater now has Refresh version, which reads the latest Android version, build and What's New notes from the release files and stages them without triggering the update.",
-    "Android release metadata and the website footer are prepared for v1.0.47, build 48."
+    "Admin App Updater now includes Refresh version, which automatically reads the latest Android versionName, versionCode and What's New from the release files and fills the updater fields for you.",
+    "Refresh version only stages the release details; it does not enable or trigger an update for users.",
+    "This release is staged as v1.0.47 • build 48 and is ready to be triggered manually from Admin when you choose.",
+    "Pinch-to-zoom in and out is now enabled in the Android app, starting at the compact 85% zoom level.",
+    "Pinching with two fingers no longer conflicts with the app's pull-to-refresh gesture, preventing an accidental page reload while zooming.",
+    "The bottom-center Home button is smaller and redesigned with a premium gold finish, illuminated edge, depth, halo and a properly clipped circular logo.",
+    "The Android startup screen now shows a larger, fully branded E-Football logo on a dark cinematic background instead of a blank white page.",
+    "The Android 12+ launch experience has also been branded so the system splash and in-app splash transition use the E-Football identity.",
+    "The homepage Menu control has been upgraded with stronger contrast, a darker cinematic glass surface, gold detailing, glow, depth and clearer icon treatment.",
+    "The Menu drawer has been upgraded into a higher-contrast glass panel with clearer sections, active states and improved visibility over the pirate background.",
+    "The website footer and Android release metadata are synchronized to v1.0.47 / build 48.",
+    "Release What's New is now designed to describe the actual changes in the current release instead of carrying unrelated older release notes."
   ]
 }
