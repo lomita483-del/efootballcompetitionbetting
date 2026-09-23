@@ -25,22 +25,24 @@ public class MainActivity extends Activity {
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
         settings.setMediaPlaybackRequiresUserGesture(false);
 
-        // Match the site's desktop/admin layout instead of forcing a
-        // phone-width responsive layout. The page gets a fixed desktop
-        // viewport and starts at 100%, so it is not automatically shrunk.
+        // Render the website like the desktop/admin console. Do not use
+        // phone-width responsive scaling and do not zoom the whole page.
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(false);
         webView.setInitialScale(100);
 
-        // Lock the page at the chosen scale. No pinch or browser zoom.
+        // Keep the website at its normal CSS scale. No pinch/accidental zoom.
         settings.setSupportZoom(false);
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
         settings.setTextZoom(100);
 
-        settings.setUserAgentString(
-            settings.getUserAgentString() + " ECBAndroidApp/" + BuildConfig.VERSION_NAME
-        );
+        // Do not advertise this shell as a mobile browser. This prevents the
+        // site's mobile CSS breakpoint from shrinking/rearranging the page.
+        String desktopUa = settings.getUserAgentString()
+            .replace(" Mobile", "")
+            .replace("Mobile", "");
+        settings.setUserAgentString(desktopUa + " ECBAndroidApp/" + BuildConfig.VERSION_NAME);
 
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
@@ -48,24 +50,21 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
-                // Use a desktop/admin-style viewport and preserve the site's
-                // desktop CSS instead of forcing mobile-width CSS.
+                // Match the admin/desktop canvas. Crucially, do not inject a
+                // device-width viewport or any CSS that scales the whole page.
                 String script =
                     "(function(){"
                     + "var m=document.querySelector('meta[name=viewport]');"
-                    + "if(!m){m=document.createElement('meta');m.name='viewport';document.head.appendChild(m);}"
-                    + "m.setAttribute('content','width=1024,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no');"
-                    + "var s=document.getElementById('ecb-mobile-stability');"
-                    + "if(!s){s=document.createElement('style');s.id='ecb-mobile-stability';"
-                    + "s.textContent='html,body{min-width:1024px;margin:0;padding:0}body{-webkit-text-size-adjust:100%;overscroll-behavior-x:none}';"
+                    + "if(m){m.setAttribute('content','width=1024,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no');}"
+                    + "var s=document.getElementById('ecb-admin-scale');"
+                    + "if(!s){s=document.createElement('style');s.id='ecb-admin-scale';"
+                    + "s.textContent='body{-webkit-text-size-adjust:100%;overscroll-behavior-x:none}';"
                     + "document.head.appendChild(s);}"
                     + "})();";
                 view.evaluateJavascript(script, null);
             }
         });
 
-        // Keep the desktop layout stable. Horizontal scrolling is available
-        // when the desktop canvas is wider than the phone; zoom remains locked.
         webView.setHorizontalScrollBarEnabled(false);
         webView.setVerticalScrollBarEnabled(true);
         webView.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
