@@ -4186,11 +4186,30 @@ function AndroidAppUpdatesPanel() {
             <span>•</span>
             <span>force update {releaseControl.force_update ? "ON" : "OFF"}</span>
             <Button variant="outline" size="sm" className="ml-auto h-8 px-3 text-[10px] border-primary/40 bg-primary/10 hover:bg-primary/20" onClick={async () => {
-              const { data, error } = await (supabase as any).from("app_release_control").select("*").eq("id", 1).maybeSingle();
-              if (error) toast.error(error.message);
-              else if (data) {
-                setReleaseControl({ ...data, whats_new: Array.isArray(data.whats_new) ? data.whats_new : [] });
-                toast.success("Updater refreshed from live release control.");
+              try {
+                const bust = Date.now();
+                const [gradleRes, notesRes] = await Promise.all([
+                  fetch("https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/android-shell/app/build.gradle?t=" + bust, { cache: "no-store" }),
+                  fetch("https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/android-shell/update-notes.json?t=" + bust, { cache: "no-store" }),
+                ]);
+                if (!gradleRes.ok || !notesRes.ok) throw new Error("Could not read the latest release files from GitHub.");
+                const gradle = await gradleRes.text();
+                const notes = await notesRes.json();
+                const version = gradle.match(/versionName\\s+['"]([^'"]+)['"]/)?.[1];
+                const build = Number(gradle.match(/versionCode\\s+(\\d+)/)?.[1] || 0);
+                if (!version || !build) throw new Error("The Android version/build could not be detected.");
+                const whatsNew = Array.isArray(notes?.whatsNew) ? notes.whatsNew.filter(Boolean) : [];
+                setReleaseControl((prev: any) => ({
+                  ...prev,
+                  enabled: false,
+                  latest_version: version,
+                  latest_build: build,
+                  minimum_supported_build: build,
+                  whats_new: whatsNew,
+                }));
+                toast.success("Version " + version + " (build " + build + ") loaded and staged. Update was not triggered.");
+              } catch (e: any) {
+                toast.error(e?.message || "Unable to refresh the latest version.");
               }
             }}><RotateCw className="h-3.5 w-3.5 mr-1.5" />Refresh version</Button>
           </div>
