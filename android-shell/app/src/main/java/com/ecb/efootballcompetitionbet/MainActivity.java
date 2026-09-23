@@ -13,6 +13,10 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.os.Handler;
+import android.os.Looper;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.ImageView;
 
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -25,11 +29,11 @@ public class MainActivity extends Activity {
     private static final String NOTIFICATION_CHANNEL_ID = "ecb_updates";
     private SwipeRefreshLayout swipeRefresh;
     private WebView webView;
-    private final Handler updateHandler = new Handler();
+    private final Handler updateHandler = new Handler(Looper.getMainLooper());
     private final Runnable updatePoll = new Runnable() {
         @Override public void run() {
             UpdateChecker.check(MainActivity.this);
-            updateHandler.postDelayed(this, 60_000L);
+            updateHandler.postDelayed(this, 3000L);
         }
     };
 
@@ -64,7 +68,7 @@ public class MainActivity extends Activity {
         // Render the website at 80% of the previous WebView scale.
         s.setTextZoom(100);
         webView.setInitialScale(80);
-        s.setSupportZoom(false);
+        s.setSupportZoom(true);
         s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
 
@@ -112,6 +116,8 @@ public class MainActivity extends Activity {
             }
         });
 
+        swipeRefresh.setOnChildScrollUpCallback((parent, child) -> webView != null && webView.canScrollVertically(-1));
+
         swipeRefresh.addView(webView, new FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT
@@ -123,6 +129,20 @@ public class MainActivity extends Activity {
             FrameLayout.LayoutParams.MATCH_PARENT
         ));
 
+        ImageView homeLogo = new ImageView(this);
+        homeLogo.setImageResource(R.drawable.site_logo);
+        homeLogo.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        homeLogo.setContentDescription("Go to E-Football home");
+        homeLogo.setClickable(true);
+        homeLogo.setFocusable(true);
+        homeLogo.setOnClickListener(v -> webView.loadUrl(APP_URL));
+        int logoSize = (int) (160 * getResources().getDisplayMetrics().density);
+        FrameLayout.LayoutParams logoParams = new FrameLayout.LayoutParams(
+            logoSize, logoSize, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM
+        );
+        logoParams.bottomMargin = (int) (120 * getResources().getDisplayMetrics().density);
+        root.addView(homeLogo, logoParams);
+
         setContentView(root);
         webView.loadUrl(APP_URL);
 
@@ -130,7 +150,7 @@ public class MainActivity extends Activity {
         requestNotificationPermissionIfNeeded();
         UpdateChecker.check(this);
         root.postDelayed(() -> UpdateChecker.check(this), 5000L);
-        updateHandler.postDelayed(updatePoll, 60_000L);
+        updateHandler.postDelayed(updatePoll, 3000L);
     }
 
     private void createNotificationChannel() {
@@ -163,6 +183,8 @@ public class MainActivity extends Activity {
         super.onResume();
         if (webView != null) webView.onResume();
         UpdateChecker.check(this);
+        updateHandler.removeCallbacks(updatePoll);
+        updateHandler.post(updatePoll);
     }
 
     @Override protected void onDestroy() {
@@ -172,6 +194,7 @@ public class MainActivity extends Activity {
     }
 
     @Override protected void onPause() {
+        updateHandler.removeCallbacks(updatePoll);
         if (webView != null) webView.onPause();
         super.onPause();
     }
