@@ -1,0 +1,11 @@
+{
+  "version": "1.0.11",
+  "build": 12,
+  "whatsNew": [
+    "Glassmorphism update popup with a premium E-Football visual style.",
+    "Added a dedicated What's New section showing the changes in this release.",
+    "Improved update checking with multiple manifest sources and automatic retries.",
+    "Update download and installation flow is handled directly by the app.",
+    "App-local account/storage remains separate from Chrome browser data."
+  ]
+}
