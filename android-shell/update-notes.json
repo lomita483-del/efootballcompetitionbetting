@@ -1,10 +1,15 @@
 {
   "whatsNew": [
-    "v1.0.43 updates the Android WebView to the normal mobile-responsive website layout at 85% scale.",
-    "Input fields no longer trigger automatic WebView zoom while typing or logging in.",
-    "The Android update screen has been redesigned as a full-screen update page with much larger text.",
-    "The update flow now uses the native Android installer instead of opening the APK in the browser.",
-    "Downloaded APKs are checked before installation to make sure the package is valid and is a newer signed build.",
-    "The app release footer now displays the current app version after the Contact section."
+    "The Android app now uses the website's normal mobile responsive layout instead of the previous fixed/desktop-style WebView presentation.",
+    "The Android WebView is set to 85% scale so the website fits the phone screen correctly.",
+    "Typing in login, betting and other input fields no longer automatically zooms the WebView.",
+    "The update popup now fills the screen instead of appearing as a small centered card.",
+    "The update popup text and buttons are enlarged for much better readability on mobile screens.",
+    "The What's New section now lists the actual changes included in the released version.",
+    "The Download Latest Update button is handled by the native Android updater rather than relying on the browser/WebView.",
+    "The downloaded APK is validated before Android is asked to install it, including checking that it is a valid newer E-Football Competition Bet build.",
+    "The app checks for available updates repeatedly while the app is open so a triggered release can be detected without waiting for a manual refresh.",
+    "The current app version is shown at the bottom-right of the website footer after the Contact section and is read from the current release version.",
+    "The footer version updates automatically for future releases instead of requiring the version text to be changed manually on every page."
   ]
 }
