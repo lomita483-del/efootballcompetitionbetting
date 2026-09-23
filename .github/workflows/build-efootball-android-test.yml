@@ -21,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-java@v4
         with:
@@ -70,6 +72,11 @@ jobs:
         run: |
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose android-shell/app/build/outputs/apk/release/app-release.apk
           rm -f android-shell/release-key.jks
+
+      - name: Generate What's New from actual release changes
+        run: |
+          chmod +x scripts/generate-release-notes.sh
+          ./scripts/generate-release-notes.sh
 
       - name: Read app version and release notes
         id: app_version

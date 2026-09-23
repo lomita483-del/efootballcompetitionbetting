@@ -1,9 +1,8 @@
 {
   "whatsNew": [
-    "The Android update popup now uses a full-screen layout with much larger text and buttons for easier reading.",
-    "The What's New list is now written specifically for the release being installed instead of reusing older release notes.",
-    "The app footer now shows the current app version and follows the active release version automatically.",
-    "The Android app and website now use the same release version and build information for update prompts.",
-    "Release metadata is kept synchronized so the update dialog shows the actual changes included in the new build."
+    "The Android update prompt was redesigned with a full-screen layout, larger text, and larger controls for easier reading.",
+    "The app footer now displays the current release version and reads the live release metadata so the version stays synchronized with the latest app release.",
+    "The Android package version/build was incremented to version 1.0.44, build 45.",
+    "Release What's New is now generated from the files changed since the previous Android release instead of copying unrelated older release notes."
   ]
 }
