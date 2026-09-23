@@ -1,5 +1,6 @@
 package com.ecb.efootballcompetitionbet;
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -15,9 +16,16 @@ import org.json.JSONObject;
 public final class NativeNotificationBridge {
     private static final String CHANNEL_ID = "ecb_realtime";
     private final Context context;
+    private final Activity activity;
 
     public NativeNotificationBridge(Context context) {
+        this.activity = context instanceof Activity ? (Activity) context : null;
         this.context = context.getApplicationContext();
+    }
+
+    @JavascriptInterface
+    public void downloadUpdate(String url) {
+        UpdateChecker.downloadAndInstallFromUrl(activity, url);
     }
 
     @JavascriptInterface
