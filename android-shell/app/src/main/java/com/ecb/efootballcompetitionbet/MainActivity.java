@@ -58,7 +58,7 @@ public class MainActivity extends Activity {
 
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
-        s.setCacheMode(WebView.LOAD_DEFAULT);
+        s.setCacheMode(WebSettings.LOAD_DEFAULT);
 
         String desktopChromeUa =
             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
