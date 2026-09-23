@@ -26,35 +26,18 @@ jobs:
           java-version: "17"
       - name: Install Android SDK packages
         run: |
-          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null 2>&1 || true
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.7"
-      - name: Prepare Android launcher icon
-        run: |
-          mkdir -p android-shell/app/src/main/res/mipmap-xxxhdpi
-          curl -fsSL "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/icon-512.png" -o /tmp/ecb-icon.png
-          cp /tmp/ecb-icon.png android-shell/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
-      - name: Build APK
-        working-directory: android-shell
-        run: gradle :app:assembleDebug --no-daemon --stacktrace
-      - name: Sign APK with persistent release key when configured
-        if: ${{ secrets.ECB_ANDROID_KEYSTORE_BASE64 != '' && secrets.ECB_ANDROID_KEYSTORE_PASSWORD != '' && secrets.ECB_ANDROID_KEY_ALIAS != '' && secrets.ECB_ANDROID_KEY_PASSWORD != '' }}
-        env:
-          ECB_ANDROID_KEYSTORE_BASE64: ${{ secrets.ECB_ANDROID_KEYSTORE_BASE64 }}
-          ECB_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ECB_ANDROID_KEYSTORE_PASSWORD }}
-          ECB_ANDROID_KEY_ALIAS: ${{ secrets.ECB_ANDROID_KEY_ALIAS }}
-          ECB_ANDROID_KEY_PASSWORD: ${{ secrets.ECB_ANDROID_KEY_PASSWORD }}
-        run: |
+          if [ -z "$ECB_ANDROID_KEYSTORE_BASE64" ] || [ -z "$ECB_ANDROID_KEYSTORE_PASSWORD" ] || [ -z "$ECB_ANDROID_KEY_ALIAS" ] || [ -z "$ECB_ANDROID_KEY_PASSWORD" ]; then
+            echo "Persistent signing secrets are not configured; keeping the debug-signed test APK."
+            exit 0
+          fi
           echo "$ECB_ANDROID_KEYSTORE_BASE64" | base64 --decode > android-shell/release-key.jks
           APKSIGNER="$ANDROID_HOME/build-tools/35.0.0/apksigner"
           APK="android-shell/app/build/outputs/apk/debug/app-debug.apk"
-          "$APKSIGNER" sign \\
-            --ks android-shell/release-key.jks \\
-            --ks-key-alias "$ECB_ANDROID_KEY_ALIAS" \\
-            --ks-pass env:ECB_ANDROID_KEYSTORE_PASSWORD \\
-            --key-pass env:ECB_ANDROID_KEY_PASSWORD \\
+          "$APKSIGNER" sign \
+            --ks android-shell/release-key.jks \
+            --ks-key-alias "$ECB_ANDROID_KEY_ALIAS" \
+            --ks-pass env:ECB_ANDROID_KEYSTORE_PASSWORD \
+            --key-pass env:ECB_ANDROID_KEY_PASSWORD \
             "$APK"
           "$APKSIGNER" verify --verbose "$APK"
           rm -f android-shell/release-key.jks
