@@ -21,11 +21,6 @@ public final class NativeNotificationBridge {
     }
 
     @JavascriptInterface
-    public void setAdminUser(boolean isAdmin) {
-        UpdateChecker.setAdminUser(isAdmin);
-    }
-
-    @JavascriptInterface
     public void notifyNotification(String json) {
         try {
             JSONObject item = new JSONObject(json == null ? "{}" : json);
