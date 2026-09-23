@@ -4103,11 +4103,13 @@ function AndroidAppUpdatesPanel() {
     latest_build: 50,
     download_url: "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
     whats_new: [
-      "The homepage spacing has been tightened so stacked UI sections sit closer together with less unused vertical space.",
-      "The Ahoy Bot-inspired background theme is now included in the Android WebView release so the app receives the same latest visual theme as the website.",
-      "The Android app release is v1.0.46 (build 47), with the website footer and admin updater aligned to the new release metadata."
+      "The app footer now displays the current release version and reads the live release metadata so the version stays synchronized with the latest app release.",
+      "The Android package version/build was incremented for this release.",
+      "Admin App Updater now includes Refresh version, which reads the Android version, build number, and What's New directly from the release files and stages them without enabling the update.",
+      "The release metadata and What's New list are synchronized to the staged Android release and include the complete user-facing changes in this version.",
+      "Release What's New is generated from the files changed since the previous Android release instead of copying unrelated older release notes."
     ],
-    force_update: true,
+    force_update: false,
     minimum_supported_build: 50,
   });
 
