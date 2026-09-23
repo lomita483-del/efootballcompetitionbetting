@@ -17,6 +17,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewOutlineProvider;
+import android.graphics.Outline;
+import android.view.MotionEvent;
 import android.graphics.drawable.GradientDrawable;
 import android.widget.ImageView;
 
@@ -47,6 +50,25 @@ public class MainActivity extends Activity {
 
         FrameLayout root = new FrameLayout(this);
         root.setBackgroundColor(0xFF080808);
+
+        // Branded in-app splash: larger than the Android 12 system icon so the
+        // complete E-Football logo is clearly visible while the WebView starts.
+        FrameLayout splash = new FrameLayout(this);
+        splash.setBackgroundColor(0xFF080F1C);
+        ImageView splashLogo = new ImageView(this);
+        splashLogo.setImageResource(R.drawable.site_logo);
+        splashLogo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        splashLogo.setAdjustViewBounds(true);
+        splashLogo.setElevation(12 * getResources().getDisplayMetrics().density);
+        FrameLayout.LayoutParams splashLogoParams = new FrameLayout.LayoutParams(
+            (int)(260 * getResources().getDisplayMetrics().density),
+            (int)(260 * getResources().getDisplayMetrics().density),
+            Gravity.CENTER
+        );
+        splash.addView(splashLogo, splashLogoParams);
+        root.addView(splash, new FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT
+        ));
 
         swipeRefresh = new SwipeRefreshLayout(this);
         swipeRefresh.setColorSchemeColors(0xFFFFC400);
@@ -91,6 +113,15 @@ public class MainActivity extends Activity {
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
+        webView.setOnTouchListener((v, event) -> {
+            if (event.getPointerCount() > 1) {
+                swipeRefresh.setEnabled(false);
+            } else if (event.getActionMasked() == MotionEvent.ACTION_UP || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+                swipeRefresh.setEnabled(true);
+            }
+            return false;
+        });
+
         webView.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url != null && url.matches("(?i).*\\.apk(?:[?#].*)?$")) {
@@ -118,6 +149,13 @@ public class MainActivity extends Activity {
                     null
                 );
                 if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                if (splash.getVisibility() == View.VISIBLE) {
+                    splash.animate().alpha(0f).setDuration(260L).withEndAction(() -> splash.setVisibility(View.GONE)).start();
+                }
+                view.evaluateJavascript(
+                    "(function(){var m=document.querySelector('meta[name=viewport]');if(m)m.setAttribute('content','width=device-width,initial-scale=0.85,minimum-scale=0.5,maximum-scale=4,user-scalable=yes,viewport-fit=cover');})();",
+                    null
+                );
             }
         });
 
@@ -158,6 +196,11 @@ public class MainActivity extends Activity {
         logoCircle.setStroke((int) (1.5f * d), 0xFFFFE9A3);
         homeLogo.setBackground(logoCircle);
         homeLogo.setPadding((int) (5 * d), (int) (5 * d), (int) (5 * d), (int) (5 * d));
+        homeLogo.setOutlineProvider(new ViewOutlineProvider() {
+            @Override public void getOutline(View view, Outline outline) {
+                outline.setOval(0, 0, view.getWidth(), view.getHeight());
+            }
+        });
         homeLogo.setClipToOutline(true);
         homeLogo.setElevation(10 * d);
         homeLogo.setAlpha(0.98f);
