@@ -455,6 +455,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 
 function SiteFooter({ isHome = false }: { isHome?: boolean }) {
   const [s, setS] = useState<any>(null);
+  const [appVersion, setAppVersion] = useState("1.0.43");
   const [open, setOpen] = useState<"terms" | "about" | null>(null);
   useEffect(() => {
     supabase
@@ -463,6 +464,15 @@ function SiteFooter({ isHome = false }: { isHome?: boolean }) {
       .eq("id", 1)
       .maybeSingle()
       .then(({ data }) => setS(data));
+    supabase
+      .from("app_release_control")
+      .select("latest_version")
+      .eq("id", 1)
+      .eq("enabled", true)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.latest_version) setAppVersion(data.latest_version);
+      });
   }, []);
   return (
     <footer className="border-t border-border mt-20 backdrop-blur-xl bg-card/40">
@@ -511,6 +521,11 @@ function SiteFooter({ isHome = false }: { isHome?: boolean }) {
             {s?.contact_whatsapp && <li>WhatsApp: {s.contact_whatsapp}</li>}
           </ul>
         </div>
+      </div>
+      <div className="container mx-auto px-4 pb-5 flex justify-end">
+        <span className="text-[10px] font-semibold tracking-widest text-muted-foreground/70 uppercase">
+          Version {appVersion}
+        </span>
       </div>
       <Dialog open={!!open} onOpenChange={(v) => !v && setOpen(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
