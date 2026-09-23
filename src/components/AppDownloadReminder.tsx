@@ -15,6 +15,11 @@ export function AppDownloadReminder() {
 
   useEffect(() => {
     if (typeof window === "undefined" || isEcbAndroidWebView()) return;
+    // Admins already manage the standalone app and release flow from the console.
+    try {
+      const roles = JSON.parse(localStorage.getItem("ecb_roles") || "[]");
+      if (Array.isArray(roles) && roles.includes("admin")) return;
+    } catch {}
     if (window.matchMedia?.("(display-mode: standalone)").matches) return;
 
     const last = Number(localStorage.getItem(DISMISS_KEY) || 0);
