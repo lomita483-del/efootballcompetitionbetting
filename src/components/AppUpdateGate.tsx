@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 const RELEASE_MANIFESTS = [
   "/app-release.json",
-  "https://lslonlinebetting.lovable.app/app-release.json",
+  "https://ecb001.lovable.app/app-release.json",
   "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/app-release.json",
   "https://cdn.jsdelivr.net/gh/lomita483-del/efootballcompetitionbetting@main/public/app-release.json",
 ];
