@@ -4099,18 +4099,16 @@ function PanelBlock({ title, onView, children, accent, compact, count, hideWhenE
 function AndroidAppUpdatesPanel() {
   const [releaseControl, setReleaseControl] = useState<any>({
     enabled: true,
-    latest_version: "1.0.45",
-    latest_build: 46,
+    latest_version: "1.0.46",
+    latest_build: 47,
     download_url: "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
     whats_new: [
-      "Old installed Android app versions can now receive the update announcement from the live website, even before installing this release.",
-      "Update detection is based on the installed app version, not the signed-in user account.",
-      "The entire app uses the website's desktop layout instead of the mobile responsive layout.",
-      "The WebView uses a consistent 50% presentation so the desktop page structure fits the phone screen.",
-      "Update checks run every 3 seconds while the app is open."
+      "The homepage spacing has been tightened so stacked UI sections sit closer together with less unused vertical space.",
+      "The Ahoy Bot-inspired background theme is now included in the Android WebView release so the app receives the same latest visual theme as the website.",
+      "The Android app release is v1.0.46 (build 47), with the website footer and admin updater aligned to the new release metadata."
     ],
     force_update: true,
-    minimum_supported_build: 46,
+    minimum_supported_build: 47,
   });
 
   useEffect(() => {
@@ -4182,9 +4180,9 @@ function AndroidAppUpdatesPanel() {
           </div>
           <div className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/20 bg-background/20 p-3 text-[10px] text-muted-foreground">
             <span className="font-bold text-foreground">Current production release:</span>
-            <span>v1.0.45 • build 46</span>
+            <span>v1.0.46 • build 47</span>
             <span>•</span>
-            <span>minimum supported build 46</span>
+            <span>minimum supported build 47</span>
             <span>•</span>
             <span>force update {releaseControl.force_update ? "ON" : "OFF"}</span>
             <Button variant="ghost" size="sm" className="ml-auto h-7 px-2 text-[10px]" onClick={async () => {
@@ -4257,8 +4255,8 @@ function SettingsPanel() {
   const [s, setS] = useState<any>(null);
   const [releaseControl, setReleaseControl] = useState<any>({
     enabled: false,
-    latest_version: "1.0.45",
-    latest_build: 46,
+    latest_version: "1.0.46",
+    latest_build: 47,
     download_url: "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
     whats_new: [
       "Admin console now uses 85% native WebView scaling so the floating bet checkout control scales with the console.",
@@ -4269,7 +4267,7 @@ function SettingsPanel() {
       "Admin can edit What's New, stage a release, trigger it for users, stop the prompt, or force the update."
     ],
     force_update: true,
-    minimum_supported_build: 46,
+    minimum_supported_build: 47,
   });
   const confirm = useConfirm();
 
