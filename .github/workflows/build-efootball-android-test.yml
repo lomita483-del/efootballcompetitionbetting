@@ -20,11 +20,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
+
       - name: Install Android SDK packages
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null 2>&1 || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+
+      - name: Build APK
+        working-directory: android-shell
+        run: gradle :app:assembleDebug --no-daemon --stacktrace
+
+      - name: Apply persistent signing key when configured
+        env:
+          ECB_ANDROID_KEYSTORE_BASE64: ${{ secrets.ECB_ANDROID_KEYSTORE_BASE64 }}
+          ECB_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ECB_ANDROID_KEYSTORE_PASSWORD }}
+          ECB_ANDROID_KEY_ALIAS: ${{ secrets.ECB_ANDROID_KEY_ALIAS }}
+          ECB_ANDROID_KEY_PASSWORD: ${{ secrets.ECB_ANDROID_KEY_PASSWORD }}
         run: |
           if [ -z "$ECB_ANDROID_KEYSTORE_BASE64" ] || [ -z "$ECB_ANDROID_KEYSTORE_PASSWORD" ] || [ -z "$ECB_ANDROID_KEY_ALIAS" ] || [ -z "$ECB_ANDROID_KEY_PASSWORD" ]; then
             echo "Persistent signing secrets are not configured; keeping the debug-signed test APK."
@@ -33,14 +53,10 @@ jobs:
           echo "$ECB_ANDROID_KEYSTORE_BASE64" | base64 --decode > android-shell/release-key.jks
           APKSIGNER="$ANDROID_HOME/build-tools/35.0.0/apksigner"
           APK="android-shell/app/build/outputs/apk/debug/app-debug.apk"
-          "$APKSIGNER" sign \
-            --ks android-shell/release-key.jks \
-            --ks-key-alias "$ECB_ANDROID_KEY_ALIAS" \
-            --ks-pass env:ECB_ANDROID_KEYSTORE_PASSWORD \
-            --key-pass env:ECB_ANDROID_KEY_PASSWORD \
-            "$APK"
+          "$APKSIGNER" sign             --ks android-shell/release-key.jks             --ks-key-alias "$ECB_ANDROID_KEY_ALIAS"             --ks-pass env:ECB_ANDROID_KEYSTORE_PASSWORD             --key-pass env:ECB_ANDROID_KEY_PASSWORD             "$APK"
           "$APKSIGNER" verify --verbose "$APK"
           rm -f android-shell/release-key.jks
+
       - name: Read app version
         id: app_version
         working-directory: android-shell
@@ -49,12 +65,14 @@ jobs:
           BUILD=$(grep -o "versionCode [0-9]*" app/build.gradle | head -1 | awk '{print $2}')
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "build=$BUILD" >> "$GITHUB_OUTPUT"
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: efootball-competition-bet-android-test
           path: android-shell/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
+
       - name: Publish test APK
         env:
           GH_TOKEN: ${{ github.token }}
@@ -62,6 +80,7 @@ jobs:
           cp android-shell/app/build/outputs/apk/debug/app-debug.apk efootball-competition-bet-test.apk
           gh release delete test-latest --yes --cleanup-tag || true
           gh release create test-latest efootball-competition-bet-test.apk --title "E-Football Competition Bet — Test APK v${{ steps.app_version.outputs.version }}" --notes "Test build ${{ steps.app_version.outputs.version }} (${{ steps.app_version.outputs.build }}). Desktop-mode WebView, app-local storage and built-in update checking."
+
       - name: Publish update manifest
         run: |
           cat > public/app-release.json <<'EOF'
@@ -75,7 +94,7 @@ jobs:
             "forceUpdate": false,
             "downloadUrl": "https://github.com/lomita483-del/efootballcompetitionbetting/releases/download/test-latest/efootball-competition-bet-test.apk",
             "releaseNotes": ["Desktop-mode Android app update. App-local storage is preserved and Chrome data is separate."],
-            "publishedAt": "2026-09-22T22:00:00Z"
+            "publishedAt": "${{ github.event.head_commit.timestamp }}"
           }
           EOF
           git config user.name "github-actions[bot]"
