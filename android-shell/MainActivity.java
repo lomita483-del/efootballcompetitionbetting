@@ -25,10 +25,14 @@ public class MainActivity extends Activity {
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
         settings.setMediaPlaybackRequiresUserGesture(false);
 
-        // Use the phone's real CSS viewport instead of forcing a desktop/wide canvas.
-        // This prevents the website from appearing permanently zoomed out on mobile.
+        // Use the real phone-width viewport and start slightly enlarged.
+        // Android documents that overview mode is what zooms wide content out;
+        // keep it off and explicitly start at 125% for a more readable phone UI.
         settings.setUseWideViewPort(false);
         settings.setLoadWithOverviewMode(false);
+        webView.setInitialScale(125);
+
+        // Lock the scale after the initial 125% setting.
         settings.setSupportZoom(false);
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
@@ -44,22 +48,25 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
-                // Some deployed pages omit a mobile viewport tag. Add one at runtime
-                // so the existing responsive UI uses the actual phone width.
+                // Force a mobile viewport and prevent horizontal page drift.
                 String script =
                     "(function(){"
                     + "var m=document.querySelector('meta[name=viewport]');"
                     + "if(!m){m=document.createElement('meta');m.name='viewport';document.head.appendChild(m);}"
                     + "m.setAttribute('content','width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover');"
                     + "var s=document.getElementById('ecb-mobile-stability');"
-                    + "if(!s){s=document.createElement('style');s.id='ecb-mobile-stability';s.textContent='html,body{width:100%;max-width:100%;overflow-x:hidden!important;margin:0;padding:0}body{-webkit-text-size-adjust:100%;overscroll-behavior-x:none}*,*::before,*::after{box-sizing:border-box}';document.head.appendChild(s);}"
+                    + "if(!s){s=document.createElement('style');s.id='ecb-mobile-stability';"
+                    + "s.textContent='html,body{width:100%;max-width:100%;min-width:0!important;overflow-x:hidden!important;margin:0;padding:0}"
+                    + "#root{width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:hidden!important}"
+                    + "body{-webkit-text-size-adjust:100%;overscroll-behavior-x:none}"
+                    + "*,*::before,*::after{box-sizing:border-box}';"
+                    + "document.head.appendChild(s);}"
                     + "})();";
                 view.evaluateJavascript(script, null);
             }
         });
 
-        // Keep the shell visually locked to the phone width and prevent accidental
-        // horizontal drift/overscroll while allowing normal vertical scrolling.
+        // No sideways scrolling/overscroll. Vertical scrolling remains normal.
         webView.setHorizontalScrollBarEnabled(false);
         webView.setVerticalScrollBarEnabled(true);
         webView.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
