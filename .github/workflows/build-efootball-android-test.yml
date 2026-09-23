@@ -99,32 +99,29 @@ jobs:
 
           # Upload explicitly after creating the release so the APK asset is
           # present before the update manifest is published.
-          # Upload through GitHub's release-asset endpoint with retries.
-          # GitHub can occasionally return an upstream 502 while creating a
-          # temporary "starter" asset; remove that temporary asset and retry.
+          # Upload the raw APK through GitHub's documented release-asset endpoint.
           RELEASE_ID=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" --jq '.id')
           APK_UPLOAD_OK=0
           for ATTEMPT in 1 2 3 4 5; do
             echo "Uploading APK release asset (attempt $ATTEMPT/5)..."
-            set +e
-            UPLOAD_RESPONSE=$(gh api --method POST \
+            if curl --fail-with-body --silent --show-error --location --retry 2 \
+              -X POST \
               -H "Accept: application/vnd.github+json" \
-              -H "Content-Type: application/vnd.android.package-archive" \
-              --input efootball-competition-bet-test.apk \
-              "https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?name=efootball-competition-bet-test.apk" 2>&1)
-            UPLOAD_STATUS=$?
-            set -e
-
-            if [ "$UPLOAD_STATUS" -eq 0 ]; then
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "X-GitHub-Api-Version: 2026-03-10" \
+              -H "Content-Type: application/octet-stream" \
+              --data-binary "@efootball-competition-bet-test.apk" \
+              "https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?name=efootball-competition-bet-test.apk" >/tmp/release-asset-response.json; then
               ASSET_COUNT=$(gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets" --jq '[.[] | select(.name == "efootball-competition-bet-test.apk" and .state == "uploaded")] | length')
               if [ "$ASSET_COUNT" -eq 1 ]; then
                 APK_UPLOAD_OK=1
                 echo "APK asset uploaded successfully."
                 break
               fi
+            else
+              cat /tmp/release-asset-response.json 2>/dev/null || true
             fi
 
-            echo "$UPLOAD_RESPONSE"
             for ASSET_ID in $(gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets" --jq '.[] | select(.name == "efootball-competition-bet-test.apk") | .id'); do
               gh api --method DELETE "repos/$GITHUB_REPOSITORY/releases/assets/$ASSET_ID" || true
             done
