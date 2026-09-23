@@ -42,9 +42,16 @@ public final class UpdateChecker {
     private static final String TAG = "ECBUpdateChecker";
     // Admin-controlled release endpoint. A build is invisible until an admin
     // explicitly triggers it after testing.
-    private static final String[] MANIFESTS = {
-        "https://lslonlinebetting.lovable.app/api/public/app-release"
-    };
+    // The Supabase release-control row is the single source of truth.
+    // This prevents a stale website deployment or historical static manifest
+    // from showing an old release/old What's New list.
+    private static final String RELEASES_URL =
+        "https://udwsxqdegrtaqlbwnrqg.supabase.co/rest/v1/app_release_control"
+        + "?id=eq.1&select=enabled,latest_version,latest_build,download_url,"
+        + "whats_new,force_update,minimum_supported_build,updated_at";
+    private static final String SUPABASE_PUBLISHABLE_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1dHdzxHNkZWRncnRhcWxid25ycWdqIiwicmVmIjoidWR3c3hxZGVncnRhcWxid25ycWdqIiwicm9uIjoiYW5vbiJ9";
+
     private static final int MAX_ATTEMPTS = 3;
     private static final int CONNECT_TIMEOUT_MS = 8000;
     private static final int READ_TIMEOUT_MS = 12000;
@@ -58,81 +65,59 @@ public final class UpdateChecker {
         if (!checking.compareAndSet(false, true)) return;
 
         new Thread(() -> {
+            HttpURLConnection connection = null;
             try {
-                for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-                    int bestBuild = -1, bestMinimumBuild = 0;
-                    String bestVersion = "", bestDownloadUrl = "", bestNotes = "";
-                    boolean bestForceUpdate = false, receivedManifest = false;
+                URL url = new URL(RELEASES_URL + "&t=" + System.currentTimeMillis());
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
+                connection.setReadTimeout(READ_TIMEOUT_MS);
+                connection.setUseCaches(false);
+                connection.setInstanceFollowRedirects(true);
+                connection.setRequestProperty("Cache-Control", "no-cache, no-store, max-age=0");
+                connection.setRequestProperty("Pragma", "no-cache");
+                connection.setRequestProperty("Accept", "application/json");
+                connection.setRequestProperty("apikey", SUPABASE_PUBLISHABLE_KEY);
+                connection.setRequestProperty("Authorization", "Bearer " + SUPABASE_PUBLISHABLE_KEY);
 
-                    for (String manifestUrl : MANIFESTS) {
-                        HttpURLConnection connection = null;
-                        try {
-                            URL url = new URL(manifestUrl + "?t=" + System.currentTimeMillis());
-                            connection = (HttpURLConnection) url.openConnection();
-                            connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
-                            connection.setReadTimeout(READ_TIMEOUT_MS);
-                            connection.setUseCaches(false);
-                            connection.setInstanceFollowRedirects(true);
-                            connection.setRequestProperty("Cache-Control", "no-cache, no-store, max-age=0");
-                            connection.setRequestProperty("Pragma", "no-cache");
-                            connection.setRequestProperty("Accept", "application/json");
-
-                            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                                throw new IllegalStateException("HTTP " + connection.getResponseCode());
-                            }
-
-                            StringBuilder body = new StringBuilder();
-                            try (BufferedReader reader = new BufferedReader(
-                                    new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
-                                String line;
-                                while ((line = reader.readLine()) != null) body.append(line);
-                            }
-
-                            JSONObject manifest = new JSONObject(body.toString());
-                            if (!manifest.optBoolean("enabled", false)) {
-                                receivedManifest = true;
-                                continue;
-                            }
-                            int latestBuild = manifest.optInt("latestBuild", 0);
-                            receivedManifest = true;
-
-                            if (latestBuild > bestBuild) {
-                                bestBuild = latestBuild;
-                                bestMinimumBuild = manifest.optInt("minimumSupportedBuild", 0);
-                                bestVersion = manifest.optString("latestVersion", "new version");
-                                bestDownloadUrl = manifest.optString("downloadUrl", "");
-                                // Only the explicitly edited What's New list is shown.
-                                // Never fall back to historical releaseNotes.
-                                Object notes = manifest.opt("whatsNew");
-                                bestNotes = formatReleaseNotes(notes);
-                                bestForceUpdate = manifest.optBoolean("forceUpdate", false);
-                            }
-                        } catch (Exception error) {
-                            Log.w(TAG, "Manifest failed: " + manifestUrl, error);
-                        } finally {
-                            if (connection != null) connection.disconnect();
-                        }
-                    }
-
-                    if (receivedManifest && bestBuild > BuildConfig.VERSION_CODE) {
-                        boolean mandatory = bestForceUpdate ||
-                            (bestMinimumBuild > 0 && BuildConfig.VERSION_CODE < bestMinimumBuild);
-                        showUpdateDialog(activity, bestVersion, bestBuild, bestNotes, bestDownloadUrl, mandatory);
-                        return;
-                    }
-
-                    if (receivedManifest) return;
-
-                    if (attempt < MAX_ATTEMPTS) {
-                        try {
-                            Thread.sleep(1200L * attempt);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            return;
-                        }
-                    }
+                if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                    throw new IllegalStateException("HTTP " + connection.getResponseCode());
                 }
+
+                StringBuilder body = new StringBuilder();
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) body.append(line);
+                }
+
+                org.json.JSONArray rows = new org.json.JSONArray(body.toString());
+                if (rows.length() == 0) return;
+
+                JSONObject release = rows.optJSONObject(0);
+                if (release == null || !release.optBoolean("enabled", false)) return;
+
+                int latestBuild = release.optInt("latest_build", 0);
+                String latestVersion = release.optString("latest_version", "");
+                String downloadUrl = release.optString("download_url", "");
+                int minimumBuild = release.optInt("minimum_supported_build", 0);
+                boolean forceUpdate = release.optBoolean("force_update", false);
+
+                // IMPORTANT: only the current admin-controlled whats_new array is
+                // rendered. There is deliberately no releaseNotes/static-manifest
+                // fallback, so old What's New items cannot leak into a new release.
+                String notes = formatReleaseNotes(release.opt("whats_new"));
+
+                if (latestBuild <= BuildConfig.VERSION_CODE) return;
+                if (latestVersion.isEmpty() || downloadUrl.trim().isEmpty()) return;
+
+                boolean mandatory = forceUpdate ||
+                    (minimumBuild > 0 && BuildConfig.VERSION_CODE < minimumBuild);
+
+                showUpdateDialog(activity, latestVersion, latestBuild, notes, downloadUrl, mandatory);
+            } catch (Exception error) {
+                Log.w(TAG, "Release check failed", error);
             } finally {
+                if (connection != null) connection.disconnect();
                 checking.set(false);
             }
         }, "ECB-UpdateChecker").start();
