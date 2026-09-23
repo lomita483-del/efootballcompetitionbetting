@@ -4057,15 +4057,15 @@ function PanelBlock({ title, onView, children, accent, compact, count, hideWhenE
 function AndroidAppUpdatesPanel() {
   const [releaseControl, setReleaseControl] = useState<any>({
     enabled: false,
-    latest_version: "1.0.31",
-    latest_build: 32,
+    latest_version: "1.0.33",
+    latest_build: 34,
     download_url: "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
     whats_new: [
-      "The home logo button is now smaller while remaining clearly visible and clickable.",
-      "All app pages now use a desktop-style WebView layout like the Admin Console.",
-      "The wide desktop layout is applied consistently across normal pages instead of switching to the narrow mobile layout.",
-      "Pinch-to-zoom remains enabled for accessibility.",
-      "Update checks continue to detect newly triggered releases while the app is open."
+      "All app pages now use the same wide desktop website layout instead of the mobile layout.",
+      "The WebView uses a consistent 50% desktop presentation so the full desktop navigation and page structure fit phone screens.",
+      "The desktop layout is applied consistently across home, matches, betting, dashboards, Admin Console, and other pages.",
+      "The update release is based on the installed app version, not the signed-in user account.",
+      "Triggered releases are checked every 3 seconds while the app is open."
     ],
     force_update: false,
     minimum_supported_build: 0,
