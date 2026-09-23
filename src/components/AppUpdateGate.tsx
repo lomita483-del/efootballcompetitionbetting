@@ -42,24 +42,19 @@ export function AppUpdateGate() {
 
   const checkForUpdate = async () => {
     if (checkingRef.current) return;
-    checkingRef.current = true;
     const webViewNative = typeof navigator !== "undefined" && isEcbAndroidWebView();
     const capacitorNative = Capacitor.isNativePlatform();
-    if (!webViewNative && !capacitorNative) return;
+
+    // The standalone ECB Android shell has its own native updater. Do not
+    // show a second web popup or send APK downloads to the browser from it.
+    if (webViewNative || !capacitorNative) return;
+
+    checkingRef.current = true;
 
     try {
-      let version = "";
-      let build = 0;
-
-      if (capacitorNative) {
-        const info = await App.getInfo();
-        version = info.version || "";
-        build = Number(info.build) || 0;
-      } else {
-        const match = navigator.userAgent.match(/ECBAndroidApp\/([0-9.]+)/i);
-        version = match?.[1] || "";
-        build = versionToNumber(version);
-      }
+      const info = await App.getInfo();
+      const version = info.version || "";
+      const build = Number(info.build) || 0;
 
       let next: ReleaseManifest | null = null;
       for (const manifestUrl of RELEASE_MANIFESTS) {
@@ -105,12 +100,6 @@ export function AppUpdateGate() {
       }).then((handle) => {
         removeListener = () => handle.remove();
       });
-    } else if (isEcbAndroidWebView()) {
-      const onVisible = () => {
-        if (document.visibilityState === "visible") checkForUpdate();
-      };
-      document.addEventListener("visibilitychange", onVisible);
-      removeListener = () => document.removeEventListener("visibilitychange", onVisible);
     }
 
     return () => {
