@@ -20,11 +20,15 @@ import org.json.JSONObject;
 
 public final class UpdateChecker {
     private static final String TAG = "ECBUpdateChecker";
+
+    // Prefer GitHub's manifest because it is independent of the Lovable site.
+    // Keep two fallbacks so a temporary CDN/network problem does not hide updates.
     private static final String[] MANIFESTS = {
-        "https://lslonlinebetting.lovable.app/app-release.json",
         "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/app-release.json",
-        "https://cdn.jsdelivr.net/gh/lomita483-del/efootballcompetitionbetting@main/public/app-release.json"
+        "https://cdn.jsdelivr.net/gh/lomita483-del/efootballcompetitionbetting@main/public/app-release.json",
+        "https://lslonlinebetting.lovable.app/app-release.json"
     };
+
     private static final int MAX_ATTEMPTS = 3;
     private static final int CONNECT_TIMEOUT_MS = 8000;
     private static final int READ_TIMEOUT_MS = 8000;
@@ -89,8 +93,6 @@ public final class UpdateChecker {
                                 + ", installed build=" + BuildConfig.VERSION_CODE
                                 + ", latest build=" + latestBuild);
 
-                            // IMPORTANT: never stop at a stale "no update" manifest.
-                            // Another source may already have the newer release.
                             if (latestBuild > bestBuild) {
                                 bestBuild = latestBuild;
                                 bestMinimumBuild = minimumBuild;
@@ -124,9 +126,8 @@ public final class UpdateChecker {
                     }
 
                     if (receivedManifest && bestBuild >= 0) {
-                        Log.d(TAG, "No update available after checking all manifest sources. "
-                            + "installed build=" + BuildConfig.VERSION_CODE
-                            + ", highest remote build=" + bestBuild);
+                        Log.d(TAG, "No update available. installed build="
+                            + BuildConfig.VERSION_CODE + ", highest remote build=" + bestBuild);
                         return;
                     }
 
