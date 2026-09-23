@@ -49,24 +49,17 @@ jobs:
 
       - name: Build APK
         working-directory: android-shell
-        run: gradle :app:assembleDebug --no-daemon --stacktrace
+        run: gradle :app:assembleRelease --no-daemon --stacktrace
 
-      - name: Apply persistent signing key when configured
+      - name: Decode persistent signing key
         env:
           ECB_ANDROID_KEYSTORE_BASE64: ${{ secrets.ECB_ANDROID_KEYSTORE_BASE64 }}
-          ECB_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ECB_ANDROID_KEYSTORE_PASSWORD }}
-          ECB_ANDROID_KEY_ALIAS: ${{ secrets.ECB_ANDROID_KEY_ALIAS }}
-          ECB_ANDROID_KEY_PASSWORD: ${{ secrets.ECB_ANDROID_KEY_PASSWORD }}
         run: |
-          if [ -z "$ECB_ANDROID_KEYSTORE_BASE64" ] || [ -z "$ECB_ANDROID_KEYSTORE_PASSWORD" ] || [ -z "$ECB_ANDROID_KEY_ALIAS" ] || [ -z "$ECB_ANDROID_KEY_PASSWORD" ]; then
-            echo "::error::Persistent Android signing secrets are required."
-            exit 1
-          fi
           echo "$ECB_ANDROID_KEYSTORE_BASE64" | base64 --decode > android-shell/release-key.jks
-          APKSIGNER="$ANDROID_HOME/build-tools/35.0.0/apksigner"
-          APK="android-shell/app/build/outputs/apk/debug/app-debug.apk"
-          "$APKSIGNER" sign --ks android-shell/release-key.jks --ks-key-alias "$ECB_ANDROID_KEY_ALIAS" --ks-pass env:ECB_ANDROID_KEYSTORE_PASSWORD --key-pass env:ECB_ANDROID_KEY_PASSWORD "$APK"
-          "$APKSIGNER" verify --verbose "$APK"
+
+      - name: Verify APK signature
+        run: |
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose android-shell/app/build/outputs/apk/release/app-release.apk
           rm -f android-shell/release-key.jks
 
       - name: Read app version and release notes
@@ -83,7 +76,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: efootball-competition-bet-android-test
-          path: android-shell/app/build/outputs/apk/debug/app-debug.apk
+          path: android-shell/app/build/outputs/apk/release/app-release.apk
           retention-days: 30
 
       - name: Publish test APK
@@ -93,7 +86,7 @@ jobs:
           BUILD: ${{ steps.app_version.outputs.build }}
         run: |
           TAG="android-v${VERSION}-build${BUILD}"
-          cp android-shell/app/build/outputs/apk/debug/app-debug.apk efootball-competition-bet-test.apk
+          cp android-shell/app/build/outputs/apk/release/app-release.apk efootball-competition-bet-test.apk
 
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release delete "$TAG" --yes --cleanup-tag
