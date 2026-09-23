@@ -37,7 +37,7 @@ public class MainActivity extends Activity {
         settings.setLoadWithOverviewMode(false);
         webView.setInitialScale(80);
 
-        // Keep the website at its normal CSS scale. No pinch/accidental zoom.
+        // Keep the website at its normal 80% presentation while allowing pinch zoom for accessibility.
         settings.setSupportZoom(true);
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
@@ -83,7 +83,16 @@ public class MainActivity extends Activity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 refresher.setRefreshing(false);
-                super.onPageFinished(view, url);
+                String script =
+                    "(function(){"
+                    + "var m=document.querySelector('meta[name=viewport]');"
+                    + "if(m){m.setAttribute('content','width=1024,initial-scale=1.0,minimum-scale=0.5,maximum-scale=5.0,user-scalable=yes');}"
+                    + "var s=document.getElementById('ecb-admin-scale');"
+                    + "if(!s){s=document.createElement('style');s.id='ecb-admin-scale';"
+                    + "s.textContent='body{-webkit-text-size-adjust:100%;overscroll-behavior-x:none;overscroll-behavior-y:auto}';"
+                    + "document.head.appendChild(s);}"
+                    + "})();";
+                view.evaluateJavascript(script, null);
             }
         });
         refresher.addView(webView, new ViewGroup.LayoutParams(
