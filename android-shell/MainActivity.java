@@ -25,14 +25,14 @@ public class MainActivity extends Activity {
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
         settings.setMediaPlaybackRequiresUserGesture(false);
 
-        // Use the real phone-width viewport and start slightly enlarged.
-        // Android documents that overview mode is what zooms wide content out;
-        // keep it off and explicitly start at 125% for a more readable phone UI.
-        settings.setUseWideViewPort(false);
+        // Match the site's desktop/admin layout instead of forcing a
+        // phone-width responsive layout. The page gets a fixed desktop
+        // viewport and starts at 100%, so it is not automatically shrunk.
+        settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(false);
-        webView.setInitialScale(125);
+        webView.setInitialScale(100);
 
-        // Lock the scale after the initial 125% setting.
+        // Lock the page at the chosen scale. No pinch or browser zoom.
         settings.setSupportZoom(false);
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
@@ -48,25 +48,24 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
-                // Force a mobile viewport and prevent horizontal page drift.
+                // Use a desktop/admin-style viewport and preserve the site's
+                // desktop CSS instead of forcing mobile-width CSS.
                 String script =
                     "(function(){"
                     + "var m=document.querySelector('meta[name=viewport]');"
                     + "if(!m){m=document.createElement('meta');m.name='viewport';document.head.appendChild(m);}"
-                    + "m.setAttribute('content','width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover');"
+                    + "m.setAttribute('content','width=1024,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no');"
                     + "var s=document.getElementById('ecb-mobile-stability');"
                     + "if(!s){s=document.createElement('style');s.id='ecb-mobile-stability';"
-                    + "s.textContent='html,body{width:100%;max-width:100%;min-width:0!important;overflow-x:hidden!important;margin:0;padding:0}"
-                    + "#root{width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:hidden!important}"
-                    + "body{-webkit-text-size-adjust:100%;overscroll-behavior-x:none}"
-                    + "*,*::before,*::after{box-sizing:border-box}';"
+                    + "s.textContent='html,body{min-width:1024px;margin:0;padding:0}body{-webkit-text-size-adjust:100%;overscroll-behavior-x:none}';"
                     + "document.head.appendChild(s);}"
                     + "})();";
                 view.evaluateJavascript(script, null);
             }
         });
 
-        // No sideways scrolling/overscroll. Vertical scrolling remains normal.
+        // Keep the desktop layout stable. Horizontal scrolling is available
+        // when the desktop canvas is wider than the phone; zoom remains locked.
         webView.setHorizontalScrollBarEnabled(false);
         webView.setVerticalScrollBarEnabled(true);
         webView.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
