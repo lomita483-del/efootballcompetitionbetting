@@ -42,8 +42,7 @@ public final class UpdateChecker {
     private static final String TAG = "ECBUpdateChecker";
     private static final String[] MANIFESTS = {
         "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/app-release.json",
-        "https://cdn.jsdelivr.net/gh/lomita483-del/efootballcompetitionbetting@main/public/app-release.json",
-        "https://ecb001.lovable.app/app-release.json"
+        "https://cdn.jsdelivr.net/gh/lomita483-del/efootballcompetitionbetting@main/public/app-release.json"
     };
     private static final int MAX_ATTEMPTS = 3;
     private static final int CONNECT_TIMEOUT_MS = 8000;
