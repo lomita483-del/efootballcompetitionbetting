@@ -6,11 +6,11 @@ on:
       version:
         description: "App version"
         required: true
-        default: "1.0.0"
+        default: "1.0.26"
       build:
         description: "Android build number"
         required: true
-        default: "1"
+        default: "27"
       minimum_build:
         description: "Minimum supported build"
         required: true
@@ -21,9 +21,9 @@ on:
         type: boolean
         default: false
       release_notes:
-        description: "Release notes"
+        description: "What's new — one item per line"
         required: false
-        default: "Performance, security and app improvements"
+        default: "Fixed admin console scaling and floating checkout sizing\nFixed staged release What's New so only the current release notes are shown\nImproved realtime notifications in the Android app\nKept the optional web-to-app download reminder\nAdded admin-controlled staged, triggerable and force-update releases"
       distribution:
         description: "Build type"
         required: true
@@ -40,11 +40,11 @@ jobs:
   android:
     runs-on: ubuntu-latest
     env:
-      APP_VERSION: \${{ inputs.version }}
-      APP_BUILD: \${{ inputs.build }}
-      MINIMUM_BUILD: \${{ inputs.minimum_build }}
-      FORCE_UPDATE: \${{ inputs.force_update }}
-      RELEASE_NOTES: \${{ inputs.release_notes }}
+      APP_VERSION: ${{ inputs.version }}
+      APP_BUILD: ${{ inputs.build }}
+      MINIMUM_BUILD: ${{ inputs.minimum_build }}
+      FORCE_UPDATE: ${{ inputs.force_update }}
+      RELEASE_NOTES: ${{ inputs.release_notes }}
 
     steps:
       - uses: actions/checkout@v4
@@ -54,135 +54,85 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Add Android platform
-        run: npx cap add android
+      - name: Prepare launcher icon
+        run: |
+          mkdir -p android-shell/app/src/main/res/drawable
+          curl -fsSL https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/icon-512.png \
+            -o android-shell/app/src/main/res/drawable/site_logo.png
+          test -s android-shell/app/src/main/res/drawable/site_logo.png
 
       - name: Configure Android version
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import os
-          p = Path("android/app/build.gradle")
+          import os, re
+          p = Path("android-shell/app/build.gradle")
           s = p.read_text()
-          version = os.environ["APP_VERSION"]
-          build = os.environ["APP_BUILD"]
-          s = s.replace("versionCode 1", f"versionCode {build}")
-          s = s.replace('versionName "1.0"', f'versionName "{version}"')
-          s = s.replace("compileSdk 34", "compileSdk 35")
-          s = s.replace("targetSdk 34", "targetSdk 35")
+          s = re.sub(r"versionCode \\d+", f"versionCode {os.environ['APP_BUILD']}", s, count=1)
+          s = re.sub(r"versionName ['\"][^'\"]+['\"]", f"versionName '{os.environ['APP_VERSION']}'", s, count=1)
           p.write_text(s)
           PY
 
-      - name: Prepare release signing
-        if: \${{ inputs.distribution == 'release' }}
+      - name: Prepare permanent release signing key
+        if: ${{ inputs.distribution == 'release' }}
         env:
-          KEYSTORE_B64: \${{ secrets.ECB_ANDROID_KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: \${{ secrets.ECB_ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: \${{ secrets.ECB_ANDROID_KEY_ALIAS }}
-          KEY_PASSWORD: \${{ secrets.ECB_ANDROID_KEY_PASSWORD }}
+          KEYSTORE_B64: ${{ secrets.ECB_ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ECB_ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ECB_ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ECB_ANDROID_KEY_PASSWORD }}
         run: |
           test -n "$KEYSTORE_B64" || (echo "Missing ECB_ANDROID_KEYSTORE_BASE64" && exit 1)
           test -n "$KEYSTORE_PASSWORD" || (echo "Missing ECB_ANDROID_KEYSTORE_PASSWORD" && exit 1)
           test -n "$KEY_ALIAS" || (echo "Missing ECB_ANDROID_KEY_ALIAS" && exit 1)
           test -n "$KEY_PASSWORD" || (echo "Missing ECB_ANDROID_KEY_PASSWORD" && exit 1)
-          echo "$KEYSTORE_B64" | base64 --decode > android/ecb-release.keystore
-          cat > android/keystore.properties <<EOF
-          storeFile=../ecb-release.keystore
-          storePassword=$KEYSTORE_PASSWORD
-          keyAlias=$KEY_ALIAS
-          keyPassword=$KEY_PASSWORD
-          EOF
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path("android/app/build.gradle")
-          s = p.read_text()
-          block = r'''
-          def keystorePropertiesFile = rootProject.file("keystore.properties")
-          def keystoreProperties = new Properties()
-          if (keystorePropertiesFile.exists()) {
-              keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-          }
-          android.signingConfigs {
-              release {
-                  storeFile keystoreProperties["storeFile"] ? rootProject.file(keystoreProperties["storeFile"]) : null
-                  storePassword keystoreProperties["storePassword"]
-                  keyAlias keystoreProperties["keyAlias"]
-                  keyPassword keystoreProperties["keyPassword"]
-              }
-          }
-          '''
-          s = s.replace("android {", block + "\nandroid {", 1) if "keystorePropertiesFile" not in s else s
-          s = s.replace("buildTypes {", "buildTypes {\n        release { signingConfig signingConfigs.release }", 1)
-          p.write_text(s)
-          PY
+          echo "$KEYSTORE_B64" | base64 --decode > android-shell/release-key.jks
+          test -s android-shell/release-key.jks
 
       - name: Build debug APK
-        if: \${{ inputs.distribution == 'debug' }}
-        working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
+        if: ${{ inputs.distribution == 'debug' }}
+        working-directory: android-shell
+        run: |
+          gradle :app:assembleDebug --no-daemon --stacktrace
 
       - name: Build signed release APK
-        if: \${{ inputs.distribution == 'release' }}
-        working-directory: android
-        run: ./gradlew assembleRelease --no-daemon
+        if: ${{ inputs.distribution == 'release' }}
+        working-directory: android-shell
+        env:
+          ECB_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ECB_ANDROID_KEYSTORE_PASSWORD }}
+          ECB_ANDROID_KEY_ALIAS: ${{ secrets.ECB_ANDROID_KEY_ALIAS }}
+          ECB_ANDROID_KEY_PASSWORD: ${{ secrets.ECB_ANDROID_KEY_PASSWORD }}
+        run: |
+          gradle :app:assembleRelease --no-daemon --stacktrace
 
       - name: Upload debug APK
-        if: \${{ inputs.distribution == 'debug' }}
+        if: ${{ inputs.distribution == 'debug' }}
         uses: actions/upload-artifact@v4
         with:
           name: efootball-competition-bet-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: android-shell/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 14
 
       - name: Publish signed release
-        if: \${{ inputs.distribution == 'release' }}
+        if: ${{ inputs.distribution == 'release' }}
         env:
-          GH_TOKEN: \${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          APK="android/app/build/outputs/apk/release/app-release.apk"
-          test -f "$APK"
-          gh release create "v$APP_VERSION" "$APK#E-Football Competition Bet v$APP_VERSION.apk" --title "E-Football Competition Bet v$APP_VERSION" --notes "$RELEASE_NOTES"
-
-      - name: Update release manifest
-        if: \${{ inputs.distribution == 'release' }}
-        run: |
-          python3 - <<'PY'
-          import json, os
-          from pathlib import Path
-          from datetime import datetime, timezone
-          v = os.environ["APP_VERSION"]
-          b = int(os.environ["APP_BUILD"])
-          minimum = int(os.environ["MINIMUM_BUILD"])
-          force = os.environ["FORCE_UPDATE"].lower() == "true"
-          notes = os.environ["RELEASE_NOTES"]
-          data = {
-            "app": "E-Football Competition Bet",
-            "platform": "android",
-            "latestVersion": v,
-            "latestBuild": b,
-            "minimumSupportedVersion": "1.0.0",
-            "minimumSupportedBuild": minimum,
-            "forceUpdate": force,
-            "downloadUrl": f"https://github.com/lomita483-del/efootballcompetitionbetting/releases/download/v{v}/app-release.apk",
-            "releaseNotes": [notes] if notes else [],
-            "publishedAt": datetime.now(timezone.utc).isoformat()
-          }
-          Path("public/app-release.json").write_text(json.dumps(data, indent=2) + "\n")
-          PY
-
-      - name: Commit release manifest
-        if: \${{ inputs.distribution == 'release' }}
-        run: |
+          APK="android-shell/app/build/outputs/apk/release/app-release.apk"
+          test -s "$APK"
+          cp "$APK" "public/downloads/efootball-competition-bet-latest.apk"
+          gh release create "android-v$APP_VERSION-build$APP_BUILD" "$APK#efootball-competition-bet-v$APP_VERSION-build$APP_BUILD.apk" \
+            --title "E-Football Competition Bet v$APP_VERSION (build $APP_BUILD)" \
+            --notes "$RELEASE_NOTES"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/app-release.json
-          git commit -m "chore: publish E-Football app v$APP_VERSION" || true
+          git add public/downloads/efootball-competition-bet-latest.apk android-shell/app/build.gradle
+          git commit -m "chore: publish Android app v$APP_VERSION build $APP_BUILD" || true
           git push
+
+      - name: Upload signed release artifact
+        if: ${{ inputs.distribution == 'release' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: efootball-competition-bet-v${{ inputs.version }}-build${{ inputs.build }}
+          path: android-shell/app/build/outputs/apk/release/app-release.apk
+          retention-days: 30
