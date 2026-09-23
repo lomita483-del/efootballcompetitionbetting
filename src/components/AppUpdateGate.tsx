@@ -165,7 +165,7 @@ export function AppUpdateGate() {
 
   return (
     <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 p-2 backdrop-blur-md">
-      <div className="flex h-[calc(100vh-16px)] w-[calc(100vw-16px)] max-w-[960px] flex-col overflow-y-auto rounded-3xl border border-primary/30 bg-background/95 p-6 shadow-2xl sm:p-8">
+      <div className="flex max-h-[90vh] w-[94vw] max-w-none flex-col overflow-y-auto rounded-3xl border border-primary/30 bg-background/95 p-6 shadow-2xl sm:p-10">
         <div className="mb-5 flex items-start gap-4">
           <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-primary/15 text-primary">
             {mandatory ? <RefreshCw className="h-7 w-7" /> : <Download className="h-7 w-7" />}
