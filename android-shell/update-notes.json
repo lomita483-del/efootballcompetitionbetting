@@ -1,11 +1,8 @@
 {
-  "version": "1.0.11",
-  "build": 12,
   "whatsNew": [
-    "Glassmorphism update popup with a premium E-Football visual style.",
-    "Added a dedicated What's New section showing the changes in this release.",
-    "Improved update checking with multiple manifest sources and automatic retries.",
-    "Update download and installation flow is handled directly by the app.",
-    "App-local account/storage remains separate from Chrome browser data."
+    "Fixed mobile WebView scaling so the site uses the phone screen correctly instead of appearing zoomed out.",
+    "Update downloads now happen inside the app and launch the Android installer directly instead of opening the browser.",
+    "Improved update download progress and failure handling.",
+    "App-local account and WebView storage remain separate from Chrome browser data."
   ]
 }
