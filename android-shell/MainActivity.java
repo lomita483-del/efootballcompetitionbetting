@@ -92,7 +92,7 @@ public class MainActivity extends Activity {
         homeLogo.setClickable(true);
         homeLogo.setFocusable(true);
         homeLogo.setOnClickListener(v -> webView.loadUrl(APP_URL));
-        int logoSize = (int) (220 * getResources().getDisplayMetrics().density);
+        int logoSize = (int) (160 * getResources().getDisplayMetrics().density);
         FrameLayout.LayoutParams logoParams = new FrameLayout.LayoutParams(
             logoSize, logoSize, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM
         );
