@@ -57,23 +57,13 @@ public final class UpdateChecker {
     private static final int READ_TIMEOUT_MS = 12000;
     private static final AtomicBoolean checking = new AtomicBoolean(false);
     private static boolean showing;
-    private static volatile boolean adminStatusKnown;
-    private static volatile boolean adminUser;
-
-    /** Called by the web app after its auth/profile state is known. */
-    public static void setAdminUser(boolean isAdmin) {
-        adminUser = isAdmin;
-        adminStatusKnown = true;
-    }
-
     private UpdateChecker() {}
 
     public static void check(Activity activity) {
-        // The release popup is for end users. Admins trigger releases manually
-        // from the website and should never receive their own release popup.
-        // Wait until the web app has told us whether the current account is an
-        // admin so an admin cannot be caught by the first startup check.
-        if (adminUser || !adminStatusKnown) return;
+        // Releases are app-version based, not account based. Every installed
+        // older build checks the same admin-controlled release record, regardless
+        // of which account is signed in, so a triggered release reaches all old
+        // app versions as quickly as the active polling interval allows.
         if (activity == null || activity.isFinishing() || showing) return;
         if (!checking.compareAndSet(false, true)) return;
 
