@@ -53,24 +53,6 @@ public class MainActivity extends Activity {
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                // Match the admin/desktop canvas. Crucially, do not inject a
-                // device-width viewport or any CSS that scales the whole page.
-                String script =
-                    "(function(){"
-                    + "var m=document.querySelector('meta[name=viewport]');"
-                    + "if(m){m.setAttribute('content','width=1024,initial-scale=1.0,minimum-scale=1.0,maximum-scale=5.0,user-scalable=yes');}"
-                    + "var s=document.getElementById('ecb-admin-scale');"
-                    + "if(!s){s=document.createElement('style');s.id='ecb-admin-scale';"
-                    + "s.textContent='body{-webkit-text-size-adjust:100%;overscroll-behavior-x:none}';"
-                    + "document.head.appendChild(s);}"
-                    + "})();";
-                view.evaluateJavascript(script, null);
-            }
-        });
-
         webView.setHorizontalScrollBarEnabled(false);
         webView.setVerticalScrollBarEnabled(true);
         webView.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
