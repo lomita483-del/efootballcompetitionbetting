@@ -1,10 +1,9 @@
 {
   "whatsNew": [
-    "Pinch-to-zoom is now enabled in the Android app, with the app starting at a compact 85% zoom by default.",
-    "The bottom-center home control is smaller and redesigned with a premium gold finish, halo, depth and stronger visibility.",
-    "The Android launch screen now uses the full E-Football logo on a branded dark background instead of a blank white startup screen.",
-    "The homepage Menu control and drawer now use a higher-contrast cinematic glass treatment so they remain clearly visible over the background.",
-    "Admin App Updater now has Refresh version, which reads the latest Android version, build and What's New notes from the release files and stages them without triggering the update.",
-    "Android release metadata and the website footer are prepared for v1.0.47, build 48."
+    "The app footer now displays the current release version and reads the live release metadata so the version stays synchronized with the latest app release.",
+    "The Android package version/build was incremented for this release.",
+    "Admin App Updater now includes Refresh version, which reads the Android version, build number, and What's New directly from the release files and stages them without enabling the update.",
+    "The release metadata and What's New list are synchronized to the staged Android release and include the complete user-facing changes in this version.",
+    "Release What's New is generated from the files changed since the previous Android release instead of copying unrelated older release notes."
   ]
 }
