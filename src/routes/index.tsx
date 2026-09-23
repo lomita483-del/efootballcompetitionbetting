@@ -114,6 +114,7 @@ function Index() {
 
   return (
     <Layout>
+      <div className="home-page">
       <section className="container mt-4 flex items-stretch gap-3">
         <div className="flex-1 min-w-0"><HomeBannerSlider embedded placement="home" /></div>
         <HomeQuickMenu />
@@ -140,6 +141,7 @@ function Index() {
         </div>
       </section>
       <PromoFooterBand />
+      </div>
     </Layout>
   );
 }
