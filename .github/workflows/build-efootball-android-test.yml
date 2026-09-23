@@ -93,9 +93,15 @@ jobs:
           fi
 
           jq -r '.whatsNew | join("\n")' android-shell/update-notes.json > release-notes.txt
-          gh release create "$TAG" efootball-competition-bet-test.apk             --title "E-Football Competition Bet — Test APK v${VERSION}"             --notes-file release-notes.txt
+          gh release create "$TAG" \
+            --title "E-Football Competition Bet — Test APK v${VERSION}" \
+            --notes-file release-notes.txt
 
-          echo "Published release: $TAG"
+          # Upload explicitly after creating the release so the APK asset is
+          # present before the update manifest is published.
+          gh release upload "$TAG" efootball-competition-bet-test.apk --clobber
+
+          echo "Published release with APK asset: $TAG"
 
       - name: Publish update manifest
         run: |
