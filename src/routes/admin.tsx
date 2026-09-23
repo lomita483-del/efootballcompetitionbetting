@@ -349,28 +349,70 @@ function DesktopCanvas({ children }: { children: React.ReactNode }) {
   const innerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const [height, setHeight] = useState(0);
+
   useEffect(() => {
+    let raf = 0;
+
     const measure = () => {
-      const w = hostRef.current?.clientWidth || window.innerWidth;
-      const s = Math.min(1, w / 1280);
-      setScale(s);
-      setHeight((innerRef.current?.scrollHeight || 0) * s);
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const host = hostRef.current;
+        const inner = innerRef.current;
+        if (!host || !inner) return;
+
+        const nextScale = Math.min(1, host.clientWidth / 1280);
+        setScale((prev) => (Math.abs(prev - nextScale) < 0.001 ? prev : nextScale));
+
+        // CSS transforms do not participate in normal document flow, so the
+        // wrapper must reserve the scaled visual height explicitly.
+        const nextHeight = inner.scrollHeight * nextScale;
+        setHeight((prev) => (Math.abs(prev - nextHeight) < 1 ? prev : nextHeight));
+      });
     };
+
     measure();
+
     const ro = new ResizeObserver(measure);
     if (innerRef.current) ro.observe(innerRef.current);
-    if (hostRef.current) ro.observe(hostRef.current);
+
+    // Some admin panels change their content without changing the observed
+    // element's border box immediately (Tabs, async data, font/layout changes).
+    // Watch the subtree and re-measure on those changes so the page scrollbar
+    // always reaches the true bottom of the active panel.
+    const mo = innerRef.current
+      ? new MutationObserver(measure)
+      : null;
+    if (mo && innerRef.current) {
+      mo.observe(innerRef.current, { subtree: true, childList: true, attributes: true });
+    }
+
     window.addEventListener("resize", measure);
     window.addEventListener("orientationchange", measure);
+    document.fonts?.ready.then(measure).catch(() => {});
+
     return () => {
+      cancelAnimationFrame(raf);
       ro.disconnect();
+      mo?.disconnect();
       window.removeEventListener("resize", measure);
       window.removeEventListener("orientationchange", measure);
     };
   }, []);
+
   return (
-    <div ref={hostRef} className="w-full overflow-x-hidden" style={{ height: height || undefined }}>
-      <div ref={innerRef} style={{ width: 1280, transform: `scale(${scale})`, transformOrigin: "top left" }}>
+    <div
+      ref={hostRef}
+      className="w-full overflow-x-hidden overflow-y-visible"
+      style={{ height: height > 0 ? height : undefined, minHeight: height > 0 ? height : undefined }}
+    >
+      <div
+        ref={innerRef}
+        style={{
+          width: 1280,
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+        }}
+      >
         {children}
       </div>
     </div>
