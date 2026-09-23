@@ -1,7 +1,7 @@
 {
   "whatsNew": [
     "The entire app uses the website's normal mobile responsive layout.",
-    "The whole WebView presentation is restored to 70% scale.",
+    "The whole WebView presentation is restored to 85% scale.",
     "The update button is handled by the native Android updater instead of an ignored WebView new-window request.",
     "APK downloads are validated before Android is asked to install the update.",
     "Update checks continue every 3 seconds while the app is open."
