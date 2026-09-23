@@ -50,12 +50,18 @@ public class MainActivity extends Activity {
                     "(function(){"
                     + "var m=document.querySelector('meta[name=viewport]');"
                     + "if(!m){m=document.createElement('meta');m.name='viewport';document.head.appendChild(m);}"
-                    + "m.setAttribute('content','width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover');"
+                    + "m.setAttribute('content','width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover');"
+                    + "var s=document.getElementById('ecb-mobile-stability');"
+                    + "if(!s){s=document.createElement('style');s.id='ecb-mobile-stability';s.textContent='html,body{width:100%;max-width:100%;overflow-x:hidden!important;margin:0;padding:0}body{-webkit-text-size-adjust:100%;overscroll-behavior-x:none}*,*::before,*::after{box-sizing:border-box}';document.head.appendChild(s);}"
                     + "})();";
                 view.evaluateJavascript(script, null);
             }
         });
 
+        // Keep the shell visually locked to the phone width and prevent accidental
+        // horizontal drift/overscroll while allowing normal vertical scrolling.
+        webView.setHorizontalScrollBarEnabled(false);
+        webView.setVerticalScrollBarEnabled(true);
         webView.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
         setContentView(webView);
         webView.loadUrl(APP_URL);
