@@ -48,21 +48,21 @@ export function HomeQuickMenu() {
   ];
 
   return (
-    <div ref={ref} className="relative shrink-0 self-stretch">
+    <div ref={ref} className="relative z-40 shrink-0 self-stretch">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-label="Open menu"
-        className="group relative h-full w-[76px] sm:w-[92px] md:w-[108px] flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-white/45 bg-[linear-gradient(145deg,rgba(10,20,36,0.96),rgba(16,36,57,0.92))] text-primary shadow-[0_10px_30px_-12px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.16)] transition-all hover:border-primary/80 hover:shadow-[0_14px_36px_-12px_rgba(212,175,55,0.55)] active:scale-95"
+        className="group relative h-full min-w-[82px] w-[82px] sm:min-w-[98px] sm:w-[98px] md:min-w-[112px] md:w-[112px] flex flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-primary/70 bg-[linear-gradient(145deg,rgba(5,14,28,0.98),rgba(14,35,57,0.97))] backdrop-blur-xl text-primary shadow-[0_10px_30px_-12px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.16)] transition-all hover:border-primary/80 hover:shadow-[0_14px_36px_-12px_rgba(212,175,55,0.55)] active:scale-95"
       >
         <span className="pointer-events-none absolute inset-[1px] rounded-[15px] border border-primary/20 bg-[radial-gradient(circle_at_50%_0%,rgba(255,220,120,0.18),transparent_55%)]" />
         {!open && <span className="pointer-events-none absolute -inset-1 rounded-2xl ring-2 ring-primary/35 animate-pulse" />}
-        <span className="relative grid place-items-center h-9 w-9 sm:h-10 sm:w-10 rounded-xl border border-primary/55 bg-primary/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_0_18px_-7px_rgba(212,175,55,0.9)]">
+        <span className="relative grid place-items-center h-9 w-9 sm:h-10 sm:w-10 rounded-xl border-2 border-primary/75 bg-primary/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_0_18px_-7px_rgba(212,175,55,0.9)]">
           <MenuIcon className="h-5 w-5 sm:h-5.5 sm:w-5.5 drop-shadow-[0_0_8px_rgba(255,220,120,0.55)]" />
         </span>
         <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.18em] flex items-center gap-0.5">
-          Menu <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} />
+          MENU <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} />
         </span>
       </button>
 
