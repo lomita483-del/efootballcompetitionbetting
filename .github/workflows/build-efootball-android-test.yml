@@ -7,6 +7,8 @@ on:
     branches: [main]
     paths:
       - "android-shell/**"
+      - "src/routes/dashboard.tsx"
+      - "src/styles/user-dashboard-premium.css"
       - ".github/workflows/build-efootball-android-test.yml"
 
 permissions:
@@ -55,8 +57,7 @@ jobs:
       - name: Sync exact website launcher image
         run: |
           mkdir -p android-shell/app/src/main/res/drawable
-          curl -fsSL "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/icon-512.png" \
-            -o android-shell/app/src/main/res/drawable/site_logo.png
+          curl -fsSL "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/icon-512.png"             -o android-shell/app/src/main/res/drawable/site_logo.png
           file android-shell/app/src/main/res/drawable/site_logo.png
           test -s android-shell/app/src/main/res/drawable/site_logo.png
 
@@ -109,24 +110,15 @@ jobs:
           fi
 
           jq -r '.whatsNew | join("\n")' android-shell/update-notes.json > release-notes.txt
-          gh release create "$TAG" \
-            --title "E-Football Competition Bet — Test APK v${VERSION}" \
-            --notes-file release-notes.txt
+          gh release create "$TAG"             --title "E-Football Competition Bet — Test APK v${VERSION}"             --notes-file release-notes.txt
 
-          # Upload explicitly after creating the release so the APK asset is
-          # present before the update manifest is published.
-          # Release assets are currently unreliable in this CI environment.
-          # The update manifest below serves the APK from the repository raw-file endpoint.
           echo "Release created: $TAG"
           echo "APK will be published through raw.githubusercontent.com."
-
-          echo "Skipping release-asset verification; updater uses raw GitHub APK delivery."
 
       - name: Publish update manifest
         run: |
           VERSION="${{ steps.app_version.outputs.version }}"
           BUILD="${{ steps.app_version.outputs.build }}"
-          TAG="android-v${VERSION}-build${BUILD}"
           APK_PATH="public/downloads/efootball-competition-bet-latest.apk"
           mkdir -p public/downloads
           cp android-shell/app/build/outputs/apk/release/app-release.apk "$APK_PATH"
