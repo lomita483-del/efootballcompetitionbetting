@@ -45,7 +45,7 @@ public class MainActivity extends Activity {
         s.setDatabaseEnabled(true);
 
         // Keep the desktop console layout, but make the fixed phone canvas readable.
-        // 760px is intentionally between the old tiny 900px canvas and mobile mode.
+        // 760px is intentionally between the old tiny 900px canvas and mobile mode.\n        // Build 1.0.7 includes the final system-bar and updater fixes.
         s.setUseWideViewPort(true);
         s.setLoadWithOverviewMode(true);
         s.setAllowFileAccess(false);
