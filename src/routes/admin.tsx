@@ -4099,8 +4099,8 @@ function PanelBlock({ title, onView, children, accent, compact, count, hideWhenE
 function AndroidAppUpdatesPanel() {
   const [releaseControl, setReleaseControl] = useState<any>({
     enabled: false,
-    latest_version: "1.0.49",
-    latest_build: 50,
+    latest_version: "1.0.50",
+    latest_build: 51,
     download_url: "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
     whats_new: [
       "The app footer now displays the current release version and reads the live release metadata so the version stays synchronized with the latest app release.",
@@ -4110,7 +4110,7 @@ function AndroidAppUpdatesPanel() {
       "Release What's New is generated from the files changed since the previous Android release instead of copying unrelated older release notes."
     ],
     force_update: false,
-    minimum_supported_build: 50,
+    minimum_supported_build: 51,
   });
 
   useEffect(() => {
