@@ -1,7 +1,9 @@
 {
   "whatsNew": [
     "Fixed the Android WebView so the desktop website starts below the phone status bar and stays clear of the navigation bar.",
-    "Adjusted the desktop-mode scale and text size so the admin console is easier to read and tap without becoming oversized.",
+    "Starts the mobile WebView at a readable 125% scale instead of appearing zoomed out.",
+    "Zoom is locked after the initial scale so pinch zoom and accidental zooming in/out are disabled.",
+    "Locked the mobile page to the phone width and blocked horizontal drift/overscroll.",
     "Strengthened automatic update checking with multiple manifest sources and retries.",
     "The updater validates the downloaded package before handing it to Android.",
     "Future releases use the persistent Android signing key so updates can replace the installed app without clearing app data.",
