@@ -4,10 +4,20 @@
   "latestVersion": "1.0.44",
   "latestBuild": 45,
   "minimumSupportedVersion": "1.0.0",
-  "minimumSupportedBuild": 1,
-  "forceUpdate": false,
+  "minimumSupportedBuild": 45,
+  "forceUpdate": true,
   "downloadUrl": "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
-  "whatsNew": ["The Android update popup now uses a full-screen layout with much larger text and buttons for easier reading.","The What's New list is now written specifically for the release being installed instead of reusing older release notes.","The app footer now shows the current app version and follows the active release version automatically.","The Android app and website now use the same release version and build information for update prompts.","Release metadata is kept synchronized so the update dialog shows the actual changes included in the new build."],
-  "releaseNotes": ["The Android update popup now uses a full-screen layout with much larger text and buttons for easier reading.","The What's New list is now written specifically for the release being installed instead of reusing older release notes.","The app footer now shows the current app version and follows the active release version automatically.","The Android app and website now use the same release version and build information for update prompts.","Release metadata is kept synchronized so the update dialog shows the actual changes included in the new build."],
-  "publishedAt": "2026-09-23T19:57:14+01:00"
+  "whatsNew": [
+    "The Android update popup is now full-screen with much larger text and controls for easier reading.",
+    "The app footer now shows the current app version and updates automatically from the active release version.",
+    "The Android app release has been updated to version 1.0.44 (build 45).",
+    "The updater now uses the admin-controlled release record as the single source for the current version and its What's New content."
+  ],
+  "releaseNotes": [
+    "The Android update popup is now full-screen with much larger text and controls for easier reading.",
+    "The app footer now shows the current app version and updates automatically from the active release version.",
+    "The Android app release has been updated to version 1.0.44 (build 45).",
+    "The updater now uses the admin-controlled release record as the single source for the current version and its What's New content."
+  ],
+  "publishedAt": "2026-09-23T20:40:31.651Z"
 }
