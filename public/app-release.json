@@ -1,18 +1,12 @@
 {
   "app": "E-Football Competition Bet",
   "platform": "android",
-  "latestVersion": "1.0.6",
-  "latestBuild": 7,
+  "latestVersion": "1.0.7",
+  "latestBuild": 8,
   "minimumSupportedVersion": "1.0.0",
   "minimumSupportedBuild": 1,
   "forceUpdate": false,
   "downloadUrl": "https://github.com/lomita483-del/efootballcompetitionbetting/releases/download/test-latest/efootball-competition-bet-test.apk",
-  "releaseNotes": [
-    "Fixed Android system-bar overlap so the top navigation is fully tappable.",
-    "Improved update checking with retries and recovery after no-update checks.",
-    "Added Android notification permission request.",
-    "Restored the ECB site logo as the app icon.",
-    "Kept the phone desktop canvas readable and improved browser viewport behavior."
-  ],
-  "publishedAt": "2026-09-23T00:02:01Z"
+  "releaseNotes": ["Desktop-mode Android app update. App-local storage is preserved and Chrome data is separate."],
+  "publishedAt": "2026-09-22T22:00:00Z"
 }
