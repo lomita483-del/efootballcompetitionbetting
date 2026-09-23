@@ -2,6 +2,8 @@ package com.ecb.efootballcompetitionbet;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.webkit.CookieManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -16,6 +18,13 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 public class MainActivity extends Activity {
     private static final String APP_URL = "https://lslonlinebetting.lovable.app/";
     private WebView webView;
+    private final Handler updateHandler = new Handler(Looper.getMainLooper());
+    private final Runnable updatePoll = new Runnable() {
+        @Override public void run() {
+            if (!isFinishing()) UpdateChecker.check(MainActivity.this, true);
+            updateHandler.postDelayed(this, 3000);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +74,8 @@ public class MainActivity extends Activity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 refresher.setRefreshing(false);
+                boolean adminConsole = url != null && url.contains("/admin");
+                view.setInitialScale(adminConsole ? 85 : 80);
                 String script =
                     "(function(){"
                     + "var m=document.querySelector('meta[name=viewport]');"
@@ -102,18 +113,22 @@ public class MainActivity extends Activity {
         setContentView(root);
         webView.loadUrl(APP_URL);
 
-        UpdateChecker.check(this, false);
+        UpdateChecker.check(this, true);
+        updateHandler.post(updatePoll);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         if (webView != null) webView.onResume();
-        UpdateChecker.check(this, false);
+        UpdateChecker.check(this, true);
+        updateHandler.removeCallbacks(updatePoll);
+        updateHandler.post(updatePoll);
     }
 
     @Override
     protected void onPause() {
+        updateHandler.removeCallbacks(updatePoll);
         if (webView != null) webView.onPause();
         super.onPause();
     }
