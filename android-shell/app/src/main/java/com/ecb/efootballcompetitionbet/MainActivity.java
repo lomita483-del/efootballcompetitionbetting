@@ -2,21 +2,17 @@ package com.ecb.efootballcompetitionbet;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
+import android.app.AlertDialog;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Insets;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowInsets;
-import android.view.WindowInsetsController;
-import android.widget.FrameLayout;
 import android.webkit.CookieManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -30,16 +26,12 @@ public class MainActivity extends Activity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
 
-        Window window = getWindow();
-        window.setStatusBarColor(0xFF080808);
-        window.setNavigationBarColor(0xFF080808);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            window.setNavigationBarContrastEnforced(false);
-        }
+        getWindow().setStatusBarColor(0xFF080808);
+        getWindow().setNavigationBarColor(0xFF080808);
 
         FrameLayout root = new FrameLayout(this);
         root.setBackgroundColor(0xFF080808);
-        root.setFitsSystemWindows(false);
+        root.setFitsSystemWindows(true);
 
         swipeRefresh = new SwipeRefreshLayout(this);
         swipeRefresh.setColorSchemeColors(0xFFFFC400);
@@ -52,10 +44,12 @@ public class MainActivity extends Activity {
         s.setDatabaseEnabled(true);
         s.setUseWideViewPort(true);
         s.setLoadWithOverviewMode(true);
-        // The fixed desktop canvas was too small on phone screens. A modest
-        // initial scale keeps the desktop layout intact while making controls
-        // easier to read and tap.
-        webView.setInitialScale(94);
+
+        // The desktop website is intentionally kept as a fixed canvas, but the
+        // previous scale was too small on phones. 110% makes controls noticeably
+        // easier to read/tap without making the desktop layout oversized.
+        webView.setInitialScale(110);
+
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
@@ -85,43 +79,8 @@ public class MainActivity extends Activity {
             FrameLayout.LayoutParams.MATCH_PARENT
         ));
 
-        // Android 15+ targets are edge-to-edge by default. Put the actual
-        // WebView container inside the safe area so the website's navbar and
-        // controls cannot sit underneath the phone status/navigation bars.
-        root.setOnApplyWindowInsetsListener((View v, WindowInsets insets) -> {
-            int top, bottom, left, right;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                Insets bars = insets.getInsets(
-                    WindowInsets.Type.statusBars()
-                        | WindowInsets.Type.navigationBars()
-                        | WindowInsets.Type.displayCutout()
-                );
-                top = bars.top;
-                bottom = bars.bottom;
-                left = bars.left;
-                right = bars.right;
-            } else {
-                top = insets.getSystemWindowInsetTop();
-                bottom = insets.getSystemWindowInsetBottom();
-                left = insets.getSystemWindowInsetLeft();
-                right = insets.getSystemWindowInsetRight();
-            }
-            // Apply insets to the WebView container itself rather than the
-            // outer root; this reliably prevents touch targets being hidden.
-            swipeRefresh.setPadding(left, top, right, bottom);
-            return insets;
-        });
-
         setContentView(root);
-        root.post(root::requestApplyInsets);
         webView.loadUrl(APP_URL);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            WindowInsetsController controller = window.getInsetsController();
-            if (controller != null) {
-                controller.setSystemBarsAppearance(0, WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS);
-            }
-        }
 
         createNotificationChannel();
         requestNotificationPermissionIfNeeded();
@@ -131,12 +90,12 @@ public class MainActivity extends Activity {
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
-        NotificationManager manager = getSystemService(NotificationManager.class);
+        android.app.NotificationManager manager = getSystemService(android.app.NotificationManager.class);
         if (manager == null) return;
-        NotificationChannel channel = new NotificationChannel(
+        android.app.NotificationChannel channel = new android.app.NotificationChannel(
             NOTIFICATION_CHANNEL_ID,
             "E-Football Competition Bet notifications",
-            NotificationManager.IMPORTANCE_DEFAULT
+            android.app.NotificationManager.IMPORTANCE_DEFAULT
         );
         channel.setDescription("Match results, account alerts and important E-Football Competition Bet updates.");
         manager.createNotificationChannel(channel);
@@ -152,7 +111,6 @@ public class MainActivity extends Activity {
         super.onResume();
         if (webView != null) {
             webView.onResume();
-            webView.requestApplyInsets();
         }
         UpdateChecker.check(this);
     }
