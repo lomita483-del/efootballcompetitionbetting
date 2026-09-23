@@ -3,16 +3,26 @@ package com.ecb.efootballcompetitionbet;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
+import androidx.core.content.FileProvider;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -41,10 +51,12 @@ public final class UpdateChecker {
                 if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) return;
 
                 StringBuilder body = new StringBuilder();
-                try (InputStream in = conn.getInputStream();
-                     BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) body.append(line);
+                try (InputStream in = conn.getInputStream()) {
+                    byte[] buffer = new byte[8192];
+                    int count;
+                    while ((count = in.read(buffer)) != -1) {
+                        body.append(new String(buffer, 0, count, java.nio.charset.StandardCharsets.UTF_8));
+                    }
                 }
 
                 JSONObject json = new JSONObject(body.toString());
@@ -96,27 +108,131 @@ public final class UpdateChecker {
         AlertDialog dialog = new AlertDialog.Builder(activity)
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton("Download update", (d, which) -> {
-                if (!downloadUrl.isEmpty()) {
-                    try {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl));
-                        activity.startActivity(intent);
-                    } catch (Exception ignored) {}
-                }
-            })
+            .setPositiveButton("Install update", null)
+            .setNegativeButton("Cancel", mandatory ? null : (d, which) -> {})
             .setCancelable(!mandatory)
             .create();
 
-        if (!mandatory) {
-            dialog.setOnDismissListener(d -> dialogShowing = false);
-        } else {
-            dialog.setOnDismissListener(d -> {
-                dialogShowing = false;
-                MAIN.postDelayed(() -> check(activity, true), 1500);
+        dialog.setOnShowListener(d -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(false);
+                dialog.setMessage("Downloading update…");
+                downloadAndInstall(activity, dialog, downloadUrl);
             });
-        }
+        });
+
+        dialog.setOnDismissListener(d -> {
+            dialogShowing = false;
+            if (mandatory) {
+                MAIN.postDelayed(() -> check(activity, true), 1500);
+            }
+        });
 
         dialog.setCanceledOnTouchOutside(!mandatory);
         dialog.show();
+    }
+
+    private static void downloadAndInstall(Activity activity, AlertDialog dialog, String downloadUrl) {
+        new Thread(() -> {
+            HttpURLConnection conn = null;
+            FileOutputStream output = null;
+            try {
+                if (downloadUrl == null || downloadUrl.isEmpty()) {
+                    throw new IllegalArgumentException("Missing update download URL");
+                }
+
+                File updatesDir = new File(activity.getFilesDir(), "updates");
+                if (!updatesDir.exists() && !updatesDir.mkdirs()) {
+                    throw new IllegalStateException("Unable to create update directory");
+                }
+
+                File apk = new File(updatesDir, "efootball-competition-bet-update.apk");
+                if (apk.exists()) apk.delete();
+
+                URL url = new URL(downloadUrl);
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setConnectTimeout(15000);
+                conn.setReadTimeout(30000);
+                conn.setInstanceFollowRedirects(true);
+                conn.setUseCaches(false);
+                conn.setRequestProperty("Cache-Control", "no-cache");
+
+                if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                    throw new IllegalStateException("Download failed: HTTP " + conn.getResponseCode());
+                }
+
+                long total = conn.getContentLengthLong();
+                long downloaded = 0;
+
+                try (InputStream input = new BufferedInputStream(conn.getInputStream())) {
+                    output = new FileOutputStream(apk);
+                    byte[] buffer = new byte[16384];
+                    int count;
+                    while ((count = input.read(buffer)) != -1) {
+                        output.write(buffer, 0, count);
+                        downloaded += count;
+                        if (total > 0) {
+                            int percent = (int) Math.min(100, (downloaded * 100L) / total);
+                            final int p = percent;
+                            MAIN.post(() -> dialog.setMessage("Downloading update… " + p + "%"));
+                        }
+                    }
+                    output.flush();
+                } finally {
+                    if (output != null) {
+                        try { output.close(); } catch (Exception ignored) {}
+                        output = null;
+                    }
+                }
+
+                if (!apk.exists() || apk.length() < 100_000) {
+                    throw new IllegalStateException("Downloaded APK is incomplete");
+                }
+
+                Uri uri = FileProvider.getUriForFile(
+                    activity,
+                    activity.getPackageName() + ".fileprovider",
+                    apk
+                );
+
+                MAIN.post(() -> {
+                    try {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+                            !activity.getPackageManager().canRequestPackageInstalls()) {
+                            Intent settingsIntent = new Intent(
+                                Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                                Uri.parse("package:" + activity.getPackageName())
+                            );
+                            activity.startActivity(settingsIntent);
+                            dialog.dismiss();
+                            return;
+                        }
+
+                        Intent install = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+                        install.setDataAndType(uri, "application/vnd.android.package-archive");
+                        install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        install.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        activity.startActivity(install);
+                        dialog.dismiss();
+                    } catch (Exception e) {
+                        dialog.setMessage("Could not open the Android installer. Please try again.");
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(true);
+                    }
+                });
+            } catch (Exception e) {
+                MAIN.post(() -> {
+                    dialog.setMessage("Update download failed. Please check your connection and try again.");
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                    dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(true);
+                });
+            } finally {
+                if (conn != null) conn.disconnect();
+                if (output != null) {
+                    try { output.close(); } catch (Exception ignored) {}
+                }
+            }
+        }).start();
     }
 }
