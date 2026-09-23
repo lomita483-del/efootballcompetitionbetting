@@ -72,8 +72,8 @@ public class MainActivity extends Activity {
         s.setTextZoom(100);
 
         // Keep the responsive mobile website, but restore the requested
-        // 70% WebView presentation across the entire app.
-        webView.setInitialScale(70);
+        // 85% WebView presentation across the entire app.
+        webView.setInitialScale(85);
         s.setSupportZoom(true);
         s.setSupportMultipleWindows(false);
         s.setBuiltInZoomControls(false);
