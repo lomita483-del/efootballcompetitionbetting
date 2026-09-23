@@ -49,6 +49,14 @@ jobs:
           echo "$ECB_ANDROID_KEYSTORE_BASE64" | base64 --decode > android-shell/release-key.jks
           test -s android-shell/release-key.jks
 
+      - name: Sync exact website launcher image
+        run: |
+          mkdir -p android-shell/app/src/main/res/drawable
+          curl -fsSL "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/icon-512.png" \
+            -o android-shell/app/src/main/res/drawable/site_logo.png
+          file android-shell/app/src/main/res/drawable/site_logo.png
+          test -s android-shell/app/src/main/res/drawable/site_logo.png
+
       - name: Build signed release APK
         working-directory: android-shell
         env:
