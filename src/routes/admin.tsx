@@ -4054,8 +4054,22 @@ function PanelBlock({ title, onView, children, accent, compact, count, hideWhenE
 /* ============================ SETTINGS ============================ */
 function SettingsPanel() {
   const [s, setS] = useState<any>(null);
+  const [releaseControl, setReleaseControl] = useState<any>({
+    enabled: false,
+    latest_version: "1.0.24",
+    latest_build: 25,
+    download_url: "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
+    whats_new: [],
+    force_update: false,
+    minimum_supported_build: 0,
+  });
   const confirm = useConfirm();
-  useEffect(() => { supabase.from("app_settings").select("*").eq("id", 1).maybeSingle().then(({ data }) => setS(data ?? { id: 1 })); }, []);
+  useEffect(() => {
+    supabase.from("app_settings").select("*").eq("id", 1).maybeSingle().then(({ data }) => setS(data ?? { id: 1 }));
+    (supabase as any).from("app_release_control").select("*").eq("id", 1).maybeSingle().then(({ data }: any) => {
+      if (data) setReleaseControl({ ...data, whats_new: Array.isArray(data.whats_new) ? data.whats_new : [] });
+    });
+  }, []);
   if (!s) return null;
   async function save() {
     const { error } = await supabase.from("app_settings").upsert(s);
@@ -4295,6 +4309,87 @@ function SettingsPanel() {
         />
         <p className="text-[10px] text-amber-300/80">Remember to press “Save settings” below to apply.</p>
       </SettingsSection>
+
+      <div className="lg:col-span-2">
+        <SettingsSection icon={Download} title="Android App Updates" subtitle="Stage a tested APK, edit exactly what users see under “What's new”, then trigger the release. Nothing is shown to users until you enable it.">
+          <div className="grid gap-3 md:grid-cols-2">
+            <FieldLuxe label="Version">
+              <Input value={releaseControl.latest_version ?? ""} onChange={(e) => setReleaseControl({ ...releaseControl, latest_version: e.target.value })} placeholder="1.0.24" />
+            </FieldLuxe>
+            <FieldLuxe label="Build number">
+              <Input type="number" value={releaseControl.latest_build ?? 0} onChange={(e) => setReleaseControl({ ...releaseControl, latest_build: Number(e.target.value) })} />
+            </FieldLuxe>
+          </div>
+          <FieldLuxe label="APK download URL">
+            <Input value={releaseControl.download_url ?? ""} onChange={(e) => setReleaseControl({ ...releaseControl, download_url: e.target.value })} />
+          </FieldLuxe>
+          <FieldLuxe label="What's new — one item per line">
+            <Textarea
+              rows={7}
+              value={(releaseControl.whats_new ?? []).join("\n")}
+              onChange={(e) => setReleaseControl({ ...releaseControl, whats_new: e.target.value.split("\n").map((x) => x.trim()).filter(Boolean) })}
+              placeholder={"Example:\n• Fixed admin console scaling\n• Improved notifications\n• Added staged updates"}
+            />
+          </FieldLuxe>
+          <div className="grid gap-3 md:grid-cols-2">
+            <FieldLuxe label="Minimum supported build (0 = none)">
+              <Input type="number" min={0} value={releaseControl.minimum_supported_build ?? 0} onChange={(e) => setReleaseControl({ ...releaseControl, minimum_supported_build: Number(e.target.value) })} />
+            </FieldLuxe>
+            <label className="flex items-center justify-between rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+              <span><span className="block text-sm font-bold">Force update</span><span className="block text-[10px] text-muted-foreground">Block the app until this build is installed.</span></span>
+              <Switch checked={!!releaseControl.force_update} onCheckedChange={(v) => setReleaseControl({ ...releaseControl, force_update: v })} />
+            </label>
+          </div>
+          <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground">
+            <div className="font-bold text-foreground mb-1">{releaseControl.enabled ? "UPDATE IS LIVE" : "UPDATE IS STAGED / HIDDEN"}</div>
+            {releaseControl.enabled
+              ? "Users below this build will keep receiving the update prompt. If Force update is enabled, the app cannot dismiss it."
+              : "Edit and save the release first. Then use Trigger update when you have finished testing. This prevents unfinished builds from being announced automatically."}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={async () => {
+              const payload = {
+                id: 1,
+                enabled: !!releaseControl.enabled,
+                latest_version: String(releaseControl.latest_version || "").trim(),
+                latest_build: Number(releaseControl.latest_build || 0),
+                download_url: String(releaseControl.download_url || "").trim(),
+                whats_new: Array.isArray(releaseControl.whats_new) ? releaseControl.whats_new : [],
+                force_update: !!releaseControl.force_update,
+                minimum_supported_build: Number(releaseControl.minimum_supported_build || 0),
+                updated_at: new Date().toISOString(),
+              };
+              const { error } = await (supabase as any).from("app_release_control").upsert(payload);
+              if (error) toast.error(error.message); else { setReleaseControl(payload); toast.success("Release settings saved."); logAudit("app_release_settings_saved", "app_release_control"); }
+            }}><Check className="h-4 w-4 mr-1" />Save release settings</Button>
+            <Button className="btn-luxury" onClick={async () => {
+              const notes = Array.isArray(releaseControl.whats_new) ? releaseControl.whats_new : [];
+              if (!String(releaseControl.latest_version || "").trim() || Number(releaseControl.latest_build || 0) <= 0 || !String(releaseControl.download_url || "").trim()) {
+                toast.error("Version, build and APK URL are required."); return;
+              }
+              const payload = {
+                id: 1,
+                enabled: true,
+                latest_version: String(releaseControl.latest_version).trim(),
+                latest_build: Number(releaseControl.latest_build),
+                download_url: String(releaseControl.download_url).trim(),
+                whats_new: notes,
+                force_update: !!releaseControl.force_update,
+                minimum_supported_build: Number(releaseControl.minimum_supported_build || 0),
+                updated_at: new Date().toISOString(),
+              };
+              const { error } = await (supabase as any).from("app_release_control").upsert(payload);
+              if (error) toast.error(error.message); else { setReleaseControl(payload); toast.success("Update triggered. Users will now see this release."); logAudit("app_update_triggered", "app_release_control", undefined, { version: payload.latest_version, build: payload.latest_build, force: payload.force_update }); }
+            }}><Play className="h-4 w-4 mr-1" />Trigger update for users</Button>
+            {releaseControl.enabled && (
+              <Button variant="destructive" onClick={async () => {
+                const { error } = await (supabase as any).from("app_release_control").update({ enabled: false, updated_at: new Date().toISOString() }).eq("id", 1);
+                if (error) toast.error(error.message); else { setReleaseControl({ ...releaseControl, enabled: false }); toast.success("Update trigger disabled."); }
+              }}><Pause className="h-4 w-4 mr-1" />Stop update prompt</Button>
+            )}
+          </div>
+        </SettingsSection>
+      </div>
 
       <Card className="glass-strong p-4 lg:col-span-2 flex flex-wrap items-center gap-2 justify-between">
         <div className="flex items-center gap-2 text-sm text-muted-foreground"><Lock className="h-4 w-4" />Saving writes an audit log entry.</div>
