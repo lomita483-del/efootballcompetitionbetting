@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public final class UpdateChecker {
+public final class UpdateChecker { // release rebuild includes the latest Android UI and launcher fixes
     private static final String TAG = "ECBUpdateChecker";
     private static final String[] MANIFESTS = {
         "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/app-release.json",
