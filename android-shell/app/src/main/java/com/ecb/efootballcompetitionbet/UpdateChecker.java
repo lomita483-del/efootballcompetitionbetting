@@ -3,12 +3,19 @@ package com.ecb.efootballcompetitionbet;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.TextView;
 
 import androidx.core.content.FileProvider;
 
@@ -84,7 +91,10 @@ public final class UpdateChecker {
                                 bestMinimumBuild = manifest.optInt("minimumSupportedBuild", 0);
                                 bestVersion = manifest.optString("latestVersion", "new version");
                                 bestDownloadUrl = manifest.optString("downloadUrl", "");
-                                bestNotes = formatReleaseNotes(manifest.opt("releaseNotes"));
+                                Object notes = manifest.has("whatsNew")
+                                    ? manifest.opt("whatsNew")
+                                    : manifest.opt("releaseNotes");
+                                bestNotes = formatReleaseNotes(notes);
                                 bestForceUpdate = manifest.optBoolean("forceUpdate", false);
                             }
                         } catch (Exception error) {
@@ -104,8 +114,12 @@ public final class UpdateChecker {
                     if (receivedManifest) return;
 
                     if (attempt < MAX_ATTEMPTS) {
-                        try { Thread.sleep(1200L * attempt); }
-                        catch (InterruptedException e) { Thread.currentThread().interrupt(); return; }
+                        try {
+                            Thread.sleep(1200L * attempt);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            return;
+                        }
                     }
                 }
             } finally {
@@ -133,20 +147,39 @@ public final class UpdateChecker {
             if (activity.isFinishing() || showing || downloadUrl.isEmpty()) return;
             showing = true;
 
-            String message = "Version " + version + " (build " + build + ") is available.";
-            if (!notes.isEmpty()) message += "\n\n" + notes;
-            message += "\n\nYour account data stays in the app and is not cleared by an update.";
+            View view = LayoutInflater.from(activity).inflate(R.layout.dialog_update, null);
+            ((TextView) view.findViewById(R.id.update_title))
+                .setText(mandatory ? "UPDATE REQUIRED" : "NEW UPDATE AVAILABLE");
+            ((TextView) view.findViewById(R.id.update_version))
+                .setText("VERSION " + version + "  •  BUILD " + build);
+            ((TextView) view.findViewById(R.id.update_notes))
+                .setText(notes.isEmpty() ? "• Performance and stability improvements." : notes);
 
             AlertDialog dialog = new AlertDialog.Builder(activity)
-                .setTitle(mandatory ? "Update required" : "New update available")
-                .setMessage(message)
-                .setPositiveButton("Download & install",
-                    (d, w) -> downloadAndInstall(activity, version, downloadUrl, mandatory))
-                .setNegativeButton(mandatory ? null : "Later", null)
+                .setView(view)
                 .setCancelable(!mandatory)
                 .create();
 
+            view.findViewById(R.id.update_later).setOnClickListener(v -> {
+                if (!mandatory) dialog.dismiss();
+            });
+            view.findViewById(R.id.update_install).setOnClickListener(v -> {
+                dialog.dismiss();
+                downloadAndInstall(activity, version, downloadUrl, mandatory);
+            });
+
             dialog.setOnDismissListener(d -> showing = false);
+            dialog.setOnShowListener(d -> {
+                Window window = dialog.getWindow();
+                if (window != null) {
+                    window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    WindowManager.LayoutParams params = window.getAttributes();
+                    params.width = (int) (activity.getResources().getDisplayMetrics().widthPixels * 0.92f);
+                    params.dimAmount = 0.68f;
+                    window.setAttributes(params);
+                    window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                }
+            });
             dialog.show();
         });
     }
@@ -158,7 +191,9 @@ public final class UpdateChecker {
             FileOutputStream output = null;
             try {
                 File dir = new File(activity.getFilesDir(), "updates");
-                if (!dir.exists() && !dir.mkdirs()) throw new IllegalStateException("Cannot create update directory");
+                if (!dir.exists() && !dir.mkdirs()) {
+                    throw new IllegalStateException("Cannot create update directory");
+                }
 
                 File apk = new File(dir, "efootball-update-" + version + ".apk");
                 connection = (HttpURLConnection) new URL(downloadUrl).openConnection();
