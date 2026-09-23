@@ -1,8 +1,10 @@
 {
   "whatsNew": [
     "The entire app uses the website's normal mobile responsive layout.",
-    "The whole WebView presentation is restored to 85% scale with automatic input zoom disabled.",
-    "The update button is handled by the native Android updater instead of an ignored WebView new-window request.",
+    "The WebView is set to 85% scale for the correct mobile presentation.",
+    "Typing into input fields no longer automatically zooms the WebView.",
+    "The update popup now opens full-screen for much better readability on mobile screens.",
+    "The update button is handled by the native Android updater.",
     "APK downloads are validated before Android is asked to install the update.",
     "Update checks continue every 3 seconds while the app is open."
   ]
