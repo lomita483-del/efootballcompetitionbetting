@@ -34,6 +34,7 @@ public class MainActivity extends Activity {
     private static final String NOTIFICATION_CHANNEL_ID = "ecb_updates";
     private SwipeRefreshLayout swipeRefresh;
     private WebView webView;
+    private View startupOverlay;
     private final Handler updateHandler = new Handler(Looper.getMainLooper());
     private final Runnable updatePoll = new Runnable() {
         @Override public void run() {
@@ -72,7 +73,7 @@ public class MainActivity extends Activity {
 
         swipeRefresh = new SwipeRefreshLayout(this);
         swipeRefresh.setColorSchemeColors(0xFFFFC400);
-        swipeRefresh.setEnabled(true);
+        swipeRefresh.setEnabled(false);
 
         ViewCompat.setOnApplyWindowInsetsListener(swipeRefresh, (view, insets) -> {
             Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -88,8 +89,8 @@ public class MainActivity extends Activity {
         s.setDatabaseEnabled(true);
         // Use the website's normal responsive mobile layout across the entire app.
         // Do not force a desktop CSS viewport or a fixed native zoom.
-        s.setUseWideViewPort(false);
-        s.setLoadWithOverviewMode(false);
+        s.setUseWideViewPort(true);
+        s.setLoadWithOverviewMode(true);
         s.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         s.setTextZoom(100);
 
@@ -100,6 +101,7 @@ public class MainActivity extends Activity {
         s.setSupportMultipleWindows(false);
         s.setBuiltInZoomControls(true);
         s.setDisplayZoomControls(false);
+        s.setBuiltInZoomControls(true);
 
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
@@ -149,6 +151,7 @@ public class MainActivity extends Activity {
                     null
                 );
                 if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                if (startupOverlay != null) { startupOverlay.animate().alpha(0f).setDuration(220).withEndAction(() -> { if (startupOverlay != null) { ((FrameLayout) startupOverlay.getParent()).removeView(startupOverlay); startupOverlay = null; } }).start(); }
                 if (splash.getVisibility() == View.VISIBLE) {
                     splash.animate().alpha(0f).setDuration(260L).withEndAction(() -> splash.setVisibility(View.GONE)).start();
                 }
@@ -177,56 +180,52 @@ public class MainActivity extends Activity {
             FrameLayout.LayoutParams.MATCH_PARENT
         ));
 
-        // Fixed circular home button: centered at the very bottom like the website reference.
+        // Compact premium home control with transparent logo surface.
+        float d = getResources().getDisplayMetrics().density;
+        FrameLayout homeControl = new FrameLayout(this);
+        GradientDrawable homeRing = new GradientDrawable(
+            GradientDrawable.Orientation.TL_BR,
+            new int[]{0xFFF9DE7A, 0xFFD4AF37, 0xFF8B6510}
+        );
+        homeRing.setShape(GradientDrawable.OVAL);
+        homeRing.setStroke((int) (1.2f * d), 0xFFFFF0B0);
+        homeControl.setBackground(homeRing);
+        homeControl.setElevation(12 * d);
+        homeControl.setClickable(true);
+        homeControl.setFocusable(true);
+        homeControl.setContentDescription("Go to E-Football home");
+        homeControl.setOnClickListener(v -> webView.loadUrl(APP_URL));
+
         ImageView homeLogo = new ImageView(this);
         homeLogo.setImageResource(R.drawable.site_logo);
         homeLogo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        homeLogo.setContentDescription("Go to E-Football home");
-        homeLogo.setClickable(true);
-        homeLogo.setFocusable(true);
-        homeLogo.setOnClickListener(v -> webView.loadUrl(APP_URL));
-
-        float d = getResources().getDisplayMetrics().density;
-        int logoSize = (int) (46 * d);
-        GradientDrawable logoCircle = new GradientDrawable(
-            GradientDrawable.Orientation.TL_BR,
-            new int[]{0xFFF7D56A, 0xFFD4AF37, 0xFF7A5A08}
-        );
-        logoCircle.setShape(GradientDrawable.OVAL);
-        logoCircle.setStroke((int) (1.5f * d), 0xFFFFE9A3);
-        homeLogo.setBackground(logoCircle);
-        homeLogo.setPadding((int) (5 * d), (int) (5 * d), (int) (5 * d), (int) (5 * d));
-        homeLogo.setOutlineProvider(new ViewOutlineProvider() {
-            @Override public void getOutline(View view, Outline outline) {
-                outline.setOval(0, 0, view.getWidth(), view.getHeight());
-            }
-        });
+        homeLogo.setPadding((int)(6*d),(int)(6*d),(int)(6*d),(int)(6*d));
+        homeLogo.setBackgroundColor(0x00000000);
         homeLogo.setClipToOutline(true);
-        homeLogo.setElevation(10 * d);
-        homeLogo.setAlpha(0.98f);
-
-        FrameLayout.LayoutParams logoParams = new FrameLayout.LayoutParams(
-            logoSize, logoSize, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM
+        homeControl.addView(homeLogo, new FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT
+        ));
+        FrameLayout.LayoutParams homeParams = new FrameLayout.LayoutParams(
+            (int)(44*d), (int)(44*d), Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM
         );
-        logoParams.bottomMargin = (int) (9 * d);
-        root.addView(homeLogo, logoParams);
+        homeParams.bottomMargin = (int)(8*d);
+        root.addView(homeControl, homeParams);
 
-        // Subtle halo behind the compact home control so it remains legible
-        // against the cinematic website background.
-        View logoHalo = new View(this);
-        GradientDrawable halo = new GradientDrawable();
-        halo.setShape(GradientDrawable.OVAL);
-        halo.setColor(0x3310182A);
-        halo.setStroke((int) (1 * d), 0x66FFD86A);
-        logoHalo.setBackground(halo);
-        logoHalo.setElevation(8 * d);
-        FrameLayout.LayoutParams haloParams = new FrameLayout.LayoutParams(
-            (int) (52 * d), (int) (52 * d), Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM
-        );
-        haloParams.bottomMargin = (int) (6 * d);
-        root.addView(logoHalo, haloParams);
-        logoHalo.bringToFront();
-        homeLogo.bringToFront();
+        // Large branded startup overlay until the first web page is ready.
+        startupOverlay = new FrameLayout(this);
+        startupOverlay.setBackgroundColor(0xFF08111F);
+        ImageView startupLogo = new ImageView(this);
+        startupLogo.setImageResource(R.drawable.site_logo);
+        startupLogo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        startupLogo.setAdjustViewBounds(true);
+        startupLogo.setPadding((int)(12*d),(int)(12*d),(int)(12*d),(int)(12*d));
+        startupOverlay.addView(startupLogo, new FrameLayout.LayoutParams(
+            (int)(250*d), (int)(250*d), Gravity.CENTER
+        ));
+        root.addView(startupOverlay, new FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT
+        ));
+        startupOverlay.bringToFront();
 
         setContentView(root);
         webView.loadUrl(APP_URL);
