@@ -18,8 +18,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-public class MainActivity extends Activity {
-    private static final String APP_URL = "https://ecb001.lovable.app/";
+public class MainActivity {
+    private static final String APP_URL = "https://lslonlinebetting.lovable.app/";
     private static final int NOTIFICATION_PERMISSION_REQUEST = 2001;
     private static final String NOTIFICATION_CHANNEL_ID = "ecb_updates";
     private WebView webView;
@@ -44,8 +44,7 @@ public class MainActivity extends Activity {
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
 
-        // Keep the desktop console layout, but make the fixed phone canvas readable.
-        // 760px is intentionally between the old tiny 900px canvas and mobile mode.\n        // Build 1.0.7 includes the final system-bar and updater fixes.
+        // Keep the desktop console layout, with a slightly larger fixed phone canvas.
         s.setUseWideViewPort(true);
         s.setLoadWithOverviewMode(true);
         s.setAllowFileAccess(false);
