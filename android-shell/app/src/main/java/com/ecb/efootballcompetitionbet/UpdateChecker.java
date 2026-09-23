@@ -3,6 +3,9 @@ package com.ecb.efootballcompetitionbet;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.SigningInfo;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -23,10 +26,13 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.json.JSONArray;
@@ -189,17 +195,20 @@ public final class UpdateChecker {
         new Thread(() -> {
             HttpURLConnection connection = null;
             FileOutputStream output = null;
+            File apk = null;
             try {
                 File dir = new File(activity.getFilesDir(), "updates");
                 if (!dir.exists() && !dir.mkdirs()) {
                     throw new IllegalStateException("Cannot create update directory");
                 }
 
-                File apk = new File(dir, "efootball-update-" + version + ".apk");
+                apk = new File(dir, "efootball-update-" + version + ".apk");
                 connection = (HttpURLConnection) new URL(downloadUrl).openConnection();
                 connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
                 connection.setReadTimeout(60000);
                 connection.setInstanceFollowRedirects(true);
+                connection.setUseCaches(false);
+                connection.setRequestProperty("Cache-Control", "no-cache");
                 connection.setRequestProperty("User-Agent", "EFootballCompetitionBet/" + BuildConfig.VERSION_NAME);
 
                 if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
@@ -219,6 +228,55 @@ public final class UpdateChecker {
                     if (total < 100000) throw new IllegalStateException("Invalid APK download");
                 }
 
+                PackageManager pm = activity.getPackageManager();
+                PackageInfo archive = pm.getPackageArchiveInfo(
+                    apk.getAbsolutePath(),
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                        ? PackageManager.GET_SIGNING_CERTIFICATES
+                        : PackageManager.GET_SIGNATURES
+                );
+
+                if (archive == null) throw new IllegalStateException("Android could not read the downloaded APK.");
+                if (!activity.getPackageName().equals(archive.packageName)) {
+                    throw new IllegalStateException("The update package does not belong to this app.");
+                }
+
+                long installedBuild = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                    ? pm.getPackageInfo(activity.getPackageName(), PackageManager.GET_SIGNING_CERTIFICATES).getLongVersionCode()
+                    : pm.getPackageInfo(activity.getPackageName(), 0).versionCode;
+                long downloadedBuild = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                    ? archive.getLongVersionCode()
+                    : archive.versionCode;
+
+                if (downloadedBuild <= installedBuild) {
+                    throw new IllegalStateException(
+                        "Downloaded version " + downloadedBuild + " is not newer than installed build " + installedBuild + "."
+                    );
+                }
+
+                // Android only permits an in-place update when the signing certificate
+                // matches the installed application. Catch that before launching the
+                // system installer so the user gets a useful message instead of a
+                // generic "Installing..." dialog that silently stops.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    PackageInfo installed = pm.getPackageInfo(
+                        activity.getPackageName(), PackageManager.GET_SIGNING_CERTIFICATES);
+                    SigningInfo installedSigning = installed.signingInfo;
+                    SigningInfo archiveSigning = archive.signingInfo;
+                    if (installedSigning != null && archiveSigning != null) {
+                        boolean same = Arrays.equals(
+                            installedSigning.getApkContentsSigners(),
+                            archiveSigning.getApkContentsSigners()
+                        );
+                        if (!same) {
+                            throw new IllegalStateException(
+                                "The downloaded update is signed with a different Android signing key. " +
+                                "This build cannot replace the installed app without uninstalling it."
+                            );
+                        }
+                    }
+                }
+
                 Uri uri = FileProvider.getUriForFile(
                     activity, activity.getPackageName() + ".fileprovider", apk);
 
@@ -228,7 +286,7 @@ public final class UpdateChecker {
                             !activity.getPackageManager().canRequestPackageInstalls()) {
                             new AlertDialog.Builder(activity)
                                 .setTitle("Allow app updates")
-                                .setMessage("Android needs permission to install updates downloaded by E-Football Competition Bet. Enable 'Allow from this source', then return to the app.")
+                                .setMessage("Android needs permission to install updates downloaded by E-Football Competition Bet. Enable 'Allow from this source', then return to the app and tap Install again.")
                                 .setPositiveButton("Open settings", (d, w) -> {
                                     Intent settings = new Intent(
                                         Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
@@ -244,23 +302,31 @@ public final class UpdateChecker {
                         install.setDataAndType(uri, "application/vnd.android.package-archive");
                         install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                         install.putExtra(Intent.EXTRA_RETURN_RESULT, true);
-                        activity.startActivity(install);
+                        activity.startActivityForResult(install, 9101);
                     } catch (Exception error) {
                         Log.e(TAG, "Installer launch failed", error);
+                        showInstallError(activity, error.getMessage());
                     }
                 });
             } catch (Exception error) {
-                Log.e(TAG, "APK download failed", error);
-                new Handler(Looper.getMainLooper()).post(() ->
-                    new AlertDialog.Builder(activity)
-                        .setTitle("Update download failed")
-                        .setMessage("The latest update could not be downloaded. Please try again.")
-                        .setPositiveButton("OK", null)
-                        .show());
+                Log.e(TAG, "APK download/validation failed", error);
+                String message = error.getMessage() == null
+                    ? "The update could not be installed."
+                    : error.getMessage();
+                new Handler(Looper.getMainLooper()).post(() -> showInstallError(activity, message));
             } finally {
                 if (output != null) try { output.close(); } catch (Exception ignored) {}
                 if (connection != null) connection.disconnect();
             }
         }, "ECB-ApkDownloader").start();
+    }
+
+    private static void showInstallError(Activity activity, String message) {
+        if (activity.isFinishing()) return;
+        new AlertDialog.Builder(activity)
+            .setTitle("Update could not be installed")
+            .setMessage(message + "\n\nNo app data has been deleted.")
+            .setPositiveButton("OK", null)
+            .show();
     }
 }
