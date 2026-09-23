@@ -44,7 +44,6 @@ import { VideoAd } from "@/components/VideoAd";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation } from "@tanstack/react-router";
-import lslPlatformBg from "@/assets/ecb-nebula-bg.jpg.asset.json";
 import { useBranding } from "@/lib/branding";
 
 // Site-wide background ticker so virtual rounds keep advancing even when
@@ -196,7 +195,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   const [railOpen, setRailOpen] = useState(false);
   const branding = useBranding();
 
-  // Admin-configurable site-wide background + branding (fall back to bundled art).
+  // Admin-configurable site-wide background + branding.
   const [siteBg, setSiteBg] = useState<string | null>(null);
   const [bgFit, setBgFit] = useState<string>("cover");
   const [bgPos, setBgPos] = useState<string>("center");
@@ -231,16 +230,18 @@ export const Layout = ({ children }: { children: ReactNode }) => {
 
   return (
     <div className="relative min-h-screen">
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <img
-          src={siteBg || lslPlatformBg.url}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 h-full w-full"
-          style={{ objectFit: (bgFit as any) || "cover", objectPosition: bgPos || "center" }}
-        />
-        <div className="absolute inset-0 bg-background/40" />
-      </div>
+      {siteBg && (
+        <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+          <img
+            src={siteBg}
+            alt=""
+            aria-hidden
+            className="absolute inset-0 h-full w-full"
+            style={{ objectFit: (bgFit as any) || "cover", objectPosition: bgPos || "center" }}
+          />
+          <div className="absolute inset-0 bg-background/40" />
+        </div>
+      )}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-gradient-to-b from-card/80 to-card/50 border-b border-primary/20 shadow-[0_2px_30px_-12px_rgba(0,0,0,0.6)]">
         {navBg && (
           <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
