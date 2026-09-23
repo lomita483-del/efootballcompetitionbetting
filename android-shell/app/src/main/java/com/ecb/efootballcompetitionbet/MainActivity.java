@@ -12,6 +12,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
+import android.os.Handler;
 
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -24,6 +25,13 @@ public class MainActivity extends Activity {
     private static final String NOTIFICATION_CHANNEL_ID = "ecb_updates";
     private SwipeRefreshLayout swipeRefresh;
     private WebView webView;
+    private final Handler updateHandler = new Handler();
+    private final Runnable updatePoll = new Runnable() {
+        @Override public void run() {
+            UpdateChecker.check(MainActivity.this);
+            updateHandler.postDelayed(this, 60_000L);
+        }
+    };
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -74,7 +82,15 @@ public class MainActivity extends Activity {
                 boolean isAdminConsole = url != null && (
                     url.contains("/admin") || url.contains("/admin/")
                 );
-                webView.setInitialScale(isAdminConsole ? 85 : 80);
+                // SPA navigation does not always cause WebView's initial scale to
+                // re-layout the already-rendered document. Keep the base scale at
+                // 100% on admin routes and apply the requested 85% to the actual
+                // document so floating checkout widgets scale with the console.
+                webView.setInitialScale(isAdminConsole ? 100 : 80);
+                webView.evaluateJavascript(
+                    "(function(){document.documentElement.style.zoom='" + (isAdminConsole ? "85%" : "100%") + "';document.body.style.zoom='" + (isAdminConsole ? "85%" : "100%") + "';})();",
+                    null
+                );
             }
 
             @Override public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
@@ -110,6 +126,7 @@ public class MainActivity extends Activity {
         requestNotificationPermissionIfNeeded();
         UpdateChecker.check(this);
         root.postDelayed(() -> UpdateChecker.check(this), 5000L);
+        updateHandler.postDelayed(updatePoll, 60_000L);
     }
 
     private void createNotificationChannel() {
@@ -135,6 +152,12 @@ public class MainActivity extends Activity {
         super.onResume();
         if (webView != null) webView.onResume();
         UpdateChecker.check(this);
+    }
+
+    @Override protected void onDestroy() {
+        updateHandler.removeCallbacks(updatePoll);
+        if (webView != null) webView.destroy();
+        super.onDestroy();
     }
 
     @Override protected void onPause() {
