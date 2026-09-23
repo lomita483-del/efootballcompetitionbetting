@@ -1,0 +1,13 @@
+@layer components{
+.user-dashboard-shell{position:relative;isolation:isolate}
+.user-dashboard-shell:before{content:"";position:fixed;inset:64px 0 0;pointer-events:none;z-index:-1;background:radial-gradient(70% 45% at 50% 0%,hsl(var(--primary)/.10),transparent 65%),radial-gradient(40% 35% at 8% 35%,hsl(var(--accent)/.08),transparent 70%)}
+.dashboard-section{animation:dashboard-rise .55s cubic-bezier(.2,.8,.2,1) both}
+.dashboard-hero-card{border:1px solid hsl(var(--primary)/.32)!important;box-shadow:0 30px 80px -45px hsl(var(--primary)/.45),inset 0 1px 0 rgba(255,255,255,.09),inset 0 -1px 0 rgba(0,0,0,.35);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+.dashboard-hero-card:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(120deg,rgba(255,255,255,.09),transparent 24%,transparent 72%,rgba(212,175,55,.05));mix-blend-mode:screen}
+.dashboard-glass-card,.user-dashboard-shell .border-primary\/20{backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.user-dashboard-shell .group:hover{transform:translateY(-2px)}
+.user-dashboard-shell button,.user-dashboard-shell a{transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease,background-color .22s ease}
+@keyframes dashboard-rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.dashboard-section{animation:none!important}.user-dashboard-shell *{transition:none!important}}
+@media(max-width:640px){.user-dashboard-shell{padding-bottom:92px}.dashboard-hero-card h1{font-size:clamp(2.15rem,12vw,3.5rem);line-height:.95}}
+}
