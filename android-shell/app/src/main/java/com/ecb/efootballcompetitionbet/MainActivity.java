@@ -70,8 +70,25 @@ public class MainActivity extends Activity {
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
         webView.setWebViewClient(new WebViewClient() {
+            private void applyPageScale(String url) {
+                boolean isAdminConsole = url != null && (
+                    url.contains("/admin") || url.contains("/admin/")
+                );
+                webView.setInitialScale(isAdminConsole ? 85 : 80);
+            }
+
+            @Override public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+                applyPageScale(url);
+            }
+
             @Override public void onPageFinished(WebView view, String url) {
+                applyPageScale(url);
                 if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+            }
+
+            @Override public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
+                applyPageScale(url);
+                super.doUpdateVisitedHistory(view, url, isReload);
             }
         });
 
