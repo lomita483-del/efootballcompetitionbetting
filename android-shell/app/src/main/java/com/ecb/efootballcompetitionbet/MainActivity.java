@@ -71,12 +71,12 @@ public class MainActivity extends Activity {
         s.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         s.setTextZoom(100);
 
-        // Keep the responsive mobile website, but restore the requested
-        // 85% WebView presentation across the entire app.
+        // Start slightly zoomed out, while allowing native pinch-to-zoom.
+        // Users can pinch in/out freely; the initial presentation remains compact.
         webView.setInitialScale(85);
-        s.setSupportZoom(false);
+        s.setSupportZoom(true);
         s.setSupportMultipleWindows(false);
-        s.setBuiltInZoomControls(false);
+        s.setBuiltInZoomControls(true);
         s.setDisplayZoomControls(false);
 
         s.setAllowFileAccess(false);
@@ -148,28 +148,42 @@ public class MainActivity extends Activity {
         homeLogo.setFocusable(true);
         homeLogo.setOnClickListener(v -> webView.loadUrl(APP_URL));
 
-        int logoSize = (int) (56 * getResources().getDisplayMetrics().density);
-        GradientDrawable logoCircle = new GradientDrawable();
+        float d = getResources().getDisplayMetrics().density;
+        int logoSize = (int) (46 * d);
+        GradientDrawable logoCircle = new GradientDrawable(
+            GradientDrawable.Orientation.TL_BR,
+            new int[]{0xFFF7D56A, 0xFFD4AF37, 0xFF7A5A08}
+        );
         logoCircle.setShape(GradientDrawable.OVAL);
-        logoCircle.setColor(0xEE080808);
-        logoCircle.setStroke(
-            (int) (2 * getResources().getDisplayMetrics().density),
-            0xFFFFC400
-        );
+        logoCircle.setStroke((int) (1.5f * d), 0xFFFFE9A3);
         homeLogo.setBackground(logoCircle);
-        homeLogo.setPadding(
-            (int) (5 * getResources().getDisplayMetrics().density),
-            (int) (5 * getResources().getDisplayMetrics().density),
-            (int) (5 * getResources().getDisplayMetrics().density),
-            (int) (5 * getResources().getDisplayMetrics().density)
-        );
+        homeLogo.setPadding((int) (5 * d), (int) (5 * d), (int) (5 * d), (int) (5 * d));
         homeLogo.setClipToOutline(true);
+        homeLogo.setElevation(10 * d);
+        homeLogo.setAlpha(0.98f);
 
         FrameLayout.LayoutParams logoParams = new FrameLayout.LayoutParams(
             logoSize, logoSize, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM
         );
-        logoParams.bottomMargin = (int) (16 * getResources().getDisplayMetrics().density);
+        logoParams.bottomMargin = (int) (9 * d);
         root.addView(homeLogo, logoParams);
+
+        // Subtle halo behind the compact home control so it remains legible
+        // against the cinematic website background.
+        View logoHalo = new View(this);
+        GradientDrawable halo = new GradientDrawable();
+        halo.setShape(GradientDrawable.OVAL);
+        halo.setColor(0x3310182A);
+        halo.setStroke((int) (1 * d), 0x66FFD86A);
+        logoHalo.setBackground(halo);
+        logoHalo.setElevation(8 * d);
+        FrameLayout.LayoutParams haloParams = new FrameLayout.LayoutParams(
+            (int) (52 * d), (int) (52 * d), Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM
+        );
+        haloParams.bottomMargin = (int) (6 * d);
+        root.addView(logoHalo, haloParams);
+        logoHalo.bringToFront();
+        homeLogo.bringToFront();
 
         setContentView(root);
         webView.loadUrl(APP_URL);
