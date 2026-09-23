@@ -1,13 +1,13 @@
 {
   "app": "E-Football Competition Bet",
   "platform": "android",
-  "latestVersion": "1.0.28",
-  "latestBuild": 29,
+  "latestVersion": "1.0.29",
+  "latestBuild": 30,
   "minimumSupportedVersion": "1.0.0",
   "minimumSupportedBuild": 1,
   "forceUpdate": false,
   "downloadUrl": "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
-  "whatsNew": ["Normal app view remains at 80%, with pinch-to-zoom enabled for easier reading.","Pull-to-refresh now activates only when you drag down from the top of the page.","Scrolling down from the middle of a page no longer triggers an unwanted refresh.","A fixed website logo is shown near the lower center of the screen and opens the home page when tapped.","When an update is forced, the update popup does not offer a Later/Cancel option."],
-  "releaseNotes": ["Normal app view remains at 80%, with pinch-to-zoom enabled for easier reading.","Pull-to-refresh now activates only when you drag down from the top of the page.","Scrolling down from the middle of a page no longer triggers an unwanted refresh.","A fixed website logo is shown near the lower center of the screen and opens the home page when tapped.","When an update is forced, the update popup does not offer a Later/Cancel option."],
-  "publishedAt": "2026-09-23T13:17:59+01:00"
+  "whatsNew": ["Update pop-ups now check for a newly triggered release every 3 seconds while the app is open.","Normal website pages are restored to 80% scale; only the Admin Console stays at 85%.","Pinch-to-zoom remains enabled so users can enlarge text and icons when needed.","Update checks avoid duplicate network requests and duplicate pop-ups.","Forced updates keep the Later/Cancel option hidden."],
+  "releaseNotes": ["Update pop-ups now check for a newly triggered release every 3 seconds while the app is open.","Normal website pages are restored to 80% scale; only the Admin Console stays at 85%.","Pinch-to-zoom remains enabled so users can enlarge text and icons when needed.","Update checks avoid duplicate network requests and duplicate pop-ups.","Forced updates keep the Later/Cancel option hidden."],
+  "publishedAt": "2026-09-23T15:24:27+01:00"
 }
