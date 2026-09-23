@@ -164,18 +164,18 @@ export function AppUpdateGate() {
   };
 
   return (
-    <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 p-5 backdrop-blur-md">
-      <div className="w-full max-w-md rounded-3xl border border-primary/30 bg-background/95 p-6 shadow-2xl">
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 p-2 backdrop-blur-md">
+      <div className="flex h-[calc(100vh-16px)] w-[calc(100vw-16px)] max-w-[960px] flex-col overflow-y-auto rounded-3xl border border-primary/30 bg-background/95 p-6 shadow-2xl sm:p-8">
         <div className="mb-5 flex items-start gap-4">
           <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-primary/15 text-primary">
             {mandatory ? <RefreshCw className="h-7 w-7" /> : <Download className="h-7 w-7" />}
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-xs font-black uppercase tracking-[0.25em] text-primary">E-Football Competition Bet</p>
-            <h2 className="mt-1 text-xl font-black">
+            <h2 className="mt-1 text-2xl font-black">
               {mandatory ? "Update required" : "New app update available"}
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-2 text-base text-muted-foreground">
               Version {release.latestVersion} is ready. You are on {currentVersion || "your current version"}.
             </p>
           </div>
@@ -203,14 +203,14 @@ export function AppUpdateGate() {
         {notes.length > 0 && (
           <div className="mb-5">
             <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">What's new</p>
-            <ul className="space-y-1 text-sm text-muted-foreground">
+            <ul className="space-y-2 text-base leading-6 text-muted-foreground">
               {notes.slice(0, 6).map((note) => <li key={note}>• {note}</li>)}
             </ul>
           </div>
         )}
 
         {download ? (
-          <Button className="h-12 w-full font-black" onClick={install}>
+          <Button className="h-14 w-full text-base font-black" onClick={install}>
             <Download className="mr-2 h-4 w-4" />
             Download latest update
           </Button>
