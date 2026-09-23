@@ -164,36 +164,50 @@ export function AppUpdateGate() {
   };
 
   return (
-    <div className="fixed inset-0 z-[99999] flex h-screen w-screen items-stretch justify-stretch bg-black/85 p-0 backdrop-blur-md">
-      <div className="flex h-screen w-screen max-h-none max-w-none flex-col overflow-y-auto rounded-none border-0 border-primary/30 bg-background/95 p-7 shadow-2xl sm:p-10">
-        <div className="mb-7 flex items-start gap-5">
-          <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-primary/15 text-primary sm:h-20 sm:w-20">
-            {mandatory ? <RefreshCw className="h-8 w-8 sm:h-10 sm:w-10" /> : <Download className="h-7 w-7" />}
+    <div
+      className="fixed inset-0 z-[99999] flex items-stretch justify-stretch bg-black/90 backdrop-blur-md"
+      style={{ width: "100vw", height: "100vh", minHeight: "100vh" }}
+    >
+      <div
+        className="flex flex-col overflow-y-auto bg-background"
+        style={{
+          width: "100vw",
+          height: "100vh",
+          minHeight: "100vh",
+          maxWidth: "100vw",
+          maxHeight: "100vh",
+          padding: "32px",
+          boxSizing: "border-box",
+        }}
+      >
+        <div className="mb-8 flex items-start gap-5">
+          <div className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl bg-primary/15 text-primary">
+            {mandatory ? <RefreshCw className="h-10 w-10" /> : <Download className="h-9 w-9" />}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-black uppercase tracking-[0.25em] text-primary sm:text-base">E-Football Competition Bet</p>
-            <h2 className="mt-2 text-3xl font-black sm:text-4xl">
+            <p className="text-base font-black uppercase tracking-[0.25em] text-primary">E-Football Competition Bet</p>
+            <h2 className="mt-2 text-[40px] leading-tight font-black">
               {mandatory ? "Update required" : "New app update available"}
             </h2>
-            <p className="mt-3 text-lg text-muted-foreground sm:text-xl">
+            <p className="mt-4 text-[24px] leading-9 text-muted-foreground">
               Version {release.latestVersion} is ready. You are on {currentVersion || "your current version"}.
             </p>
           </div>
           {!mandatory && (
             <button
               aria-label="Dismiss update"
-              className="rounded-full p-2 text-muted-foreground hover:bg-muted"
+              className="rounded-full p-3 text-muted-foreground hover:bg-muted"
               onClick={() => setDismissed(true)}
             >
-              <X className="h-4 w-4" />
+              <X className="h-7 w-7" />
             </button>
           )}
         </div>
 
-        <div className="mb-7 rounded-2xl border border-border/60 bg-muted/20 p-6">
-          <div className="flex items-start gap-3">
-            <ShieldCheck className="mt-1 h-6 w-6 shrink-0 text-emerald-400" />
-            <p className="text-base leading-7 text-muted-foreground sm:text-lg">
+        <div className="mb-8 rounded-2xl border border-border/60 bg-muted/20 p-6">
+          <div className="flex items-start gap-4">
+            <ShieldCheck className="mt-1 h-8 w-8 shrink-0 text-emerald-400" />
+            <p className="text-[22px] leading-8 text-muted-foreground">
               Your account, balances, tickets, matches and other server data stay on your account.
               Installing an update does not require clearing the app or signing in again.
             </p>
@@ -201,28 +215,28 @@ export function AppUpdateGate() {
         </div>
 
         {notes.length > 0 && (
-          <div className="mb-7">
-            <p className="mb-4 text-sm font-bold uppercase tracking-wider text-muted-foreground sm:text-base">What's new</p>
-            <ul className="space-y-4 text-lg leading-8 text-muted-foreground sm:text-xl">
-              {notes.slice(0, 6).map((note) => <li key={note}>• {note}</li>)}
+          <div className="mb-8">
+            <p className="mb-4 text-lg font-black uppercase tracking-wider text-muted-foreground">What's new in this version</p>
+            <ul className="space-y-4 text-[22px] leading-8 text-muted-foreground">
+              {notes.slice(0, 8).map((note) => <li key={note}>• {note}</li>)}
             </ul>
           </div>
         )}
 
         {download ? (
-          <Button className="mt-auto h-16 w-full text-lg font-black sm:h-20 sm:text-xl" onClick={install}>
-            <Download className="mr-2 h-4 w-4" />
+          <Button className="mt-auto h-20 w-full text-[22px] font-black" onClick={install}>
+            <Download className="mr-3 h-6 w-6" />
             Download latest update
           </Button>
         ) : (
-          <p className="rounded-xl bg-muted p-3 text-center text-xs text-muted-foreground">
+          <p className="rounded-xl bg-muted p-4 text-center text-base text-muted-foreground">
             The new build is published but the download package is not ready yet.
           </p>
         )}
 
         {!mandatory && (
           <button
-            className="mt-3 w-full py-2 text-xs text-muted-foreground hover:text-foreground"
+            className="mt-4 w-full py-3 text-base text-muted-foreground hover:text-foreground"
             onClick={() => setDismissed(true)}
           >
             Remind me later
