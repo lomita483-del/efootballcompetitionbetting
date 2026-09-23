@@ -4108,7 +4108,7 @@ function AndroidAppUpdatesPanel() {
       "The Android app release is v1.0.46 (build 47), with the website footer and admin updater aligned to the new release metadata."
     ],
     force_update: true,
-    minimum_supported_build: 47,
+    minimum_supported_build: 48,
   });
 
   useEffect(() => {
@@ -4274,8 +4274,8 @@ function SettingsPanel() {
   const [s, setS] = useState<any>(null);
   const [releaseControl, setReleaseControl] = useState<any>({
     enabled: false,
-    latest_version: "1.0.46",
-    latest_build: 47,
+    latest_version: "1.0.47",
+    latest_build: 48,
     download_url: "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
     whats_new: [
       "Admin console now uses 85% native WebView scaling so the floating bet checkout control scales with the console.",
