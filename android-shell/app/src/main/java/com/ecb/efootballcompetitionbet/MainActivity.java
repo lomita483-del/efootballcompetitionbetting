@@ -63,8 +63,11 @@ public class MainActivity extends Activity {
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
+        // Force a desktop-style CSS viewport so every page uses the same
+        // wide layout as the Admin Console instead of switching to the
+        // narrow mobile layout on phone-sized screens.
         s.setUseWideViewPort(true);
-        s.setLoadWithOverviewMode(false);
+        s.setLoadWithOverviewMode(true);
 
         // Render the website at 80% of the previous WebView scale.
         s.setTextZoom(100);
@@ -88,16 +91,16 @@ public class MainActivity extends Activity {
 
         webView.setWebViewClient(new WebViewClient() {
             private void applyPageScale(String url) {
-                boolean isAdminConsole = url != null && (
-                    url.contains("/admin") || url.contains("/admin/")
-                );
-                // The admin console is intentionally rendered at 85% at the
-                // WebView level so fixed/floating controls (including the bet
-                // checkout button) are scaled with the rest of the console.
-                // Normal pages remain at 80%.
-                webView.setInitialScale(isAdminConsole ? 85 : 80);
+                // Keep every route on the same desktop-style scale/layout.
+                webView.setInitialScale(85);
                 webView.evaluateJavascript(
-                    "(function(){document.documentElement.style.zoom='100%';document.body.style.zoom='100%';})();",
+                    "(function(){"
+                    + "var m=document.querySelector('meta[name=viewport]');"
+                    + "if(!m){m=document.createElement('meta');m.name='viewport';document.head.appendChild(m);}"
+                    + "m.setAttribute('content','width=1200,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes');"
+                    + "document.documentElement.style.zoom='100%';"
+                    + "document.body.style.zoom='100%';"
+                    + "})();",
                     null
                 );
             }
@@ -139,7 +142,7 @@ public class MainActivity extends Activity {
         homeLogo.setFocusable(true);
         homeLogo.setOnClickListener(v -> webView.loadUrl(APP_URL));
 
-        int logoSize = (int) (96 * getResources().getDisplayMetrics().density);
+        int logoSize = (int) (72 * getResources().getDisplayMetrics().density);
         GradientDrawable logoCircle = new GradientDrawable();
         logoCircle.setShape(GradientDrawable.OVAL);
         logoCircle.setColor(0xEE080808);
@@ -159,7 +162,7 @@ public class MainActivity extends Activity {
         FrameLayout.LayoutParams logoParams = new FrameLayout.LayoutParams(
             logoSize, logoSize, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM
         );
-        logoParams.bottomMargin = (int) (18 * getResources().getDisplayMetrics().density);
+        logoParams.bottomMargin = (int) (16 * getResources().getDisplayMetrics().density);
         root.addView(homeLogo, logoParams);
 
         setContentView(root);
