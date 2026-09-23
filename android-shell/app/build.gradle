@@ -17,7 +17,8 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("\${project.rootDir}/release-key.jks")
+            // release-key.jks is written by CI at the android-shell root.
+            storeFile rootProject.file("release-key.jks")
             storePassword System.getenv("ECB_ANDROID_KEYSTORE_PASSWORD")
             keyAlias System.getenv("ECB_ANDROID_KEY_ALIAS")
             keyPassword System.getenv("ECB_ANDROID_KEY_PASSWORD")
