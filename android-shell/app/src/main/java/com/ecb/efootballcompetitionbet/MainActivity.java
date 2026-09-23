@@ -52,13 +52,13 @@ public class MainActivity extends Activity {
         s.setUseWideViewPort(true);
         s.setLoadWithOverviewMode(false);
 
-        // Do not enlarge the page. Render at the site's native desktop scale.
+        // Render the website at 80% of the previous WebView scale.
         s.setTextZoom(100);
-        webView.setInitialScale(90);
+        webView.setInitialScale(80);
 
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
-        s.setCacheMode(WebSettings.LOAD_DEFAULT);
+        s.setCacheMode(WebView.LOAD_DEFAULT);
 
         String desktopChromeUa =
             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
