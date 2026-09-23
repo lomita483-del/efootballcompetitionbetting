@@ -4056,10 +4056,17 @@ function SettingsPanel() {
   const [s, setS] = useState<any>(null);
   const [releaseControl, setReleaseControl] = useState<any>({
     enabled: false,
-    latest_version: "1.0.24",
-    latest_build: 25,
+    latest_version: "1.0.26",
+    latest_build: 27,
     download_url: "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
-    whats_new: [],
+    whats_new: [
+      "Admin console now uses 85% native WebView scaling so the floating bet checkout control scales with the console.",
+      "Android release checks now use the admin-controlled Supabase release record as the single source of truth.",
+      "What's New is taken only from the current staged release; old release notes are never reused.",
+      "Improved realtime notification delivery from the web app into Android notifications while the app is running.",
+      "Kept the optional web reminder for users to download the standalone Android app.",
+      "Admin can edit What's New, stage a release, trigger it for users, stop the prompt, or force the update."
+    ],
     force_update: false,
     minimum_supported_build: 0,
   });
