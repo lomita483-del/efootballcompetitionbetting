@@ -35,7 +35,7 @@ public class MainActivity extends Activity {
         ViewCompat.setOnApplyWindowInsetsListener(swipeRefresh,(view,insets)->{Insets bars=insets.getInsets(WindowInsetsCompat.Type.systemBars());view.setPadding(0,bars.top,0,bars.bottom);return insets;});
         webView=new WebView(this);webView.addJavascriptInterface(new NativeNotificationBridge(this),"ECBAndroid");
         WebSettings s=webView.getSettings();s.setJavaScriptEnabled(true);s.setDomStorageEnabled(true);s.setDatabaseEnabled(true);
-        s.setUseWideViewPort(false);s.setLoadWithOverviewMode(false);s.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);s.setTextZoom(100);webView.setInitialScale(85);
+        s.setUseWideViewPort(false);s.setLoadWithOverviewMode(false);s.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);s.setTextZoom(100);webView.setInitialScale(80);
         s.setSupportZoom(false);s.setSupportMultipleWindows(false);s.setBuiltInZoomControls(false);s.setDisplayZoomControls(false);s.setAllowFileAccess(false);s.setAllowContentAccess(false);s.setCacheMode(WebSettings.LOAD_DEFAULT);
         s.setUserAgentString(s.getUserAgentString()+" ECBAndroidApp/"+BuildConfig.VERSION_NAME);
         CookieManager.getInstance().setAcceptCookie(true);CookieManager.getInstance().setAcceptThirdPartyCookies(webView,true);
