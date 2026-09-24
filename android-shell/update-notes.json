@@ -1,8 +1,8 @@
 {
   "whatsNew": [
-    "The Android app now starts at an 80% WebView scale for a more compact layout while keeping pinch-to-zoom available.",
-    "The Android package version/build was incremented for this release.",
-    "The app footer continues to read the current release version from live release metadata.",
-    "Admin App Updater continues to support Refresh version so the Android version, build number, and What's New stay synchronized with the release files."
+    The Android app now starts at an 80% WebView scale for a more compact layout with pinch-to-zoom disabled.,
+    The Android package version/build was incremented for this release.,
+    The app footer continues to read the current release version from live release metadata.,
+    Admin App Updater continues to support Refresh version so the Android version, build number, and What's New stay synchronized with the release files.
   ]
 }
