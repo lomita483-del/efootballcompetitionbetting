@@ -4247,6 +4247,7 @@ function AndroidAppUpdatesPanel() {
           </div>
         </Card>
       )}
+      {/* Keep Android release controls build-safe and explicitly closed. */}
       <div className="space-y-2">
         {filtered.length === 0 && <p className="text-sm text-muted-foreground">No tickets match.</p>}
         {filtered.map((b) => (
