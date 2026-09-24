@@ -1,13 +1,13 @@
 {
   "app": "E-Football Competition Bet",
   "platform": "android",
-  "latestVersion": "1.0.62",
-  "latestBuild": 63,
+  "latestVersion": "1.0.63",
+  "latestBuild": 64,
   "minimumSupportedVersion": "1.0.0",
   "minimumSupportedBuild": 1,
   "forceUpdate": false,
   "downloadUrl": "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
-  "whatsNew": [""],
-  "releaseNotes": [""],
+  "whatsNew": ["Android WebView now forces a 1280px desktop viewport so desktop CSS breakpoints are used on phones.","Android identifies itself as a desktop Chrome-style browser while retaining the ECB app identifier.","Release metadata is synchronized to Android v1.0.63 build 64."],
+  "releaseNotes": ["Desktop WebView mode corrected to use a true wide CSS viewport.","App version/build metadata updated to v1.0.63 build 64."],
   "publishedAt": "2026-09-24T11:32:36+01:00"
 }
