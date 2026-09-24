@@ -220,7 +220,7 @@ function AdaptiveViewport() {
     if (typeof window === "undefined") return;
     const meta = document.querySelector('meta[name="viewport"]') as HTMLMetaElement | null;
     if (!meta) return;
-    const isAndroidApp = /ECBAndroidApp\\//.test(navigator.userAgent);
+    const isAndroidApp = /ECBAndroidApp\//.test(navigator.userAgent);
     const responsiveViewport = "width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover";
     const androidViewport = "width=1280, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover";
     const targetViewport = isAndroidApp ? androidViewport : responsiveViewport;
