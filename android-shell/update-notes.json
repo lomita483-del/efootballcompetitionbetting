@@ -1,8 +1,8 @@
 {
   "whatsNew": [
-    "The Android app now uses a 75% WebView scale so more of the website fits comfortably on phone screens.",
-    "The mobile website viewport is restored to the real device width instead of forcing a wide desktop canvas inside the Android app.",
-    "Global layout width constraints prevent pages and admin content from expanding past the phone screen and being pushed off to the right.",
-    "The native Android update checker, APK installer, and bottom-center Home control remain available."
+    "Restored the Android WebView to the website's normal responsive mobile viewport so the homepage fills the phone screen correctly.",
+    "Fixed the right-side offset/cropping that was introduced by the 75% native WebView scaling.",
+    "Repaired the production web build, including the Android App Updates admin panel and truncated Token Movement panel.",
+    "Android release v1.0.61 build 62 is signed and verified for distribution."
   ]
 }
