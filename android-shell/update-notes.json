@@ -1,6 +1,6 @@
 {
   "whatsNew": [
-    "Android now starts at an 80% WebView scale for a more compact layout, with pinch-to-zoom disabled.",
+    "Android now starts at a 50% WebView scale for a compact layout, with pinch-to-zoom disabled.",
     "The Android bottom-center Home button has been refined with a compact premium gold design and circular logo treatment.",
     "The Android startup screen now shows the full E-Football logo on a branded dark background while the app loads.",
     "The homepage Menu control and drawer now have stronger contrast, cinematic glass styling, gold detailing, glow, depth, and clearer icon states.",
