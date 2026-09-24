@@ -44,7 +44,7 @@ public class MainActivity extends Activity {
         // phone-width responsive scaling and do not zoom the whole page.
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(false);
-        webView.setInitialScale(80);
+        webView.setInitialScale(64);
 
         // Use a 1280px desktop CSS viewport rendered at 64% so the full desktop layout fits the phone width.
         settings.setSupportZoom(true);
