@@ -5196,3 +5196,33 @@ function TokenMovementPanel() {
           <div className="ml-auto flex items-center gap-3 text-xs">
             <span className="text-emerald-300 font-bold">+ {credits.toLocaleString()}</span>
             <span className="text-destructive font-bold">− {debits.toLocaleString()}</span>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {(["all", "credit", "debit"] as const).map((value) => (
+            <Button key={value} size="sm" variant={filter === value ? "default" : "outline"} onClick={() => setFilter(value)} className="h-7 px-3 text-[10px] uppercase">
+              {value === "all" ? "All" : value === "credit" ? "Credits" : "Debits"}
+            </Button>
+          ))}
+        </div>
+      </Card>
+      <div className="space-y-2">
+        {filtered.length === 0 && <p className="text-sm text-muted-foreground">No token movements found.</p>}
+        {filtered.map((r) => (
+          <Card key={r.id} className="glass p-3">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="min-w-0">
+                <div className="font-semibold text-sm truncate">{r.description || r.kind || "Token movement"}</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">{r.kind || "—"} · user {r.user_id || "—"} · {r.created_at ? new Date(r.created_at).toLocaleString() : "—"}</div>
+              </div>
+              <div className="text-right">
+                <div className={`font-black ${Number(r.amount) >= 0 ? "text-emerald-300" : "text-destructive"}`}>{Number(r.amount) >= 0 ? "+" : ""}{Number(r.amount || 0).toLocaleString()}</div>
+                <div className="text-[9px] text-muted-foreground">Balance after: {Number(r.balance_after || 0).toLocaleString()}</div>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
