@@ -16,8 +16,9 @@ export default defineConfig({
     spa: {
       enabled: process.env.CAPACITOR_BUILD === "1",
     },
-    // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-    // nitro/vite builds from this
-    server: { entry: "server" },
+    // The normal web deployment keeps the custom server entry. The standalone
+    // Android SPA build must let TanStack Start use its default server entry so
+    // SPA shell prerendering can run correctly during the static build.
+    server: process.env.CAPACITOR_BUILD === "1" ? undefined : { entry: "server" },
   },
 });
