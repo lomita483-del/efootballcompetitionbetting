@@ -220,11 +220,14 @@ function AdaptiveViewport() {
     if (typeof window === "undefined") return;
     const meta = document.querySelector('meta[name="viewport"]') as HTMLMetaElement | null;
     if (!meta) return;
+    const isAndroidApp = /ECBAndroidApp\\//.test(navigator.userAgent);
     const responsiveViewport = "width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover";
+    const androidViewport = "width=1280, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover";
+    const targetViewport = isAndroidApp ? androidViewport : responsiveViewport;
     const apply = () => {
-      // Keep every page tied to the actual device width. Do not force a 1024px
-      // desktop canvas on phones or inside the Android app.
-      if (meta.getAttribute("content") !== responsiveViewport) meta.setAttribute("content", responsiveViewport);
+      // The Android APK deliberately uses the same fixed 1280px canvas as the
+      // admin console. The browser keeps its normal responsive viewport.
+      if (meta.getAttribute("content") !== targetViewport) meta.setAttribute("content", targetViewport);
     };
     apply();
     window.addEventListener("resize", apply);
