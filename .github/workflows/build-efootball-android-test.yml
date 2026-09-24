@@ -45,7 +45,7 @@ jobs:
           node-version: "22"
 
       - name: Install web dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps --package-lock=false
 
       - name: Build and bundle the exact web client into the APK
         run: |
