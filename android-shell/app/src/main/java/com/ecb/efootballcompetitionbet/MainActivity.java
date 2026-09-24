@@ -33,7 +33,7 @@ import java.io.InputStream;
 
 public class MainActivity extends Activity {
     private static final String LOCAL_APP_URL =
-        "https://appassets.androidplatform.net/assets/index.html";
+        "https://appassets.androidplatform.net/assets/_shell.html";
     private static final String ASSET_HOST = "appassets.androidplatform.net";
     private static final int NOTIFICATION_PERMISSION_REQUEST = 2001;
     private static final String NOTIFICATION_CHANNEL_ID = "ecb_updates";
@@ -210,7 +210,7 @@ public class MainActivity extends Activity {
         // routes, serve the bundled shell instead of going back to the network.
         String relative = path.substring("/assets/".length());
         if (relative.isEmpty() || !relative.contains(".")) {
-            return serveBundledFile("index.html", "text/html", "UTF-8");
+            return serveBundledFile("_shell.html", "text/html", "UTF-8");
         }
 
         // A missing real asset should fail normally rather than returning HTML
