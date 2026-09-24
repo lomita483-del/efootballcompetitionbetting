@@ -154,10 +154,8 @@ public class MainActivity extends Activity {
                 if (splash.getVisibility() == View.VISIBLE) {
                     splash.animate().alpha(0f).setDuration(260L).withEndAction(() -> splash.setVisibility(View.GONE)).start();
                 }
-                view.evaluateJavascript(
-                    "(function(){var m=document.querySelector('meta[name=viewport]');if(m)m.setAttribute('content','width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover');})();",
-                    null
-                );
+                // Do not overwrite the website viewport here. The site controls
+                // its own mobile/desktop view mode and responsive viewport.
             }
         });
 
