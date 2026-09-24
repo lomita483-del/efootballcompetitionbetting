@@ -144,7 +144,7 @@ function useInstallPrompt() {
  * Renders the header on a fixed 1280px desktop canvas and scales it down to the
  * device width, so /admin keeps the exact one-row desktop top bar on phones.
  */
-function HeaderCanvas({ active, children }: { active: boolean; children: ReactNode }) {
+function DesktopCanvas({ active, children }: { active: boolean; children: ReactNode }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
@@ -188,7 +188,6 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   const isHome = location.pathname === "/";
   // The admin console renders on a fixed desktop canvas; keep the site header on
   // the same canvas so the top bar never reflows into the stacked mobile rows.
-  const isAdminRoute = location.pathname.startsWith("/admin");
   useVirtualHeartbeat();
   useForceReloadBroadcast();
   const { canInstall, promptInstall } = useInstallPrompt();
@@ -255,7 +254,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
             <div className="absolute inset-0 bg-gradient-to-b from-background/55 via-background/45 to-background/65" />
           </div>
         )}
-        <HeaderCanvas active={isAdminRoute}>
+        <DesktopCanvas active={true}>
         <div className="container mx-auto px-4 flex h-16 items-center gap-3 lg:gap-4 relative">
           <Link to="/" className="flex items-center gap-2 group shrink-0">
             {branding.logoUrl ? (
@@ -429,12 +428,15 @@ export const Layout = ({ children }: { children: ReactNode }) => {
             )}
           </div>
         ) : null}
-        </HeaderCanvas>
+        </DesktopCanvas>
       </header>
-      <main className="relative overflow-x-hidden">{children}</main>
-      <div className="container pb-4" data-tour="page-ads">
-        <AdvertisementRow placement={location.pathname} />
-      </div>
+      <DesktopCanvas active={true}>
+        <main className="relative overflow-x-hidden">{children}</main>
+        <div className="container pb-4" data-tour="page-ads">
+          <AdvertisementRow placement={location.pathname} />
+        </div>
+        <SiteFooter isHome={isHome} />
+      </DesktopCanvas>
       <LevelUpModal />
       <GlobalWinAnimation />
       <GlobalLossAnimation />
@@ -447,7 +449,6 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       <PageTour />
       <VideoAd />
       <AppDownloadReminder />
-      <SiteFooter isHome={isHome} />
     </div>
   );
 };
