@@ -96,7 +96,7 @@ public class MainActivity extends Activity {
 
         // Start at 80% and keep the WebView at a fixed scale.
         // Pinch-to-zoom is intentionally disabled for a consistent app layout.
-        webView.setInitialScale(80);
+        webView.setInitialScale(50);
         s.setSupportZoom(false);
         s.setSupportMultipleWindows(false);
         s.setBuiltInZoomControls(false);
@@ -106,7 +106,7 @@ public class MainActivity extends Activity {
         s.setAllowContentAccess(false);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
 
-        // Pinch gestures are disabled; keep the app at the 80% presentation scale.
+        // Pinch gestures are disabled; keep the app at the 50% presentation scale.
         webView.setOnTouchListener((v, event) -> {
             if (event.getPointerCount() > 1) return true;
             if (event.getActionMasked() == MotionEvent.ACTION_UP || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
