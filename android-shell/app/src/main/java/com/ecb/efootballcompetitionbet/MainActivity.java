@@ -87,16 +87,14 @@ public class MainActivity extends Activity {
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
-        // Use the website's normal responsive mobile layout across the entire app.
-        // Do not force a desktop CSS viewport or a fixed native zoom.
+        // Desktop-mode WebView: use a wide CSS viewport and present it at 80%.
         s.setUseWideViewPort(true);
-        s.setLoadWithOverviewMode(true);
+        s.setLoadWithOverviewMode(false);
         s.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         s.setTextZoom(100);
 
-        // Use the normal Android mobile viewport. Native WebView scaling was
-        // causing the page to appear zoomed and crop/hide responsive content.
-        // The website controls its own responsive layout through the viewport.
+        // Desktop mode is intentionally presented at 80%.
+        webView.setInitialScale(80);
         s.setSupportZoom(false);
         s.setSupportMultipleWindows(false);
         s.setBuiltInZoomControls(false);
@@ -106,10 +104,9 @@ public class MainActivity extends Activity {
         s.setAllowContentAccess(false);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
 
-        // Keep the normal Android WebView/mobile user agent so the website
-        // serves its responsive mobile layout, while retaining the app marker
-        // used by the live update gate.
-        s.setUserAgentString(s.getUserAgentString() + " ECBAndroidApp/" + BuildConfig.VERSION_NAME);
+        // Advertise a desktop browser so the website keeps its desktop layout.
+        String desktopUa = s.getUserAgentString().replace(" Mobile", "").replace("Mobile", "");
+        s.setUserAgentString(desktopUa + " ECBAndroidApp/" + BuildConfig.VERSION_NAME);
 
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
@@ -154,8 +151,12 @@ public class MainActivity extends Activity {
                 if (splash.getVisibility() == View.VISIBLE) {
                     splash.animate().alpha(0f).setDuration(260L).withEndAction(() -> splash.setVisibility(View.GONE)).start();
                 }
-                // Do not overwrite the website viewport here. The site controls
-                // its own mobile/desktop view mode and responsive viewport.
+                // Keep desktop CSS viewport and the requested 80% presentation.
+                view.setInitialScale(80);
+                view.evaluateJavascript(
+                    "(function(){var m=document.querySelector('meta[name=viewport]');if(m)m.setAttribute('content','width=1024,initial-scale=1.0,minimum-scale=0.5,maximum-scale=5.0,user-scalable=yes');})();",
+                    null
+                );
             }
         });
 
