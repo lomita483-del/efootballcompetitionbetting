@@ -22,6 +22,6 @@ export default defineConfig({
     // Keep a concrete server entry during the SPA-shell prerender step. The
     // TanStack prerenderer expects the generated server entry to exist while it
     // renders the static shell that is copied into the APK.
-    server: { entry: "server" },
+    server: { entry: "src/server.ts" },
   },
 });
