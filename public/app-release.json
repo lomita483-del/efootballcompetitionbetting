@@ -1,13 +1,13 @@
 {
   "app": "E-Football Competition Bet",
   "platform": "android",
-  "latestVersion": "1.0.63",
-  "latestBuild": 64,
+  "latestVersion": "1.0.64",
+  "latestBuild": 65,
   "minimumSupportedVersion": "1.0.0",
   "minimumSupportedBuild": 1,
   "forceUpdate": false,
   "downloadUrl": "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
   "whatsNew": [""],
   "releaseNotes": [""],
-  "publishedAt": "2026-09-24T11:52:41+01:00"
+  "publishedAt": "2026-09-24T12:09:17+01:00"
 }
