@@ -13,6 +13,7 @@ on:
       - "src/components/Layout.tsx"
       - "src/styles/user-dashboard-premium.css"
       - ".github/workflows/build-efootball-android-test.yml"
+      - "scripts/generate-release-notes.sh"
 
 permissions:
   contents: write
