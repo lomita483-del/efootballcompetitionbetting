@@ -94,18 +94,26 @@ public class MainActivity extends Activity {
         s.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         s.setTextZoom(100);
 
-        // Start slightly zoomed out, while allowing native pinch-to-zoom.
-        // Users can pinch in/out freely; the initial presentation remains compact.
+        // Start at 80% and keep the WebView at a fixed scale.
+        // Pinch-to-zoom is intentionally disabled for a consistent app layout.
         webView.setInitialScale(80);
-        s.setSupportZoom(true);
+        s.setSupportZoom(false);
         s.setSupportMultipleWindows(false);
-        s.setBuiltInZoomControls(true);
+        s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
-        s.setBuiltInZoomControls(true);
 
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
+
+        // Pinch gestures are disabled; keep the app at the 80% presentation scale.
+        webView.setOnTouchListener((v, event) -> {
+            if (event.getPointerCount() > 1) return true;
+            if (event.getActionMasked() == MotionEvent.ACTION_UP || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+                return false;
+            }
+            return false;
+        });
 
         // Keep the normal Android WebView/mobile user agent so the website
         // serves its responsive mobile layout, while retaining the app marker
