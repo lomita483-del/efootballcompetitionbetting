@@ -76,6 +76,7 @@ jobs:
                   if (getBridge() != null && getBridge().getWebView() != null) {
                       WebSettings settings = getBridge().getWebView().getSettings();
                       settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+                      settings.setUserAgentString(settings.getUserAgentString() + " ECBAndroidApp/" + BuildConfig.VERSION_NAME);
                       getBridge().getWebView().clearCache(true);
                       getBridge().getWebView().clearHistory();
                   }
