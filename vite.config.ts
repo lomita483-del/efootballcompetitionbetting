@@ -15,6 +15,9 @@ export default defineConfig({
     // inside the APK without depending on the live website for HTML.
     spa: {
       enabled: process.env.CAPACITOR_BUILD === "1",
+      prerender: {
+        failOnError: false,
+      },
     },
     // The normal web deployment keeps the custom server entry. The standalone
     // Android SPA build must let TanStack Start use its default server entry so
