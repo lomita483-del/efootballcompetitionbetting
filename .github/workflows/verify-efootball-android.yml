@@ -31,7 +31,7 @@ jobs:
           node-version: "22"
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps --package-lock=false
 
       - name: Build bundled web app
         run: CAPACITOR_BUILD=1 npm run build
