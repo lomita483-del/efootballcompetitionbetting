@@ -9,7 +9,7 @@ if printf '%s\n' "$CHANGED" | grep -Eq 'android-shell/app/src/main/res/layout/di
 if printf '%s\n' "$CHANGED" | grep -Eq 'src/components/Layout\.tsx'; then add_note "The app footer now displays the current release version and reads the live release metadata so the version stays synchronized with the latest app release."; fi
 if printf '%s\n' "$CHANGED" | grep -Eq 'android-shell/app/build\.gradle'; then add_note "The Android package version/build was incremented for this release."; fi
 if printf '%s\n' "$CHANGED" | grep -Eq 'android-shell/app/src/main/java/.*/MainActivity\.java'; then
-  add_note "Android pinch-to-zoom is enabled with an 85% starting scale, and multi-touch no longer triggers the app's pull-to-refresh reload."
+  add_note "Android now starts at an 80% WebView scale for a more compact layout, with pinch-to-zoom disabled and multi-touch no longer triggering the app's pull-to-refresh reload."
   add_note "The bottom-center Home control is smaller and more refined, with a premium gold finish, illuminated edge, depth, halo, and circular logo clipping."
   add_note "The Android startup experience now shows a larger full E-Football logo on a branded dark splash while the WebView loads."
 fi
