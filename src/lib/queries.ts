@@ -42,9 +42,55 @@ const matchSelect = `
 `;
 
 export async function fetchMatches(): Promise<MatchRow[]> {
-  const { data, error } = await supabase.from("matches").select(matchSelect).eq("is_archived", false).eq("is_virtual", false).order("start_time", { ascending: true });
-  if (error) throw error;
-  return (data ?? []) as unknown as MatchRow[];
+  const base = supabase
+    .from("matches")
+    .select(matchSelect)
+    .eq("is_archived", false)
+    .eq("is_virtual", false)
+    .order("start_time", { ascending: true });
+
+  const { data, error } = await base;
+  if (!error) return (data ?? []) as unknown as MatchRow[];
+
+  // The homepage must not disappear when a nested PostgREST relationship
+  // temporarily fails. Fall back to the core match/team data so the arena
+  // still renders, then attach markets/odds when that secondary request works.
+  const { data: fallback, error: fallbackError } = await supabase
+    .from("matches")
+    .select(`
+      id,name,status,start_time,location,is_featured,home_score,away_score,category_id,is_virtual,lock_time,match_kind,marketing_enabled,featured_image_url,featured_image_fit,featured_image_position,
+      category:categories!category_id(id,name,icon),
+      home_team:teams!home_team_id(id,name,logo_url,gang_type),
+      away_team:teams!away_team_id(id,name,logo_url,gang_type),
+      home_player:players!home_player_id(id,name,avatar_url,team_id),
+      away_player:players!away_player_id(id,name,avatar_url,team_id)
+    `)
+    .eq("is_archived", false)
+    .eq("is_virtual", false)
+    .order("start_time", { ascending: true });
+
+  if (fallbackError) throw error;
+
+  const rows = (fallback ?? []) as unknown as MatchRow[];
+  if (!rows.length) return rows;
+
+  try {
+    const ids = rows.map((row) => row.id);
+    const { data: marketRows } = await supabase
+      .from("markets")
+      .select("id,match_id,name,is_open,odds(id,label,value,is_winner,market_id,future_candidate_type,future_emblem_url,future_status,future_next_title,future_next_at,future_progress)")
+      .in("match_id", ids);
+
+    const byMatch = new Map<string, MarketRow[]>();
+    for (const market of (marketRows ?? []) as any[]) {
+      const current = byMatch.get(market.match_id) ?? [];
+      current.push(market as MarketRow);
+      byMatch.set(market.match_id, current);
+    }
+    return rows.map((row) => ({ ...row, markets: byMatch.get(row.id) ?? [] }));
+  } catch {
+    return rows.map((row) => ({ ...row, markets: [] }));
+  }
 }
 
 export async function fetchMatch(id: string): Promise<MatchRow | null> {
