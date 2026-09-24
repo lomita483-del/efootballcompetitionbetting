@@ -25,7 +25,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.webkit.WebViewAssetLoader;
 import androidx.webkit.WebViewClientCompat;
 
 import java.io.InputStream;
@@ -33,8 +32,8 @@ import java.io.InputStream;
 
 public class MainActivity extends Activity {
     private static final String APP_URL =
-        "https://appassets.androidplatform.net/";
-    private static final String ASSET_HOST = "appassets.androidplatform.net";
+        "https://lslonlinebetting.lovable.app/";
+    private static final String APP_HOST = "lslonlinebetting.lovable.app";
     private static final int NOTIFICATION_PERMISSION_REQUEST = 2001;
     private static final String NOTIFICATION_CHANNEL_ID = "ecb_updates";
 
@@ -98,20 +97,16 @@ public class MainActivity extends Activity {
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
-        final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
-            .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
-            .build();
-
         webView.setWebViewClient(new WebViewClientCompat() {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                return interceptLocalRequest(assetLoader, request.getUrl());
+                return interceptLocalRequest(request.getUrl());
             }
 
             @Override
             @SuppressWarnings("deprecation")
             public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-                return interceptLocalRequest(assetLoader, Uri.parse(url));
+                return interceptLocalRequest(Uri.parse(url));
             }
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -188,16 +183,29 @@ public class MainActivity extends Activity {
         updateHandler.postDelayed(updatePoll, 3000L);
     }
 
-    private WebResourceResponse interceptLocalRequest(WebViewAssetLoader assetLoader, Uri uri) {
-        if (uri == null) return null;
-        if (!ASSET_HOST.equalsIgnoreCase(uri.getHost())) return null;
-        WebResourceResponse response = assetLoader.shouldInterceptRequest(uri);
-        if (response != null) return response;
+    private WebResourceResponse interceptLocalRequest(Uri uri) {
+        if (uri == null || !APP_HOST.equalsIgnoreCase(uri.getHost())) return null;
         String path = uri.getPath();
-        if (path == null || path.isEmpty() || "/".equals(path) || !path.substring(path.lastIndexOf('/') + 1).contains(".")) {
+        if (path == null || "/".equals(path) || path.isEmpty() || !path.substring(path.lastIndexOf('/') + 1).contains(".")) {
             return serveBundledFile("_shell.html", "text/html", "UTF-8");
         }
-        return null;
+        if (path.startsWith("/assets/")) {
+            return serveBundledFile(path.substring(1), guessMime(path), guessEncoding(path));
+        }
+        // Public bundled assets (favicon, manifest, etc.).
+        WebResourceResponse asset = serveBundledFile(path.substring(1), guessMime(path), guessEncoding(path));
+        return asset;
+    }
+
+    private String guessMime(String path) {
+        String ext = MimeTypeMap.getFileExtensionFromUrl(path);
+        String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+        return mime != null ? mime : "application/octet-stream";
+    }
+
+    private String guessEncoding(String path) {
+        String mime = guessMime(path);
+        return mime.startsWith("text/") || mime.contains("javascript") || mime.contains("json") ? "UTF-8" : null;
     }
 
     private WebResourceResponse serveBundledFile(String filename, String mime, String encoding) {
