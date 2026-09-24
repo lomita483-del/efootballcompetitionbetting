@@ -44,9 +44,9 @@ public class MainActivity extends Activity {
         // phone-width responsive scaling and do not zoom the whole page.
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(false);
-        webView.setInitialScale(64);
+        webView.setInitialScale(100);
 
-        // Use a 1280px desktop CSS viewport rendered at 64% so the full desktop layout fits the phone width.
+        // Let the website's shared 1280px desktop canvas control scaling for every page, matching the admin console.
         settings.setSupportZoom(true);
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
@@ -75,11 +75,11 @@ public class MainActivity extends Activity {
             public void onPageFinished(WebView view, String url) {
                 refresher.setRefreshing(false);
                 boolean adminConsole = url != null && url.contains("/admin");
-                view.setInitialScale(64);
+                view.setInitialScale(100);
                 String script =
                     "(function(){"
                     + "var m=document.querySelector('meta[name=viewport]');"
-                    + "if(m){m.setAttribute('content','width=1280,initial-scale=1.0,minimum-scale=0.5,maximum-scale=5.0,user-scalable=yes');}"
+                    + "if(m){m.setAttribute('content','width=1024,initial-scale=1.0,minimum-scale=0.5,maximum-scale=5.0,user-scalable=yes');}"
                     + "var s=document.getElementById('ecb-admin-scale');"
                     + "if(!s){s=document.createElement('style');s.id='ecb-admin-scale';"
                     + "s.textContent='body{-webkit-text-size-adjust:100%;overscroll-behavior-x:none;overscroll-behavior-y:auto}';"
