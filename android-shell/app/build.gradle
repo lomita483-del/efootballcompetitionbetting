@@ -8,8 +8,8 @@ android {
         applicationId 'com.ecb.efootballcompetitionbet'
         minSdk 24
         targetSdk 34
-        versionCode 64
-        versionName '1.0.63'
+        versionCode 65
+        versionName '1.0.64'
     }
     signingConfigs {
         release {
