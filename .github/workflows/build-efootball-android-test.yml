@@ -1,5 +1,5 @@
 name: Build E-Football Android Test APK
-# Release build trigger: force rebuild after startup overlay fix
+# Release build trigger: rebuild on Android shell changes and release metadata changes
 
 on:
   workflow_dispatch:
