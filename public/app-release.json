@@ -5,9 +5,21 @@
   "latestBuild": 74,
   "minimumSupportedVersion": "1.0.0",
   "minimumSupportedBuild": 1,
-  "forceUpdate": false,
+  "forceUpdate": true,
   "downloadUrl": "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
-  "whatsNew": [""],
-  "releaseNotes": [""],
+  "whatsNew": [
+    "Fixed the Android app blank-screen issue by restoring reliable loading of the live E-Football website.",
+    "Restored the website's normal mobile responsive layout inside the Android WebView.",
+    "Restored the 85% WebView presentation so pages fit the phone correctly.",
+    "Restored the normal mobile WebView User-Agent while keeping the ECB Android app identifier.",
+    "Removed the broken local asset interception that could prevent the website from rendering."
+  ],
+  "releaseNotes": [
+    "Fixed the Android app blank-screen issue by restoring reliable loading of the live E-Football website.",
+    "Restored the website's normal mobile responsive layout inside the Android WebView.",
+    "Restored the 85% WebView presentation so pages fit the phone correctly.",
+    "Restored the normal mobile WebView User-Agent while keeping the ECB Android app identifier.",
+    "Removed the broken local asset interception that could prevent the website from rendering."
+  ],
   "publishedAt": "2026-09-24T13:50:54+01:00"
 }
