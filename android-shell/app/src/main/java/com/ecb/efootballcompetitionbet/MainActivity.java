@@ -89,8 +89,8 @@ public class MainActivity extends Activity {
         s.setDatabaseEnabled(true);
         // Use the website's normal responsive mobile layout across the entire app.
         // Do not force a desktop CSS viewport or a fixed native zoom.
-        s.setUseWideViewPort(false);
-        s.setLoadWithOverviewMode(false);
+        s.setUseWideViewPort(true);
+        s.setLoadWithOverviewMode(true);
         s.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         s.setTextZoom(100);
 
