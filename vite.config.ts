@@ -10,6 +10,12 @@ import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
 export default defineConfig({
   plugins: [mcpPlugin()],
   tanstackStart: {
+    // The Android release is a true standalone WebView APK. In that build only,
+    // emit TanStack Start's static SPA shell so the full client can be shipped
+    // inside the APK without depending on the live website for HTML.
+    spa: {
+      enabled: process.env.CAPACITOR_BUILD === "1",
+    },
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
     server: { entry: "server" },
