@@ -194,7 +194,6 @@ export function AdminPage() {
     <Layout>
       <main className={`admin-console-page${unblurred ? " admin-unblurred" : ""} w-full overflow-x-hidden`}>
         <div className="admin-shell-logo" style={{ backgroundImage: `url(${lslLogo})` }} aria-hidden="true" />
-        <DesktopCanvas>
         <div className="w-[1280px] max-w-[1280px] ml-0 mr-auto px-4 py-6 space-y-4">
 
           <div
@@ -332,7 +331,7 @@ export function AdminPage() {
             <TabsContent value="wagers" className="mt-4"><WagersAdminPanel /></TabsContent>
           </Tabs>
         </div>
-        </DesktopCanvas>
+
         <ActionConfirmDialog />
       </main>
     </Layout>
@@ -344,80 +343,6 @@ export function AdminPage() {
  * CSS transform so phones get the exact desktop layout (League Arena stays in
  * the right column) instead of the stacked mobile reflow.
  */
-function DesktopCanvas({ children }: { children: React.ReactNode }) {
-  const hostRef = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
-  const [height, setHeight] = useState(0);
-
-  useEffect(() => {
-    let raf = 0;
-
-    const measure = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const host = hostRef.current;
-        const inner = innerRef.current;
-        if (!host || !inner) return;
-
-        const nextScale = Math.min(1, host.clientWidth / 1280);
-        setScale((prev) => (Math.abs(prev - nextScale) < 0.001 ? prev : nextScale));
-
-        // CSS transforms do not participate in normal document flow, so the
-        // wrapper must reserve the scaled visual height explicitly.
-        const nextHeight = inner.scrollHeight * nextScale;
-        setHeight((prev) => (Math.abs(prev - nextHeight) < 1 ? prev : nextHeight));
-      });
-    };
-
-    measure();
-
-    const ro = new ResizeObserver(measure);
-    if (innerRef.current) ro.observe(innerRef.current);
-
-    // Some admin panels change their content without changing the observed
-    // element's border box immediately (Tabs, async data, font/layout changes).
-    // Watch the subtree and re-measure on those changes so the page scrollbar
-    // always reaches the true bottom of the active panel.
-    const mo = innerRef.current
-      ? new MutationObserver(measure)
-      : null;
-    if (mo && innerRef.current) {
-      mo.observe(innerRef.current, { subtree: true, childList: true, attributes: true });
-    }
-
-    window.addEventListener("resize", measure);
-    window.addEventListener("orientationchange", measure);
-    document.fonts?.ready.then(measure).catch(() => {});
-
-    return () => {
-      cancelAnimationFrame(raf);
-      ro.disconnect();
-      mo?.disconnect();
-      window.removeEventListener("resize", measure);
-      window.removeEventListener("orientationchange", measure);
-    };
-  }, []);
-
-  return (
-    <div
-      ref={hostRef}
-      className="w-full overflow-x-hidden overflow-y-visible"
-      style={{ height: height > 0 ? height : undefined, minHeight: height > 0 ? height : undefined }}
-    >
-      <div
-        ref={innerRef}
-        style={{
-          width: 1280,
-          transform: `scale(${scale})`,
-          transformOrigin: "top left",
-        }}
-      >
-        {children}
-      </div>
-    </div>
-  );
-}
 
 async function logAudit(action: string, target_type: string, target_id?: string, metadata?: any) {
   const u = (await supabase.auth.getUser()).data.user;
