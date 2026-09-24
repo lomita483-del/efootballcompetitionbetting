@@ -4244,7 +4244,7 @@ function AndroidAppUpdatesPanel() {
                 toast.error(e?.message || "Unable to refresh the latest version.");
               }
             }}><RotateCw className="h-3.5 w-3.5 mr-1.5" />Refresh version</Button>
-          )}
+          </div>
         </Card>
       )}
       <div className="space-y-2">
