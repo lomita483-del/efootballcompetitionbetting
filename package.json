@@ -10,7 +10,10 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "app:sync": "npm run build && npx cap sync android",
+    "app:android:debug": "npm run build && npx cap sync android && cd android && ./gradlew assembleDebug",
+    "app:android:release": "npm run build && npx cap sync android && cd android && ./gradlew assembleRelease"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -74,7 +77,9 @@
     "vite-tsconfig-paths": "^6.1.1",
     "web-push": "^3.6.7",
     "zod": "^4.4.3",
-    "react-is": "^19.2.0"
+    "react-is": "^19.2.0",
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/android": "^7.4.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
@@ -93,7 +98,8 @@
     "prettier": "^3.7.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "@capacitor/cli": "^7.4.3"
   },
   "overrides": {
     "seroval": "^1.6.4",
