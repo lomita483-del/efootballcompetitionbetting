@@ -94,9 +94,9 @@ public class MainActivity extends Activity {
         s.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         s.setTextZoom(100);
 
-        // Start at 70% and keep the WebView at a fixed scale.
-        // Pinch-to-zoom is intentionally disabled for a consistent app layout.
-        webView.setInitialScale(70);
+        // Use the normal Android mobile viewport. Native WebView scaling was
+        // causing the page to appear zoomed and crop/hide responsive content.
+        // The website controls its own responsive layout through the viewport.
         s.setSupportZoom(false);
         s.setSupportMultipleWindows(false);
         s.setBuiltInZoomControls(false);
@@ -155,7 +155,7 @@ public class MainActivity extends Activity {
                     splash.animate().alpha(0f).setDuration(260L).withEndAction(() -> splash.setVisibility(View.GONE)).start();
                 }
                 view.evaluateJavascript(
-                    "(function(){var m=document.querySelector('meta[name=viewport]');if(m)m.setAttribute('content','width=device-width,initial-scale=0.7,minimum-scale=0.7,maximum-scale=0.7,user-scalable=no,viewport-fit=cover');})();",
+                    "(function(){var m=document.querySelector('meta[name=viewport]');if(m)m.setAttribute('content','width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover');})();",
                     null
                 );
             }
