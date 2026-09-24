@@ -1,13 +1,13 @@
 {
   "app": "E-Football Competition Bet",
   "platform": "android",
-  "latestVersion": "1.0.52",
-  "latestBuild": 53,
+  "latestVersion": "1.0.53",
+  "latestBuild": 54,
   "minimumSupportedVersion": "1.0.0",
   "minimumSupportedBuild": 1,
   "forceUpdate": false,
   "downloadUrl": "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
-  "whatsNew": ["The Android package version/build was incremented for this release.","Android now starts at an 80% WebView scale for a more compact layout, with pinch-to-zoom disabled and multi-touch no longer triggering the app's pull-to-refresh reload.","The bottom-center Home control is smaller and more refined, with a premium gold finish, illuminated edge, depth, halo, and circular logo clipping.","The Android startup experience now shows a larger full E-Football logo on a branded dark splash while the WebView loads.","The release metadata and What's New list are synchronized to the staged Android release and include the complete user-facing changes in this version.","Release What's New is generated from the files changed since the previous Android release instead of copying unrelated older release notes."],
-  "releaseNotes": ["The Android package version/build was incremented for this release.","Android now starts at an 80% WebView scale for a more compact layout, with pinch-to-zoom disabled and multi-touch no longer triggering the app's pull-to-refresh reload.","The bottom-center Home control is smaller and more refined, with a premium gold finish, illuminated edge, depth, halo, and circular logo clipping.","The Android startup experience now shows a larger full E-Football logo on a branded dark splash while the WebView loads.","The release metadata and What's New list are synchronized to the staged Android release and include the complete user-facing changes in this version.","Release What's New is generated from the files changed since the previous Android release instead of copying unrelated older release notes."],
-  "publishedAt": "2026-09-24T08:24:13+01:00"
+  "whatsNew": ["The Android package version/build was incremented for this release.","Android now starts at an 80% WebView scale for a more compact layout, with pinch-to-zoom disabled and multi-touch no longer triggering the app's pull-to-refresh reload.","The bottom-center Home control is smaller and more refined, with a premium gold finish, illuminated edge, depth, halo, and circular logo clipping.","The Android startup experience now shows a larger full E-Football logo on a branded dark splash while the WebView loads.","The release metadata and What's New list are synchronized to the staged Android release and include the complete user-facing changes in this version."],
+  "releaseNotes": ["The Android package version/build was incremented for this release.","Android now starts at an 80% WebView scale for a more compact layout, with pinch-to-zoom disabled and multi-touch no longer triggering the app's pull-to-refresh reload.","The bottom-center Home control is smaller and more refined, with a premium gold finish, illuminated edge, depth, halo, and circular logo clipping.","The Android startup experience now shows a larger full E-Football logo on a branded dark splash while the WebView loads.","The release metadata and What's New list are synchronized to the staged Android release and include the complete user-facing changes in this version."],
+  "publishedAt": "2026-09-24T08:29:04+01:00"
 }
