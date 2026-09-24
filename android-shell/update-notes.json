@@ -1,10 +1,7 @@
 {
   "whatsNew": [
-    "Android WebView scaling has been fixed so the website now opens at the normal responsive 100% viewport instead of appearing zoomed and hiding content.",
-    "Native WebView initial scaling has been removed to prevent forced zoom and cropped responsive content.",
-    "Pinch-to-zoom remains disabled for a consistent app experience.",
-    "The Android bottom-center Home button uses the compact premium gold design with the app logo.",
-    "The Android startup screen shows the full E-Football logo on a branded dark background while the app loads.",
-    "The app footer continues to display the current release version from live release metadata."
+    "The Android app behavior has been restored to the 1.0.46 baseline, including the responsive mobile website layout and 85% WebView presentation.",
+    "The release has a new package version, 1.0.59 (build 60), while retaining the restored 1.0.46 app behavior.",
+    "The native Android update checker and APK installer remain available so future updates can still be installed from inside the app."
   ]
 }
