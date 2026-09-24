@@ -4165,7 +4165,7 @@ function AndroidAppUpdatesPanel() {
       </Card>
 
       <div className="lg:col-span-2">
-        <div id="android-app-updates" className="scroll-mt-6"><SettingsSection icon={Download} title="Android App Updates" subtitle="Prepare the release details, save them, and trigger the update only when you are ready. Nothing is shown to users until you trigger it.">
+        <div id="android-app-updates" className="scroll-mt-6"><Card className="glass p-5">
           <div className="grid gap-3 md:grid-cols-2">
             <FieldLuxe label="Version">
               <Input value={releaseControl.latest_version ?? ""} onChange={(e) => setReleaseControl({ ...releaseControl, latest_version: e.target.value })} placeholder="1.0.24" />
@@ -4245,8 +4245,7 @@ function AndroidAppUpdatesPanel() {
               }
             }}><RotateCw className="h-3.5 w-3.5 mr-1.5" />Refresh version</Button>
           </div>
-        </Card>
-      )}
+        </Card></div>
       {/* Keep Android release controls build-safe and explicitly closed. */}
       <div className="space-y-2">
         {filtered.length === 0 && <p className="text-sm text-muted-foreground">No tickets match.</p>}
