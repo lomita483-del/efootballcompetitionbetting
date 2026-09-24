@@ -1,7 +1,8 @@
 {
   "whatsNew": [
-    "The Android app behavior remains restored to the 1.0.46 baseline, including the responsive mobile website layout.",
-    "The WebView presentation is now zoomed out to 80% so more of the website is visible on screen.",
-    "The native Android update checker and APK installer remain available for future releases."
+    "The Android app now uses a 75% WebView scale so more of the website fits comfortably on phone screens.",
+    "The mobile website viewport is restored to the real device width instead of forcing a wide desktop canvas inside the Android app.",
+    "Global layout width constraints prevent pages and admin content from expanding past the phone screen and being pushed off to the right.",
+    "The native Android update checker, APK installer, and bottom-center Home control remain available."
   ]
 }
