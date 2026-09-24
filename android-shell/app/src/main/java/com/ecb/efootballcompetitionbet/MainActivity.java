@@ -9,9 +9,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.webkit.CookieManager;
-import android.webkit.MimeTypeMap;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
@@ -26,15 +23,11 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.webkit.WebViewAssetLoader;
-import androidx.webkit.WebViewClientCompat;
 
-import java.io.InputStream;
 
 public class MainActivity extends Activity {
-    private static final String LOCAL_APP_URL =
-        "https://appassets.androidplatform.net/";
-    private static final String ASSET_HOST = "appassets.androidplatform.net";
+    private static final String APP_URL =
+        "https://lslonlinebetting.lovable.app/";
     private static final int NOTIFICATION_PERMISSION_REQUEST = 2001;
     private static final String NOTIFICATION_CHANNEL_ID = "ecb_updates";
 
@@ -78,13 +71,13 @@ public class MainActivity extends Activity {
         settings.setAllowContentAccess(false);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
-        // Keep the same 1280px desktop canvas used by the site's admin layout.
-        // WebView then scales that fixed canvas to the physical phone width.
-        settings.setUseWideViewPort(true);
+        // Use the site's real responsive mobile layout. The app owns its WebView
+        // storage/cookies, so it does not depend on Chrome's cache or storage.
+        settings.setUseWideViewPort(false);
         settings.setLoadWithOverviewMode(false);
         settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         settings.setTextZoom(100);
-        webView.setInitialScale(100);
+        webView.setInitialScale(85);
 
         settings.setSupportZoom(false);
         settings.setBuiltInZoomControls(false);
@@ -92,10 +85,9 @@ public class MainActivity extends Activity {
         settings.setSupportMultipleWindows(false);
         settings.setMediaPlaybackRequiresUserGesture(false);
 
-        String desktopUa = settings.getUserAgentString()
-            .replace(" Mobile", "")
-            .replace("Mobile", "");
-        settings.setUserAgentString(desktopUa + " ECBAndroidApp/" + BuildConfig.VERSION_NAME);
+        settings.setUserAgentString(
+            settings.getUserAgentString() + " ECBAndroidApp/" + BuildConfig.VERSION_NAME
+        );
 
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
@@ -131,7 +123,7 @@ public class MainActivity extends Activity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
-                view.setInitialScale(100);
+                view.setInitialScale(85);
                 injectAndroidAppState(view);
             }
         });
@@ -166,7 +158,7 @@ public class MainActivity extends Activity {
         homeLogo.setContentDescription("Go to E-Football home");
         homeLogo.setClickable(true);
         homeLogo.setFocusable(true);
-        homeLogo.setOnClickListener(v -> webView.loadUrl(LOCAL_APP_URL));
+        homeLogo.setOnClickListener(v -> webView.loadUrl(APP_URL));
 
         int density = (int) getResources().getDisplayMetrics().density;
         int logoSize = 56 * density;
@@ -185,7 +177,7 @@ public class MainActivity extends Activity {
         root.addView(homeLogo, logoParams);
 
         setContentView(root);
-        webView.loadUrl(LOCAL_APP_URL);
+        webView.loadUrl(APP_URL);
 
         createNotificationChannel();
         requestNotificationPermissionIfNeeded();
@@ -194,67 +186,11 @@ public class MainActivity extends Activity {
         updateHandler.postDelayed(updatePoll, 3000L);
     }
 
-    private WebResourceResponse interceptLocalRequest(
-        WebViewAssetLoader assetLoader, Uri uri
-    ) {
-        if (uri == null) return null;
-        if (!ASSET_HOST.equalsIgnoreCase(uri.getHost())) return null;
-
-        WebResourceResponse response = assetLoader.shouldInterceptRequest(uri);
-        if (response != null) return response;
-
-        String path = uri.getPath();
-        if (path == null || path.isEmpty() || "/".equals(path) || !path.contains(".")) {
-            // Keep the browser URL at the app root so TanStack Router resolves "/"
-            // instead of trying to route "/assets/_shell.html".
-            return serveBundledFile("_shell.html", "text/html", "UTF-8");
-        }
-
-        // Root-level public assets such as manifest.json, icons, and favicon
-        // are also bundled in the APK.
-        if (!path.startsWith("/assets/")) {
-            return serveAssetPath(path.substring(1));
-        }
-
-        return null;
-    }
-
-    private WebResourceResponse serveBundledFile(
-        String filename, String mime, String encoding
-    ) {
-        try {
-            InputStream input = getAssets().open(filename);
-            return new WebResourceResponse(mime, encoding, input);
-        } catch (Exception ignored) {
-            return null;
-        }
-    }
-
-    private WebResourceResponse serveAssetPath(String filename) {
-        try {
-            InputStream input = getAssets().open(filename);
-            String extension = MimeTypeMap.getFileExtensionFromUrl(filename);
-            String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-            if (mime == null) mime = "application/octet-stream";
-            String encoding = mime.startsWith("text/") || mime.contains("json") || mime.contains("javascript")
-                ? "UTF-8" : null;
-            return new WebResourceResponse(mime, encoding, input);
-        } catch (Exception ignored) {
-            return null;
-        }
-    }
-
     private void injectAndroidAppState(WebView view) {
         String version = BuildConfig.VERSION_NAME.replace("\\", "\\\\").replace("'", "\\'");
         String script =
             "(function(){"
             + "var version='" + version + "';"
-            + "var m=document.querySelector('meta[name=viewport]');"
-            + "var c='width=1280,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover';"
-            + "if(m){m.setAttribute('content',c);}else{"
-            + "m=document.createElement('meta');m.name='viewport';m.content=c;document.head.appendChild(m);}"
-            + "document.documentElement.setAttribute('data-ecb-desktop','true');"
-            + "document.body.style.webkitTextSizeAdjust='100%';"
             + "window.ECB_ANDROID_APP_VERSION=version;"
             + "function sync(){"
             + "document.querySelectorAll('[data-app-version]').forEach(function(el){"
@@ -271,7 +207,7 @@ public class MainActivity extends Activity {
             + "if(!window.__ecbApkOpenPatched){"
             + "var original=window.open;"
             + "window.open=function(url){"
-            + "if(typeof url==='string'&&/\\.apk(?:[?#]|$)/i.test(url)){window.location.href=url;return null;}"
+            + "if(typeof url==='string'&&/\\\\.apk(?:[?#]|$)/i.test(url)){window.location.href=url;return null;}"
             + "return original.apply(window,arguments);"
             + "};"
             + "window.__ecbApkOpenPatched=true;"
