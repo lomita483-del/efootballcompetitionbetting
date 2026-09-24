@@ -227,7 +227,7 @@ function AdaptiveViewport() {
       // normal viewport so the browser version remains fully usable.
       const isPhoneSized = window.innerWidth < 900;
       const isAndroidApp = navigator.userAgent.includes("ECBAndroidApp/");
-      const target = isAndroidApp ? "width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" : (isPhoneSized ? mobileDesktopCanvas : normalBrowserViewport);
+      const target = isAndroidApp ? "width=1024,initial-scale=1,minimum-scale=0.5,maximum-scale=5.0,user-scalable=yes,viewport-fit=cover" : (isPhoneSized ? mobileDesktopCanvas : normalBrowserViewport);
       if (meta.getAttribute("content") !== target) meta.setAttribute("content", target);
     };
     apply();
