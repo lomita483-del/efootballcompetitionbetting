@@ -4,15 +4,13 @@ android {
     namespace 'com.ecb.efootballcompetitionbet'
     compileSdk 35
     buildFeatures { buildConfig true }
-
     defaultConfig {
         applicationId 'com.ecb.efootballcompetitionbet'
         minSdk 24
         targetSdk 34
-        versionCode 59
-        versionName '1.0.58'
+        versionCode 60
+        versionName '1.0.59'
     }
-
     signingConfigs {
         release {
             storeFile rootProject.file("release-key.jks")
@@ -21,14 +19,9 @@ android {
             keyPassword System.getenv("ECB_ANDROID_KEY_PASSWORD")
         }
     }
-
     buildTypes {
         debug { debuggable true }
-        release {
-            minifyEnabled false
-            debuggable false
-            signingConfig signingConfigs.release
-        }
+        release { minifyEnabled false; debuggable false; signingConfig signingConfigs.release }
     }
 }
 
