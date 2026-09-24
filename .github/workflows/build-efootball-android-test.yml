@@ -11,6 +11,7 @@ on:
       - "public/**"
       - "package.json"
       - "vite.config.ts"
+      - "vite.android.config.ts"
       - "capacitor.config.ts"
       - "src/routes/dashboard.tsx"
       - "src/routes/index.tsx"
@@ -49,11 +50,11 @@ jobs:
 
       - name: Build and bundle the exact web client into the APK
         run: |
-          CAPACITOR_BUILD=1 npm run build
-          test -f .output/public/_shell.html
+          CAPACITOR_BUILD=1 npx vite build --config vite.android.config.ts
+          test -f dist/client/_shell.html
           rm -rf android-shell/app/src/main/assets
           mkdir -p android-shell/app/src/main/assets
-          cp -R .output/public/. android-shell/app/src/main/assets/
+          cp -R dist/client/. android-shell/app/src/main/assets/
           cp android-shell/app/src/main/assets/_shell.html android-shell/app/src/main/assets/index.html
           test -f android-shell/app/src/main/assets/index.html
           test -n "$(find android-shell/app/src/main/assets -type f -print -quit)"
