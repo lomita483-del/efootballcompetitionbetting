@@ -28,10 +28,12 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.webkit.WebViewAssetLoader;
 import androidx.webkit.WebViewClientCompat;
 
+import java.io.InputStream;
+
 
 public class MainActivity extends Activity {
     private static final String APP_URL =
-        "https://appassets.androidplatform.net/assets/";
+        "https://appassets.androidplatform.net/";
     private static final String ASSET_HOST = "appassets.androidplatform.net";
     private static final int NOTIFICATION_PERMISSION_REQUEST = 2001;
     private static final String NOTIFICATION_CHANNEL_ID = "ecb_updates";
@@ -192,7 +194,7 @@ public class MainActivity extends Activity {
         WebResourceResponse response = assetLoader.shouldInterceptRequest(uri);
         if (response != null) return response;
         String path = uri.getPath();
-        if (path == null || path.isEmpty() || "/assets/".equals(path) || !path.substring(path.lastIndexOf('/') + 1).contains(".")) {
+        if (path == null || path.isEmpty() || "/".equals(path) || !path.substring(path.lastIndexOf('/') + 1).contains(".")) {
             return serveBundledFile("_shell.html", "text/html", "UTF-8");
         }
         return null;
