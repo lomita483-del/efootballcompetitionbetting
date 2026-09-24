@@ -7,6 +7,7 @@ on:
       - "src/**"
       - "public/**"
       - "package.json"
+      - "vite.android.config.ts"
       - "capacitor.config.ts"
       - "android-shell/**"
       - ".github/workflows/verify-efootball-android.yml"
@@ -34,19 +35,19 @@ jobs:
         run: npm install --legacy-peer-deps --package-lock=false
 
       - name: Build bundled web app
-        run: CAPACITOR_BUILD=1 npm run build
+        run: CAPACITOR_BUILD=1 npx vite build --config vite.android.config.ts
 
       - name: Verify bundled app
         run: |
-          test -d .output/public
-          test -f .output/public/_shell.html
-          test -n "$(find .output/public -type f -print -quit)"
+          test -d dist/client
+          test -f dist/client/_shell.html
+          test -n "$(find dist/client -type f -print -quit)"
 
       - name: Copy bundled web app into Android assets
         run: |
           rm -rf android-shell/app/src/main/assets
           mkdir -p android-shell/app/src/main/assets
-          cp -R .output/public/. android-shell/app/src/main/assets/
+          cp -R dist/client/. android-shell/app/src/main/assets/
           cp android-shell/app/src/main/assets/_shell.html android-shell/app/src/main/assets/index.html
           test -f android-shell/app/src/main/assets/index.html
 
