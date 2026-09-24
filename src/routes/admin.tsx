@@ -4246,6 +4246,7 @@ function AndroidAppUpdatesPanel() {
             }}><RotateCw className="h-3.5 w-3.5 mr-1.5" />Refresh version</Button>
           </div>
         </Card></div>
+      </div>
       {/* Keep Android release controls build-safe and explicitly closed. */}
       <div className="space-y-2">
         {filtered.length === 0 && <p className="text-sm text-muted-foreground">No tickets match.</p>}
