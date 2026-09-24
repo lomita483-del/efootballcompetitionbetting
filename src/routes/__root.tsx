@@ -220,15 +220,11 @@ function AdaptiveViewport() {
     if (typeof window === "undefined") return;
     const meta = document.querySelector('meta[name="viewport"]') as HTMLMetaElement | null;
     if (!meta) return;
-    const mobileDesktopCanvas = "width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover";
-    const normalBrowserViewport = "width=device-width, initial-scale=1, viewport-fit=cover";
+    const responsiveViewport = "width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover";
     const apply = () => {
-      // Phones keep the desktop-style canvas, but real desktop browsers use their
-      // normal viewport so the browser version remains fully usable.
-      const isPhoneSized = window.innerWidth < 900;
-      const isAndroidApp = navigator.userAgent.includes("ECBAndroidApp/");
-      const target = isAndroidApp ? "width=1024,initial-scale=1,minimum-scale=0.5,maximum-scale=5.0,user-scalable=yes,viewport-fit=cover" : (isPhoneSized ? mobileDesktopCanvas : normalBrowserViewport);
-      if (meta.getAttribute("content") !== target) meta.setAttribute("content", target);
+      // Keep every page tied to the actual device width. Do not force a 1024px
+      // desktop canvas on phones or inside the Android app.
+      if (meta.getAttribute("content") !== responsiveViewport) meta.setAttribute("content", responsiveViewport);
     };
     apply();
     window.addEventListener("resize", apply);
