@@ -1,23 +1,13 @@
 {
   "app": "E-Football Competition Bet",
   "platform": "android",
-  "latestVersion": "1.0.61",
-  "latestBuild": 62,
+  "latestVersion": "1.0.62",
+  "latestBuild": 63,
   "minimumSupportedVersion": "1.0.0",
   "minimumSupportedBuild": 1,
   "forceUpdate": false,
   "downloadUrl": "https://raw.githubusercontent.com/lomita483-del/efootballcompetitionbetting/main/public/downloads/efootball-competition-bet-latest.apk",
-  "whatsNew": [
-    "Restored the Android WebView to the website's normal responsive mobile viewport so the homepage fills the phone screen correctly.",
-    "Fixed the right-side offset/cropping that was introduced by the 75% native WebView scaling.",
-    "Repaired the production web build, including the Android App Updates admin panel and truncated Token Movement panel.",
-    "Android release v1.0.61 build 62 is signed and verified for distribution."
-  ],
-  "releaseNotes": [
-    "Restored the Android WebView to the website's normal responsive mobile viewport so the homepage fills the phone screen correctly.",
-    "Fixed the right-side offset/cropping that was introduced by the 75% native WebView scaling.",
-    "Repaired the production web build, including the Android App Updates admin panel and truncated Token Movement panel.",
-    "Android release v1.0.61 build 62 is signed and verified for distribution."
-  ],
-  "publishedAt": "2026-09-24T11:23:04+01:00"
+  "whatsNew": [""],
+  "releaseNotes": [""],
+  "publishedAt": "2026-09-24T11:32:36+01:00"
 }
