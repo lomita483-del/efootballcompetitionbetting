@@ -1,8 +1,0 @@
-<resources>
-    <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar">
-        <item name="android:windowSplashScreenBackground">#08111F</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/site_logo</item>
-        <item name="android:windowSplashScreenAnimationDuration">450</item>
-        <item name="android:windowLightStatusBar">false</item>
-    </style>
-</resources>
