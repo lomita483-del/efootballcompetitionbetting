@@ -19,9 +19,9 @@ export default defineConfig({
         failOnError: false,
       },
     },
-    // The normal web deployment keeps the custom server entry. The standalone
-    // Android SPA build must let TanStack Start use its default server entry so
-    // SPA shell prerendering can run correctly during the static build.
-    server: process.env.CAPACITOR_BUILD === "1" ? undefined : { entry: "server" },
+    // Keep a concrete server entry during the SPA-shell prerender step. The
+    // TanStack prerenderer expects the generated server entry to exist while it
+    // renders the static shell that is copied into the APK.
+    server: { entry: "server" },
   },
 });
