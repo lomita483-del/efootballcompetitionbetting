@@ -44,7 +44,7 @@ public class MainActivity extends Activity {
         // phone-width responsive scaling and do not zoom the whole page.
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(false);
-        webView.setInitialScale(100);
+        webView.setInitialScale(55);
 
         // Let the website's shared 1280px desktop canvas control scaling for every page, matching the admin console.
         settings.setSupportZoom(true);
@@ -75,7 +75,7 @@ public class MainActivity extends Activity {
             public void onPageFinished(WebView view, String url) {
                 refresher.setRefreshing(false);
                 boolean adminConsole = url != null && url.contains("/admin");
-                view.setInitialScale(100);
+                view.setInitialScale(55);
                 String script =
                     "(function(){"
                     + "var m=document.querySelector('meta[name=viewport]');"
