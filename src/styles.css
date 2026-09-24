@@ -203,7 +203,10 @@ html.light body {
   .home-page .gap-5 { gap: 0.65rem !important; }
   .home-page .gap-4 { gap: 0.6rem !important; }
 
-  #root, main { min-width: 0; width: 100%; }
+  #root, main { min-width: 0; width: 100%; max-width: 100%; }
+  #root > * { min-width: 0; max-width: 100%; }
+  main, section, article, aside, header, footer, nav, form { min-width: 0; max-width: 100%; }
+  [class*="w-screen"], [class*="min-w-"] { max-width: 100%; }
 
   img, video, canvas, svg { max-width: 100%; height: auto; }
   input, textarea, select { font-size: 16px; } /* prevent iOS zoom on focus */
