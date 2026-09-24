@@ -5,55 +5,327 @@ import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.webkit.CookieManager;
+import android.webkit.MimeTypeMap;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Gravity;
 import android.graphics.drawable.GradientDrawable;
 import android.widget.ImageView;
+
+import androidx.annotation.RequiresApi;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.webkit.WebViewAssetLoader;
+import androidx.webkit.WebViewClientCompat;
+
+import java.io.InputStream;
 
 public class MainActivity extends Activity {
-    private static final String APP_URL="https://lslonlinebetting.lovable.app/";
-    private static final int NOTIFICATION_PERMISSION_REQUEST=2001;
-    private static final String NOTIFICATION_CHANNEL_ID="ecb_updates";
-    private SwipeRefreshLayout swipeRefresh; private WebView webView;
-    private final Handler updateHandler=new Handler(Looper.getMainLooper());
-    private final Runnable updatePoll=new Runnable(){@Override public void run(){UpdateChecker.check(MainActivity.this);updateHandler.postDelayed(this,3000L);}};
-    @Override public void onCreate(Bundle state){super.onCreate(state);getWindow().setStatusBarColor(0xFF080808);getWindow().setNavigationBarColor(0xFF080808);
-        FrameLayout root=new FrameLayout(this);root.setBackgroundColor(0xFF080808);
-        swipeRefresh=new SwipeRefreshLayout(this);swipeRefresh.setColorSchemeColors(0xFFFFC400);swipeRefresh.setEnabled(true);
-        ViewCompat.setOnApplyWindowInsetsListener(swipeRefresh,(view,insets)->{Insets bars=insets.getInsets(WindowInsetsCompat.Type.systemBars());view.setPadding(0,bars.top,0,bars.bottom);return insets;});
-        webView=new WebView(this);webView.addJavascriptInterface(new NativeNotificationBridge(this),"ECBAndroid");
-        WebSettings s=webView.getSettings();s.setJavaScriptEnabled(true);s.setDomStorageEnabled(true);s.setDatabaseEnabled(true);
-        s.setUseWideViewPort(true);s.setLoadWithOverviewMode(true);s.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);s.setTextZoom(100);
-        s.setSupportZoom(false);s.setSupportMultipleWindows(false);s.setBuiltInZoomControls(false);s.setDisplayZoomControls(false);s.setAllowFileAccess(false);s.setAllowContentAccess(false);s.setCacheMode(WebSettings.LOAD_DEFAULT);
-        s.setUserAgentString("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 ECBAndroidApp/"+BuildConfig.VERSION_NAME);
-        CookieManager.getInstance().setAcceptCookie(true);CookieManager.getInstance().setAcceptThirdPartyCookies(webView,true);
-        webView.setWebViewClient(new WebViewClient(){@Override public boolean shouldOverrideUrlLoading(WebView view,String url){if(url!=null&&url.matches("(?i).*\\.apk(?:[?#].*)?$")){UpdateChecker.downloadAndInstallFromUrl(MainActivity.this,url);return true;}return false;}@Override public void onPageFinished(WebView view,String url){view.evaluateJavascript("(function(){if(window.__ecbApkOpenPatched)return;var original=window.open;window.open=function(url){if(typeof url==='string' && /\\.apk(?:[?#]|$)/i.test(url)){window.location.href=url;return null;}return original.apply(window,arguments);};window.__ecbApkOpenPatched=true;})();",null);applyDesktopViewport(view);if(swipeRefresh!=null)swipeRefresh.setRefreshing(false);}});
-        webView.setDownloadListener((url,userAgent,contentDisposition,mimeType,contentLength)->UpdateChecker.downloadAndInstallFromUrl(MainActivity.this,url));
-        swipeRefresh.setOnChildScrollUpCallback((parent,child)->webView!=null&&webView.canScrollVertically(-1));
-        swipeRefresh.addView(webView,new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,FrameLayout.LayoutParams.MATCH_PARENT));swipeRefresh.setOnRefreshListener(()->webView.reload());
-        root.addView(swipeRefresh,new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,FrameLayout.LayoutParams.MATCH_PARENT));
-        ImageView homeLogo=new ImageView(this);homeLogo.setImageResource(R.drawable.site_logo);homeLogo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);homeLogo.setContentDescription("Go to E-Football home");homeLogo.setClickable(true);homeLogo.setFocusable(true);homeLogo.setOnClickListener(v->webView.loadUrl(APP_URL));
-        int logoSize=(int)(56*getResources().getDisplayMetrics().density);GradientDrawable logoCircle=new GradientDrawable();logoCircle.setShape(GradientDrawable.OVAL);logoCircle.setColor(0xEE080808);logoCircle.setStroke((int)(2*getResources().getDisplayMetrics().density),0xFFFFC400);homeLogo.setBackground(logoCircle);homeLogo.setPadding((int)(5*getResources().getDisplayMetrics().density),(int)(5*getResources().getDisplayMetrics().density),(int)(5*getResources().getDisplayMetrics().density),(int)(5*getResources().getDisplayMetrics().density));homeLogo.setClipToOutline(true);
-        FrameLayout.LayoutParams logoParams=new FrameLayout.LayoutParams(logoSize,logoSize,Gravity.CENTER_HORIZONTAL|Gravity.BOTTOM);logoParams.bottomMargin=(int)(16*getResources().getDisplayMetrics().density);root.addView(homeLogo,logoParams);
-        setContentView(root);webView.loadUrl(APP_URL);createNotificationChannel();requestNotificationPermissionIfNeeded();UpdateChecker.check(this);root.postDelayed(()->UpdateChecker.check(this),5000L);updateHandler.postDelayed(updatePoll,3000L);
+    private static final String LOCAL_APP_URL =
+        "https://appassets.androidplatform.net/assets/index.html";
+    private static final String ASSET_HOST = "appassets.androidplatform.net";
+    private static final int NOTIFICATION_PERMISSION_REQUEST = 2001;
+    private static final String NOTIFICATION_CHANNEL_ID = "ecb_updates";
+
+    private SwipeRefreshLayout swipeRefresh;
+    private WebView webView;
+
+    private final Handler updateHandler = new Handler(Looper.getMainLooper());
+    private final Runnable updatePoll = new Runnable() {
+        @Override public void run() {
+            UpdateChecker.check(MainActivity.this);
+            updateHandler.postDelayed(this, 3000L);
+        }
+    };
+
+    @Override
+    public void onCreate(Bundle state) {
+        super.onCreate(state);
+        getWindow().setStatusBarColor(0xFF080808);
+        getWindow().setNavigationBarColor(0xFF080808);
+
+        FrameLayout root = new FrameLayout(this);
+        root.setBackgroundColor(0xFF080808);
+
+        swipeRefresh = new SwipeRefreshLayout(this);
+        swipeRefresh.setColorSchemeColors(0xFFFFC400);
+        swipeRefresh.setEnabled(true);
+        ViewCompat.setOnApplyWindowInsetsListener(swipeRefresh, (view, insets) -> {
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            view.setPadding(0, bars.top, 0, bars.bottom);
+            return insets;
+        });
+
+        webView = new WebView(this);
+        webView.addJavascriptInterface(new NativeNotificationBridge(this), "ECBAndroid");
+
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setDatabaseEnabled(true);
+        settings.setAllowFileAccess(false);
+        settings.setAllowContentAccess(false);
+        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+
+        // Keep the same 1280px desktop canvas used by the site's admin layout.
+        // WebView then scales that fixed canvas to the physical phone width.
+        settings.setUseWideViewPort(true);
+        settings.setLoadWithOverviewMode(false);
+        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
+        settings.setTextZoom(100);
+        webView.setInitialScale(100);
+
+        settings.setSupportZoom(false);
+        settings.setBuiltInZoomControls(false);
+        settings.setDisplayZoomControls(false);
+        settings.setSupportMultipleWindows(false);
+        settings.setMediaPlaybackRequiresUserGesture(false);
+
+        String desktopUa = settings.getUserAgentString()
+            .replace(" Mobile", "")
+            .replace("Mobile", "");
+        settings.setUserAgentString(desktopUa + " ECBAndroidApp/" + BuildConfig.VERSION_NAME);
+
+        CookieManager.getInstance().setAcceptCookie(true);
+        CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
+
+        final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+            .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
+            .build();
+
+        webView.setWebViewClient(new WebViewClientCompat() {
+            @Override
+            @RequiresApi(21)
+            public WebResourceResponse shouldInterceptRequest(
+                WebView view, WebResourceRequest request
+            ) {
+                return interceptLocalRequest(assetLoader, request.getUrl());
+            }
+
+            @Override
+            @SuppressWarnings("deprecation")
+            public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+                return interceptLocalRequest(assetLoader, Uri.parse(url));
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (url != null && url.matches("(?i).*\\.apk(?:[?#].*)?$")) {
+                    UpdateChecker.downloadAndInstallFromUrl(MainActivity.this, url);
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                view.setInitialScale(100);
+                injectAndroidAppState(view);
+            }
+        });
+
+        webView.setDownloadListener(
+            (url, userAgent, contentDisposition, mimeType, contentLength) ->
+                UpdateChecker.downloadAndInstallFromUrl(MainActivity.this, url)
+        );
+
+        swipeRefresh.setOnChildScrollUpCallback(
+            (parent, child) -> webView != null && webView.canScrollVertically(-1)
+        );
+        swipeRefresh.addView(
+            webView,
+            new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        );
+        swipeRefresh.setOnRefreshListener(() -> webView.reload());
+        root.addView(
+            swipeRefresh,
+            new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        );
+
+        ImageView homeLogo = new ImageView(this);
+        homeLogo.setImageResource(R.drawable.site_logo);
+        homeLogo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        homeLogo.setContentDescription("Go to E-Football home");
+        homeLogo.setClickable(true);
+        homeLogo.setFocusable(true);
+        homeLogo.setOnClickListener(v -> webView.loadUrl(LOCAL_APP_URL));
+
+        int density = (int) getResources().getDisplayMetrics().density;
+        int logoSize = 56 * density;
+        GradientDrawable logoCircle = new GradientDrawable();
+        logoCircle.setShape(GradientDrawable.OVAL);
+        logoCircle.setColor(0xEE080808);
+        logoCircle.setStroke(2 * density, 0xFFFFC400);
+        homeLogo.setBackground(logoCircle);
+        homeLogo.setPadding(5 * density, 5 * density, 5 * density, 5 * density);
+        homeLogo.setClipToOutline(true);
+
+        FrameLayout.LayoutParams logoParams = new FrameLayout.LayoutParams(
+            logoSize, logoSize, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM
+        );
+        logoParams.bottomMargin = 16 * density;
+        root.addView(homeLogo, logoParams);
+
+        setContentView(root);
+        webView.loadUrl(LOCAL_APP_URL);
+
+        createNotificationChannel();
+        requestNotificationPermissionIfNeeded();
+        UpdateChecker.check(this);
+        root.postDelayed(() -> UpdateChecker.check(this), 5000L);
+        updateHandler.postDelayed(updatePoll, 3000L);
     }
-    private void applyDesktopViewport(WebView view){view.evaluateJavascript("(function(){var m=document.querySelector('meta[name=viewport]');var c='width=1280,initial-scale=1.0,minimum-scale=0.5,maximum-scale=5.0,user-scalable=no,viewport-fit=cover';if(m){m.setAttribute('content',c);}else{m=document.createElement('meta');m.name='viewport';m.content=c;document.head.appendChild(m);}document.documentElement.setAttribute('data-ecb-desktop','true');document.body.style.webkitTextSizeAdjust='100%';})();",null);}
-    private void createNotificationChannel(){if(Build.VERSION.SDK_INT<Build.VERSION_CODES.O)return;NotificationManager manager=getSystemService(NotificationManager.class);if(manager==null)return;NotificationChannel channel=new NotificationChannel(NOTIFICATION_CHANNEL_ID,"E-Football Competition Bet notifications",NotificationManager.IMPORTANCE_DEFAULT);channel.setDescription("Important E-Football Competition Bet updates.");manager.createNotificationChannel(channel);NotificationChannel realtime=new NotificationChannel("ecb_realtime","Realtime notifications",NotificationManager.IMPORTANCE_DEFAULT);realtime.setDescription("Realtime E-Football Competition Bet notifications.");manager.createNotificationChannel(realtime);}
-    private void requestNotificationPermissionIfNeeded(){if(Build.VERSION.SDK_INT<Build.VERSION_CODES.TIRAMISU)return;if(checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)==PackageManager.PERMISSION_GRANTED)return;requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},NOTIFICATION_PERMISSION_REQUEST);}
-    @Override protected void onResume(){super.onResume();if(webView!=null)webView.onResume();UpdateChecker.check(this);updateHandler.removeCallbacks(updatePoll);updateHandler.post(updatePoll);}
-    @Override protected void onDestroy(){updateHandler.removeCallbacks(updatePoll);if(webView!=null)webView.destroy();super.onDestroy();}
-    @Override protected void onPause(){updateHandler.removeCallbacks(updatePoll);if(webView!=null)webView.onPause();super.onPause();}
-    @Override public void onBackPressed(){if(webView!=null&&webView.canGoBack())webView.goBack();else super.onBackPressed();}
+
+    private WebResourceResponse interceptLocalRequest(
+        WebViewAssetLoader assetLoader, Uri uri
+    ) {
+        if (uri == null) return null;
+        if (!ASSET_HOST.equalsIgnoreCase(uri.getHost())) return null;
+
+        WebResourceResponse response = assetLoader.shouldInterceptRequest(uri);
+        if (response != null) return response;
+
+        String path = uri.getPath();
+        if (path == null || !path.startsWith("/assets/")) return null;
+
+        // TanStack Start uses SPA history routes. If WebView reloads one of those
+        // routes, serve the bundled shell instead of going back to the network.
+        String relative = path.substring("/assets/".length());
+        if (relative.isEmpty() || !relative.contains(".")) {
+            return serveBundledFile("index.html", "text/html", "UTF-8");
+        }
+
+        // A missing real asset should fail normally rather than returning HTML
+        // with a JavaScript/CSS MIME type.
+        return null;
+    }
+
+    private WebResourceResponse serveBundledFile(
+        String filename, String mime, String encoding
+    ) {
+        try {
+            InputStream input = getAssets().open(filename);
+            return new WebResourceResponse(mime, encoding, input);
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    private void injectAndroidAppState(WebView view) {
+        String version = BuildConfig.VERSION_NAME.replace("\\", "\\\\").replace("'", "\\'");
+        String script =
+            "(function(){"
+            + "var version='" + version + "';"
+            + "var m=document.querySelector('meta[name=viewport]');"
+            + "var c='width=1280,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover';"
+            + "if(m){m.setAttribute('content',c);}else{"
+            + "m=document.createElement('meta');m.name='viewport';m.content=c;document.head.appendChild(m);}"
+            + "document.documentElement.setAttribute('data-ecb-desktop','true');"
+            + "document.body.style.webkitTextSizeAdjust='100%';"
+            + "window.ECB_ANDROID_APP_VERSION=version;"
+            + "function sync(){"
+            + "document.querySelectorAll('[data-app-version]').forEach(function(el){"
+            + "el.setAttribute('data-app-version',version);"
+            + "var s=el.querySelector('span');"
+            + "if(s)s.textContent='App version '+version;"
+            + "});"
+            + "}"
+            + "sync();"
+            + "if(document.body&&!window.__ecbVersionObserver){"
+            + "window.__ecbVersionObserver=new MutationObserver(sync);"
+            + "window.__ecbVersionObserver.observe(document.body,{childList:true,subtree:true});"
+            + "}"
+            + "if(!window.__ecbApkOpenPatched){"
+            + "var original=window.open;"
+            + "window.open=function(url){"
+            + "if(typeof url==='string'&&/\\.apk(?:[?#]|$)/i.test(url)){window.location.href=url;return null;}"
+            + "return original.apply(window,arguments);"
+            + "};"
+            + "window.__ecbApkOpenPatched=true;"
+            + "}"
+            + "})();";
+        view.evaluateJavascript(script, null);
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
+        NotificationManager manager = getSystemService(NotificationManager.class);
+        if (manager == null) return;
+
+        NotificationChannel channel = new NotificationChannel(
+            NOTIFICATION_CHANNEL_ID,
+            "E-Football Competition Bet notifications",
+            NotificationManager.IMPORTANCE_DEFAULT
+        );
+        channel.setDescription("Important E-Football Competition Bet updates.");
+        manager.createNotificationChannel(channel);
+
+        NotificationChannel realtime = new NotificationChannel(
+            "ecb_realtime",
+            "Realtime notifications",
+            NotificationManager.IMPORTANCE_DEFAULT
+        );
+        realtime.setDescription("Realtime E-Football Competition Bet notifications.");
+        manager.createNotificationChannel(realtime);
+    }
+
+    private void requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return;
+        if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+            == PackageManager.PERMISSION_GRANTED) return;
+        requestPermissions(
+            new String[]{Manifest.permission.POST_NOTIFICATIONS},
+            NOTIFICATION_PERMISSION_REQUEST
+        );
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (webView != null) webView.onResume();
+        UpdateChecker.check(this);
+        updateHandler.removeCallbacks(updatePoll);
+        updateHandler.post(updatePoll);
+    }
+
+    @Override
+    protected void onPause() {
+        updateHandler.removeCallbacks(updatePoll);
+        if (webView != null) webView.onPause();
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        updateHandler.removeCallbacks(updatePoll);
+        if (webView != null) webView.destroy();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (webView != null && webView.canGoBack()) {
+            webView.goBack();
+        } else {
+            super.onBackPressed();
+        }
+    }
 }
