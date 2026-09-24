@@ -457,9 +457,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 
 function SiteFooter({ isHome = false }: { isHome?: boolean }) {
   const [s, setS] = useState<any>(null);
-  const [appVersion, setAppVersion] = useState("1.0.63");
+  const [appVersion, setAppVersion] = useState(() => {
+    if (typeof window !== "undefined") {
+      const nativeVersion = (window as any).ECB_ANDROID_APP_VERSION;
+      if (nativeVersion) return String(nativeVersion);
+    }
+    return "1.0.71";
+  });
   const [open, setOpen] = useState<"terms" | "about" | null>(null);
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const nativeVersion = (window as any).ECB_ANDROID_APP_VERSION;
+      if (nativeVersion) setAppVersion(String(nativeVersion));
+    }
+    if (typeof window !== "undefined" && navigator.userAgent.includes("ECBAndroidApp/")) return;
+
     supabase
       .from("app_settings")
       .select("site_name,about_us,why_trust_us,terms_content,contact_email,contact_phone,contact_whatsapp")
