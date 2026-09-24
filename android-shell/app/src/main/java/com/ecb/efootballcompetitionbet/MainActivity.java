@@ -10,6 +10,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.webkit.CookieManager;
 import android.webkit.WebSettings;
+import android.webkit.MimeTypeMap;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.os.Handler;
@@ -22,12 +25,14 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.webkit.WebViewAssetLoader;
 import androidx.webkit.WebViewClientCompat;
 
 
 public class MainActivity extends Activity {
     private static final String APP_URL =
-        "https://lslonlinebetting.lovable.app/";
+        "https://appassets.androidplatform.net/assets/";
+    private static final String ASSET_HOST = "appassets.androidplatform.net";
     private static final int NOTIFICATION_PERMISSION_REQUEST = 2001;
     private static final String NOTIFICATION_CHANNEL_ID = "ecb_updates";
 
@@ -71,13 +76,12 @@ public class MainActivity extends Activity {
         settings.setAllowContentAccess(false);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
-        // Use the site's real responsive mobile layout. The app owns its WebView
-        // storage/cookies, so it does not depend on Chrome's cache or storage.
-        settings.setUseWideViewPort(false);
+        // The standalone APK uses the same fixed 1280px desktop canvas as the site.
+        settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(false);
         settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         settings.setTextZoom(100);
-        webView.setInitialScale(85);
+        webView.setInitialScale(55);
 
         settings.setSupportZoom(false);
         settings.setBuiltInZoomControls(false);
@@ -92,7 +96,21 @@ public class MainActivity extends Activity {
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
+        final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+            .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
+            .build();
+
         webView.setWebViewClient(new WebViewClientCompat() {
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                return interceptLocalRequest(assetLoader, request.getUrl());
+            }
+
+            @Override
+            @SuppressWarnings("deprecation")
+            public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+                return interceptLocalRequest(assetLoader, Uri.parse(url));
+            }
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url != null && url.matches("(?i).*\\\\.apk(?:[?#].*)?$")) {
@@ -105,7 +123,7 @@ public class MainActivity extends Activity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
-                view.setInitialScale(85);
+                view.setInitialScale(55);
                 injectAndroidAppState(view);
             }
         });
@@ -166,6 +184,27 @@ public class MainActivity extends Activity {
         UpdateChecker.check(this);
         root.postDelayed(() -> UpdateChecker.check(this), 5000L);
         updateHandler.postDelayed(updatePoll, 3000L);
+    }
+
+    private WebResourceResponse interceptLocalRequest(WebViewAssetLoader assetLoader, Uri uri) {
+        if (uri == null) return null;
+        if (!ASSET_HOST.equalsIgnoreCase(uri.getHost())) return null;
+        WebResourceResponse response = assetLoader.shouldInterceptRequest(uri);
+        if (response != null) return response;
+        String path = uri.getPath();
+        if (path == null || path.isEmpty() || "/assets/".equals(path) || !path.substring(path.lastIndexOf('/') + 1).contains(".")) {
+            return serveBundledFile("_shell.html", "text/html", "UTF-8");
+        }
+        return null;
+    }
+
+    private WebResourceResponse serveBundledFile(String filename, String mime, String encoding) {
+        try {
+            InputStream input = getAssets().open(filename);
+            return new WebResourceResponse(mime, encoding, input);
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     private void injectAndroidAppState(WebView view) {
