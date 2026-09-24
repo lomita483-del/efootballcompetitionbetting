@@ -53,7 +53,7 @@ jobs:
           cp -R .output/public/. dist/client/
           test -f dist/client/index.html
           echo "Standalone bundle ready: dist/client"
-          find dist/client -maxdepth 2 -type f | head -40
+          find dist/client -maxdepth 2 -type f -print
 
       - name: Generate Android project
         run: npx cap add android
