@@ -16,7 +16,7 @@ if printf '%s\n' "$CHANGED" | grep -Eq 'android-shell/app/build\.gradle'; then
   add_note "The Android package version/build was incremented for this release."
 fi
 if printf '%s\n' "$CHANGED" | grep -Eq 'android-shell/app/src/main/java/.*/MainActivity\.java'; then
-  add_note "Android now uses a 75% WebView scale so more of the website fits comfortably on phone screens while keeping the native mobile interaction behavior."
+  add_note "Android now uses the website\u0027s normal responsive mobile viewport so the homepage fills the phone screen without being offset or cropped on the right."
 fi
 if printf '%s\n' "$CHANGED" | grep -Eq 'src/routes/__root\.tsx'; then
   add_note "The mobile website viewport now uses the real device width instead of forcing a wide desktop canvas inside the Android app."
