@@ -1,8 +1,8 @@
 {
   "whatsNew": [
-    "Restored the Android WebView to the website's normal responsive mobile viewport so the homepage fills the phone screen correctly.",
-    "Fixed the right-side offset/cropping that was introduced by the 75% native WebView scaling.",
-    "Repaired the production web build, including the Android App Updates admin panel and truncated Token Movement panel.",
-    "Android release v1.0.61 build 62 is signed and verified for distribution."
+    "Android WebView now forces a 1280px desktop viewport so desktop CSS breakpoints are used on phones.",
+    "Android identifies itself as a desktop Chrome-style browser while retaining the ECB app identifier.",
+    "The previous mobile-style viewport behavior is corrected instead of only changing the User-Agent.",
+    "Android release v1.0.63 build 64 is prepared for verification."
   ]
 }
