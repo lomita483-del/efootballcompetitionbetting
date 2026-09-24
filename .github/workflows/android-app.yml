@@ -1,0 +1,96 @@
+name: Build standalone Android app
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "package.json"
+      - "bun.lock"
+      - "vite.config.ts"
+      - "capacitor.config.ts"
+      - ".github/workflows/android-app.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build web app
+        run: npm run build
+
+      - name: Verify standalone web bundle
+        run: |
+          test -d dist/client
+          test -f dist/client/index.html
+          echo "Standalone bundle ready: dist/client"
+
+      - name: Generate Android project
+        run: npx cap add android
+
+      - name: Sync web bundle into Android
+        run: npx cap sync android
+
+      - name: Disable Android WebView HTTP cache
+        shell: bash
+        run: |
+          mkdir -p android/app/src/main/java/com/efcb/app
+          cat > android/app/src/main/java/com/efcb/app/MainActivity.java <<'EOF'
+          package com.efcb.app;
+
+          import android.os.Bundle;
+          import android.webkit.WebSettings;
+
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+              @Override
+              public void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+
+                  if (getBridge() != null && getBridge().getWebView() != null) {
+                      WebSettings settings = getBridge().getWebView().getSettings();
+                      settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+                      getBridge().getWebView().clearCache(true);
+                      getBridge().getWebView().clearHistory();
+                  }
+              }
+          }
+          EOF
+
+      - name: Build installable debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: e-football-competition-bet-android
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
