@@ -1,9 +1,0 @@
-{
-  "whatsNew": [
-    "Fixed the Android app blank-screen issue by restoring reliable loading of the live E-Football website.",
-    "Restored the website's normal mobile responsive layout inside the Android WebView.",
-    "Restored the 85% WebView presentation so pages fit the phone correctly.",
-    "Restored the normal mobile WebView User-Agent while keeping the ECB Android app identifier.",
-    "Removed the broken local asset interception that could prevent the website from rendering."
-  ]
-}
