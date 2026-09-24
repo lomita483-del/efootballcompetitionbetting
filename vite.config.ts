@@ -10,18 +10,9 @@ import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
 export default defineConfig({
   plugins: [mcpPlugin()],
   tanstackStart: {
-    // The Android release is a true standalone WebView APK. In that build only,
-    // emit TanStack Start's static SPA shell so the full client can be shipped
-    // inside the APK without depending on the live website for HTML.
-    spa: {
-      enabled: process.env.CAPACITOR_BUILD === "1",
-      prerender: {
-        failOnError: false,
-      },
-    },
-    // Keep a concrete server entry during the SPA-shell prerender step. The
-    // TanStack prerenderer expects the generated server entry to exist while it
-    // renders the static shell that is copied into the APK.
-    server: { entry: "src/server.ts" },
+    // The native Android build uses Nitro's static preset to generate the
+    // shell directly into .output/public. Do not enable Start's separate
+    // SPA prerender here; the Lovable/Nitro preview bridge expects a
+    // different server layout and was causing dist/server/server.js errors.
   },
 });
