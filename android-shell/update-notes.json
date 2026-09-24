@@ -1,10 +1,10 @@
 {
   "whatsNew": [
-    "Android now starts at a 50% WebView scale for a compact layout, with pinch-to-zoom disabled.",
-    "The Android bottom-center Home button has been refined with a compact premium gold design and circular logo treatment.",
-    "The Android startup screen now shows the full E-Football logo on a branded dark background while the app loads.",
-    "The homepage Menu control and drawer now have stronger contrast, cinematic glass styling, gold detailing, glow, depth, and clearer icon states.",
-    "The app footer continues to display the current release version from live release metadata.",
-    "Admin App Updater now supports Refresh version to synchronize the Android version, build number, and What's New with the release files."
+    "Android WebView scaling has been fixed so the website now opens at the normal responsive 100% viewport instead of appearing zoomed and hiding content.",
+    "Native WebView initial scaling has been removed to prevent forced zoom and cropped responsive content.",
+    "Pinch-to-zoom remains disabled for a consistent app experience.",
+    "The Android bottom-center Home button uses the compact premium gold design with the app logo.",
+    "The Android startup screen shows the full E-Football logo on a branded dark background while the app loads.",
+    "The app footer continues to display the current release version from live release metadata."
   ]
 }
