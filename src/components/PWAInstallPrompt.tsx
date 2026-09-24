@@ -31,6 +31,8 @@ export function PWAInstallPrompt() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    // The native Capacitor app is already installed; never show the browser/PWA install UI inside it.
+    if (/ECBAndroidApp\//i.test(navigator.userAgent)) return;
     if (isStandalone()) return;
 
     const dismissedAt = Number(localStorage.getItem(DISMISS_KEY) || 0);
