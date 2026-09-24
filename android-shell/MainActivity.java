@@ -44,9 +44,9 @@ public class MainActivity extends Activity {
         // phone-width responsive scaling and do not zoom the whole page.
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(false);
-        webView.setInitialScale(80);
+        webView.setInitialScale(85);
 
-        // Keep the website at its normal 80% presentation while allowing pinch zoom for accessibility.
+        // Keep the website at its normal 85% presentation while allowing pinch zoom for accessibility.
         settings.setSupportZoom(true);
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
@@ -75,7 +75,7 @@ public class MainActivity extends Activity {
             public void onPageFinished(WebView view, String url) {
                 refresher.setRefreshing(false);
                 boolean adminConsole = url != null && url.contains("/admin");
-                view.setInitialScale(adminConsole ? 85 : 80);
+                view.setInitialScale(85);
                 String script =
                     "(function(){"
                     + "var m=document.querySelector('meta[name=viewport]');"
