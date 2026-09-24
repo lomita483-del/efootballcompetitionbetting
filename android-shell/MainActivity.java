@@ -1,22 +1,27 @@
 package com.ecb.efootballcompetitionbet;
 
 import android.app.Activity;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.webkit.CookieManager;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.graphics.Color;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import androidx.annotation.RequiresApi;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.webkit.WebViewAssetLoader;
+import androidx.webkit.WebViewClientCompat;
 
 public class MainActivity extends Activity {
-    private static final String APP_URL = "https://lslonlinebetting.lovable.app/";
+    private static final String LOCAL_APP_URL = "https://appassets.androidplatform.net/assets/index.html";
     private WebView webView;
     private final Handler updateHandler = new Handler(Looper.getMainLooper());
     private final Runnable updatePoll = new Runnable() {
@@ -40,20 +45,17 @@ public class MainActivity extends Activity {
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
         settings.setMediaPlaybackRequiresUserGesture(false);
 
-        // Render the website like the desktop/admin console. Do not use
-        // phone-width responsive scaling and do not zoom the whole page.
+        // The APK contains the complete web client. The website's shared 1280px
+        // desktop canvas is therefore rendered from the exact source shipped
+        // inside this APK rather than loading a changing remote website.
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(false);
         webView.setInitialScale(55);
-
-        // Let the website's shared 1280px desktop canvas control scaling for every page, matching the admin console.
         settings.setSupportZoom(true);
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
         settings.setTextZoom(100);
 
-        // Do not advertise this shell as a mobile browser. This prevents the
-        // site's mobile CSS breakpoint from shrinking/rearranging the page.
         String desktopUa = settings.getUserAgentString()
             .replace(" Mobile", "")
             .replace("Mobile", "");
@@ -66,28 +68,58 @@ public class MainActivity extends Activity {
         webView.setVerticalScrollBarEnabled(true);
         webView.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
 
-        // Pull-to-refresh only activates when the WebView is already at the top.
+        final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+            .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
+            .build();
+
         SwipeRefreshLayout refresher = new SwipeRefreshLayout(this);
         refresher.setOnRefreshListener(() -> webView.reload());
 
-        webView.setWebViewClient(new WebViewClient() {
+        webView.setWebViewClient(new WebViewClientCompat() {
+            @Override
+            @RequiresApi(21)
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                return assetLoader.shouldInterceptRequest(request.getUrl());
+            }
+
+            @Override
+            @SuppressWarnings("deprecation")
+            public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+                return assetLoader.shouldInterceptRequest(Uri.parse(url));
+            }
+
             @Override
             public void onPageFinished(WebView view, String url) {
                 refresher.setRefreshing(false);
-                boolean adminConsole = url != null && url.contains("/admin");
                 view.setInitialScale(55);
+
+                // The bundled web client may have an older browser fallback
+                // version. Always make the Android APK's own release version
+                // authoritative in the visible footer and DOM metadata.
+                String version = BuildConfig.VERSION_NAME.replace("'", "");
                 String script =
                     "(function(){"
+                    + "var version='" + version + "';"
                     + "var m=document.querySelector('meta[name=viewport]');"
-                    + "if(m){m.setAttribute('content','width=1024,initial-scale=1.0,minimum-scale=0.5,maximum-scale=5.0,user-scalable=yes');}"
-                    + "var s=document.getElementById('ecb-admin-scale');"
-                    + "if(!s){s=document.createElement('style');s.id='ecb-admin-scale';"
-                    + "s.textContent='body{-webkit-text-size-adjust:100%;overscroll-behavior-x:none;overscroll-behavior-y:auto}';"
-                    + "document.head.appendChild(s);}"
+                    + "if(m){m.setAttribute('content','width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover');}"
+                    + "window.ECB_ANDROID_APP_VERSION=version;"
+                    + "function sync(){"
+                    + "document.querySelectorAll('[data-app-version]').forEach(function(el){"
+                    + "el.setAttribute('data-app-version',version);"
+                    + "var s=el.querySelector('span');"
+                    + "if(s)s.textContent='App version '+version;"
+                    + "});"
+                    + "}"
+                    + "sync();"
+                    + "if(document.body&&!window.__ecbVersionObserver){"
+                    + "window.__ecbVersionObserver=new MutationObserver(sync);"
+                    + "window.__ecbVersionObserver.observe(document.body,{childList:true,subtree:true});"
+                    + "}"
                     + "})();";
                 view.evaluateJavascript(script, null);
             }
         });
+
         refresher.addView(webView, new ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
         ));
@@ -95,14 +127,13 @@ public class MainActivity extends Activity {
         FrameLayout root = new FrameLayout(this);
         root.addView(refresher);
 
-        // Fixed, non-draggable website logo. Clicking it always returns home.
         ImageView homeLogo = new ImageView(this);
         homeLogo.setImageResource(R.drawable.site_logo);
         homeLogo.setScaleType(ImageView.ScaleType.FIT_CENTER);
         homeLogo.setContentDescription("Go to E-Football home");
         homeLogo.setClickable(true);
         homeLogo.setFocusable(true);
-        homeLogo.setOnClickListener(v -> webView.loadUrl(APP_URL));
+        homeLogo.setOnClickListener(v -> webView.loadUrl(LOCAL_APP_URL));
         int logoSize = (int) (160 * getResources().getDisplayMetrics().density);
         FrameLayout.LayoutParams logoParams = new FrameLayout.LayoutParams(
             logoSize, logoSize, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM
@@ -111,7 +142,7 @@ public class MainActivity extends Activity {
         root.addView(homeLogo, logoParams);
 
         setContentView(root);
-        webView.loadUrl(APP_URL);
+        webView.loadUrl(LOCAL_APP_URL);
 
         UpdateChecker.check(this, true);
         updateHandler.post(updatePoll);
