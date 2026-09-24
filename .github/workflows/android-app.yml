@@ -42,14 +42,18 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
-      - name: Build web app
-        run: CAPACITOR_BUILD=1 npm run build
+      - name: Build static web bundle for Capacitor
+        run: NITRO_PRESET=static CAPACITOR_BUILD=1 npm run build
 
-      - name: Verify standalone web bundle
+      - name: Prepare Capacitor web directory
+        shell: bash
         run: |
-          test -d dist/client
+          rm -rf dist/client
+          mkdir -p dist/client
+          cp -R .output/public/. dist/client/
           test -f dist/client/index.html
           echo "Standalone bundle ready: dist/client"
+          find dist/client -maxdepth 2 -type f | head -40
 
       - name: Generate Android project
         run: npx cap add android
