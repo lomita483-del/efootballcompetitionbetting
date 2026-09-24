@@ -18,11 +18,11 @@ import android.view.Gravity;
 import android.graphics.drawable.GradientDrawable;
 import android.widget.ImageView;
 
-import androidx.annotation.RequiresApi;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.webkit.WebViewClientCompat;
 
 
 public class MainActivity extends Activity {
@@ -92,28 +92,10 @@ public class MainActivity extends Activity {
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
-        final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
-            .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
-            .build();
-
         webView.setWebViewClient(new WebViewClientCompat() {
             @Override
-            @RequiresApi(21)
-            public WebResourceResponse shouldInterceptRequest(
-                WebView view, WebResourceRequest request
-            ) {
-                return interceptLocalRequest(assetLoader, request.getUrl());
-            }
-
-            @Override
-            @SuppressWarnings("deprecation")
-            public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-                return interceptLocalRequest(assetLoader, Uri.parse(url));
-            }
-
-            @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if (url != null && url.matches("(?i).*\\.apk(?:[?#].*)?$")) {
+                if (url != null && url.matches("(?i).*\\\\.apk(?:[?#].*)?$")) {
                     UpdateChecker.downloadAndInstallFromUrl(MainActivity.this, url);
                     return true;
                 }
