@@ -1,8 +1,9 @@
 {
   "whatsNew": [
-    "Android WebView now forces a 1280px desktop viewport so desktop CSS breakpoints are used on phones.",
-    "Android identifies itself as a desktop Chrome-style browser while retaining the ECB app identifier.",
-    "The previous mobile-style viewport behavior is corrected instead of only changing the User-Agent.",
-    "Android release v1.0.63 build 64 is prepared for verification."
+    "Fixed the Android app blank-screen issue by restoring reliable loading of the live E-Football website.",
+    "Restored the website's normal mobile responsive layout inside the Android WebView.",
+    "Restored the 85% WebView presentation so pages fit the phone correctly.",
+    "Restored the normal mobile WebView User-Agent while keeping the ECB Android app identifier.",
+    "Removed the broken local asset interception that could prevent the website from rendering."
   ]
 }
