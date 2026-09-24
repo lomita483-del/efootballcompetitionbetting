@@ -8,8 +8,8 @@ android {
         applicationId 'com.ecb.efootballcompetitionbet'
         minSdk 24
         targetSdk 34
-        versionCode 69
-        versionName '1.0.68'
+        versionCode 70
+        versionName '1.0.69'
     }
     signingConfigs {
         release {
@@ -28,4 +28,5 @@ android {
 dependencies {
     implementation 'androidx.core:core:1.15.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation 'androidx.webkit:webkit:1.8.0'
 }
