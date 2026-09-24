@@ -39,7 +39,15 @@ jobs:
       - name: Verify bundled app
         run: |
           test -d .output/public
+          test -f .output/public/index.html
           test -n "$(find .output/public -type f -print -quit)"
+
+      - name: Copy bundled web app into Android assets
+        run: |
+          rm -rf android-shell/app/src/main/assets
+          mkdir -p android-shell/app/src/main/assets
+          cp -R .output/public/. android-shell/app/src/main/assets/
+          test -f android-shell/app/src/main/assets/index.html
 
       - name: Install Android SDK packages
         run: |
