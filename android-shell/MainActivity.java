@@ -10,7 +10,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.graphics.Color;
+import android.webkit.MimeTypeMap;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -19,6 +19,7 @@ import androidx.annotation.RequiresApi;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.webkit.WebViewAssetLoader;
 import androidx.webkit.WebViewClientCompat;
+import java.io.InputStream;
 
 public class MainActivity extends Activity {
     private static final String LOCAL_APP_URL = "https://appassets.androidplatform.net/assets/index.html";
@@ -30,6 +31,27 @@ public class MainActivity extends Activity {
             updateHandler.postDelayed(this, 3000);
         }
     };
+
+    private WebResourceResponse serveLocalAsset(String path) {
+        String relative = path.startsWith("/") ? path.substring(1) : path;
+        if (relative.isEmpty()) relative = "index.html";
+        try {
+            InputStream input = getAssets().open(relative);
+            String extension = MimeTypeMap.getFileExtensionFromUrl(relative);
+            String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+            if (mime == null) mime = "application/octet-stream";
+            String encoding = (mime.startsWith("text/") || mime.contains("javascript") || mime.contains("json"))
+                ? "UTF-8" : null;
+            return new WebResourceResponse(mime, encoding, input);
+        } catch (Exception ignored) {
+            try {
+                InputStream input = getAssets().open("index.html");
+                return new WebResourceResponse("text/html", "UTF-8", input);
+            } catch (Exception ignoredAgain) {
+                return null;
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,13 +101,29 @@ public class MainActivity extends Activity {
             @Override
             @RequiresApi(21)
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                return assetLoader.shouldInterceptRequest(request.getUrl());
+                Uri uri = request.getUrl();
+                if ("appassets.androidplatform.net".equals(uri.getHost())) {
+                    String path = uri.getPath() == null ? "/" : uri.getPath();
+                    if (path.startsWith("/api/")) return null;
+                    WebResourceResponse response = serveLocalAsset(path);
+                    if (response != null) return response;
+                    return assetLoader.shouldInterceptRequest(Uri.parse(LOCAL_APP_URL));
+                }
+                return assetLoader.shouldInterceptRequest(uri);
             }
 
             @Override
             @SuppressWarnings("deprecation")
             public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-                return assetLoader.shouldInterceptRequest(Uri.parse(url));
+                Uri uri = Uri.parse(url);
+                if ("appassets.androidplatform.net".equals(uri.getHost())) {
+                    String path = uri.getPath() == null ? "/" : uri.getPath();
+                    if (path.startsWith("/api/")) return null;
+                    WebResourceResponse response = serveLocalAsset(path);
+                    if (response != null) return response;
+                    return assetLoader.shouldInterceptRequest(Uri.parse(LOCAL_APP_URL));
+                }
+                return assetLoader.shouldInterceptRequest(uri);
             }
 
             @Override
