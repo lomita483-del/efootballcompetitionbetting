@@ -220,14 +220,14 @@ function AdaptiveViewport() {
     if (typeof window === "undefined") return;
     const meta = document.querySelector('meta[name="viewport"]') as HTMLMetaElement | null;
     if (!meta) return;
-    const mobileDesktopCanvas = "width=760, viewport-fit=cover";
+    const mobileDesktopCanvas = "width=device-width,initial-scale=0.5,minimum-scale=0.5,maximum-scale=0.5,user-scalable=no,viewport-fit=cover";
     const normalBrowserViewport = "width=device-width, initial-scale=1, viewport-fit=cover";
     const apply = () => {
       // Phones keep the desktop-style canvas, but real desktop browsers use their
       // normal viewport so the browser version remains fully usable.
       const isPhoneSized = window.innerWidth < 900;
       const isAndroidApp = navigator.userAgent.includes("ECBAndroidApp/");
-      const target = isAndroidApp ? "width=device-width,initial-scale=0.85,minimum-scale=0.5,maximum-scale=5,user-scalable=yes,viewport-fit=cover" : (isPhoneSized ? mobileDesktopCanvas : normalBrowserViewport);
+      const target = isAndroidApp ? "width=device-width,initial-scale=0.5,minimum-scale=0.5,maximum-scale=0.5,user-scalable=no,viewport-fit=cover" : (isPhoneSized ? mobileDesktopCanvas : normalBrowserViewport);
       if (meta.getAttribute("content") !== target) meta.setAttribute("content", target);
     };
     apply();
