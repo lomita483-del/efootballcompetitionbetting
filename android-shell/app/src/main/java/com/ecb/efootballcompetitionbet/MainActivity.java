@@ -89,12 +89,12 @@ public class MainActivity extends Activity {
         s.setDatabaseEnabled(true);
         // Use the website's normal responsive mobile layout across the entire app.
         // Do not force a desktop CSS viewport or a fixed native zoom.
-        s.setUseWideViewPort(true);
-        s.setLoadWithOverviewMode(true);
+        s.setUseWideViewPort(false);
+        s.setLoadWithOverviewMode(false);
         s.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         s.setTextZoom(100);
 
-        // Start at 80% and keep the WebView at a fixed scale.
+        // Start at 50% and keep the WebView at a fixed scale.
         // Pinch-to-zoom is intentionally disabled for a consistent app layout.
         webView.setInitialScale(50);
         s.setSupportZoom(false);
@@ -105,15 +105,6 @@ public class MainActivity extends Activity {
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
-
-        // Pinch gestures are disabled; keep the app at the 50% presentation scale.
-        webView.setOnTouchListener((v, event) -> {
-            if (event.getPointerCount() > 1) return true;
-            if (event.getActionMasked() == MotionEvent.ACTION_UP || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
-                return false;
-            }
-            return false;
-        });
 
         // Keep the normal Android WebView/mobile user agent so the website
         // serves its responsive mobile layout, while retaining the app marker
@@ -164,7 +155,7 @@ public class MainActivity extends Activity {
                     splash.animate().alpha(0f).setDuration(260L).withEndAction(() -> splash.setVisibility(View.GONE)).start();
                 }
                 view.evaluateJavascript(
-                    "(function(){var m=document.querySelector('meta[name=viewport]');if(m)m.setAttribute('content','width=device-width,initial-scale=0.8,minimum-scale=0.5,maximum-scale=4,user-scalable=yes,viewport-fit=cover');})();",
+                    "(function(){var m=document.querySelector('meta[name=viewport]');if(m)m.setAttribute('content','width=device-width,initial-scale=0.5,minimum-scale=0.5,maximum-scale=0.5,user-scalable=no,viewport-fit=cover');})();",
                     null
                 );
             }
