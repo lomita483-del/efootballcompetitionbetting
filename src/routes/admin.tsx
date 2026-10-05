@@ -3081,9 +3081,21 @@ function AdminTicketDialog({ ticket, onClose }: { ticket: any; onClose: () => vo
   }
   async function updateStatus(status: string) { await supabase.from("support_tickets").update({ status: status as any }).eq("id", ticket.id); toast.success("Ticket updated"); onClose(); }
   async function deleteTicket() {
-    if (!await confirm({ title: "Delete this support ticket?", description: "All replies and uploaded references on this report will be removed.", tone: "danger", confirmText: "Delete forever" })) return;
-    await supabase.from("ticket_messages").delete().eq("ticket_id", ticket.id);
-    await supabase.from("support_tickets").delete().eq("id", ticket.id);
+    if (ticket.status !== "closed") {
+      toast.error("Close the ticket first", { description: "Only closed support conversations can be permanently deleted." });
+      return;
+    }
+    if (!await confirm({ title: "Delete this closed support ticket?", description: "All replies and uploaded references on this report will be removed.", tone: "danger", confirmText: "Delete forever" })) return;
+    const { error: messageError } = await supabase.from("ticket_messages").delete().eq("ticket_id", ticket.id);
+    if (messageError) {
+      toast.error("Could not delete replies", { description: messageError.message });
+      return;
+    }
+    const { error } = await supabase.from("support_tickets").delete().eq("id", ticket.id);
+    if (error) {
+      toast.error("Could not delete ticket", { description: error.message });
+      return;
+    }
     toast.success("Ticket deleted"); onClose();
   }
   return (
