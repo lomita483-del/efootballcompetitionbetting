@@ -3033,7 +3033,15 @@ function TicketsPanel() {
             <SelectContent>{["open", "in_progress", "resolved", "closed"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
           </Select>
           <Button size="sm" variant="outline" onClick={() => setActive(t)}><Eye className="h-3 w-3 mr-1" />Reply</Button>
-          <Button size="sm" variant="destructive" onClick={() => del(t.id)}><Trash2 className="h-3 w-3" /></Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            disabled={t.status !== "closed"}
+            title={t.status === "closed" ? "Delete closed ticket" : "Close the ticket before deleting it"}
+            onClick={() => del(t.id)}
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
         </Card>
       ))}
       {active && <AdminTicketDialog ticket={active} onClose={() => { setActive(null); load(); }} />}
