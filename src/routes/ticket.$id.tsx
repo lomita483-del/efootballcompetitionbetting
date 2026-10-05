@@ -870,17 +870,29 @@ function SupportTicketView({ ticket, userId, isMod }: { ticket: any; userId: str
     toast.success("Reopened");
   }
   async function deleteTicket() {
+    if (ticket.status !== "closed") {
+      toast.error("Close the ticket first", { description: "Only closed support conversations can be permanently deleted." });
+      return;
+    }
     if (
       !(await confirm({
-        title: "Delete this ticket?",
-        description: "This cannot be undone.",
+        title: "Delete this closed ticket?",
+        description: "This permanently removes the support conversation and its replies.",
         tone: "danger",
         confirmText: "Delete forever",
       }))
     )
       return;
-    await supabase.from("ticket_messages").delete().eq("ticket_id", ticket.id);
-    await supabase.from("support_tickets").delete().eq("id", ticket.id);
+    const { error: messageError } = await supabase.from("ticket_messages").delete().eq("ticket_id", ticket.id);
+    if (messageError) {
+      toast.error("Could not delete replies", { description: messageError.message });
+      return;
+    }
+    const { error } = await supabase.from("support_tickets").delete().eq("id", ticket.id);
+    if (error) {
+      toast.error("Could not delete ticket", { description: error.message });
+      return;
+    }
     toast.success("Ticket deleted");
     window.location.href = "/support";
   }
