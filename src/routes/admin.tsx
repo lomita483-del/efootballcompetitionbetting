@@ -2992,8 +2992,24 @@ function TicketsPanel() {
     setTickets((t) => t.map((x) => x.id === id ? { ...x, status } : x));
   }
   async function del(id: string) {
-    if (!await confirm({ title: "Delete ticket?", tone: "danger", confirmText: "Delete" })) return;
-    await supabase.from("support_tickets").delete().eq("id", id);
+    const ticket = tickets.find((x) => x.id === id);
+    if (ticket?.status !== "closed") {
+      toast.error("Close the ticket first", { description: "Only closed support conversations can be permanently deleted." });
+      return;
+    }
+    if (!await confirm({ title: "Delete closed ticket?", description: "This permanently removes the support conversation and its replies.", tone: "danger", confirmText: "Delete forever" })) return;
+
+    const { error: messageError } = await supabase.from("ticket_messages").delete().eq("ticket_id", id);
+    if (messageError) {
+      toast.error("Could not delete replies", { description: messageError.message });
+      return;
+    }
+    const { error } = await supabase.from("support_tickets").delete().eq("id", id);
+    if (error) {
+      toast.error("Could not delete ticket", { description: error.message });
+      return;
+    }
+    toast.success("Closed support ticket deleted");
     setTickets((t) => t.filter((x) => x.id !== id));
   }
   return (
